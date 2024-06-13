@@ -17,6 +17,10 @@ let package = Package(
       name: "OpenAIToolsClient",
       targets: ["OpenAIToolsClient"]
     ),
+    .library(
+      name: "JSONSchema",
+      targets: ["JSONSchema"]
+    )
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-syntax.git", from: "600.0.0-latest"),
@@ -34,10 +38,25 @@ let package = Package(
     ),
 
     // Library that exposes a macro as part of its API, which is used in client programs.
-    .target(name: "OpenAITools", dependencies: ["OpenAIToolsMacros"]),
+    .target(
+      name: "OpenAITools",
+      dependencies: [
+        "OpenAIToolsMacros",
+        "JSONSchema",
+      ]
+    ),
+
+    .target(name: "JSONSchema"),
+    .testTarget(name: "JSONSchemaTests", dependencies: ["JSONSchema"]),
 
     // A client of the library, which is able to use the macro in its own code.
-    .executableTarget(name: "OpenAIToolsClient", dependencies: ["OpenAITools"]),
+    .executableTarget(
+      name: "OpenAIToolsClient",
+      dependencies: [
+        "OpenAITools",
+        "JSONSchema",
+      ]
+    ),
 
   ]
 )

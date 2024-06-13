@@ -1,0 +1,294 @@
+@testable import JSONSchema
+
+import Foundation
+import Testing
+
+struct SchemaTests {
+  let encoder = JSONEncoder()
+
+  @Test(arguments: [
+    (Schema.string(), JSONType.string),
+    (.integer(), .integer),
+    (.number(), .number),
+    (.object(), .object),
+    (.array(), .array),
+    (.boolean(), .boolean),
+    (.null(), .null)
+  ])
+  func type(schema: Schema, type: JSONType) throws {
+    #expect(schema.type == type)
+    let json = try schema.json()
+    #expect(json == """
+      {
+        "type" : "\(type.rawValue)"
+      }
+      """
+    )
+  }
+
+  @Test(arguments: [
+    Schema.string(.annotations(title: "Hello")),
+    Schema.integer(.annotations(title: "Hello")),
+    Schema.number(.annotations(title: "Hello")),
+    Schema.object(.annotations(title: "Hello")),
+    Schema.array(.annotations(title: "Hello")),
+    Schema.boolean(.annotations(title: "Hello")),
+    Schema.null(.annotations(title: "Hello"))
+  ])
+  func title(schema: Schema) throws {
+    let json = try schema.json()
+    #expect(json == """
+      {
+        "title" : "Hello",
+        "type" : "\(schema.type.rawValue)"
+      }
+      """
+    )
+  }
+
+  static let sampleAnnotation = AnnotationOptions(
+    title: "Title",
+    description: "This is the description",
+    default: "1",
+    examples: ["1", .null, false, [1, 2, 3], ["hello": "world"]],
+    readOnly: true,
+    writeOnly: false,
+    deprecated: false,
+    comment: "Comment"
+  )
+  @Test(arguments: [
+    Schema.string(sampleAnnotation),
+    Schema.integer(sampleAnnotation),
+    Schema.number(sampleAnnotation),
+    Schema.object(sampleAnnotation),
+    Schema.array(sampleAnnotation),
+    Schema.boolean(sampleAnnotation),
+    Schema.null(sampleAnnotation)
+  ])
+  func allAnnotations(schema: Schema) throws {
+    let json = try schema.json()
+    #expect(json == """
+      {
+        "$comment" : "Comment",
+        "default" : "1",
+        "deprecated" : false,
+        "description" : "This is the description",
+        "examples" : [
+          "1",
+          null,
+          false,
+          [
+            1,
+            2,
+            3
+          ],
+          {
+            "hello" : "world"
+          }
+        ],
+        "readOnly" : true,
+        "title" : "Title",
+        "type" : "\(schema.type.rawValue)",
+        "writeOnly" : false
+      }
+      """
+    )
+  }
+
+  @Test
+  func stringOptions() throws {
+    let schema = Schema.string(
+      .annotations(),
+      .options(
+        minLength: 12,
+        maxLength: 36,
+        pattern: #"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"#,
+        format: "uuid"
+      )
+    )
+    let json = try schema.json()
+    #expect(json == """
+      {
+        "format" : "uuid",
+        "maxLength" : 36,
+        "minLength" : 12,
+        "pattern" : "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+        "type" : "string"
+      }
+      """
+    )
+  }
+
+  @Test
+  func numberOptions() throws {
+    let schema1 = Schema.number(
+      .annotations(),
+      .options(
+        multipleOf: 2,
+        minimum: .inclusive(1),
+        maximum: .exclusive(100)
+      )
+    )
+    let json1 = try schema1.json()
+    #expect(json1 == """
+      {
+        "exclusiveMaximum" : 100,
+        "minimum" : 1,
+        "multipleOf" : 2,
+        "type" : "number"
+      }
+      """
+    )
+
+    let schema2 = Schema.number(
+      .annotations(),
+      .options(
+        multipleOf: 1.0,
+        minimum: .exclusive(0.99),
+        maximum: .inclusive(5000)
+      )
+    )
+    let json2 = try schema2.json()
+    #expect(json2 == """
+      {
+        "exclusiveMinimum" : 0.99,
+        "maximum" : 5000,
+        "multipleOf" : 1,
+        "type" : "number"
+      }
+      """
+    )
+  }
+
+  @Test
+  func arrayOptions() throws {
+    let schema = Schema.array(
+      .annotations(),
+      .options(
+        items: .schema(.number()),
+        prefixItems: [
+          .number(),
+          .string(),
+          .object(),
+          .object(),
+        ],
+        unevaluatedItems: .disabled,
+        contains: .number(),
+        minContains: 1,
+        maxContains: 25,
+        minItems: 1,
+        maxItems: 50,
+        uniqueItems: true
+      )
+    )
+    let json = try schema.json()
+    #expect(json == """
+      {
+        "contains" : {
+          "type" : "number"
+        },
+        "items" : {
+          "type" : "number"
+        },
+        "maxContains" : 25,
+        "maxItems" : 50,
+        "minContains" : 1,
+        "minItems" : 1,
+        "prefixItems" : [
+          {
+            "type" : "number"
+          },
+          {
+            "type" : "string"
+          },
+          {
+            "type" : "object"
+          },
+          {
+            "type" : "object"
+          }
+        ],
+        "type" : "array",
+        "unevaluatedItems" : false,
+        "uniqueItems" : true
+      }
+      """
+    )
+  }
+
+  @Test
+  func objectOptions() throws {
+    let schema = Schema.object(
+      .annotations(),
+      .options(
+        properties: [
+          "property0": .string(),
+          "property1": .string(),
+          "property2": .boolean(),
+          "property3": .number(),
+        ],
+        patternProperties: [
+          #"^property[0-1]$"#: .string()
+        ],
+        additionalProperties: .schema(.array()),
+        unevaluatedProperties: .disabled,
+        required: ["property1", "property3"],
+        propertyNames: .options(pattern: #"^property[0-9]$"#),
+        minProperties: 1,
+        maxProperties: 10
+      )
+    )
+    let json = try schema.json()
+    #expect(json == """
+      {
+        "additionalProperties" : {
+          "type" : "array"
+        },
+        "maxProperties" : 10,
+        "minProperties" : 1,
+        "patternProperties" : {
+          "^property[0-1]$" : {
+            "type" : "string"
+          }
+        },
+        "properties" : {
+          "property0" : {
+            "type" : "string"
+          },
+          "property1" : {
+            "type" : "string"
+          },
+          "property2" : {
+            "type" : "boolean"
+          },
+          "property3" : {
+            "type" : "number"
+          }
+        },
+        "propertyNames" : {
+          "pattern" : "^property[0-9]$"
+        },
+        "required" : [
+          "property1",
+          "property3"
+        ],
+        "type" : "object",
+        "unevaluatedProperties" : false
+      }
+      """
+    )
+  }
+}
+
+extension Schema: @retroactive CustomTestStringConvertible {
+  public var testDescription: String {
+    type.rawValue.capitalized
+  }
+
+  func json() throws -> String {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+    let data = try encoder.encode(self)
+    return String(decoding: data, as: UTF8.self)
+  }
+}
