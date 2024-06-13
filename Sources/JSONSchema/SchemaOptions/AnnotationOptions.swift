@@ -1,6 +1,6 @@
 /// Part of schema that isn't strictly used for validation, but are used to describe parts of a schema
 /// https://json-schema.org/understanding-json-schema/reference/annotations#annotations
-public struct AnnotationOptions: Codable {
+public struct AnnotationOptions: Codable, Equatable {
   /// Short title about the purpose of the data described by the schema.
   public let title: String?
   

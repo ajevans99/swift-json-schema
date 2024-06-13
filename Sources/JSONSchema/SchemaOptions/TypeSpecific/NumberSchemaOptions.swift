@@ -1,25 +1,33 @@
-public struct NumberSchemaOptions: SchemaOptions {
+public struct NumberSchemaOptions: SchemaOptions, Equatable {
   /// Restrictes value to a multiple of this number.
   /// https://json-schema.org/understanding-json-schema/reference/numeric#multiples
   public let multipleOf: Double?
 
   /// Maximum value.
   /// https://json-schema.org/understanding-json-schema/reference/numeric#range
-  public let minimum: RangeValue?
+  public let minimum: BoundaryValue?
 
   /// Minimum value.
   /// https://json-schema.org/understanding-json-schema/reference/numeric#range
-  public let maximum: RangeValue?
+  public let maximum: BoundaryValue?
 
-  public enum RangeValue: Codable {
+  /// Represents a boundary value for a range constraint in a JSON schema.
+  ///
+  /// A boundary value can be either exclusive or inclusive. An exclusive boundary value means that the range does not include the boundary value itself, while an inclusive boundary value means that the range does include the boundary value.
+  ///
+  /// You can create a inclusive boundary value by initializing it with a floating-point or integer literal. For example:
+  /// ```swift
+  ///   let inclusiveBoundary: BoundaryValue = 1.0 // .inclusive(1.0)
+  /// ```
+  public enum BoundaryValue: Codable, Equatable {
     case exclusive(Double)
     case inclusive(Double)
   }
 
   init(
     multipleOf: Double? = nil,
-    minimum: RangeValue? = nil,
-    maximum: RangeValue? = nil
+    minimum: BoundaryValue? = nil,
+    maximum: BoundaryValue? = nil
   ) {
     self.multipleOf = multipleOf
     self.minimum = minimum
@@ -28,8 +36,8 @@ public struct NumberSchemaOptions: SchemaOptions {
 
   public static func options(
     multipleOf: Double? = nil,
-    minimum: RangeValue? = nil,
-    maximum: RangeValue? = nil
+    minimum: BoundaryValue? = nil,
+    maximum: BoundaryValue? = nil
   ) -> Self {
     self.init(multipleOf: multipleOf, minimum: minimum, maximum: maximum)
   }
@@ -82,5 +90,17 @@ public struct NumberSchemaOptions: SchemaOptions {
     case .none:
       break
     }
+  }
+}
+
+extension NumberSchemaOptions.BoundaryValue: ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral {
+  /// Creates an inclusive boundary value with the specified floating-point literal.
+  public init(floatLiteral value: FloatLiteralType) {
+    self = .inclusive(value)
+  }
+
+  /// Creates an inclusive boundary value with the specified integer literal, after casting to a `Double`.
+  public init(integerLiteral value: IntegerLiteralType) {
+    self = .inclusive(Double(value))
   }
 }

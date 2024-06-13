@@ -3,9 +3,7 @@
 import Foundation
 import Testing
 
-struct SchemaTests {
-  let encoder = JSONEncoder()
-
+struct EncodingSchemaTests {
   @Test(arguments: [
     (Schema.string(), JSONType.string),
     (.integer(), .integer),
@@ -26,7 +24,7 @@ struct SchemaTests {
     )
   }
 
-  @Test(arguments: [
+  @Test(.tags(.annotations), arguments: [
     Schema.string(.annotations(title: "Hello")),
     Schema.integer(.annotations(title: "Hello")),
     Schema.number(.annotations(title: "Hello")),
@@ -37,10 +35,11 @@ struct SchemaTests {
   ])
   func title(schema: Schema) throws {
     let json = try schema.json()
+    let type = try #require(schema.type)
     #expect(json == """
       {
         "title" : "Hello",
-        "type" : "\(schema.type.rawValue)"
+        "type" : "\(type.rawValue)"
       }
       """
     )
@@ -50,13 +49,13 @@ struct SchemaTests {
     title: "Title",
     description: "This is the description",
     default: "1",
-    examples: ["1", .null, false, [1, 2, 3], ["hello": "world"]],
+    examples: ["1", nil, false, [1, 2, 3], ["hello": "world"]],
     readOnly: true,
     writeOnly: false,
     deprecated: false,
     comment: "Comment"
   )
-  @Test(arguments: [
+  @Test(.tags(.annotations), arguments: [
     Schema.string(sampleAnnotation),
     Schema.integer(sampleAnnotation),
     Schema.number(sampleAnnotation),
@@ -67,6 +66,7 @@ struct SchemaTests {
   ])
   func allAnnotations(schema: Schema) throws {
     let json = try schema.json()
+    let type = try #require(schema.type)
     #expect(json == """
       {
         "$comment" : "Comment",
@@ -88,14 +88,14 @@ struct SchemaTests {
         ],
         "readOnly" : true,
         "title" : "Title",
-        "type" : "\(schema.type.rawValue)",
+        "type" : "\(type.rawValue)",
         "writeOnly" : false
       }
       """
     )
   }
 
-  @Test
+  @Test(.tags(.typeOptions))
   func stringOptions() throws {
     let schema = Schema.string(
       .annotations(),
@@ -119,13 +119,13 @@ struct SchemaTests {
     )
   }
 
-  @Test
+  @Test(.tags(.typeOptions))
   func numberOptions() throws {
     let schema1 = Schema.number(
       .annotations(),
       .options(
         multipleOf: 2,
-        minimum: .inclusive(1),
+        minimum: 1.0,
         maximum: .exclusive(100)
       )
     )
@@ -160,7 +160,7 @@ struct SchemaTests {
     )
   }
 
-  @Test
+  @Test(.tags(.typeOptions))
   func arrayOptions() throws {
     let schema = Schema.array(
       .annotations(),
@@ -216,7 +216,7 @@ struct SchemaTests {
     )
   }
 
-  @Test
+  @Test(.tags(.typeOptions))
   func objectOptions() throws {
     let schema = Schema.object(
       .annotations(),
@@ -278,11 +278,55 @@ struct SchemaTests {
       """
     )
   }
+
+  @Test(
+    arguments: [
+      Schema.string(enumValues: ["Hello", "World"]),
+      Schema.integer(enumValues: ["Hello", "World"]),
+      Schema.number(enumValues: ["Hello", "World"]),
+      Schema.object(enumValues: ["Hello", "World"]),
+      Schema.array(enumValues: ["Hello", "World"]),
+      Schema.boolean(enumValues: ["Hello", "World"]),
+      Schema.null(enumValues: ["Hello", "World"])
+    ]
+  )
+  func enumValue(schema: Schema) throws {
+    #expect(schema.enumValues == ["Hello", "World"])
+    let json = try schema.json()
+    let type = try #require(schema.type)
+    #expect(json == """
+      {
+        "enum" : [
+          "Hello",
+          "World"
+        ],
+        "type" : "\(type)"
+      }
+      """
+    )
+  }
+
+  @Test(arguments: [Schema.noType(enumValues: ["Hello", 1, nil, 4.5])])
+  func noType(schema: Schema) throws {
+    #expect(schema.enumValues == ["Hello", 1, nil, 4.5])
+    let json = try schema.json()
+    #expect(json == """
+      {
+        "enum" : [
+          "Hello",
+          1,
+          null,
+          4.5
+        ]
+      }
+      """
+    )
+  }
 }
 
 extension Schema: @retroactive CustomTestStringConvertible {
   public var testDescription: String {
-    type.rawValue.capitalized
+    type?.rawValue.capitalized ?? "No explicit type"
   }
 
   func json() throws -> String {

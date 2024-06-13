@@ -1,4 +1,4 @@
-public struct ArraySchemaOptions: SchemaOptions {
+public struct ArraySchemaOptions: SchemaOptions, Equatable {
   /// Each element of the array must match the given schema.
   /// If `.disabled`, array elements beyond what are provided in `prefixItems` are not allowed.
   /// https://json-schema.org/understanding-json-schema/reference/array#items

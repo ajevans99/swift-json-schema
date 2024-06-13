@@ -1,8 +1,10 @@
 /// The type of a JSON value.
-public enum JSONType: String, Codable {
+///
+/// - SeeAlso: ``JSONValue``
+public enum JSONType: String, Codable, Hashable {
   case string
-  case number
   case integer
+  case number
   case object
   case array
   case boolean
