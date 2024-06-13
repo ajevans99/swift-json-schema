@@ -8,4 +8,9 @@
 ///
 /// produces a tuple `(x + y, "x + y")`.
 @freestanding(expression)
-public macro stringify<T>(_ value: T) -> (T, String) = #externalMacro(module: "swift_openai_toolsMacros", type: "StringifyMacro")
+public macro stringify<T>(_ value: T) -> (T, String) = #externalMacro(module: "OpenAIToolsMacros", type: "StringifyMacro")
+
+@attached(peer)
+public macro ToolParameter(
+  _ description: String? = nil
+) = #externalMacro(module: "OpenAIToolsMacros", type: "ToolParameterMacro")
