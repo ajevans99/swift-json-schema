@@ -37,7 +37,7 @@
 /// }
 /// ```
 ///
-/// https://json-schema.org/understanding-json-schema/about
+/// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/about)
 public struct Schema {
   /// Specifies the data type for the schema.
   /// Optional to support schemas that are not tied to a specific type.
@@ -52,7 +52,7 @@ public struct Schema {
 
   /// An array of possible values for the schema.
   /// TODO: Use `OrderedSet` from `swift-collections` to ensure uniqueness
-  /// https://json-schema.org/understanding-json-schema/reference/enum
+  /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/enum)
   let enumValues: [JSONValue]?
 
   /// Creates a schema definition for a string type.
@@ -149,6 +149,13 @@ public struct Schema {
 
   /// Creates a schema definition with no explicit type.
   /// This is a special case. No type is specified, but the schema is still valid.
+  ///
+  /// Example:
+  /// ```json
+  /// {
+  ///   "enum" : ["1", 2, null, 4.5]
+  /// }
+  /// ```
   ///
   /// - Parameters:
   ///   - annotations: Additional annotations for the schema.

@@ -342,7 +342,7 @@ extension DecodingSchemaTests {
 extension Schema {
   init(json: String) throws {
     let decoder = JSONDecoder()
-    let data = json.data(using: .utf8)!
+    let data = Data(json.utf8)
     self = try decoder.decode(Schema.self, from: data)
   }
 }

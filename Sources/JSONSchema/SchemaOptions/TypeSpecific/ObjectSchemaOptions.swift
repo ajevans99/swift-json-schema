@@ -1,37 +1,37 @@
 public struct ObjectSchemaOptions: SchemaOptions {
   /// Key is the name of a property and each value is a schema used to validate that property.
-  /// https://json-schema.org/understanding-json-schema/reference/object#properties
+  /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/object#properties)
   public let properties: [String: Schema]?
 
   /// Key is a regular expression and each value is a schema use to validate that property.
   /// If a property name matches the given regular expression, the property value must validate against the corresponding schema.
-  /// https://json-schema.org/understanding-json-schema/reference/object#patternProperties
+  /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/object#patternProperties)
   public let patternProperties: [String: Schema]?
 
   /// Used to control the handling of properties whose names are not listed in the `properties` keyword or match any of the regular expressions in the `patternProperties` keyword.
   /// By default any additional properties are allowed.
   /// If `.disabled`, no additional properties (not listed in `properties` or `patternProperties`) will be allowed.
-  /// https://json-schema.org/understanding-json-schema/reference/object#additionalproperties
+  /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/object#additionalproperties)
   public let additionalProperties: SchemaControlOption?
 
   /// Similar to `additionalProperties` except that it can recognize properties declared in subschemas.
-  /// https://json-schema.org/understanding-json-schema/reference/object#unevaluatedproperties
+  /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/object#unevaluatedproperties)
   public let unevaluatedProperties: SchemaControlOption?
 
   /// List of property keywords that are required.
-  /// https://json-schema.org/understanding-json-schema/reference/object#required
+  /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/object#required)
   public let required: [String]?
 
   /// Schema options to validate property names against.
-  /// https://json-schema.org/understanding-json-schema/reference/object#propertyNames
+  /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/object#propertyNames)
   public let propertyNames: StringSchemaOptions?
 
   /// Minimum number of properties.
-  /// https://json-schema.org/understanding-json-schema/reference/object#size
+  /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/object#size)
   public let minProperties: Int?
 
   /// Maximum number of properties.
-  /// https://json-schema.org/understanding-json-schema/reference/object#size
+  /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/object#size)
   public let maxProperties: Int?
 
   init(

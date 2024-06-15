@@ -20,6 +20,10 @@ let package = Package(
     .library(
       name: "JSONSchema",
       targets: ["JSONSchema"]
+    ),
+    .library(
+      name: "JSONResultBuilders",
+      targets: ["JSONResultBuilders"]
     )
   ],
   dependencies: [
@@ -49,14 +53,17 @@ let package = Package(
     .target(name: "JSONSchema"),
     .testTarget(name: "JSONSchemaTests", dependencies: ["JSONSchema"]),
 
+    .target(name: "JSONResultBuilders", dependencies: ["JSONSchema"]),
+    .testTarget(name: "JSONResultBuildersTests", dependencies: ["JSONResultBuilders"]),
+
     // A client of the library, which is able to use the macro in its own code.
     .executableTarget(
       name: "OpenAIToolsClient",
       dependencies: [
         "OpenAITools",
         "JSONSchema",
+        "JSONResultBuilders"
       ]
     ),
-
   ]
 )

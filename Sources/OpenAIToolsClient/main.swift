@@ -1,5 +1,6 @@
 import OpenAITools
 import JSONSchema
+import JSONResultBuilders
 import Foundation
 
 let a = 17
@@ -46,7 +47,7 @@ struct Weather: Codable {
       ),
       .options(
         properties: [
-          "temp": .number(
+          "temperature": .number(
             .annotations(description: "The city and state, e.g. San Francisco, CA")
           ),
           "location": .string(
@@ -63,6 +64,193 @@ struct Weather: Codable {
     )
   }()
 }
+
+//// - MARK: Values
+//
+//protocol JSON {
+//  var value: JSONValue { get }
+//}
+//
+//extension String: JSON {
+//  var value: JSONValue { .string(self) }
+//}
+//
+//extension Int: JSON {
+//  var value: JSONValue { .integer(self) }
+//}
+//
+//struct Object: JSON {
+//  var value: JSONValue {
+//    return .object(
+//      properties.reduce(into: [:]) { partialResult, property in
+//        partialResult[property.key] = property.value.value
+//      }
+//    )
+//  }
+//
+//  var properties: [Property]
+//
+//  init(@JSONValueBuilder content: () -> Self) {
+//    self = content()
+//  }
+//
+//  init(@PropertyBuilder _ content: () -> [Property]) {
+//    self.properties = content()
+//  }
+//}
+//
+//struct JArray: JSON {
+//  var value: JSONValue {
+//    .array(elements.map(\.value))
+//  }
+//
+//  var elements: [JSON]
+//}
+//
+//@resultBuilder
+//struct PropertyBuilder {
+//  static func buildBlock(_ components: Property...) -> [Property] {
+//    components
+//  }
+//}
+//
+//struct Property {
+//  let key: String
+//  let value: JSON
+//
+//  init(key: String, @JSONValueBuilder value: () -> JSON) {
+//    self.key = key
+//    self.value = value()
+//  }
+//}
+//
+//@resultBuilder
+//struct JSONValueBuilder {
+//  static func buildExpression(_ expression: JSON) -> JSON {
+//    expression
+//  }
+//  
+//  static func buildBlock(_ values: JSON...) -> JSON {
+//    JArray(elements: values)
+//  }
+//}
+//
+//extension JSONValue {
+//  init(@JSONValueBuilder content: () -> Self) {
+//    self = content()
+//  }
+//}
+//
+//let json = Object {
+//  Property(key: "Hello") {
+//    1
+//  }
+//  
+//  Property(key: "World") {
+//    Object {}
+//  }
+//
+//  Property(key: "jarray") {
+//    1
+//    Object {}
+//    "more"
+//  }
+//}
+//
+//print("JSON:", json)
+//print("JSON Value:", json.value)
+
+//let jsonData = try! JSONEncoder().encode(json)
+//print(String(decoding: jsonData, as: UTF8.self))
+
+//// - MARK: Schema
+//
+//protocol JSONSchema {
+//  var schema: Schema { get }
+//}
+//
+//struct JSONString: JSONSchema {
+//  var schema: Schema { .string() }
+//}
+//
+//struct JSONNumber: JSONSchema {
+//  var schema: Schema { .number() }
+//}
+//
+//// MARK: Object
+//
+//struct JSONObject: JSONSchema {
+//  var schema: Schema { .object() }
+//}
+//
+//protocol JSONObjectSchema {
+//  var key: String { get }
+//  var value: JSONSchema { get }
+//}
+
+//struct Property: JSONObjectSchema {
+//  let key: String
+//  let value: JSONSchema
+//
+//  init(_ key: String, @SchemaBuilder value: () -> JSONSchema) {
+//    self.key = key
+//    self.value = value()
+//  }
+//
+//  var schema: Schema { .object() }
+//}
+
+//@resultBuilder
+//struct SchemaBuilder {
+//  static func buildBlock(_ components: JSONSchema...) -> JSONSchema {
+//    JSONObject()
+//  }
+//
+//  static func buildExpression(_ expression: JSONSchema) -> JSONSchema {
+//    return expression
+//  }
+//}
+
+//let test = JSONObject {
+//
+//}
+
+// NORTH Star
+//struct WeatherSchema {
+//  var body: JSON {
+//    JSONObject {
+//      Property("temperature") {
+//        JSONNumber()
+//          .description("The city and state, e.g. San Francisco, CA")
+//
+//      }
+//      Property("location") {
+//        JSONString()
+//          .comment("whisper, whisper")
+//      }
+//
+//      Property("unit") {
+//        JSONString() // This is a Schema, schema is represented with json
+//          .description("The unit of measurement")
+//          .enumValues {
+//            "celcius" // This is a JSON value, represent with literals
+//            "fahrenheit"
+//            nil
+//          }
+//      }
+//    }
+//    .additionalProperties(.disabled)
+//    .title("Weather")
+//    .description("Get the current weather in a given location")
+//  }
+//}
+
+// Result builder syntax
+//@JSONBuilder var example: Object {
+//  Property("temperature") {
+//    Number()
+//  }
+//}
 
 let data = try! JSONEncoder().encode(Weather.toolContext)
 print(String(decoding: data, as: UTF8.self))
@@ -91,3 +279,26 @@ struct WeatherQuery {
 }
 
 //print(WeatherQuery.schema)
+
+let builder = JSONObjectElement {
+  Property(key: "Temperature") {
+    nil
+  }
+  Property(key: "hi") {
+    1.0
+  }
+
+  Property(key: "nested") {
+    [
+      "test": JSONIntegerElement(integer: 1),
+      "another-test": JSONObjectElement {
+        Property(key: "yes?") {
+          false
+        }
+      }
+    ]
+  }
+}
+
+print(builder)
+print(builder.value)

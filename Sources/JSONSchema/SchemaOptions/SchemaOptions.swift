@@ -1,14 +1,19 @@
+/// A type that represents the options for a JSON Schema type.
 public protocol SchemaOptions: Codable, Equatable {}
 
 extension SchemaOptions {
+  /// Erases the type of the schema options.
   func eraseToAnySchemaOptions() -> AnySchemaOptions {
     AnySchemaOptions(self)
   }
 }
 
+/// A type-erased schema options type.
 struct AnySchemaOptions: Encodable {
   private let value: any SchemaOptions
 
+  /// Creates a type-erased schema options type.
+  /// - Parameter value: The schema options to type-erase.
   public init<T: SchemaOptions>(_ value: T) {
     self.value = value
   }
@@ -48,10 +53,15 @@ struct AnySchemaOptions: Encodable {
     return nil
   }
 
+  /// Attempts to cast the schema options to a specific type.
+  /// - Returns: The schema options as the specified type, or `nil` if the cast fails.
   public func asType<T: SchemaOptions>() -> T? {
     asType(T.self)
   }
 
+  /// Attempts to cast the schema options to a specific type.
+  /// - Parameter type: The type to cast the schema options to.
+  /// - Returns: The schema options as the specified type, or `nil` if the cast fails.
   public func asType<T: SchemaOptions>(_ type: T.Type) -> T? {
     value as? T
   }
