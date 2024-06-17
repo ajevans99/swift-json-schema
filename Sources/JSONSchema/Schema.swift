@@ -1,5 +1,77 @@
+/// A root JSON schema definition.
+///
+/// The root schema is the starting point for defining the structure of a JSON document. It provides essential metadata and can include nested schemas for more complex and hierarchical definitions.
+///
+/// For example, the following root schema specifies that a JSON document must adhere to a particular dialect and can include additional nested schemas:
+///
+/// ```json
+/// {
+///   "$schema": "https://json-schema.org/draft/2020-12/schema",
+///   "$id": "https://example.com/schemas/myschema",
+///   "vocabulary": {
+///     "https://json-schema.org/draft/2020-12/vocab/core": true,
+///     "https://json-schema.org/draft/2020-12/vocab/applicator": true
+///   },
+///   "type": "object",
+///   "properties": {
+///     "name": { "type": "string" }
+///   },
+///   "required": ["name"]
+/// }
+/// ```
+///
+/// This root schema provides the base structure and vocabulary for defining and validating JSON documents.
+///
+/// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/about)
+public struct RootSchema: Equatable {
+  /// An optional identifier for the schema. When serialized, this will appear as `$id`.
+  /// The `$id` keyword is used to define a base URI for the schema. This base URI is used to resolve relative URIs within the schema.
+  /// An example value is `/schemas/address` (relative) or `https://example.com/schemas/address` (absolute)
+  /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/structuring.html#id)
+  let id: String?
+  
+  /// Used to declare which dialect of JSON Schema the schema was written for. When serialized, this will appear as `$schema`.
+  /// The value of the `$schema` keyword is also the identifier for a schema that can be used to verify that the schema is valid according to the dialect `$schema` identifies. A schema that describes another schema is called a "meta-schema".
+  /// An example value is `https://json-schema.org/draft/2020-12/schema`
+  /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/schema#schema)
+  let schema: String?
+  
+  /// Defines the set of keywords and their associated values that can be used in the schema. When serialized, this will appear as `$vocabulary`.
+  /// Each entry in the vocabulary object maps a keyword to a boolean or an object. If the value is true, it means that the keyword is mandatory. If it is false, the keyword is optional.
+  /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/schema#schema)
+  let vocabulary: [String: JSONValue]?
+  
+  /// The actual JSON schema definition.
+  ///
+  /// This will be serialized at the same level as the other properties of this struct, without the keyword `subschema`
+  ///
+  /// The ``Schema/type`` must always be `.object`.
+  ///
+  /// For example, the subschema can define the structure of nested objects within the root schema:
+  ///
+  /// ```json
+  /// {
+  ///   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  ///   "$id": "https://example.com/schemas/myschema",
+  ///   "vocabulary": {
+  ///     "https://json-schema.org/draft/2020-12/vocab/core": true,
+  ///     "https://json-schema.org/draft/2020-12/vocab/applicator": true
+  ///   },
+  ///   // The following properties are the subschema ↴
+  ///   "type": "object",
+  ///   "properties": {
+  ///     "name": { "type": "string" }
+  ///   },
+  ///   "required": ["name"]
+  /// }
+  /// ```
+  ///
+  /// The `subschema` allows for defining detailed structures and validation rules for nested objects within the root schema.
+  let subschema: Schema?
+}
+
 /// A JSON schema definition.
-/// 
+///
 /// A schema definition is a JSON object that defines the structure of a JSON document. A schema definition can be used to validate a JSON document, and to provide additional information about the document's structure.
 ///
 /// For example, the following schema definition specifies that a JSON document must be an object with a `name` property that is a string:
@@ -162,7 +234,7 @@ public struct Schema {
   ///   - enumValues: An array of possible values for the schema.
   public static func noType(
     _ annotations: AnnotationOptions = .annotations(),
-    enumValues: [JSONValue]
+    enumValues: [JSONValue]? = nil
   ) -> Schema {
     .init(type: nil, options: nil, annotations: annotations, enumValues: enumValues)
   }

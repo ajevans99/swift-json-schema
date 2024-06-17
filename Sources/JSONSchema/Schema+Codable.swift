@@ -1,3 +1,27 @@
+extension RootSchema: Codable {
+  enum CodingKeys: String, CodingKey {
+    case schema = "$schema"
+    case id = "$id"
+    case vocabulary = "$vocabulary"
+  }
+
+  public init(from decoder: any Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    self.id = try container.decodeIfPresent(String.self, forKey: .id)
+    self.schema = try container.decodeIfPresent(String.self, forKey: .schema)
+    self.vocabulary = try container.decodeIfPresent([String: JSONValue].self, forKey: .vocabulary)
+    self.subschema = try Schema(from: decoder)
+  }
+
+  public func encode(to encoder: any Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encodeIfPresent(schema, forKey: .schema)
+    try container.encodeIfPresent(id, forKey: .id)
+    try container.encodeIfPresent(vocabulary, forKey: .vocabulary)
+    try subschema?.encode(to: encoder)
+  }
+}
+
 extension Schema: Codable {
   enum CodingKeys: String, CodingKey {
     case type

@@ -322,6 +322,52 @@ struct EncodingSchemaTests {
       """
     )
   }
+
+  @Test
+  func root() throws {
+    let schema = RootSchema(
+      id: "https://example.com/schemas/myschema",
+      schema: "https://json-schema.org/draft/2020-12/schema",
+      vocabulary: [
+        "https://json-schema.org/draft/2020-12/vocab/core": true,
+        "https://json-schema.org/draft/2020-12/vocab/applicator": true
+      ],
+      subschema: .object(
+        .annotations(),
+        .options(properties: ["name": .string()])
+      )
+    )
+    let json = try schema.json()
+    #expect(json == """
+    {
+      "$id" : "https:\\/\\/example.com\\/schemas\\/myschema",
+      "$schema" : "https:\\/\\/json-schema.org\\/draft\\/2020-12\\/schema",
+      "$vocabulary" : {
+        "https:\\/\\/json-schema.org\\/draft\\/2020-12\\/vocab\\/applicator" : true,
+        "https:\\/\\/json-schema.org\\/draft\\/2020-12\\/vocab\\/core" : true
+      },
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        }
+      },
+      "type" : "object"
+    }
+    """)
+  }
+}
+
+extension RootSchema: @retroactive CustomTestStringConvertible {
+  public var testDescription: String {
+    subschema?.testDescription ?? "No subschema"
+  }
+
+  func json() throws -> String {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+    let data = try encoder.encode(self)
+    return String(decoding: data, as: UTF8.self)
+  }
 }
 
 extension Schema: @retroactive CustomTestStringConvertible {

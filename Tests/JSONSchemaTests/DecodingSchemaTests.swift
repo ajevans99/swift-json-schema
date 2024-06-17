@@ -329,6 +329,40 @@ struct DecodingSchemaTests {
       }
     }
   }
+
+  @Test
+  func root() throws {
+    let json = """
+    {
+      "$id" : "https://example.com/schemas/myschema",
+      "$schema" : "https://json-schema.org/draft/2020-12/schema",
+      "$vocabulary" : {
+        "https://json-schema.org/draft/2020-12/vocab/core" : true,
+        "https://json-schema.org/draft/2020-12/vocab/applicator" : true
+      },
+      "type": "object",
+      "properties": {
+        "name": { "type" : "string" }
+      }
+    }
+    """
+
+    let schema = try RootSchema(json: json)
+    #expect(
+      schema == RootSchema(
+        id: "https://example.com/schemas/myschema",
+        schema: "https://json-schema.org/draft/2020-12/schema",
+        vocabulary: [
+          "https://json-schema.org/draft/2020-12/vocab/core": true,
+          "https://json-schema.org/draft/2020-12/vocab/applicator": true
+        ],
+        subschema: .object(
+          .annotations(),
+          .options(properties: ["name": .string()])
+        )
+      )
+    )
+  }
 }
 
 extension DecodingSchemaTests {
@@ -336,6 +370,14 @@ extension DecodingSchemaTests {
 
   static func arguments(stringBuilder: (JSONType) -> String) -> [(String, JSONType)] {
     jsonTypes.map { (stringBuilder($0), $0) }
+  }
+}
+
+extension RootSchema {
+  init(json: String) throws {
+    let decoder = JSONDecoder()
+    let data = Data(json.utf8)
+    self = try decoder.decode(RootSchema.self, from: data)
   }
 }
 
