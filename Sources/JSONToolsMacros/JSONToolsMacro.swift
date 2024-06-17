@@ -83,7 +83,7 @@ public struct ToolParameterMacro: PeerMacro {
 }
 
 @main
-struct OpenAIToolsPlugin: CompilerPlugin {
+struct JSONToolsPlugin: CompilerPlugin {
   let providingMacros: [Macro.Type] = [
     StringifyMacro.self,
     ToolParameterMacro.self,

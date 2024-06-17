@@ -1,4 +1,4 @@
-import OpenAITools
+import JSONTools
 import JSONSchema
 import JSONResultBuilders
 import Foundation
