@@ -10,10 +10,23 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  build_swift_5:
     runs-on: macos-latest
 
+    name: Build on macOS
+    steps:
+    - uses: actions/checkout@v4
+    - name: Get swift version
+      run: swift --version
+    - name: Delete Package.resolved
+      run: rm -f Package.resolved
+    - name: Build
+      run: swift build -v
+
+  build_and_test:
+    runs-on: macos-latest
+
+    name: Build and Test on macOS with Swift 6.0
     steps:
     - uses: actions/checkout@v4
     - name: Xcode setup
@@ -24,3 +37,15 @@ jobs:
       run: swift build -v
     - name: Run tests
       run: swift test --enable-experimental-swift-testing
+
+  build:
+    name: Build on Linux
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Get swift version
+      run: swift --version
+    - name: Delete Package.resolved
+      run: rm -f Package.resolved
+    - name: Build
+      run: swift build -v
