@@ -10,6 +10,35 @@ let (result, code) = #stringify(a + b)
 
 print("The value \(result) was produced by the code \"\(code)\"")
 
+class Person {
+  var name: String
+  var age: Int
+
+  init(name: String, age: Int) {
+    self.name = name
+    self.age = age
+  }
+}
+
+let person = Person(name: "Alice", age: 30)
+let mirror = Mirror(reflecting: person)
+
+print("Type of subject: \(mirror.subjectType)")
+
+if let displayStyle = mirror.displayStyle {
+  print("Display style: \(displayStyle)")
+}
+
+for child in mirror.children {
+  if let propertyName = child.label {
+    print("Property name: \(propertyName), value: \(child.value)")
+  }
+}
+
+if let superclassMirror = mirror.superclassMirror {
+  print("Superclass: \(superclassMirror.subjectType)")
+}
+
 //protocol JSONSchemable {
 //  static var schema: String { get }
 //}
