@@ -9,7 +9,7 @@ extension SchemaOptions {
 }
 
 /// A type-erased schema options type.
-struct AnySchemaOptions: Encodable {
+public struct AnySchemaOptions: Encodable {
   private let value: any SchemaOptions
 
   /// Creates a type-erased schema options type.

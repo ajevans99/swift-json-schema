@@ -23,29 +23,30 @@
 /// This root schema provides the base structure and vocabulary for defining and validating JSON documents.
 ///
 /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/about)
+///
+/// - SeeAlso: ``Schema``
+@dynamicMemberLookup
 public struct RootSchema: Equatable {
   /// An optional identifier for the schema. When serialized, this will appear as `$id`.
   /// The `$id` keyword is used to define a base URI for the schema. This base URI is used to resolve relative URIs within the schema.
   /// An example value is `/schemas/address` (relative) or `https://example.com/schemas/address` (absolute)
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/structuring.html#id)
-  let id: String?
-  
+  public let id: String?
+
   /// Used to declare which dialect of JSON Schema the schema was written for. When serialized, this will appear as `$schema`.
   /// The value of the `$schema` keyword is also the identifier for a schema that can be used to verify that the schema is valid according to the dialect `$schema` identifies. A schema that describes another schema is called a "meta-schema".
   /// An example value is `https://json-schema.org/draft/2020-12/schema`
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/schema#schema)
-  let schema: String?
-  
+  public let schema: String?
+
   /// Defines the set of keywords and their associated values that can be used in the schema. When serialized, this will appear as `$vocabulary`.
   /// Each entry in the vocabulary object maps a keyword to a boolean or an object. If the value is true, it means that the keyword is mandatory. If it is false, the keyword is optional.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/schema#schema)
-  let vocabulary: [String: JSONValue]?
-  
+  public let vocabulary: [String: JSONValue]?
+
   /// The actual JSON schema definition.
   ///
   /// This will be serialized at the same level as the other properties of this struct, without the keyword `subschema`
-  ///
-  /// The ``Schema/type`` must always be `.object`.
   ///
   /// For example, the subschema can define the structure of nested objects within the root schema:
   ///
@@ -66,8 +67,18 @@ public struct RootSchema: Equatable {
   /// }
   /// ```
   ///
-  /// The `subschema` allows for defining detailed structures and validation rules for nested objects within the root schema.
-  let subschema: Schema?
+  /// The ``Schema/type`` must always be `.object`. The `subschema` allows for defining detailed structures and validation rules for nested objects within the root schema. Subschema properties can be accessed directly through dynamic member lookup.
+  public let subschema: Schema?
+
+  public subscript<T>(dynamicMember keyPath: KeyPath<Schema, T>) -> T? {
+    subschema?[keyPath: keyPath]
+  }
+
+  /// Handles optional properties from `Schema` and returns a single optional.
+  /// Helps prevent double optional unwrapping.
+  public subscript<T>(dynamicMember keyPath: KeyPath<Schema, T?>) -> T? {
+    subschema?[keyPath: keyPath] ?? nil
+  }
 }
 
 /// A JSON schema definition.
@@ -110,22 +121,24 @@ public struct RootSchema: Equatable {
 /// ```
 ///
 /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/about)
+///
+/// - SeeAlso: ``RootSchema``
 public struct Schema {
   /// Specifies the data type for the schema.
   /// Optional to support schemas that are not tied to a specific type.
-  let type: JSONType?
+  public let type: JSONType?
 
   /// Additional options specific to the schema type.
   /// Type-erased to support `Codable` conformance.
-  let options: AnySchemaOptions?
+  public let options: AnySchemaOptions?
 
   /// Additional annotations for the schema.
-  let annotations: AnnotationOptions
+  public let annotations: AnnotationOptions
 
   /// An array of possible values for the schema.
   /// TODO: Use `OrderedSet` from `swift-collections` to ensure uniqueness
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/enum)
-  let enumValues: [JSONValue]?
+  public let enumValues: [JSONValue]?
 
   /// Creates a schema definition for a string type.
   ///
