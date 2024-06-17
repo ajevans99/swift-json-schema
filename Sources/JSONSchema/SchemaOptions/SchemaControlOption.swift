@@ -1,6 +1,6 @@
 /// Often in JSON schema, `false` or a nested schema are the only valid options.
 /// - SeeAlso: ``ObjectSchemaOptions/additionalProperties``
-public enum SchemaControlOption: Codable, Equatable {
+public enum SchemaControlOption: Codable, Equatable, Sendable {
   case schema(Schema)
   case disabled
 

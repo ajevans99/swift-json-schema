@@ -16,7 +16,7 @@
 /// ```
 ///
 /// - SeeAlso: ``JSONType``
-public enum JSONValue: Hashable, Equatable {
+public enum JSONValue: Hashable, Equatable, Sendable {
   case string(String)
   case number(Double)
   case integer(Int)

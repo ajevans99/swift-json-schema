@@ -19,7 +19,7 @@ public struct NumberSchemaOptions: SchemaOptions, Equatable {
   /// ```swift
   ///   let inclusiveBoundary: BoundaryValue = 1.0 // .inclusive(1.0)
   /// ```
-  public enum BoundaryValue: Codable, Equatable {
+  public enum BoundaryValue: Codable, Equatable, Sendable {
     case exclusive(Double)
     case inclusive(Double)
   }

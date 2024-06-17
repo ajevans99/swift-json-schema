@@ -1,7 +1,7 @@
 /// The type of a JSON value.
 ///
 /// - SeeAlso: ``JSONValue``
-public enum JSONType: String, Codable, Hashable {
+public enum JSONType: String, Codable, Hashable, Sendable {
   case string
   case integer
   case number

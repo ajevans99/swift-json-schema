@@ -4,7 +4,7 @@ import Foundation
 import Testing
 
 struct DecodingSchemaTests {
-  static let typeMapper = { (type: JSONType) in
+  static let typeMapper: @Sendable (JSONType) -> String = { (type: JSONType) in
     """
     {
       "type" : "\(type.rawValue)"
@@ -17,7 +17,7 @@ struct DecodingSchemaTests {
     #expect(schema.type == type)
   }
 
-  static let titleMapper = { (type: JSONType) in
+  static let titleMapper: @Sendable (JSONType) -> String = { (type: JSONType) in
     """
     {
       "title": "Hello",
@@ -31,7 +31,7 @@ struct DecodingSchemaTests {
     #expect(schema.annotations.title == "Hello")
   }
 
-  static let annotationsMapper = { (type: JSONType) in
+  static let annotationsMapper: @Sendable (JSONType) -> String = { (type: JSONType) in
     """
     {
       "$comment" : "Comment",
@@ -260,7 +260,7 @@ struct DecodingSchemaTests {
     )
   }
 
-  static let enumMapper = { (type: JSONType) in
+  static let enumMapper: @Sendable (JSONType) -> String = { (type: JSONType) in
     """
     {
       "enum" : [

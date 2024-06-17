@@ -26,7 +26,7 @@
 ///
 /// - SeeAlso: ``Schema``
 @dynamicMemberLookup
-public struct RootSchema: Equatable {
+public struct RootSchema: Equatable, Sendable {
   /// An optional identifier for the schema. When serialized, this will appear as `$id`.
   /// The `$id` keyword is used to define a base URI for the schema. This base URI is used to resolve relative URIs within the schema.
   /// An example value is `/schemas/address` (relative) or `https://example.com/schemas/address` (absolute)
@@ -123,7 +123,7 @@ public struct RootSchema: Equatable {
 /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/about)
 ///
 /// - SeeAlso: ``RootSchema``
-public struct Schema {
+public struct Schema: Sendable {
   /// Specifies the data type for the schema.
   /// Optional to support schemas that are not tied to a specific type.
   public let type: JSONType?

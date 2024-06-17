@@ -60,16 +60,16 @@ struct Weather: Codable {
   let unit: Unit
 
   // On expansion of @Tool
-  static var toolContext: ToolContext = {
+  static var toolContext: ToolContext {
     ToolContext(
       name: "Weather",
       description: "Get the current weather in a given location",
       parameters: schema
     )
-  }()
+  }
 
-  static let schema: Schema = {
-    .object(
+  static var schema: Schema {
+    Schema.object(
       .annotations(
         title: "Weather",
         description: "Get the current weather in a given location"
@@ -91,7 +91,7 @@ struct Weather: Codable {
         required: ["temp", "location"]
       )
     )
-  }()
+  }
 }
 
 //// - MARK: Values

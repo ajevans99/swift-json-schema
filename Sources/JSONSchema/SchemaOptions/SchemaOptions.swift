@@ -1,5 +1,5 @@
 /// A type that represents the options for a JSON Schema type.
-public protocol SchemaOptions: Codable, Equatable {}
+public protocol SchemaOptions: Codable, Equatable, Sendable {}
 
 extension SchemaOptions {
   /// Erases the type of the schema options.
@@ -9,7 +9,7 @@ extension SchemaOptions {
 }
 
 /// A type-erased schema options type.
-public struct AnySchemaOptions: Encodable {
+public struct AnySchemaOptions: Encodable, Sendable {
   private let value: any SchemaOptions
 
   /// Creates a type-erased schema options type.
