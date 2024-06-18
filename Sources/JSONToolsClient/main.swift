@@ -309,19 +309,19 @@ struct WeatherQuery {
 
 //print(WeatherQuery.schema)
 
-let builder = JSONObjectElement {
-  Property(key: "Temperature") {
+let builder = JSONObjectValue {
+  JSONPropertyValue(key: "Temperature") {
     nil
   }
-  Property(key: "hi") {
+  JSONPropertyValue(key: "hi") {
     1.0
   }
 
-  Property(key: "nested") {
+  JSONPropertyValue(key: "nested") {
     [
-      "test": JSONIntegerElement(integer: 1),
-      "another-test": JSONObjectElement {
-        Property(key: "yes?") {
+      "test": JSONIntegerValue(integer: 1),
+      "another-test": JSONObjectValue {
+        JSONPropertyValue(key: "yes?") {
           false
         }
       }
