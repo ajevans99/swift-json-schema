@@ -1,7 +1,7 @@
 # This workflow will build a Swift project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
 
-name: Swift
+name: CI
 
 on:
   push:
@@ -21,10 +21,12 @@ jobs:
 
     - name: Format
       run: swift-format format --in-place --parallel --recursive Sources/ Tests/
+    
     - name: Check for formatting changes
       id: check_changes
       run: |
-        git diff --exit-code || echo "Formatting changes detected"
+        git diff --exit-code
+      continue-on-error: true
 
     - name: Check if PR has a specific label
       id: check_label
@@ -36,7 +38,7 @@ jobs:
           return prLabels.includes(labelToCheck);
 
     - name: Optional auto-commit
-      if: steps.check_changes.outputs.result != '0' && steps.check_label.outputs.result
+      if: steps.check_changes.outcome == 'failure' && steps.check_label.outputs.result
       run: |
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
@@ -47,7 +49,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Fail if changes detected (optional)
-      if: steps.check_changes.outputs.result != '0' && !steps.check_label.outputs.result
+      if: steps.check_changes.outcome == 'failure' && !steps.check_label.outputs.result
       run: |
         echo "::error::Formatting issues detected. Please fix them."
         exit 1
