@@ -1,15 +1,15 @@
 public struct NumberSchemaOptions: SchemaOptions, Equatable {
   /// Restrictes value to a multiple of this number.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/numeric#multiples)
-  public let multipleOf: Double?
+  public var multipleOf: Double?
 
   /// Maximum value.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/numeric#range)
-  public let minimum: BoundaryValue?
+  public var minimum: BoundaryValue?
 
   /// Minimum value.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/numeric#range)
-  public let maximum: BoundaryValue?
+  public var maximum: BoundaryValue?
 
   /// Represents a boundary value for a range constraint in a JSON schema.
   ///

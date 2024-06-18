@@ -1,7 +1,7 @@
 /// A type that represents the options for a JSON Schema type.
 public protocol SchemaOptions: Codable, Equatable, Sendable {}
 
-extension SchemaOptions {
+public extension SchemaOptions {
   /// Erases the type of the schema options.
   func eraseToAnySchemaOptions() -> AnySchemaOptions {
     AnySchemaOptions(self)

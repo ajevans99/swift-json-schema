@@ -1,5 +1,5 @@
 import JSONSchema
 
-public protocol JSONRepresentable {
+public protocol JSONValueRepresentable {
   var value: JSONValue { get }
 }
