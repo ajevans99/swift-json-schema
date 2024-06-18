@@ -1,0 +1,60 @@
+name: Format
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  format:
+    runs-on: macos-latest
+
+    permissions:
+      contents: write
+
+    name: Lint and format
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.PAT }}
+        ref: ${{ github.head_ref }}
+    
+    - name: Install swift-format
+      run: brew install swift-format
+
+    - name: Format
+      run: swift-format format --in-place --parallel --recursive Sources/ Tests/
+    
+    - name: Check for formatting changes
+      id: check_changes
+      run: |
+        git diff --exit-code
+      continue-on-error: true
+
+    - name: Check if PR has a specific label
+      id: check_label
+      uses: actions/github-script@v6
+      with:
+        result-encoding: string
+        script: |
+          const labelToCheck = 'auto-format';
+          const prLabels = context.payload.pull_request.labels.map(label => label.name);
+          return prLabels.includes(labelToCheck);
+
+    - name: Apply auto-formatting
+      if: steps.check_changes.outcome == 'failure' && steps.check_label.outputs.result == 'true'
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: Apply auto-formatting
+
+    - name: Fail if changes detected (optional)
+      if: steps.check_changes.outcome == 'failure' && steps.check_label.outputs.result == 'false'
+      run: |
+        echo "::error::Formatting issues detected. Please fix them."
+        exit 1
+
+    - name: Lint
+      id: lint 
+      run: |
+        swift-format lint --strict --parallel --recursive Sources/ Tests/

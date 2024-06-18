@@ -1,7 +1,7 @@
-import JSONTools
-import JSONSchema
-import JSONResultBuilders
 import Foundation
+import JSONResultBuilders
+import JSONSchema
+import JSONTools
 
 let a = 17
 let b = 25
@@ -25,9 +25,7 @@ let mirror = Mirror(reflecting: person)
 
 print("Type of subject: \(mirror.subjectType)")
 
-if let displayStyle = mirror.displayStyle {
-  print("Display style: \(displayStyle)")
-}
+if let displayStyle = mirror.displayStyle { print("Display style: \(displayStyle)") }
 
 for child in mirror.children {
   if let propertyName = child.label {
@@ -70,22 +68,16 @@ struct Weather: Codable {
 
   static var schema: Schema {
     Schema.object(
-      .annotations(
-        title: "Weather",
-        description: "Get the current weather in a given location"
-      ),
+      .annotations(title: "Weather", description: "Get the current weather in a given location"),
       .options(
         properties: [
           "temperature": .number(
             .annotations(description: "The city and state, e.g. San Francisco, CA")
-          ),
-          "location": .string(
-            .annotations(comment: "whisper, whisper")
-          ),
+          ), "location": .string(.annotations(comment: "whisper, whisper")),
           "unit": .string(
             .annotations(description: "The unit of measurement"),
             enumValues: [.string("celcius"), .string("fahrenheit"), .null]
-          )
+          ),
         ],
         additionalProperties: .disabled,
         required: ["temp", "location"]
@@ -158,7 +150,7 @@ struct Weather: Codable {
 //  static func buildExpression(_ expression: JSON) -> JSON {
 //    expression
 //  }
-//  
+//
 //  static func buildBlock(_ values: JSON...) -> JSON {
 //    JArray(elements: values)
 //  }
@@ -174,7 +166,7 @@ struct Weather: Codable {
 //  Property(key: "Hello") {
 //    1
 //  }
-//  
+//
 //  Property(key: "World") {
 //    Object {}
 //  }
@@ -291,40 +283,29 @@ print(String(decoding: data, as: UTF8.self))
 //    "The unit of measurement"
 //  ]
 //)
-func currentWeather(location: String, unit: Unit) async -> Double {
-  return 0
-}
+func currentWeather(location: String, unit: Unit) async -> Double { 0 }
 
 //
 struct WeatherQuery {
-//  @ToolObject
-
+  //  @ToolObject
 
   //@ToolParameter("The city and state, e.g. San Francisco, CA")
   let location: String
-  
-//  @ToolParameter
-//  let unit: Unit
+
+  //  @ToolParameter
+  //  let unit: Unit
 }
 
 //print(WeatherQuery.schema)
 
 let builder = JSONObjectValue {
-  JSONPropertyValue(key: "Temperature") {
-    nil
-  }
-  JSONPropertyValue(key: "hi") {
-    1.0
-  }
+  JSONPropertyValue(key: "Temperature") { nil }
+  JSONPropertyValue(key: "hi") { 1.0 }
 
   JSONPropertyValue(key: "nested") {
     [
       "test": JSONIntegerValue(integer: 1),
-      "another-test": JSONObjectValue {
-        JSONPropertyValue(key: "yes?") {
-          false
-        }
-      }
+      "another-test": JSONObjectValue { JSONPropertyValue(key: "yes?") { false } },
     ]
   }
 }

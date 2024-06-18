@@ -1,7 +1,7 @@
-@testable import JSONSchema
-
 import Foundation
 import Testing
+
+@testable import JSONSchema
 
 struct DecodingSchemaTests {
   static let typeMapper: @Sendable (JSONType) -> String = { (type: JSONType) in
@@ -11,8 +11,10 @@ struct DecodingSchemaTests {
     }
     """
   }
-  @Test(arguments: arguments(stringBuilder: typeMapper))
-  func type(json: String, type: JSONType) throws {
+  @Test(arguments: arguments(stringBuilder: typeMapper)) func type(
+    json: String,
+    type: JSONType
+  ) throws {
     let schema = try Schema(json: json)
     #expect(schema.type == type)
   }
@@ -25,8 +27,10 @@ struct DecodingSchemaTests {
     }
     """
   }
-  @Test(.tags(.annotations), arguments: arguments(stringBuilder: titleMapper))
-  func title(json: String, type: JSONType) throws {
+  @Test(.tags(.annotations), arguments: arguments(stringBuilder: titleMapper)) func title(
+    json: String,
+    type: JSONType
+  ) throws {
     let schema = try Schema(json: json)
     #expect(schema.annotations.title == "Hello")
   }
@@ -63,21 +67,21 @@ struct DecodingSchemaTests {
     let schema = try Schema(json: json)
 
     #expect(
-      schema.annotations == AnnotationOptions(
-        title: "Title",
-        description: "This is the description",
-        default: "1",
-        examples: ["1", nil, false, [1, 2, 3], ["hello": "world"]],
-        readOnly: true,
-        writeOnly: false,
-        deprecated: false,
-        comment: "Comment"
-      )
+      schema.annotations
+        == AnnotationOptions(
+          title: "Title",
+          description: "This is the description",
+          default: "1",
+          examples: ["1", nil, false, [1, 2, 3], ["hello": "world"]],
+          readOnly: true,
+          writeOnly: false,
+          deprecated: false,
+          comment: "Comment"
+        )
     )
   }
 
-  @Test(.tags(.typeOptions))
-  func stringOptions() throws {
+  @Test(.tags(.typeOptions)) func stringOptions() throws {
     let json = """
       {
         "format" : "uuid",
@@ -87,21 +91,21 @@ struct DecodingSchemaTests {
         "type" : "string"
       }
       """
-    
+
     let schema = try Schema(json: json)
     let options: StringSchemaOptions = try #require(schema.options?.asType())
     #expect(
-      options == StringSchemaOptions(
-        minLength: 12,
-        maxLength: 36,
-        pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
-        format: "uuid"
-      )
+      options
+        == StringSchemaOptions(
+          minLength: 12,
+          maxLength: 36,
+          pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          format: "uuid"
+        )
     )
   }
 
-  @Test(.tags(.typeOptions))
-  func numberOptions() throws {
+  @Test(.tags(.typeOptions)) func numberOptions() throws {
     let json1 = """
       {
         "exclusiveMaximum" : 100,
@@ -113,11 +117,12 @@ struct DecodingSchemaTests {
     let schema1 = try Schema(json: json1)
     let options1: NumberSchemaOptions = try #require(schema1.options?.asType())
     #expect(
-      options1 == NumberSchemaOptions(
-        multipleOf: 2,
-        minimum: 1, // expressible by integer literal - inclusive
-        maximum: .exclusive(100)
-      )
+      options1
+        == NumberSchemaOptions(
+          multipleOf: 2,
+          minimum: 1,  // expressible by integer literal - inclusive
+          maximum: .exclusive(100)
+        )
     )
 
     let json2 = """
@@ -131,16 +136,12 @@ struct DecodingSchemaTests {
     let schema2 = try Schema(json: json2)
     let options2: NumberSchemaOptions = try #require(schema2.options?.asType())
     #expect(
-      options2 == NumberSchemaOptions(
-        multipleOf: 1,
-        minimum: .exclusive(0.99),
-        maximum: .inclusive(5000)
-      )
+      options2
+        == NumberSchemaOptions(multipleOf: 1, minimum: .exclusive(0.99), maximum: .inclusive(5000))
     )
   }
 
-  @Test(.tags(.typeOptions))
-  func arrayOptions() throws {
+  @Test(.tags(.typeOptions)) func arrayOptions() throws {
     let json = """
       {
         "contains" : {
@@ -177,27 +178,22 @@ struct DecodingSchemaTests {
     let options: ArraySchemaOptions = try #require(schema.options?.asType())
 
     #expect(
-      options == ArraySchemaOptions(
-        items: .schema(.number()),
-        prefixItems: [
-          .number(),
-          .string(),
-          .object(),
-          .object(),
-        ],
-        unevaluatedItems: .disabled,
-        contains: .number(),
-        minContains: 1,
-        maxContains: 25,
-        minItems: 1,
-        maxItems: 50,
-        uniqueItems: true
-      )
+      options
+        == ArraySchemaOptions(
+          items: .schema(.number()),
+          prefixItems: [.number(), .string(), .object(), .object()],
+          unevaluatedItems: .disabled,
+          contains: .number(),
+          minContains: 1,
+          maxContains: 25,
+          minItems: 1,
+          maxItems: 50,
+          uniqueItems: true
+        )
     )
   }
 
-  @Test(.tags(.typeOptions))
-  func objectOptions() throws {
+  @Test(.tags(.typeOptions)) func objectOptions() throws {
     let json = """
       {
         "additionalProperties" : {
@@ -240,23 +236,20 @@ struct DecodingSchemaTests {
     let options: ObjectSchemaOptions = try #require(schema.options?.asType())
 
     #expect(
-      options == ObjectSchemaOptions(
-        properties: [
-          "property0": .string(),
-          "property1": .string(),
-          "property2": .boolean(),
-          "property3": .number(),
-        ],
-        patternProperties: [
-          #"^property[0-1]$"#: .string()
-        ],
-        additionalProperties: .schema(.array()),
-        unevaluatedProperties: .disabled,
-        required: ["property1", "property3"],
-        propertyNames: .options(pattern: #"^property[0-9]$"#),
-        minProperties: 1,
-        maxProperties: 10
-      )
+      options
+        == ObjectSchemaOptions(
+          properties: [
+            "property0": .string(), "property1": .string(), "property2": .boolean(),
+            "property3": .number(),
+          ],
+          patternProperties: [#"^property[0-1]$"#: .string()],
+          additionalProperties: .schema(.array()),
+          unevaluatedProperties: .disabled,
+          required: ["property1", "property3"],
+          propertyNames: .options(pattern: #"^property[0-9]$"#),
+          minProperties: 1,
+          maxProperties: 10
+        )
     )
   }
 
@@ -272,14 +265,15 @@ struct DecodingSchemaTests {
     }
     """
   }
-  @Test(arguments: arguments(stringBuilder: enumMapper))
-  func enumValue(json: String, type: JSONType) throws {
+  @Test(arguments: arguments(stringBuilder: enumMapper)) func enumValue(
+    json: String,
+    type: JSONType
+  ) throws {
     let schema = try Schema(json: json)
     #expect(schema.enumValues == ["Hello", "World", 1.2])
   }
 
-  @Test
-  func empty() throws {
+  @Test func empty() throws {
     let json = """
       {}
       """
@@ -289,8 +283,7 @@ struct DecodingSchemaTests {
     #expect(schema.options == nil)
   }
 
-  @Test
-  func noType() throws {
+  @Test func noType() throws {
     let json = """
       {
         "enum" : [
@@ -306,61 +299,52 @@ struct DecodingSchemaTests {
     #expect(schema.enumValues == ["Hello", 1, nil, 4.5])
   }
 
-  @Test
-  func invalidValue() {
+  @Test func invalidValue() {
     let json = """
-    {
-      "default" : 1.0.1
-    }
-    """
-    #expect {
-      try Schema(json: json)
-    } throws: { error in
-      guard let decodingError = error as? DecodingError else {
-        return false
+      {
+        "default" : 1.0.1
       }
+      """
+    #expect { try Schema(json: json) } throws: { error in
+      guard let decodingError = error as? DecodingError else { return false }
 
       switch decodingError {
       case .dataCorrupted(let context):
         #expect(context.debugDescription == "Unrecognized JSON value")
         return true
-      default:
-        return false
+      default: return false
       }
     }
   }
 
-  @Test
-  func root() throws {
+  @Test func root() throws {
     let json = """
-    {
-      "$id" : "https://example.com/schemas/myschema",
-      "$schema" : "https://json-schema.org/draft/2020-12/schema",
-      "$vocabulary" : {
-        "https://json-schema.org/draft/2020-12/vocab/core" : true,
-        "https://json-schema.org/draft/2020-12/vocab/applicator" : true
-      },
-      "type": "object",
-      "properties": {
-        "name": { "type" : "string" }
+      {
+        "$id" : "https://example.com/schemas/myschema",
+        "$schema" : "https://json-schema.org/draft/2020-12/schema",
+        "$vocabulary" : {
+          "https://json-schema.org/draft/2020-12/vocab/core" : true,
+          "https://json-schema.org/draft/2020-12/vocab/applicator" : true
+        },
+        "type": "object",
+        "properties": {
+          "name": { "type" : "string" }
+        }
       }
-    }
-    """
+      """
 
     let schema = try RootSchema(json: json)
     #expect(
-      schema == RootSchema(
-        id: "https://example.com/schemas/myschema",
-        schema: "https://json-schema.org/draft/2020-12/schema",
-        vocabulary: [
-          "https://json-schema.org/draft/2020-12/vocab/core": true,
-          "https://json-schema.org/draft/2020-12/vocab/applicator": true
-        ],
-        subschema: .object(
-          .annotations(),
-          .options(properties: ["name": .string()])
+      schema
+        == RootSchema(
+          id: "https://example.com/schemas/myschema",
+          schema: "https://json-schema.org/draft/2020-12/schema",
+          vocabulary: [
+            "https://json-schema.org/draft/2020-12/vocab/core": true,
+            "https://json-schema.org/draft/2020-12/vocab/applicator": true,
+          ],
+          subschema: .object(.annotations(), .options(properties: ["name": .string()]))
         )
-      )
     )
 
     // Dynamic member lookup

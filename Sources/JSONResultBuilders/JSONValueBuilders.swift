@@ -1,15 +1,10 @@
-@resultBuilder
-public struct JSONValueBuilder {
-  public static func buildExpression(_ expression: JSONValueRepresentable?) -> JSONValueRepresentable {
-    expression ?? JSONNullValue()
-  }
+@resultBuilder public struct JSONValueBuilder {
+  public static func buildExpression(
+    _ expression: JSONValueRepresentable?
+  ) -> JSONValueRepresentable { expression ?? JSONNullValue() }
 
   public static func buildBlock(_ expression: JSONValueRepresentable...) -> JSONValueRepresentable {
-    if expression.count == 1 {
-      expression[0]
-    } else {
-      JSONArrayValue(elements: expression)
-    }
+    if expression.count == 1 { expression[0] } else { JSONArrayValue(elements: expression) }
   }
 
   // MARK: Type hints
@@ -34,9 +29,9 @@ public struct JSONValueBuilder {
     JSONArrayValue(elements: expression)
   }
 
-  public static func buildExpression(_ expression: [String: JSONValueRepresentable]) -> JSONObjectValue {
-    JSONObjectValue(properties: expression)
-  }
+  public static func buildExpression(
+    _ expression: [String: JSONValueRepresentable]
+  ) -> JSONObjectValue { JSONObjectValue(properties: expression) }
 
   // MARK: Additional array type hints
 
@@ -78,7 +73,9 @@ public struct JSONValueBuilder {
     JSONObjectValue(properties: expression.mapValues { JSONStringValue(string: $0) })
   }
 
-  public static func buildExpression(_ expression: [String: JSONValueRepresentable?]) -> JSONObjectValue {
+  public static func buildExpression(
+    _ expression: [String: JSONValueRepresentable?]
+  ) -> JSONObjectValue {
     JSONObjectValue(properties: expression.mapValues { $0 ?? JSONNullValue() })
   }
 
@@ -92,9 +89,7 @@ public struct JSONValueBuilder {
     component ?? JSONNullValue()
   }
 
-  public static func buildEither(first: JSONValueRepresentable) -> JSONValueRepresentable {
-    first
-  }
+  public static func buildEither(first: JSONValueRepresentable) -> JSONValueRepresentable { first }
 
   public static func buildEither(second: JSONValueRepresentable) -> JSONValueRepresentable {
     second

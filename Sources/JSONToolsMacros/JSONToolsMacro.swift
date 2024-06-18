@@ -42,21 +42,17 @@ public struct ToolParameterMacro: PeerMacro {
     }
 
     guard let binding = varDecl.bindings.first,
-          let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text,
-          let type = binding.typeAnnotation?.type.description else {
-      throw ToolParameterError.couldNotParseType
-    }
+      let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text,
+      let type = binding.typeAnnotation?.type.description
+    else { throw ToolParameterError.couldNotParseType }
 
     let typeDescription: String
-    if type.contains("String") {
-      typeDescription = "\"type\": \"string\""
-    } else {
-      throw ToolParameterError.unknownType
-    }
+    guard type.contains("String") else { throw ToolParameterError.unknownType }
+    typeDescription = "\"type\": \"string\""
 
     var propertySchema = """
-        "\(identifier)": {\(typeDescription)
-        """
+      "\(identifier)": {\(typeDescription)
+      """
 
     // Parse the @ToolParameter attribute.
     let attributeInfo = AttributeInfo(byParsing: node)
@@ -69,12 +65,12 @@ public struct ToolParameterMacro: PeerMacro {
 
     // Wrap the propertySchema in triple quotes
     let schemaString = """
-        \"\"\"
-        {
-          \(propertySchema)
-        }
-        \"\"\"
-        """
+      \"\"\"
+      {
+        \(propertySchema)
+      }
+      \"\"\"
+      """
 
     let newDecl = try VariableDeclSyntax("static let schema: String = \(raw: schemaString)")
 
@@ -82,10 +78,6 @@ public struct ToolParameterMacro: PeerMacro {
   }
 }
 
-@main
-struct JSONToolsPlugin: CompilerPlugin {
-  let providingMacros: [Macro.Type] = [
-    StringifyMacro.self,
-    ToolParameterMacro.self,
-  ]
+@main struct JSONToolsPlugin: CompilerPlugin {
+  let providingMacros: [Macro.Type] = [StringifyMacro.self, ToolParameterMacro.self]
 }

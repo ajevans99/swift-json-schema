@@ -5,7 +5,5 @@ public struct JSONStringValue: JSONValueRepresentable {
 
   let string: String
 
-  public init(string: String) {
-    self.string = string
-  }
+  public init(string: String) { self.string = string }
 }

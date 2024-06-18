@@ -15,12 +15,8 @@ public struct StringSchemaOptions: SchemaOptions, Equatable {
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/string#format)
   public var format: String?
 
-  init(
-    minLength: Int? = nil,
-    maxLength: Int? = nil,
-    pattern: String? = nil,
-    format: String? = nil
-  ) {
+  init(minLength: Int? = nil, maxLength: Int? = nil, pattern: String? = nil, format: String? = nil)
+  {
     self.minLength = minLength
     self.maxLength = maxLength
     self.pattern = pattern

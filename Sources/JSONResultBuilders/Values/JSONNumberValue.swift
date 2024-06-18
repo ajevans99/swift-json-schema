@@ -5,7 +5,5 @@ public struct JSONNumberValue: JSONValueRepresentable {
 
   let number: Double
 
-  public init(number: Double) {
-    self.number = number
-  }
+  public init(number: Double) { self.number = number }
 }

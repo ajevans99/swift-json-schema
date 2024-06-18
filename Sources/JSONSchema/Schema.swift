@@ -25,8 +25,7 @@
 /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/about)
 ///
 /// - SeeAlso: ``Schema``
-@dynamicMemberLookup
-public struct RootSchema: Equatable, Sendable {
+@dynamicMemberLookup public struct RootSchema: Equatable, Sendable {
   /// An optional identifier for the schema. When serialized, this will appear as `$id`.
   /// The `$id` keyword is used to define a base URI for the schema. This base URI is used to resolve relative URIs within the schema.
   /// An example value is `/schemas/address` (relative) or `https://example.com/schemas/address` (absolute)
@@ -104,7 +103,7 @@ public struct RootSchema: Equatable, Sendable {
 ///   "name": "Alice"
 /// }
 /// ```
-/// 
+///
 /// The schema definition can also be used to provide additional information about the structure of the JSON document. For example, the following schema definition specifies that the `name` property should be a string with a maximum length of 100 characters:
 ///
 /// ```json
@@ -146,12 +145,18 @@ public struct Schema: Sendable {
   ///   - annotations: Additional annotations for the schema.
   ///   - options: Additional options specific to the string type.
   ///   - enumValues: An array of possible values for the schema.
+  /// - Returns: A schema definition for a string type.
   public static func string(
     _ annotations: AnnotationOptions = .annotations(),
     _ options: StringSchemaOptions = .options(),
     enumValues: [JSONValue]? = nil
   ) -> Schema {
-    .init(type: .string, options: options.eraseToAnySchemaOptions(), annotations: annotations, enumValues: enumValues)
+    .init(
+      type: .string,
+      options: options.eraseToAnySchemaOptions(),
+      annotations: annotations,
+      enumValues: enumValues
+    )
   }
 
   /// Creates a schema definition for an integer type.
@@ -159,6 +164,7 @@ public struct Schema: Sendable {
   /// - Parameters:
   ///   - annotations: Additional annotations for the schema.
   ///   - enumValues: An array of possible values for the schema.
+  /// - Returns: A schema definition for an integer type.
   public static func integer(
     _ annotations: AnnotationOptions = .annotations(),
     enumValues: [JSONValue]? = nil
@@ -172,12 +178,18 @@ public struct Schema: Sendable {
   ///   - annotations: Additional annotations for the schema.
   ///   - options: Additional options specific to the number type.
   ///   - enumValues: An array of possible values for the schema.
+  /// - Returns: A schema definition for a number type.
   public static func number(
     _ annotations: AnnotationOptions = .annotations(),
     _ options: NumberSchemaOptions = .options(),
     enumValues: [JSONValue]? = nil
   ) -> Schema {
-    .init(type: .number, options: options.eraseToAnySchemaOptions(), annotations: annotations, enumValues: enumValues)
+    .init(
+      type: .number,
+      options: options.eraseToAnySchemaOptions(),
+      annotations: annotations,
+      enumValues: enumValues
+    )
   }
 
   /// Creates a schema definition for an object type.
@@ -186,12 +198,18 @@ public struct Schema: Sendable {
   ///   - annotations: Additional annotations for the schema.
   ///   - options: Additional options specific to the object type.
   ///   - enumValues: An array of possible values for the schema.
+  /// - Returns: A schema definition for an object type.
   public static func object(
     _ annotations: AnnotationOptions = .annotations(),
     _ options: ObjectSchemaOptions = .options(),
     enumValues: [JSONValue]? = nil
   ) -> Schema {
-    .init(type: .object, options: options.eraseToAnySchemaOptions(), annotations: annotations, enumValues: enumValues)
+    .init(
+      type: .object,
+      options: options.eraseToAnySchemaOptions(),
+      annotations: annotations,
+      enumValues: enumValues
+    )
   }
 
   /// Creates a schema definition for an array type.
@@ -200,12 +218,18 @@ public struct Schema: Sendable {
   ///   - annotations: Additional annotations for the schema.
   ///   - options: Additional options specific to the array type.
   ///   - enumValues: An array of possible values for the schema.
+  /// - Returns: A schema definition for an array type.
   public static func array(
     _ annotations: AnnotationOptions = .annotations(),
     _ options: ArraySchemaOptions = .options(),
     enumValues: [JSONValue]? = nil
   ) -> Schema {
-    .init(type: .array, options: options.eraseToAnySchemaOptions(), annotations: annotations, enumValues: enumValues)
+    .init(
+      type: .array,
+      options: options.eraseToAnySchemaOptions(),
+      annotations: annotations,
+      enumValues: enumValues
+    )
   }
 
   /// Creates a schema definition for a boolean type.
@@ -213,6 +237,7 @@ public struct Schema: Sendable {
   /// - Parameters:
   ///   - annotations: Additional annotations for the schema.
   ///   - enumValues: An array of possible values for the schema.
+  /// - Returns: A schema definition for a boolean type.
   public static func boolean(
     _ annotations: AnnotationOptions = .annotations(),
     enumValues: [JSONValue]? = nil
@@ -225,12 +250,11 @@ public struct Schema: Sendable {
   /// - Parameters:
   ///   - annotations: Additional annotations for the schema.
   ///   - enumValues: An array of possible values for the schema.
+  /// - Returns: A schema definition for a null type.
   public static func null(
     _ annotations: AnnotationOptions = .annotations(),
     enumValues: [JSONValue]? = nil
-  ) -> Schema {
-    .init(type: .null, options: nil, annotations: annotations, enumValues: enumValues)
-  }
+  ) -> Schema { .init(type: .null, options: nil, annotations: annotations, enumValues: enumValues) }
 
   /// Creates a schema definition with no explicit type.
   /// This is a special case. No type is specified, but the schema is still valid.
@@ -245,10 +269,9 @@ public struct Schema: Sendable {
   /// - Parameters:
   ///   - annotations: Additional annotations for the schema.
   ///   - enumValues: An array of possible values for the schema.
+  /// - Returns: A schema definition with no explicit type.
   public static func noType(
     _ annotations: AnnotationOptions = .annotations(),
     enumValues: [JSONValue]? = nil
-  ) -> Schema {
-    .init(type: nil, options: nil, annotations: annotations, enumValues: enumValues)
-  }
+  ) -> Schema { .init(type: nil, options: nil, annotations: annotations, enumValues: enumValues) }
 }
