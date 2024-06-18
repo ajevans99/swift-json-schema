@@ -43,15 +43,9 @@ jobs:
 
     - name: Optional auto-commit
       if: steps.check_changes.outcome == 'failure' && steps.check_label.outputs.result == 'true'
-      run: |
-        git config --global user.name 'github-actions'
-        git config --global user.email 'github-actions@github.com'
-        git add .
-        git commit -m "Apply swift-format changes"
-        git pull --rebase origin ${GITHUB_REF#refs/heads/}
-        git push origin HEAD:${{ github.head_ref }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: Apply auto-formatting
 
     - name: Fail if changes detected (optional)
       if: steps.check_changes.outcome == 'failure' && steps.check_label.outputs.result == 'false'
