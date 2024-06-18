@@ -5,7 +5,5 @@ public struct JSONBooleanValue: JSONValueRepresentable {
 
   let boolean: Bool
 
-  public init(boolean: Bool) {
-    self.boolean = boolean
-  }
+  public init(boolean: Bool) { self.boolean = boolean }
 }

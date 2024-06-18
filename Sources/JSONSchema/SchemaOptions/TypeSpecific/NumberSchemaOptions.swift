@@ -24,11 +24,7 @@ public struct NumberSchemaOptions: SchemaOptions, Equatable {
     case inclusive(Double)
   }
 
-  init(
-    multipleOf: Double? = nil,
-    minimum: BoundaryValue? = nil,
-    maximum: BoundaryValue? = nil
-  ) {
+  init(multipleOf: Double? = nil, minimum: BoundaryValue? = nil, maximum: BoundaryValue? = nil) {
     self.multipleOf = multipleOf
     self.minimum = minimum
     self.maximum = maximum
@@ -38,9 +34,7 @@ public struct NumberSchemaOptions: SchemaOptions, Equatable {
     multipleOf: Double? = nil,
     minimum: BoundaryValue? = nil,
     maximum: BoundaryValue? = nil
-  ) -> Self {
-    self.init(multipleOf: multipleOf, minimum: minimum, maximum: maximum)
-  }
+  ) -> Self { self.init(multipleOf: multipleOf, minimum: minimum, maximum: maximum) }
 
   enum CodingKeys: String, CodingKey {
     case multipleOf
@@ -52,7 +46,8 @@ public struct NumberSchemaOptions: SchemaOptions, Equatable {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     multipleOf = try container.decodeIfPresent(Double.self, forKey: .multipleOf)
 
-    if let exclusiveMinimum = try container.decodeIfPresent(Double.self, forKey: .exclusiveMinimum) {
+    if let exclusiveMinimum = try container.decodeIfPresent(Double.self, forKey: .exclusiveMinimum)
+    {
       self.minimum = .exclusive(exclusiveMinimum)
     } else if let minimum = try container.decodeIfPresent(Double.self, forKey: .minimum) {
       self.minimum = .inclusive(minimum)
@@ -60,7 +55,8 @@ public struct NumberSchemaOptions: SchemaOptions, Equatable {
       self.minimum = nil
     }
 
-    if let exclusiveMaximum = try container.decodeIfPresent(Double.self, forKey: .exclusiveMaximum) {
+    if let exclusiveMaximum = try container.decodeIfPresent(Double.self, forKey: .exclusiveMaximum)
+    {
       self.maximum = .exclusive(exclusiveMaximum)
     } else if let maximum = try container.decodeIfPresent(Double.self, forKey: .maximum) {
       self.maximum = .inclusive(maximum)
@@ -74,33 +70,24 @@ public struct NumberSchemaOptions: SchemaOptions, Equatable {
     try container.encodeIfPresent(multipleOf, forKey: .multipleOf)
 
     switch maximum {
-    case .exclusive(let value):
-      try container.encode(value, forKey: .exclusiveMaximum)
-    case .inclusive(let value):
-      try container.encode(value, forKey: .maximum)
-    case .none:
-      break
+    case .exclusive(let value): try container.encode(value, forKey: .exclusiveMaximum)
+    case .inclusive(let value): try container.encode(value, forKey: .maximum)
+    case .none: break
     }
 
     switch minimum {
-    case .exclusive(let value):
-      try container.encode(value, forKey: .exclusiveMinimum)
-    case .inclusive(let value):
-      try container.encode(value, forKey: .minimum)
-    case .none:
-      break
+    case .exclusive(let value): try container.encode(value, forKey: .exclusiveMinimum)
+    case .inclusive(let value): try container.encode(value, forKey: .minimum)
+    case .none: break
     }
   }
 }
 
-extension NumberSchemaOptions.BoundaryValue: ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral {
+extension NumberSchemaOptions.BoundaryValue: ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral
+{
   /// Creates an inclusive boundary value with the specified floating-point literal.
-  public init(floatLiteral value: FloatLiteralType) {
-    self = .inclusive(value)
-  }
+  public init(floatLiteral value: FloatLiteralType) { self = .inclusive(value) }
 
   /// Creates an inclusive boundary value with the specified integer literal, after casting to a `Double`.
-  public init(integerLiteral value: IntegerLiteralType) {
-    self = .inclusive(Double(value))
-  }
+  public init(integerLiteral value: IntegerLiteralType) { self = .inclusive(Double(value)) }
 }

@@ -5,8 +5,5 @@ public struct JSONObjectValue: JSONValueRepresentable {
 
   let properties: [String: JSONValueRepresentable]
 
-  public init(properties: [String: JSONValueRepresentable] = [:]) {
-    self.properties = properties
-  }
+  public init(properties: [String: JSONValueRepresentable] = [:]) { self.properties = properties }
 }
-

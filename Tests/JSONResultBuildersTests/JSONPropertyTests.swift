@@ -1,22 +1,18 @@
-@testable import JSONResultBuilders
-
 import JSONSchema
 import Testing
 
+@testable import JSONResultBuilders
+
 struct JSONPropertyBuilderTests {
-  @Test
-  func single() throws {
-    @JSONPropertyBuilder var sample: [JSONPropertyValue] {
-      JSONPropertyValue(key: "prop0") { 0 }
-    }
+  @Test func single() throws {
+    @JSONPropertyBuilder var sample: [JSONPropertyValue] { JSONPropertyValue(key: "prop0") { 0 } }
 
     let firstProp = try #require(sample.first)
     #expect(firstProp.key == "prop0")
     #expect(firstProp.value.value == .integer(0))
   }
 
-  @Test
-  func multiple() throws {
+  @Test func multiple() throws {
     @JSONPropertyBuilder var sample: [JSONPropertyValue] {
       JSONPropertyValue(key: "prop0") { 0 }
       JSONPropertyValue(key: "prop1") { 1 }
@@ -31,8 +27,7 @@ struct JSONPropertyBuilderTests {
     }
   }
 
-  @Test(arguments: [true, false])
-  func optional(_ bool: Bool) {
+  @Test(arguments: [true, false]) func optional(_ bool: Bool) {
     @JSONPropertyBuilder var sample: [JSONPropertyValue] {
       if bool {
         JSONPropertyValue(key: "prop0", value: JSONStringValue(string: "string"))
@@ -43,8 +38,7 @@ struct JSONPropertyBuilderTests {
     #expect(sample.count == (bool ? 2 : 0))
   }
 
-  @Test(arguments: [true, false])
-  func either(_ bool: Bool) throws {
+  @Test(arguments: [true, false]) func either(_ bool: Bool) throws {
     @JSONPropertyBuilder var sample: [JSONPropertyValue] {
       if bool {
         JSONPropertyValue(key: "prop0", value: JSONStringValue(string: "string"))
@@ -57,8 +51,7 @@ struct JSONPropertyBuilderTests {
     #expect(firstProperty.key == (bool ? "prop0" : "prop1"))
   }
 
-  @Test
-  func array() throws {
+  @Test func array() throws {
     @JSONPropertyBuilder var sample: [JSONPropertyValue] {
       for num in 0 ..< 4 {
         JSONPropertyValue(key: "prop\(num)", value: JSONIntegerValue(integer: num))
@@ -74,8 +67,7 @@ struct JSONPropertyBuilderTests {
 }
 
 struct JSONPropertySchemaTests {
-  @Test
-  func single() throws {
+  @Test func single() throws {
     @JSONPropertySchemaBuilder var sample: [JSONProperty] {
       JSONProperty(key: "prop0", value: JSONString())
     }
@@ -85,8 +77,7 @@ struct JSONPropertySchemaTests {
     #expect(firstProp.value.schema == .string())
   }
 
-  @Test
-  func multiple() throws {
+  @Test func multiple() throws {
     @JSONPropertySchemaBuilder var sample: [JSONProperty] {
       JSONProperty(key: "prop0", value: JSONString())
       JSONProperty(key: "prop1", value: JSONString())
@@ -101,8 +92,7 @@ struct JSONPropertySchemaTests {
     }
   }
 
-  @Test(arguments: [true, false])
-  func optional(_ bool: Bool) {
+  @Test(arguments: [true, false]) func optional(_ bool: Bool) {
     @JSONPropertySchemaBuilder var sample: [JSONProperty] {
       if bool {
         JSONProperty(key: "prop0", value: JSONString())
@@ -113,8 +103,7 @@ struct JSONPropertySchemaTests {
     #expect(sample.count == (bool ? 2 : 0))
   }
 
-  @Test(arguments: [true, false])
-  func either(_ bool: Bool) throws {
+  @Test(arguments: [true, false]) func either(_ bool: Bool) throws {
     @JSONPropertySchemaBuilder var sample: [JSONProperty] {
       if bool {
         JSONProperty(key: "prop0", value: JSONString())
@@ -127,12 +116,9 @@ struct JSONPropertySchemaTests {
     #expect(firstProperty.key == (bool ? "prop0" : "prop1"))
   }
 
-  @Test
-  func array() throws {
+  @Test func array() throws {
     @JSONPropertySchemaBuilder var sample: [JSONProperty] {
-      for num in 0 ..< 4 {
-        JSONProperty(key: "prop\(num)", value: JSONInteger())
-      }
+      for num in 0 ..< 4 { JSONProperty(key: "prop\(num)", value: JSONInteger()) }
     }
 
     try #require(sample.count == 4)

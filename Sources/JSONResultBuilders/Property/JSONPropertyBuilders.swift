@@ -1,20 +1,13 @@
-@resultBuilder
-public struct JSONPropertySchemaBuilder {
+@resultBuilder public struct JSONPropertySchemaBuilder {
   public static func buildBlock(_ components: [JSONProperty]...) -> [JSONProperty] {
     components.flatMap { $0 }
   }
 
-  public static func buildBlock(_ components: JSONProperty...) -> [JSONProperty] {
-    components
-  }
+  public static func buildBlock(_ components: JSONProperty...) -> [JSONProperty] { components }
 
-  public static func buildEither(first component: [JSONProperty]) -> [JSONProperty] {
-    component
-  }
+  public static func buildEither(first component: [JSONProperty]) -> [JSONProperty] { component }
 
-  public static func buildEither(second component: [JSONProperty]) -> [JSONProperty] {
-    component
-  }
+  public static func buildEither(second component: [JSONProperty]) -> [JSONProperty] { component }
 
   public static func buildOptional(_ component: [JSONProperty]?) -> [JSONProperty] {
     component ?? []
@@ -37,8 +30,7 @@ extension JSONObject {
   }
 }
 
-@resultBuilder
-public struct JSONPropertyBuilder {
+@resultBuilder public struct JSONPropertyBuilder {
   public static func buildBlock(_ components: [JSONPropertyValue]...) -> [JSONPropertyValue] {
     components.flatMap { $0 }
   }
@@ -67,8 +59,6 @@ public struct JSONPropertyBuilder {
 extension JSONObjectValue {
   public init(@JSONPropertyBuilder _ content: () -> [JSONPropertyValue]) {
     self.properties = content()
-      .reduce(into: [:]) { partialResult, property in
-        partialResult[property.key] = property.value
-      }
+      .reduce(into: [:]) { partialResult, property in partialResult[property.key] = property.value }
   }
 }

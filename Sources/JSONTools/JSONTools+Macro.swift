@@ -7,10 +7,8 @@
 ///     #stringify(x + y)
 ///
 /// produces a tuple `(x + y, "x + y")`.
-@freestanding(expression)
-public macro stringify<T>(_ value: T) -> (T, String) = #externalMacro(module: "JSONToolsMacros", type: "StringifyMacro")
+@freestanding(expression) public macro stringify<T>(_ value: T) -> (T, String) =
+  #externalMacro(module: "JSONToolsMacros", type: "StringifyMacro")
 
-@attached(peer)
-public macro ToolParameter(
-  _ description: String? = nil
-) = #externalMacro(module: "JSONToolsMacros", type: "ToolParameterMacro")
+@attached(peer) public macro ToolParameter(_ description: String? = nil) =
+  #externalMacro(module: "JSONToolsMacros", type: "ToolParameterMacro")

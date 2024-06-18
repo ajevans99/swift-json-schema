@@ -16,8 +16,7 @@
 /// ```
 ///
 /// - SeeAlso: ``JSONType``
-public enum JSONValue: Hashable, Equatable, Sendable {
-  case string(String)
+public enum JSONValue: Hashable, Equatable, Sendable { case string(String)
   case number(Double)
   case integer(Int)
   case object([String: Self])
@@ -30,20 +29,13 @@ extension JSONValue: Codable {
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.singleValueContainer()
     switch self {
-    case .string(let string):
-      try container.encode(string)
-    case .number(let double):
-      try container.encode(double)
-    case .integer(let int):
-      try container.encode(int)
-    case .object(let dictionary):
-      try container.encode(dictionary)
-    case .array(let array):
-      try container.encode(array)
-    case .boolean(let bool):
-      try container.encode(bool)
-    case .null:
-      try container.encodeNil()
+    case .string(let string): try container.encode(string)
+    case .number(let double): try container.encode(double)
+    case .integer(let int): try container.encode(int)
+    case .object(let dictionary): try container.encode(dictionary)
+    case .array(let array): try container.encode(array)
+    case .boolean(let bool): try container.encode(bool)
+    case .null: try container.encodeNil()
     }
   }
 
@@ -51,8 +43,7 @@ extension JSONValue: Codable {
     let container = try decoder.singleValueContainer()
     if let string = try? container.decode(String.self) {
       self = .string(string)
-    // It is important to check for integer before double
-    } else if let int = try? container.decode(Int.self) {
+    } else if let int = try? container.decode(Int.self) {  // It is important to check for integer before double
       self = .integer(int)
     } else if let double = try? container.decode(Double.self) {
       self = .number(double)
@@ -74,27 +65,19 @@ extension JSONValue: Codable {
 }
 
 extension JSONValue: ExpressibleByStringLiteral {
-  public init(stringLiteral value: StringLiteralType) {
-    self = .string(value)
-  }
+  public init(stringLiteral value: StringLiteralType) { self = .string(value) }
 }
 
 extension JSONValue: ExpressibleByIntegerLiteral {
-  public init(integerLiteral value: IntegerLiteralType) {
-    self = .integer(value)
-  }
+  public init(integerLiteral value: IntegerLiteralType) { self = .integer(value) }
 }
 
 extension JSONValue: ExpressibleByBooleanLiteral {
-  public init(booleanLiteral value: BooleanLiteralType) {
-    self = .boolean(value)
-  }
+  public init(booleanLiteral value: BooleanLiteralType) { self = .boolean(value) }
 }
 
 extension JSONValue: ExpressibleByArrayLiteral {
-  public init(arrayLiteral elements: JSONValue...) {
-    self = .array(elements)
-  }
+  public init(arrayLiteral elements: JSONValue...) { self = .array(elements) }
 }
 
 extension JSONValue: ExpressibleByDictionaryLiteral {
@@ -105,13 +88,7 @@ extension JSONValue: ExpressibleByDictionaryLiteral {
 }
 
 extension JSONValue: ExpressibleByFloatLiteral {
-  public init(floatLiteral value: FloatLiteralType) {
-    self = .number(value)
-  }
+  public init(floatLiteral value: FloatLiteralType) { self = .number(value) }
 }
 
-extension JSONValue: ExpressibleByNilLiteral {
-  public init(nilLiteral: ()) {
-    self = .null
-  }
-}
+extension JSONValue: ExpressibleByNilLiteral { public init(nilLiteral: ()) { self = .null } }

@@ -5,7 +5,5 @@ public struct JSONIntegerValue: JSONValueRepresentable {
 
   let integer: Int
 
-  public init(integer: Int) {
-    self.integer = integer
-  }
+  public init(integer: Int) { self.integer = integer }
 }

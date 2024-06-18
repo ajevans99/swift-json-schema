@@ -18,10 +18,8 @@ public enum SchemaControlOption: Codable, Equatable, Sendable {
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.singleValueContainer()
     switch self {
-    case .schema(let schema):
-      try container.encode(schema)
-    case .disabled:
-      try container.encode(false)
+    case .schema(let schema): try container.encode(schema)
+    case .disabled: try container.encode(false)
     }
   }
 }
