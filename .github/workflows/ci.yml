@@ -13,6 +13,9 @@ jobs:
   format:
     runs-on: macos-latest
 
+    permissions:
+      contents: write
+
     name: Lint and format
     steps:
     - uses: actions/checkout@v4
@@ -32,24 +35,26 @@ jobs:
       id: check_label
       uses: actions/github-script@v6
       with:
+        result-encoding: string
         script: |
           const labelToCheck = 'auto-format';
           const prLabels = context.payload.pull_request.labels.map(label => label.name);
           return prLabels.includes(labelToCheck);
 
     - name: Optional auto-commit
-      if: steps.check_changes.outcome == 'failure' && steps.check_label.outputs.result
+      if: steps.check_changes.outcome == 'failure' && steps.check_label.outputs.result == 'true'
       run: |
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
         git add .
         git commit -m "Apply swift-format changes"
-        git push
+        git pull --rebase origin ${GITHUB_REF#refs/heads/}
+        git push origin HEAD:${{ github.head_ref }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Fail if changes detected (optional)
-      if: steps.check_changes.outcome == 'failure' && !steps.check_label.outputs.result
+      if: steps.check_changes.outcome == 'failure' && steps.check_label.outputs.result == 'false'
       run: |
         echo "::error::Formatting issues detected. Please fix them."
         exit 1
