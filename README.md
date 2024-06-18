@@ -2,6 +2,10 @@
 
 [![CI](https://github.com/ajevans99/swift-json-schema/actions/workflows/ci.yml/badge.svg)](https://github.com/ajevans99/swift-json-schema/actions/workflows/ci.yml)
 
+JSON Schema is a powerful tool for defining the structure of JSON documents. Swift JSON Schema aims to make it easier to generate JSON schema documents directly in Swift.
+
+The [OpenAI Functions Tools API](https://platform.openai.com/docs/api-reference/assistants/createAssistant#assistants-createassistant-tools) is an example of a service that uses JSON schema to define the structure of API requests and responses. Swift JSON Schema can be used to generate advanced schema documents.
+
 ## Schema Generation
 
 Swift JSON Schema enables type-safe JSON schema generation directly in Swift.
@@ -106,11 +110,50 @@ Import the `JSONResultBuilders` target and improve schema generation ergonomics 
 schemaRepresentation.schema // Same `Schema` type as above for quick serialization
 ```
 
+## Installation
+
+You can add the SwiftJSONSchema package to your project using Swift Package Manager (SPM) or Xcode.
+
+### Using Swift Package Manager (SPM)
+
+To add SwiftJSONSchema to your project using Swift Package Manager, add the following dependency to your Package.swift file:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/ajevans99/swift-json-schema", from: "1.0.0")
+]
+```
+
+Then, include `JSONSchema` and/or `JSONResultBuilders` as a dependency for your target:
+
+```swift
+targets: [
+    .target(
+        name: "YourTarget",
+        dependencies: [
+            .product(name: "JSONSchema", package: "swift-json-schema")
+        ]
+    )
+]
+```
+
+### Using Xcode
+
+1. Open your project in Xcode.
+2. Navigate to File > Swift Packages > Add Package Dependency...
+3. Enter the repository URL: https://github.com/ajevans99/swift-json-schema
+4. Follow the prompts to add the package to your project.
+
+Once added, you can import `JSONSchema` in your Swift files and start using it in your project.
+
 ## Next Steps
 
 This library is in active development. If you have any feedback or suggestions, please open an issue or pull request.
 
 Goals for future releases include:
+- [ ] [Support `const` keyword](https://json-schema.org/understanding-json-schema/reference/const#constant-values)
+- [ ] [Support schema composition (`allOf`, `anyOf`, `oneOf`, `not`)](https://json-schema.org/understanding-json-schema/reference/combining#allof)
+- [ ] [Support applying subschemas conditionally](https://json-schema.org/understanding-json-schema/reference/conditionals)
 - [ ] Support enums in result builders
 - [ ] Root schema in result builders
 - [ ] Validate JSON instances against schemas
