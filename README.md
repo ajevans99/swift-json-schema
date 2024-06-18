@@ -1,6 +1,6 @@
 # Swift JSON Schema
 
-[![CI](https://github.com/ajevans99/swift-json-schema/actions/workflows/swift.yml/badge.svg)](https://github.com/ajevans99/swift-json-schema/actions/workflows/swift.yml)
+[![CI](https://github.com/ajevans99/swift-json-schema/actions/workflows/ci.yml/badge.svg)](https://github.com/ajevans99/swift-json-schema/actions/workflows/ci.yml)
 
 ## License
 
