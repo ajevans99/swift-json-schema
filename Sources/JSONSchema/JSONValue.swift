@@ -43,7 +43,8 @@ extension JSONValue: Codable {
     let container = try decoder.singleValueContainer()
     if let string = try? container.decode(String.self) {
       self = .string(string)
-    } else if let int = try? container.decode(Int.self) {  // It is important to check for integer before double
+    } else if let int = try? container.decode(Int.self) { 
+      // It is important to check for integer before double, as all integers are also doubles.
       self = .integer(int)
     } else if let double = try? container.decode(Double.self) {
       self = .number(double)
