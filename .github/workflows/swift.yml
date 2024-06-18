@@ -10,6 +10,53 @@ on:
     branches: [ "main" ]
 
 jobs:
+  format:
+    runs-on: macos-latest
+
+    name: Lint and format
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install swift-format
+      run: brew install swift-format
+
+    - name: Format
+      run: swift-format format --in-place --parallel --recursive Sources/ Tests/
+    - name: Check for formatting changes
+      id: check_changes
+      run: |
+        git diff --exit-code || echo "Formatting changes detected"
+
+    - name: Check if PR has a specific label
+      id: check_label
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const labelToCheck = 'auto-format';
+          const prLabels = context.payload.pull_request.labels.map(label => label.name);
+          return prLabels.includes(labelToCheck);
+
+    - name: Optional auto-commit
+      if: steps.check_changes.outputs.result != '0' && steps.check_label.outputs.result
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add .
+        git commit -m "Apply swift-format changes"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Fail if changes detected (optional)
+      if: steps.check_changes.outputs.result != '0' && !steps.check_label.outputs.result
+      run: |
+        echo "::error::Formatting issues detected. Please fix them."
+        exit 1
+
+    - name: Lint
+      id: lint 
+      run: |
+        swift-format lint --strict --parallel --recursive Sources/ Tests/
+
   build_swift_5:
     runs-on: macos-latest
 
