@@ -5,5 +5,7 @@ public struct JSONArrayValue: JSONValueRepresentable {
 
   let elements: [JSONValueRepresentable]
 
-  public init(elements: [JSONValueRepresentable] = []) { self.elements = elements }
+  public init(elements: [JSONValueRepresentable] = []) {
+    self.elements = elements
+  }
 }
