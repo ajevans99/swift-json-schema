@@ -1,14 +1,14 @@
 import JSONSchema
 
 /// A result builder type to build JSON schemas.
-/// 
+///
 /// Here's an example of how you might use this builder to create a JSON schema for a product:
 /// ```swift
 /// JSONObject {
 ///   JSONProperty(key: "productId") {
 ///     JSONInteger().description("The unique identifier for a product")
 ///   }
-///   JSONProperty(key: "productName") 
+///   JSONProperty(key: "productName")
 ///     JSONString().description("Name of the product")
 ///   }
 /// }

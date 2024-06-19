@@ -12,7 +12,7 @@ public struct JSONObject: JSONSchemaRepresentable {
 
 extension JSONObject {
   /// Defines the schema for the properties of the object.
-  /// 
+  ///
   /// - SeeAlso: ``JSONProperty``
   /// - Parameter properties: The properties to add to the schema.
   /// - Returns: A new `JSONObject` with the properties set.
