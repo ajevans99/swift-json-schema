@@ -4,7 +4,13 @@
 
 JSON Schema is a powerful tool for defining the structure of JSON documents. Swift JSON Schema aims to make it easier to generate JSON schema documents directly in Swift.
 
-The [OpenAI Functions Tools API](https://platform.openai.com/docs/api-reference/assistants/createAssistant#assistants-createassistant-tools) is an example of a service that uses JSON schema to define the structure of API requests and responses. Swift JSON Schema can be used to generate advanced schema documents.
+The [OpenAI Functions Tools API](https://platform.openai.com/docs/api-reference/assistants/createAssistant#assistants-createassistant-tools) is an example of a service that uses JSON schema to define the structure of API requests and responses.
+
+* [Schema Generation](#schema-generation)
+* [Installation](#installation)
+* [Documentation](#documentation)
+* [Next Steps](#next-steps)
+* [License](#license)
 
 ## Schema Generation
 
@@ -36,7 +42,7 @@ Here's a simple example of a person schema.
 }
 ```
 
-`RootSchema` and `Schema` types are used to define the schema structure in Swift. The `RootSchema` type represents the root of the schema document, and the `Schema` type represents a JSON schema object.
+Let's create this schema directly in Swift. `RootSchema` and `Schema` types are used to define the schema structure. The `RootSchema` type represents the root of the schema document, and the `Schema` type represents a JSON schema object.
 
 ```swift
 let schema = RootSchema(
@@ -61,8 +67,6 @@ let schema = RootSchema(
   )
 )
 ```
-
-### Codable
 
 Both `Schema` and `RootSchema` conform to `Codable` for easy serialization
 
@@ -146,6 +150,12 @@ targets: [
 
 Once added, you can import `JSONSchema` in your Swift files and start using it in your project.
 
+## Documentation
+
+The full documentation for this library is available through the Swift Package Index.
+
+[View the documentation](https://swiftpackageindex.com/ajevans99/swift-json-schema)
+
 ## Next Steps
 
 This library is in active development. If you have any feedback or suggestions, please open an issue or pull request.
@@ -154,6 +164,7 @@ Goals for future releases include:
 - [ ] [Support `const` keyword](https://json-schema.org/understanding-json-schema/reference/const#constant-values)
 - [ ] [Support schema composition (`allOf`, `anyOf`, `oneOf`, `not`)](https://json-schema.org/understanding-json-schema/reference/combining#allof)
 - [ ] [Support applying subschemas conditionally](https://json-schema.org/understanding-json-schema/reference/conditionals)
+- [ ] Support `$ref` and `$defs` keywords
 - [ ] Support enums in result builders
 - [ ] Root schema in result builders
 - [ ] Validate JSON instances against schemas

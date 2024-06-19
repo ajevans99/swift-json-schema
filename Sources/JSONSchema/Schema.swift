@@ -69,12 +69,9 @@
   /// The ``Schema/type`` must always be `.object`. The `subschema` allows for defining detailed structures and validation rules for nested objects within the root schema. Subschema properties can be accessed directly through dynamic member lookup.
   public let subschema: Schema?
 
-  public subscript<T>(dynamicMember keyPath: KeyPath<Schema, T>) -> T? {
-    subschema?[keyPath: keyPath]
-  }
-
-  /// Handles optional properties from `Schema` and returns a single optional.
-  /// Helps prevent double optional unwrapping.
+  /// Direct access to ``RootSchema/subschema`` properties.
+  ///
+  /// Optional `T` helps prevent double optional unwrapping issues.
   public subscript<T>(dynamicMember keyPath: KeyPath<Schema, T?>) -> T? {
     subschema?[keyPath: keyPath] ?? nil
   }

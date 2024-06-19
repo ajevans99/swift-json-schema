@@ -1,3 +1,7 @@
+/// A JSON property component for use in ``JSONPropertySchemaBuilder``.
+///
+/// This component is used to represent a key-value pair in a JSON object.
+/// The key is a `String` and the value is a ``JSONSchemaRepresentable``.
 public struct JSONProperty {
   let key: String
   let value: JSONSchemaRepresentable
