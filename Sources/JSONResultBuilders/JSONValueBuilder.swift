@@ -1,3 +1,6 @@
+/// A result builder that constructs JSON values.
+///
+/// This builder constructs JSON values from expressions that are either JSON value components or other JSON values.
 @resultBuilder public struct JSONValueBuilder {
   public static func buildExpression(
     _ expression: JSONValueRepresentable?

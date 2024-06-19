@@ -1,3 +1,6 @@
+/// A JSON property value component for use in ``JSONPropertyBuilder``.
+///
+/// This component is used to represent a key-value pair in a JSON object instance.
 public struct JSONPropertyValue {
   let key: String
   let value: JSONValueRepresentable

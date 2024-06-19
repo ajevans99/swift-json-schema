@@ -1,3 +1,7 @@
 import JSONSchema
 
-public protocol JSONValueRepresentable { var value: JSONValue { get } }
+/// A component for use in ``JSONValueBuilder```.
+public protocol JSONValueRepresentable {
+  /// The value that this component represents.
+  var value: JSONValue { get }
+}
