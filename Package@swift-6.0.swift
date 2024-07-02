@@ -22,9 +22,14 @@ let package = Package(
       name: "JSONResultBuilders",
       targets: ["JSONResultBuilders"]
     ),
+    .library(
+      name: "Schemable",
+      targets: ["Schemable"]
+    ),
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
+    .package(url: "https://github.com/apple/swift-syntax.git", from: "600.0.0-latest"),
   ],
   targets: [
     // Library that defines the JSON schema related types.
@@ -45,6 +50,32 @@ let package = Package(
       name: "JSONResultBuildersTests",
       dependencies: ["JSONResultBuilders"]
     ),
+
+    // Library that exposes macros as part of its API, which is used in client programs.
+    .target(
+      name: "Schemable",
+      dependencies: [
+        "JSONSchema",
+        "JSONResultBuilders",
+        "JSONSchemaMacros",
+      ]
+    ),
+    .testTarget(
+      name: "SchemableTests",
+      dependencies: [
+        "Schemable",
+        .product(name: "SwiftSyntaxMacrosGenericTestSupport", package: "swift-syntax")
+      ]
+    ),
+
+    // Macro implementation that preforms the source transformation of a macro.
+    .macro(
+      name: "JSONSchemaMacros",
+      dependencies: [
+        .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+        .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
+      ]
+    )
   ]
 )
 
