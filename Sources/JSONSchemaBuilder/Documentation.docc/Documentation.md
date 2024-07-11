@@ -1,10 +1,10 @@
-# ``JSONResultBuilders``
+# ``JSONSchemaBuilder``
 
 Allows for ergonomic JSON schema generation with Swift's result builders.
 
 ## JSON Schema Builder
 
-To get started generating JSON schemas with result builders, import the `JSONResultBuilders` target and use the ``JSONSchemaBuilder`` result builder.
+To get started generating JSON schemas with result builders, import the `JSONSchemaBuilder` target and use the ``JSONSchemaBuilder`` result builder.
 
 ```swift
 @JSONSchemaBuilder var schemaRepresentation: JSONSchemaRepresentable {

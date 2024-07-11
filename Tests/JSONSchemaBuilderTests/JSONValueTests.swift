@@ -1,7 +1,7 @@
 import JSONSchema
 import Testing
 
-@testable import JSONResultBuilders
+@testable import JSONSchemaBuilder
 
 struct JSONValueBuilderTests {
   @Test func variadicParameter() {

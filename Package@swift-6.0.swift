@@ -19,12 +19,12 @@ let package = Package(
       targets: ["JSONSchema"]
     ),
     .library(
-      name: "JSONResultBuilders",
-      targets: ["JSONResultBuilders"]
+      name: "JSONSchemaBuilder",
+      targets: ["JSONSchemaBuilder"]
     ),
-    .library(
-      name: "Schemable",
-      targets: ["Schemable"]
+    .executable(
+      name: "JSONSchemaClient",
+      targets: ["JSONSchemaClient"]
     ),
   ],
   dependencies: [
@@ -43,28 +43,17 @@ let package = Package(
 
     // Library for building JSON schemas with Swift's result builders.
     .target(
-      name: "JSONResultBuilders",
-      dependencies: ["JSONSchema"]
-    ),
-    .testTarget(
-      name: "JSONResultBuildersTests",
-      dependencies: ["JSONResultBuilders"]
-    ),
-
-    // Library that exposes macros as part of its API, which is used in client programs.
-    .target(
-      name: "Schemable",
+      name: "JSONSchemaBuilder",
       dependencies: [
         "JSONSchema",
-        "JSONResultBuilders",
         "JSONSchemaMacros",
       ]
     ),
     .testTarget(
-      name: "SchemableTests",
+      name: "JSONSchemaBuilderTests",
       dependencies: [
-        "Schemable",
-        .product(name: "SwiftSyntaxMacrosGenericTestSupport", package: "swift-syntax")
+        "JSONSchemaBuilder",
+        .product(name: "SwiftSyntaxMacrosGenericTestSupport", package: "swift-syntax"),
       ]
     ),
 
@@ -75,7 +64,17 @@ let package = Package(
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
       ]
-    )
+    ),
+
+    // A client of the library, which is able to use the macro in its own code.
+    .executableTarget(
+      name: "JSONSchemaClient",
+      dependencies: [
+        "JSONSchema",
+        "JSONSchemaBuilder",
+        "JSONSchemaMacros",
+      ]
+    ),
   ]
 )
 

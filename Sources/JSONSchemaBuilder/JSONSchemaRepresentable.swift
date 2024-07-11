@@ -1,7 +1,7 @@
 import JSONSchema
 
 /// A component for use in ``JSONSchemaBuilder```.
-public protocol JSONSchemaRepresentable {
+public protocol JSONSchemaRepresentable: Sendable {
   /// The schema that this component represents.
   var schema: Schema { get }
 
