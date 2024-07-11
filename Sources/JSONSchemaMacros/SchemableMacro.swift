@@ -1,15 +1,12 @@
 import SwiftSyntax
 import SwiftSyntaxMacros
 
-enum SchemableError: Error {
-  case unsupportedDeclaration
-}
+enum SchemableError: Error { case unsupportedDeclaration }
 
 extension SchemableError: CustomStringConvertible {
   var description: String {
     switch self {
-    case .unsupportedDeclaration:
-      "Macro can only be applied to struct"
+    case .unsupportedDeclaration: "Macro can only be applied to struct"
     }
   }
 }
@@ -43,27 +40,26 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
 }
 
 func makeSchema(fromStruct structDecl: StructDeclSyntax) -> DeclSyntax {
-  let members = structDecl.memberBlock.members
-    .compactMap { $0.decl.as(VariableDeclSyntax.self) }
+  let members = structDecl.memberBlock.members.compactMap { $0.decl.as(VariableDeclSyntax.self) }
     .flatMap { $0.bindings }
     .compactMap { patternBinding -> Member? in
-      guard let identifier = patternBinding.pattern.as(IdentifierPatternSyntax.self)?.identifier else { return nil }
+      guard let identifier = patternBinding.pattern.as(IdentifierPatternSyntax.self)?.identifier
+      else { return nil }
       guard let type = patternBinding.typeAnnotation?.type else { return nil }
 
       return Member(identifier: identifier, type: type)
     }
 
-  let statements = members
-    .compactMap { member -> CodeBlockItemSyntax? in
-      guard let jsonType = member.jsonType else {
-        if let text = member.type.as(IdentifierTypeSyntax.self) {
-          return "JSONProperty(key: \"\(member.identifier)\") { \(raw: text.name.text).schema }"
-        }
-
-        return nil
+  let statements = members.compactMap { member -> CodeBlockItemSyntax? in
+    guard let jsonType = member.jsonType else {
+      if let text = member.type.as(IdentifierTypeSyntax.self) {
+        return "JSONProperty(key: \"\(member.identifier)\") { \(raw: text.name.text).schema }"
       }
-      return "JSONProperty(key: \"\(member.identifier)\") { JSON\(raw: jsonType)() }"
+
+      return nil
     }
+    return "JSONProperty(key: \"\(member.identifier)\") { JSON\(raw: jsonType)() }"
+  }
 
   let variableDecl = VariableDeclSyntax(
     leadingTrivia: .newline,
@@ -72,14 +68,14 @@ func makeSchema(fromStruct structDecl: StructDeclSyntax) -> DeclSyntax {
     bindings: [
       PatternBindingSyntax(
         pattern: IdentifierPatternSyntax(identifier: "schema"),
-        typeAnnotation: TypeAnnotationSyntax(type: IdentifierTypeSyntax(name: .identifier("JSONSchemaRepresentable"))),
+        typeAnnotation: TypeAnnotationSyntax(
+          type: IdentifierTypeSyntax(name: .identifier("JSONSchemaRepresentable"))
+        ),
         initializer: InitializerClauseSyntax(
           value: FunctionCallExprSyntax(
             calledExpression: DeclReferenceExprSyntax(baseName: "JSONObject"),
             arguments: [],
-            trailingClosure: ClosureExprSyntax(
-              statements: CodeBlockItemListSyntax(statements)
-            )
+            trailingClosure: ClosureExprSyntax(statements: CodeBlockItemListSyntax(statements))
           )
         )
       )
@@ -95,25 +91,18 @@ struct Member {
 
   var jsonType: String? {
     // TODO: Arrays and dictionaries
-//    if let type = type.as(ArrayTypeSyntax.self) {
-//      return type.element
-//    }
+    //    if let type = type.as(ArrayTypeSyntax.self) {
+    //      return type.element
+    //    }
 
-    guard let type = type.as(IdentifierTypeSyntax.self) else {
-      return nil
-    }
+    guard let type = type.as(IdentifierTypeSyntax.self) else { return nil }
 
     switch type.name.text {
-    case "Double":
-      return "Number"
-    case "Bool":
-      return "Boolean"
-    case "Int":
-      return "Integer"
-    case "String":
-      return "String"
-    default:
-      return nil
+    case "Double": return "Number"
+    case "Bool": return "Boolean"
+    case "Int": return "Integer"
+    case "String": return "String"
+    default: return nil
     }
   }
 }

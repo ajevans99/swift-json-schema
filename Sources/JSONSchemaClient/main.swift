@@ -2,8 +2,7 @@ import Foundation
 import JSONSchema
 import JSONSchemaBuilder
 
-@Schemable
-struct Weather {
+@Schemable struct Weather {
   let temperature: Double
   let location: String
 
@@ -16,34 +15,17 @@ let now = Weather(
   temperature: 72,
   location: "Detroit",
   temperatures: [32, 70.1, 84],
-  temperatureByLocation: [
-    "Seattle": 64.5,
-    "New York": 75
-  ]
+  temperatureByLocation: ["Seattle": 64.5, "New York": 75]
 )
 
 let test = JSONObject {
-  JSONProperty(key: "temperature") {
-    JSONNumber()
-  }
+  JSONProperty(key: "temperature") { JSONNumber() }
 
-  JSONProperty(key: "location") {
-    JSONString()
-  }
+  JSONProperty(key: "location") { JSONString() }
 
-  JSONProperty(key: "temperatures") {
-    JSONArray()
-      .items {
-        JSONNumber()
-      }
-  }
+  JSONProperty(key: "temperatures") { JSONArray().items { JSONNumber() } }
 
-  JSONProperty(key: "temperatureByLocation") {
-    JSONObject()
-      .additionalProperties {
-        JSONNumber()
-      }
-  }
+  JSONProperty(key: "temperatureByLocation") { JSONObject().additionalProperties { JSONNumber() } }
 }
 
 extension Weather: Codable {}
@@ -70,16 +52,14 @@ func printSchema<T: Schemable>(_ schema: T.Type) {
 printInstance(now)
 printSchema(Weather.self)
 
-@Schemable
-struct Book {
+@Schemable struct Book {
   let title: String
   let author: String
   let yearPublished: Int
   let library: Library
 }
 
-@Schemable
-struct Library {
+@Schemable struct Library {
   let name: String
   var books: [Book] = []
 }
