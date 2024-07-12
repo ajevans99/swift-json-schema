@@ -1,4 +1,4 @@
-import JSONSchemaMacros
+import JSONSchemaMacro
 import SwiftSyntaxMacros
 import Testing
 

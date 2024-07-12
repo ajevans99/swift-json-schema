@@ -46,23 +46,31 @@ let package = Package(
       name: "JSONSchemaBuilder",
       dependencies: [
         "JSONSchema",
-        "JSONSchemaMacros",
+        "JSONSchemaMacro",
       ]
     ),
     .testTarget(
       name: "JSONSchemaBuilderTests",
       dependencies: [
         "JSONSchemaBuilder",
-        .product(name: "SwiftSyntaxMacrosGenericTestSupport", package: "swift-syntax"),
       ]
     ),
 
     // Macro implementation that preforms the source transformation of a macro.
     .macro(
-      name: "JSONSchemaMacros",
+      name: "JSONSchemaMacro",
       dependencies: [
+        .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-        .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
+        .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+      ]
+    ),
+    .testTarget(
+      name: "JSONSchemaMacroTests",
+      dependencies: [
+        "JSONSchemaMacro",
+        .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),
+        .product(name: "SwiftSyntaxMacrosGenericTestSupport", package: "swift-syntax"),
       ]
     ),
 
@@ -72,7 +80,7 @@ let package = Package(
       dependencies: [
         "JSONSchema",
         "JSONSchemaBuilder",
-        "JSONSchemaMacros",
+        "JSONSchemaMacro",
       ]
     ),
   ]

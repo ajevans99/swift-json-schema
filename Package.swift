@@ -46,7 +46,7 @@ let package = Package(
       name: "JSONSchemaBuilder",
       dependencies: [
         "JSONSchema",
-        "JSONSchemaMacros",
+        "JSONSchemaMacro",
       ]
     ),
     // Test target disabled because this Swift tools version does not support Swift Testing
@@ -57,12 +57,22 @@ let package = Package(
 
     // Macro implementation that preforms the source transformation of a macro.
     .macro(
-      name: "JSONSchemaMacros",
+      name: "JSONSchemaMacro",
       dependencies: [
+        .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
       ]
     ),
+    // Test target disabled because this Swift tools version does not support Swift Testing
+    // .testTarget(
+    //   name: "JSONSchemaMacroTests",
+    //   dependencies: [
+    //     "JSONSchemaMacro",
+    //     .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),
+    //     .product(name: "SwiftSyntaxMacrosGenericTestSupport", package: "swift-syntax"),
+    //   ]
+    // ),
 
     // A client of the library, which is able to use the macro in its own code.
     .executableTarget(
@@ -70,7 +80,7 @@ let package = Package(
       dependencies: [
         "JSONSchema",
         "JSONSchemaBuilder",
-        "JSONSchemaMacros",
+        "JSONSchemaMacro",
       ]
     ),
   ]
