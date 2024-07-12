@@ -20,7 +20,7 @@ func assertMacroExpansion(
     failureHandler: { spec in
       Issue.record(
         "\(spec.message)",
-        sourceLocation: .init(
+        sourceLocation: SourceLocation(
           fileID: spec.location.fileID,
           filePath: spec.location.filePath,
           line: spec.location.line,
