@@ -31,8 +31,7 @@ extension JSONArray {
   /// Adds prefix items to the schema.
   /// - Parameter prefixItems: A closure that returns an array of JSON schemas representing the prefix items.
   /// - Returns: A new `JSONArray` with the prefix items set.
-  public func prefixItems(@JSONSchemaBuilder _ prefixItems: () -> [JSONSchemaComponent]) -> Self
-  {
+  public func prefixItems(@JSONSchemaBuilder _ prefixItems: () -> [JSONSchemaComponent]) -> Self {
     var copy = self
     copy.options.prefixItems = prefixItems().map(\.definition)
     return copy

@@ -42,9 +42,7 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
 
 func makeSchema(fromStruct structDecl: StructDeclSyntax) -> DeclSyntax {
   let members = structDecl.memberBlock.members.compactMap { $0.decl.as(VariableDeclSyntax.self) }
-    .flatMap { variableDecl in
-      variableDecl.bindings.map { (variableDecl, $0) }
-    }
+    .flatMap { variableDecl in variableDecl.bindings.map { (variableDecl, $0) } }
     .compactMap { (variableDecl, patternBinding) -> Member? in
       guard let identifier = patternBinding.pattern.as(IdentifierPatternSyntax.self)?.identifier
       else { return nil }
@@ -109,17 +107,18 @@ struct Member {
     }
 
     return """
-    JSONProperty(key: "\(raw: identifier.text)") { \(typeCodeBlock) }
-    """
+      JSONProperty(key: "\(raw: identifier.text)") { \(typeCodeBlock) }
+      """
   }
 }
 
 extension AttributeListSyntax {
   func arguments(for attributeName: String) -> LabeledExprListSyntax? {
-    self
-      .compactMap { $0.as(AttributeSyntax.self) }
+    self.compactMap { $0.as(AttributeSyntax.self) }
       .first {
-        guard let attributeIdentifier = $0.attributeName.as(IdentifierTypeSyntax.self) else { return false }
+        guard let attributeIdentifier = $0.attributeName.as(IdentifierTypeSyntax.self) else {
+          return false
+        }
         return attributeIdentifier.name.text == attributeName
       }?
       .arguments?
@@ -139,13 +138,13 @@ extension TypeSyntax {
           }
         """
     case .dictionaryType(let dictionaryType):
-      guard let keyType = dictionaryType.key.as(IdentifierTypeSyntax.self), keyType.name.text == "String" else {
+      guard let keyType = dictionaryType.key.as(IdentifierTypeSyntax.self),
+        keyType.name.text == "String"
+      else {
         // TODO: Add warning
         return nil
       }
-      guard let type = dictionaryType.value.jsonSchemaCodeBlock() else {
-        return nil
-      }
+      guard let type = dictionaryType.value.jsonSchemaCodeBlock() else { return nil }
       return """
         JSONObject()
           .additionalProperties {
@@ -159,26 +158,25 @@ extension TypeSyntax {
       return "\(type)()"
     case .implicitlyUnwrappedOptionalType(let implicitlyUnwrappedOptionalType):
       return implicitlyUnwrappedOptionalType.wrappedType.jsonSchemaCodeBlock()
-    case .optionalType(let optionalType):
-      return optionalType.wrappedType.jsonSchemaCodeBlock()
-    case .someOrAnyType(let someOrAnyType):
-      return someOrAnyType.constraint.jsonSchemaCodeBlock()
-    case .attributedType, .classRestrictionType, .compositionType, .functionType, .memberType, .metatypeType, .missingType, .namedOpaqueReturnType, .packElementType, .packExpansionType, .suppressedType, .tupleType:
+    case .optionalType(let optionalType): return optionalType.wrappedType.jsonSchemaCodeBlock()
+    case .someOrAnyType(let someOrAnyType): return someOrAnyType.constraint.jsonSchemaCodeBlock()
+    case .attributedType, .classRestrictionType, .compositionType, .functionType, .memberType,
+      .metatypeType, .missingType, .namedOpaqueReturnType, .packElementType, .packExpansionType,
+      .suppressedType, .tupleType:
       return nil
     }
   }
 
   func jsonType(from text: String) -> DeclReferenceExprSyntax? {
-    let identifier: String? = switch text {
+    let identifier: String? =
+      switch text {
       case "Double": "JSONNumber"
       case "Bool": "JSONBoolean"
       case "Int": "JSONInteger"
       case "String": "JSONString"
       default: nil
       }
-    guard let identifier else {
-      return nil
-    }
+    guard let identifier else { return nil }
     return .init(baseName: .identifier(identifier))
   }
 }

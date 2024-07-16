@@ -6,7 +6,5 @@ public struct SchemaOptionsMacro: PeerMacro {
     of node: AttributeSyntax,
     providingPeersOf declaration: some DeclSyntaxProtocol,
     in context: some MacroExpansionContext
-  ) throws -> [DeclSyntax] {
-    []
-  }
+  ) throws -> [DeclSyntax] { [] }
 }

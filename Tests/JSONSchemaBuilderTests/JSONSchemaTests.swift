@@ -185,23 +185,12 @@ struct JSONSchemaAnnotationsBuilderTests {
 
   @Test func nonValueBuilderAnnotations() throws {
     @JSONSchemaBuilder var sample: JSONSchemaComponent {
-      JSONNull()
-        .default("1")
-        .examples([
-          "1",
-          nil,
-          false,
-          [1, 2, 3],
-          ["hello": "world"],
-        ])
+      JSONNull().default("1").examples(["1", nil, false, [1, 2, 3], ["hello": "world"]])
     }
 
     #expect(
       sample.definition.annotations
-      == .annotations(
-        default: "1",
-        examples: ["1", nil, false, [1, 2, 3], ["hello": "world"]]
-      )
+        == .annotations(default: "1", examples: ["1", nil, false, [1, 2, 3], ["hello": "world"]])
     )
   }
 

@@ -3,8 +3,8 @@ import JSONSchema
 import JSONSchemaBuilder
 
 @Schemable struct Weather {
-  @SchemaOptions(description: "The current temperature in fahrenheit, like 70°F")
-  let temperature: Double
+  @SchemaOptions(description: "The current temperature in fahrenheit, like 70°F") let temperature:
+    Double
   let location: String
 
   // Exprimental
@@ -17,17 +17,14 @@ struct Weather2: Schemable {
 
   static var schema: JSONSchemaComponent {
     JSONObject {
-      JSONProperty(key: "rain") {
-        JSONNumber()
-      }
+      JSONProperty(key: "rain") { JSONNumber() }
 
     }
     .required(["rain"])
   }
 }
 
-@Schemable
-struct Weather3 {
+@Schemable struct Weather3 {
   @SchemaOptions(
     title: "Temperature",
     description: "The current temperature in fahrenheit, like 70°F",
@@ -37,8 +34,7 @@ struct Weather3 {
     writeOnly: false,
     deprecated: true,
     comment: "This is a comment about temperature"
-  )
-  let temperature: Double
+  ) let temperature: Double
 
   @SchemaOptions(
     title: "Humidity",
@@ -49,8 +45,7 @@ struct Weather3 {
     writeOnly: true,
     deprecated: false,
     comment: "This is a comment about humidity"
-  )
-  let humidity: Int
+  ) let humidity: Int
 }
 
 let x = \Weather2.rain
@@ -100,10 +95,9 @@ printSchema(Weather.self)
 printSchema(Weather3.self)
 
 @Schemable struct Book {
-  let title:         String
+  let title: String
   let authors: [String]
-  let yearPublished: Int
-//  let library: Library
+  let yearPublished: Int//  let library: Library
 }
 
 @Schemable struct Library {

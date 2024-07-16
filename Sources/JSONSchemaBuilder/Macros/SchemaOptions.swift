@@ -1,7 +1,6 @@
 import JSONSchema
 
-@attached(peer)
-public macro SchemaOptions(
+@attached(peer) public macro SchemaOptions(
   title: String? = nil,
   description: String? = nil,
   default: JSONValue? = nil,

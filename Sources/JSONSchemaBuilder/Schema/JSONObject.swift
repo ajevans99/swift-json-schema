@@ -69,9 +69,8 @@ extension JSONObject {
   /// Adds unevaluated properties to the schema.
   /// - Parameter content: A closure that returns a JSON schema representing the unevaluated properties.
   /// - Returns: A new `JSONObject` with the unevaluated properties set.
-  public func unevaluatedProperties(
-    @JSONSchemaBuilder _ content: () -> JSONSchemaComponent
-  ) -> Self {
+  public func unevaluatedProperties(@JSONSchemaBuilder _ content: () -> JSONSchemaComponent) -> Self
+  {
     var copy = self
     copy.options.unevaluatedProperties = .schema(content().definition)
     return copy

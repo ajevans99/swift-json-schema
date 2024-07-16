@@ -19,28 +19,25 @@ import JSONSchema
     expression
   }
 
-  public static func buildBlock(
-    _ components: JSONSchemaComponent...
-  ) -> [JSONSchemaComponent] { components }
+  public static func buildBlock(_ components: JSONSchemaComponent...) -> [JSONSchemaComponent] {
+    components
+  }
 
-  public static func buildBlock(
-    _ components: [JSONSchemaComponent]
-  ) -> [JSONSchemaComponent] { components }
+  public static func buildBlock(_ components: [JSONSchemaComponent]) -> [JSONSchemaComponent] {
+    components
+  }
 
   // MARK: Advanced builers
 
-  public static func buildOptional(_ component: JSONSchemaComponent?) -> JSONSchemaComponent
-  { component ?? JSONNull() }
-
-  public static func buildEither(first: JSONSchemaComponent) -> JSONSchemaComponent {
-    first
+  public static func buildOptional(_ component: JSONSchemaComponent?) -> JSONSchemaComponent {
+    component ?? JSONNull()
   }
 
-  public static func buildEither(second: JSONSchemaComponent) -> JSONSchemaComponent {
-    second
-  }
+  public static func buildEither(first: JSONSchemaComponent) -> JSONSchemaComponent { first }
 
-  public static func buildArray(
-    _ components: [JSONSchemaComponent]
-  ) -> [JSONSchemaComponent] { components }
+  public static func buildEither(second: JSONSchemaComponent) -> JSONSchemaComponent { second }
+
+  public static func buildArray(_ components: [JSONSchemaComponent]) -> [JSONSchemaComponent] {
+    components
+  }
 }
