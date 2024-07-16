@@ -3,6 +3,7 @@ import JSONSchema
 import JSONSchemaBuilder
 
 @Schemable struct Weather {
+  @SchemaOptions(description: "The current temperature in fahrenheit, like 70°F")
   let temperature: Double
   let location: String
 
@@ -10,6 +11,50 @@ import JSONSchemaBuilder
   let temperatures: [Double]
   let temperatureByLocation: [String: Double]
 }
+
+struct Weather2: Schemable {
+  let rain: Double
+
+  static var schema: JSONSchemaComponent {
+    JSONObject {
+      JSONProperty(key: "rain") {
+        JSONNumber()
+      }
+
+    }
+    .required(["rain"])
+  }
+}
+
+@Schemable
+struct Weather3 {
+  @SchemaOptions(
+    title: "Temperature",
+    description: "The current temperature in fahrenheit, like 70°F",
+    default: 75.0,
+    examples: [72.0, 75.0, 78.0],
+    readOnly: true,
+    writeOnly: false,
+    deprecated: true,
+    comment: "This is a comment about temperature"
+  )
+  let temperature: Double
+
+  @SchemaOptions(
+    title: "Humidity",
+    description: "The current humidity percentage",
+    default: 50,
+    examples: [40, 50, 60],
+    readOnly: false,
+    writeOnly: true,
+    deprecated: false,
+    comment: "This is a comment about humidity"
+  )
+  let humidity: Int
+}
+
+let x = \Weather2.rain
+print("\(x)")
 
 let now = Weather(
   temperature: 72,
@@ -42,7 +87,7 @@ func printInstance<T: Codable>(_ instance: T) {
 }
 
 func printSchema<T: Schemable>(_ schema: T.Type) {
-  let schemaData = try? encoder.encode(T.schema.schema)
+  let schemaData = try? encoder.encode(T.schema.definition)
   if let schemaData {
     print("\(T.self) Schema")
     print(String(decoding: schemaData, as: UTF8.self))
@@ -52,11 +97,13 @@ func printSchema<T: Schemable>(_ schema: T.Type) {
 printInstance(now)
 printSchema(Weather.self)
 
+printSchema(Weather3.self)
+
 @Schemable struct Book {
-  let title: String
-  let author: String
+  let title:         String
+  let authors: [String]
   let yearPublished: Int
-  let library: Library
+//  let library: Library
 }
 
 @Schemable struct Library {

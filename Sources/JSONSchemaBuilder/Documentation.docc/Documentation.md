@@ -7,7 +7,7 @@ Allows for ergonomic JSON schema generation with Swift's result builders.
 To get started generating JSON schemas with result builders, import the `JSONSchemaBuilder` target and use the ``JSONSchemaBuilder`` result builder.
 
 ```swift
-@JSONSchemaBuilder var schemaRepresentation: JSONSchemaRepresentable {
+@JSONSchemaBuilder var schemaRepresentation: JSONSchemaComponent {
   JSONObject {
     JSONProperty(key: "firstName") {
       JSONString()
@@ -32,7 +32,7 @@ To get started generating JSON schemas with result builders, import the `JSONSch
 Result builders make composition of schemas easier and more powerful. For example, you can use the `if` statement to conditionally include properties in a schema.
 
 ```swift
-@JSONSchemaBuilder var schemaRepresentation: JSONSchemaRepresentable {
+@JSONSchemaBuilder var schemaRepresentation: JSONSchemaComponent {
   JSONObject {
     JSONProperty(key: "firstName") {
       JSONString()
@@ -59,7 +59,7 @@ Result builders make composition of schemas easier and more powerful. For exampl
 or use the `array` statement to include multiple properties.
 
 ```swift
-@JSONSchemaBuilder var schemaRepresentation: JSONSchemaRepresentable {
+@JSONSchemaBuilder var schemaRepresentation: JSONSchemaComponent {
   JSONObject {
     for item in items {
       JSONProperty(key: item.key) {

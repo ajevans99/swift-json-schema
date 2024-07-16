@@ -1,11 +1,11 @@
 import JSONSchema
 
 /// A JSON number schema component for use in ``JSONSchemaBuilder``.
-public struct JSONNumber: JSONSchemaRepresentable {
+public struct JSONNumber: JSONSchemaComponent {
   public var annotations: AnnotationOptions = .annotations()
   var options: NumberSchemaOptions = .options()
 
-  public var schema: Schema { .number(annotations, options) }
+  public var definition: Schema { .number(annotations, options) }
 
   public init() {}
 }

@@ -1,11 +1,11 @@
 import JSONSchema
 
 /// A JSON array type component for use in ``JSONSchemaBuilder``.
-public struct JSONArray: JSONSchemaRepresentable {
+public struct JSONArray: JSONSchemaComponent {
   public var annotations: AnnotationOptions = .annotations()
   var options: ArraySchemaOptions = .options()
 
-  public var schema: Schema { .array(annotations, options) }
+  public var definition: Schema { .array(annotations, options) }
 
   public init() {}
 }
@@ -22,19 +22,19 @@ extension JSONArray {
   /// Adds items to the schema.
   /// - Parameter items: A closure that returns a JSON schema representing the items.
   /// - Returns: A new `JSONArray` with the items set.
-  public func items(@JSONSchemaBuilder _ items: () -> JSONSchemaRepresentable) -> Self {
+  public func items(@JSONSchemaBuilder _ items: () -> JSONSchemaComponent) -> Self {
     var copy = self
-    copy.options.items = .schema(items().schema)
+    copy.options.items = .schema(items().definition)
     return copy
   }
 
   /// Adds prefix items to the schema.
   /// - Parameter prefixItems: A closure that returns an array of JSON schemas representing the prefix items.
   /// - Returns: A new `JSONArray` with the prefix items set.
-  public func prefixItems(@JSONSchemaBuilder _ prefixItems: () -> [JSONSchemaRepresentable]) -> Self
+  public func prefixItems(@JSONSchemaBuilder _ prefixItems: () -> [JSONSchemaComponent]) -> Self
   {
     var copy = self
-    copy.options.prefixItems = prefixItems().map(\.schema)
+    copy.options.prefixItems = prefixItems().map(\.definition)
     return copy
   }
 
@@ -50,19 +50,19 @@ extension JSONArray {
   /// - Parameter unevaluatedItems: A closure that returns a JSON schema representing the unevaluated items.
   /// - Returns: A new `JSONArray` with the unevaluated items set.
   public func unevaluatedItems(
-    @JSONSchemaBuilder _ unevaluatedItems: () -> JSONSchemaRepresentable
+    @JSONSchemaBuilder _ unevaluatedItems: () -> JSONSchemaComponent
   ) -> Self {
     var copy = self
-    copy.options.unevaluatedItems = .schema(unevaluatedItems().schema)
+    copy.options.unevaluatedItems = .schema(unevaluatedItems().definition)
     return copy
   }
 
   /// Adds a `contains` schema to the schema.
   /// - Parameter contains: A closure that returns a JSON schema representing the `contains` schema.
   /// - Returns: A new `JSONArray` with the `contains` schema set.
-  public func contains(@JSONSchemaBuilder _ contains: () -> JSONSchemaRepresentable) -> Self {
+  public func contains(@JSONSchemaBuilder _ contains: () -> JSONSchemaComponent) -> Self {
     var copy = self
-    copy.options.contains = contains().schema
+    copy.options.contains = contains().definition
     return copy
   }
 

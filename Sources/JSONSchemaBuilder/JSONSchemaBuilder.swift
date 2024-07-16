@@ -15,32 +15,32 @@ import JSONSchema
 /// .description("A product from Acme's catalog")
 /// ```
 @resultBuilder public struct JSONSchemaBuilder {
-  public static func buildBlock(_ expression: JSONSchemaRepresentable) -> JSONSchemaRepresentable {
+  public static func buildBlock(_ expression: JSONSchemaComponent) -> JSONSchemaComponent {
     expression
   }
 
   public static func buildBlock(
-    _ components: JSONSchemaRepresentable...
-  ) -> [JSONSchemaRepresentable] { components }
+    _ components: JSONSchemaComponent...
+  ) -> [JSONSchemaComponent] { components }
 
   public static func buildBlock(
-    _ components: [JSONSchemaRepresentable]
-  ) -> [JSONSchemaRepresentable] { components }
+    _ components: [JSONSchemaComponent]
+  ) -> [JSONSchemaComponent] { components }
 
   // MARK: Advanced builers
 
-  public static func buildOptional(_ component: JSONSchemaRepresentable?) -> JSONSchemaRepresentable
+  public static func buildOptional(_ component: JSONSchemaComponent?) -> JSONSchemaComponent
   { component ?? JSONNull() }
 
-  public static func buildEither(first: JSONSchemaRepresentable) -> JSONSchemaRepresentable {
+  public static func buildEither(first: JSONSchemaComponent) -> JSONSchemaComponent {
     first
   }
 
-  public static func buildEither(second: JSONSchemaRepresentable) -> JSONSchemaRepresentable {
+  public static func buildEither(second: JSONSchemaComponent) -> JSONSchemaComponent {
     second
   }
 
   public static func buildArray(
-    _ components: [JSONSchemaRepresentable]
-  ) -> [JSONSchemaRepresentable] { components }
+    _ components: [JSONSchemaComponent]
+  ) -> [JSONSchemaComponent] { components }
 }

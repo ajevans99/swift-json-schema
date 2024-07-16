@@ -5,7 +5,7 @@ import Testing
 
 struct JSONSchemaOptionBuilderTests {
   @Test func objectOptions() throws {
-    @JSONSchemaBuilder var sample: JSONSchemaRepresentable {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
       JSONObject()
         .properties {
           JSONProperty(key: "property0") { JSONString() }
@@ -19,7 +19,7 @@ struct JSONSchemaOptionBuilderTests {
         .minProperties(1).maxProperties(10)
     }
 
-    let options: ObjectSchemaOptions = try #require(sample.schema.options?.asType())
+    let options: ObjectSchemaOptions = try #require(sample.definition.options?.asType())
 
     #expect(
       options
@@ -40,7 +40,7 @@ struct JSONSchemaOptionBuilderTests {
   }
 
   @Test func objectOptionsProperty() throws {
-    @JSONSchemaBuilder var sample: JSONSchemaRepresentable {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
       JSONObject {
         JSONProperty(key: "key1", value: JSONInteger())
         JSONProperty(key: "key2") { JSONNumber() }
@@ -48,7 +48,7 @@ struct JSONSchemaOptionBuilderTests {
     }
 
     #expect(
-      sample.schema
+      sample.definition
         == Schema.object(
           .annotations(),
           .options(properties: ["key1": .integer(), "key2": .number()])
@@ -57,11 +57,11 @@ struct JSONSchemaOptionBuilderTests {
   }
 
   @Test func supplementalObjectOptions() throws {
-    @JSONSchemaBuilder var sample: JSONSchemaRepresentable {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
       JSONObject().disableAdditionalProperties().unevaluatedProperties { JSONInteger() }
     }
 
-    let options: ObjectSchemaOptions = try #require(sample.schema.options?.asType())
+    let options: ObjectSchemaOptions = try #require(sample.definition.options?.asType())
 
     #expect(
       options
@@ -70,12 +70,12 @@ struct JSONSchemaOptionBuilderTests {
   }
 
   @Test func stringOptions() throws {
-    @JSONSchemaBuilder var sample: JSONSchemaRepresentable {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
       JSONString().minLength(12).maxLength(36)
         .pattern("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$").format("uuid")
     }
 
-    let options: StringSchemaOptions = try #require(sample.schema.options?.asType())
+    let options: StringSchemaOptions = try #require(sample.definition.options?.asType())
 
     #expect(
       options
@@ -89,21 +89,21 @@ struct JSONSchemaOptionBuilderTests {
   }
 
   @Test func numberOptions() throws {
-    @JSONSchemaBuilder var sample: JSONSchemaRepresentable {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
       JSONNumber().multipleOf(2).minimum(1).exclusiveMaximum(100)
     }
 
-    let options: NumberSchemaOptions = try #require(sample.schema.options?.asType())
+    let options: NumberSchemaOptions = try #require(sample.definition.options?.asType())
 
     #expect(options == .options(multipleOf: 2, minimum: .inclusive(1), maximum: .exclusive(100)))
   }
 
   @Test func supplementalNumberOptions() throws {
-    @JSONSchemaBuilder var sample: JSONSchemaRepresentable {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
       JSONNumber().multipleOf(1).exclusiveMinimum(0.99).maximum(5000)
     }
 
-    let options: NumberSchemaOptions = try #require(sample.schema.options?.asType())
+    let options: NumberSchemaOptions = try #require(sample.definition.options?.asType())
 
     #expect(
       options == .options(multipleOf: 1, minimum: .exclusive(0.99), maximum: .inclusive(5000))
@@ -111,18 +111,18 @@ struct JSONSchemaOptionBuilderTests {
   }
 
   @Test func arrayOptions() throws {
-    @JSONSchemaBuilder var sample: JSONSchemaRepresentable {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
       JSONArray().disableItems().unevaluatedItems { JSONNumber() }
     }
 
-    let options: ArraySchemaOptions = try #require(sample.schema.options?.asType())
+    let options: ArraySchemaOptions = try #require(sample.definition.options?.asType())
 
     #expect(options == .options(items: .disabled, unevaluatedItems: .schema(.number())))
   }
 
   @Test func supplementalArrayOptions() throws {
 
-    @JSONSchemaBuilder var sample: JSONSchemaRepresentable {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
       JSONArray().items { JSONNumber() }
         .prefixItems {
           JSONNumber()
@@ -134,7 +134,7 @@ struct JSONSchemaOptionBuilderTests {
         .minItems(1).maxItems(50).uniqueItems()
     }
 
-    let options: ArraySchemaOptions = try #require(sample.schema.options?.asType())
+    let options: ArraySchemaOptions = try #require(sample.definition.options?.asType())
 
     #expect(
       options
@@ -154,8 +154,8 @@ struct JSONSchemaOptionBuilderTests {
 }
 
 struct JSONSchemaAnnotationsBuilderTests {
-  @Test func allAnnotations() async throws {
-    @JSONSchemaBuilder var sample: JSONSchemaRepresentable {
+  @Test func allAnnotations() throws {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
       JSONNull().title("Title").description("This is the description").comment("Comment")
         .default { "1" }
         .examples {
@@ -169,7 +169,7 @@ struct JSONSchemaAnnotationsBuilderTests {
     }
 
     #expect(
-      sample.schema.annotations
+      sample.definition.annotations
         == .annotations(
           title: "Title",
           description: "This is the description",
@@ -183,8 +183,30 @@ struct JSONSchemaAnnotationsBuilderTests {
     )
   }
 
+  @Test func nonValueBuilderAnnotations() throws {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
+      JSONNull()
+        .default("1")
+        .examples([
+          "1",
+          nil,
+          false,
+          [1, 2, 3],
+          ["hello": "world"],
+        ])
+    }
+
+    #expect(
+      sample.definition.annotations
+      == .annotations(
+        default: "1",
+        examples: ["1", nil, false, [1, 2, 3], ["hello": "world"]]
+      )
+    )
+  }
+
   @Test func description() {
-    @JSONSchemaBuilder var sample: JSONSchemaRepresentable {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
       JSONObject {
         JSONProperty(key: "productId") {
           JSONInteger().description("The unique identifier for a product")
@@ -195,7 +217,7 @@ struct JSONSchemaAnnotationsBuilderTests {
     }
 
     #expect(
-      sample.schema
+      sample.definition
         == .object(
           .annotations(description: "A product from Acme's catalog"),
           .options(properties: [
@@ -209,25 +231,25 @@ struct JSONSchemaAnnotationsBuilderTests {
 
 struct JSONAdvancedBuilderTests {
   @Test(arguments: [true, false]) func optional(_ bool: Bool) {
-    @JSONSchemaBuilder var sample: JSONSchemaRepresentable { if bool { JSONString() } }
+    @JSONSchemaBuilder var sample: JSONSchemaComponent { if bool { JSONString() } }
 
-    #expect(sample.schema == (bool ? Schema.string() : .null()))
+    #expect(sample.definition == (bool ? Schema.string() : .null()))
   }
 
   @Test(arguments: [true, false]) func either(_ bool: Bool) {
-    @JSONSchemaBuilder var sample: JSONSchemaRepresentable {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
       if bool { JSONString() } else { JSONInteger() }
     }
 
-    #expect(sample.schema == (bool ? Schema.string() : .integer()))
+    #expect(sample.definition == (bool ? Schema.string() : .integer()))
   }
 
   @Test func array() throws {
-    @JSONSchemaBuilder var sample: JSONSchemaRepresentable {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
       JSONArray().prefixItems { for _ in 0 ..< 10 { JSONString() } }
     }
 
-    let options: ArraySchemaOptions = try #require(sample.schema.options?.asType())
+    let options: ArraySchemaOptions = try #require(sample.definition.options?.asType())
     #expect(options.prefixItems?.count == 10)
   }
 }

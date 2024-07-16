@@ -1,6 +1,6 @@
 import JSONSchema
 
-extension JSONSchemaRepresentable {
+extension JSONSchemaComponent {
   /// Sets the title of the schema.
   /// - Parameter value: A string representing the title of the schema.
   /// - Returns: A new instance of the schema with the title set.
@@ -19,12 +19,22 @@ extension JSONSchemaRepresentable {
     return copy
   }
 
+  public func `default`(_ value: JSONValue) -> Self {
+    var copy = self
+    copy.annotations.default = value
+    return copy
+  }
+
   /// Sets the default value of the schema.
   /// - Parameter value: A closure that returns a JSON value representing the default value.
   /// - Returns: A new instance of the schema with the default value set.
   public func `default`(@JSONValueBuilder _ value: () -> JSONValueRepresentable) -> Self {
+    self.default(value().value)
+  }
+
+  public func examples(_ values: JSONValue) -> Self {
     var copy = self
-    copy.annotations.default = value().value
+    copy.annotations.examples = values
     return copy
   }
 
@@ -32,9 +42,7 @@ extension JSONSchemaRepresentable {
   /// - Parameter examples: A closure that returns a JSON value representing the examples.
   /// - Returns: A new instance of the schema with the examples set.
   public func examples(@JSONValueBuilder _ examples: () -> JSONValueRepresentable) -> Self {
-    var copy = self
-    copy.annotations.examples = examples().value
-    return copy
+    self.examples(examples().value)
   }
 
   /// Sets the readOnly flag of the schema.

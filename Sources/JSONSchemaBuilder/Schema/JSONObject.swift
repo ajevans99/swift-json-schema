@@ -1,11 +1,11 @@
 import JSONSchema
 
 /// A JSON object schema component for use in ``JSONSchemaBuilder``.
-public struct JSONObject: JSONSchemaRepresentable {
+public struct JSONObject: JSONSchemaComponent {
   public var annotations: AnnotationOptions = .annotations()
   var options: ObjectSchemaOptions = .options()
 
-  public var schema: Schema { .object(annotations, options) }
+  public var definition: Schema { .object(annotations, options) }
 
   public init() {}
 }
@@ -20,7 +20,7 @@ extension JSONObject {
     var copy = self
     copy.options.properties = properties()
       .reduce(into: [:]) { partialResult, property in
-        partialResult[property.key] = property.value.schema
+        partialResult[property.key] = property.value.definition
       }
     return copy
   }
@@ -34,7 +34,7 @@ extension JSONObject {
     var copy = self
     copy.options.patternProperties = patternProperties()
       .reduce(into: [:]) { partialResult, property in
-        partialResult[property.key] = property.value.schema
+        partialResult[property.key] = property.value.definition
       }
     return copy
   }
@@ -51,10 +51,10 @@ extension JSONObject {
   /// - Parameter additionalProperties: A closure that returns a JSON schema representing the additional properties.
   /// - Returns: A new `JSONObject` with the additional properties set.
   public func additionalProperties(
-    @JSONSchemaBuilder _ additionalProperties: () -> JSONSchemaRepresentable
+    @JSONSchemaBuilder _ additionalProperties: () -> JSONSchemaComponent
   ) -> Self {
     var copy = self
-    copy.options.additionalProperties = .schema(additionalProperties().schema)
+    copy.options.additionalProperties = .schema(additionalProperties().definition)
     return copy
   }
 
@@ -70,10 +70,10 @@ extension JSONObject {
   /// - Parameter content: A closure that returns a JSON schema representing the unevaluated properties.
   /// - Returns: A new `JSONObject` with the unevaluated properties set.
   public func unevaluatedProperties(
-    @JSONSchemaBuilder _ content: () -> JSONSchemaRepresentable
+    @JSONSchemaBuilder _ content: () -> JSONSchemaComponent
   ) -> Self {
     var copy = self
-    copy.options.unevaluatedProperties = .schema(content().schema)
+    copy.options.unevaluatedProperties = .schema(content().definition)
     return copy
   }
 

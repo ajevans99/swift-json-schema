@@ -40,7 +40,7 @@ extension JSONObject {
     options = .options(
       properties: content()
         .reduce(into: [:]) { partialResult, property in
-          partialResult[property.key] = property.value.schema
+          partialResult[property.key] = property.value.definition
         }
     )
   }

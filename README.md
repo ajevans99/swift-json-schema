@@ -87,10 +87,10 @@ let schema = try decoder.decode(Schema.self, from: data)
 
 ### Result Builers
 
-Import the `JSONResultBuilders` target and improve schema generation ergonomics with Swift's result builders.
+Import the `JSONSchemaBuilder` target and improve schema generation ergonomics with Swift's result builders.
 
 ```swift
-@JSONSchemaBuilder var schemaRepresentation: JSONSchemaRepresentable {
+@JSONSchemaBuilder var jsonSchema: JSONSchemaComponent {
   JSONObject {
     JSONProperty(key: "firstName") {
       JSONString()
@@ -111,7 +111,7 @@ Import the `JSONResultBuilders` target and improve schema generation ergonomics 
   .title("Person")
 }
 
-schemaRepresentation.schema // Same `Schema` type as above for quick serialization
+jsonSchema.schema // Same `Schema` type as above for quick serialization
 ```
 
 ## Installation
@@ -128,14 +128,15 @@ dependencies: [
 ]
 ```
 
-Then, include `JSONSchema` and/or `JSONResultBuilders` as a dependency for your target:
+Then, include `JSONSchema` and/or `JSONSchemaBuilder` as a dependency for your target:
 
 ```swift
 targets: [
     .target(
         name: "YourTarget",
         dependencies: [
-            .product(name: "JSONSchema", package: "swift-json-schema")
+            .product(name: "JSONSchema", package: "swift-json-schema"),
+            .product(name: "JSONSchemaBuilder", package: "swift-json-schema"),
         ]
     )
 ]
@@ -167,6 +168,7 @@ Goals for future releases include:
 - [ ] Support `$ref` and `$defs` keywords
 - [ ] Support enums in result builders
 - [ ] Root schema in result builders
+- [ ] Support multiple types like `{ "type": ["number", "string"] }`
 - [ ] Validate JSON instances against schemas
 - [ ] **Macros** for struct-based schema generation
 - [ ] Parse JSON instances into Swift types and functions
@@ -194,7 +196,7 @@ The `@Schemable` attribute would generate a schema for the `Person` struct.
 
 ```swift
 /// Generated property on `Person` struct by `@Schemable` attribute
-@JSONSchemaBuilder static var schemaRepresentation: JSONSchemaRepresentable {
+@JSONSchemaBuilder static var schemaRepresentation: JSONSchemaComponent {
   JSONObject {
     JSONProperty(key: "firstName") {
       JSONString()
