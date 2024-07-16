@@ -48,30 +48,19 @@ func makeSchema(fromStruct structDecl: StructDeclSyntax) -> DeclSyntax {
       else { return nil }
       guard let type = patternBinding.typeAnnotation?.type else { return nil }
 
-      let annotationArguements = variableDecl.attributes.arguments(for: "SchemaOptions")
-
-      return Member(identifier: identifier, type: type, annotationArguments: annotationArguements)
+      return Member(identifier: identifier, type: type, attributes: variableDecl.attributes)
     }
 
   let statements = members.compactMap { $0.jsonSchemaCodeBlock() }
 
   let requiredMemebers = members.filter { !$0.isOptional }
 
-  let variableDecl: DeclSyntax
-  if requiredMemebers.count > 0 {
-    variableDecl = """
-      static var schema: JSONSchemaComponent {
-        JSONObject { \(CodeBlockItemListSyntax(statements)) }
-        .required([\(raw: requiredMemebers.map { "\"\($0.identifier.text)\"" }.joined(separator: ","))])
-      }
-      """
-  } else {
-    variableDecl = """
-      static var schema: JSONSchemaComponent {
-        JSONObject { \(CodeBlockItemListSyntax(statements)) }
-      }
-      """
-  }
+  let variableDecl: DeclSyntax = """
+    static var schema: JSONSchemaComponent {
+      JSONObject { \(CodeBlockItemListSyntax(statements)) }
+      .required([\(raw: requiredMemebers.map { "\"\($0.identifier.text)\"" }.joined(separator: ","))])
+    }
+    """
 
   return variableDecl
 }
@@ -79,8 +68,21 @@ func makeSchema(fromStruct structDecl: StructDeclSyntax) -> DeclSyntax {
 struct Member {
   let identifier: TokenSyntax
   let type: TypeSyntax
+  let attributes: AttributeListSyntax
 
-  let annotationArguments: LabeledExprListSyntax?
+  var annotationArguments: LabeledExprListSyntax? {
+    attributes.arguments(for: "SchemaOptions")
+  }
+  
+  var typeSpecificArguments: LabeledExprListSyntax? {
+    let typeSpecificMacroNames = ["NumberOptions", "ArrayOptions", "ObjectOptions", "StringOptions"]
+    for macroName in typeSpecificMacroNames {
+      if let arguments = attributes.arguments(for: macroName) {
+        return arguments
+      }
+    }
+    return nil
+  }
 
   var isOptional: Bool {
     // Check for explicit optional like `let snow: Optional<Double>`
@@ -92,19 +94,31 @@ struct Member {
     return type.is(OptionalTypeSyntax.self)
   }
 
-  func jsonSchemaCodeBlock() -> CodeBlockItemSyntax? {
-    guard var typeCodeBlock = type.jsonSchemaCodeBlock() else { return nil }
-
-    if let annotationArguments {
-      for argument in annotationArguments {
+  func applyArguments(to codeBlock: inout CodeBlockItemSyntax) {
+    func applyArguments(_ arguments: LabeledExprListSyntax) {
+      for argument in arguments {
         if let label = argument.label {
-          typeCodeBlock = """
-            \(typeCodeBlock)
+          codeBlock = """
+            \(codeBlock)
               .\(label.trimmed)(\(argument.expression))
             """
         }
       }
     }
+
+    if let annotationArguments {
+      applyArguments(annotationArguments)
+    }
+
+    if let typeSpecificArguments {
+      applyArguments(typeSpecificArguments)
+    }
+  }
+
+  func jsonSchemaCodeBlock() -> CodeBlockItemSyntax? {
+    guard var typeCodeBlock = type.jsonSchemaCodeBlock() else { return nil }
+
+    applyArguments(to: &typeCodeBlock)
 
     return """
       JSONProperty(key: "\(raw: identifier.text)") { \(typeCodeBlock) }

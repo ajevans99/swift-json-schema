@@ -34,7 +34,9 @@ struct Weather2: Schemable {
     writeOnly: false,
     deprecated: true,
     comment: "This is a comment about temperature"
-  ) let temperature: Double
+  )
+  @NumberOptions(multipleOf: 5, minimum: 0, maximum: 100)
+  let temperature: Double
 
   @SchemaOptions(
     title: "Humidity",
@@ -45,7 +47,18 @@ struct Weather2: Schemable {
     writeOnly: true,
     deprecated: false,
     comment: "This is a comment about humidity"
-  ) let humidity: Int
+  )
+  let humidity: Int
+
+  @SchemaOptions(title: "Temperature Readings")
+  @ArrayOptions(
+    minContains: 1,
+    maxContains: 5,
+    minItems: 2,
+    maxItems: 10,
+    uniqueItems: true
+  )
+  let temperatureReadings: [Double]
 }
 
 let x = \Weather2.rain

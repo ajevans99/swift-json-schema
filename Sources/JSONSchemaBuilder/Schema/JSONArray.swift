@@ -37,12 +37,16 @@ extension JSONArray {
     return copy
   }
 
+  public func unevaluatedItems(_ unevaluatedItems: SchemaControlOption? = nil) -> Self {
+    var copy = self
+    copy.options.unevaluatedItems = unevaluatedItems
+    return copy
+  }
+
   /// Disables unevaluated items in the schema.
   /// - Returns: A new `JSONArray` with unevaluated items disabled.
   public func disableUnevaluatedItems() -> Self {
-    var copy = self
-    copy.options.unevaluatedItems = .disabled
-    return copy
+    self.unevaluatedItems(.disabled)
   }
 
   /// Adds unevaluated items to the schema.
@@ -51,9 +55,7 @@ extension JSONArray {
   public func unevaluatedItems(
     @JSONSchemaBuilder _ unevaluatedItems: () -> JSONSchemaComponent
   ) -> Self {
-    var copy = self
-    copy.options.unevaluatedItems = .schema(unevaluatedItems().definition)
-    return copy
+    self.unevaluatedItems(.schema(unevaluatedItems().definition))
   }
 
   /// Adds a `contains` schema to the schema.
@@ -68,7 +70,7 @@ extension JSONArray {
   /// Adds a minimum number of `contains` to the schema.
   /// - Parameter minContains: An integer representing the minimum number of `contains`.
   /// - Returns: A new `JSONArray` with the minimum number of `contains` set.
-  public func minContains(_ minContains: Int) -> Self {
+  public func minContains(_ minContains: Int?) -> Self {
     var copy = self
     copy.options.minContains = minContains
     return copy
@@ -77,7 +79,7 @@ extension JSONArray {
   /// Adds a maximum number of `contains` to the schema.
   /// - Parameter maxContains: An integer representing the maximum number of `contains`.
   /// - Returns: A new `JSONArray` with the maximum number of `contains` set.
-  public func maxContains(_ maxContains: Int) -> Self {
+  public func maxContains(_ maxContains: Int?) -> Self {
     var copy = self
     copy.options.maxContains = maxContains
     return copy
@@ -86,7 +88,7 @@ extension JSONArray {
   /// Adds a minimum number of items to the schema.
   /// - Parameter minItems: An integer representing the minimum number of items.
   /// - Returns: A new `JSONArray` with the minimum number of items set.
-  public func minItems(_ minItems: Int) -> Self {
+  public func minItems(_ minItems: Int?) -> Self {
     var copy = self
     copy.options.minItems = minItems
     return copy
@@ -95,7 +97,7 @@ extension JSONArray {
   /// Adds a maximum number of items to the schema.
   /// - Parameter maxItems: An integer representing the maximum number of items.
   /// - Returns: A new `JSONArray` with the maximum number of items set.
-  public func maxItems(_ maxItems: Int) -> Self {
+  public func maxItems(_ maxItems: Int?) -> Self {
     var copy = self
     copy.options.maxItems = maxItems
     return copy
@@ -103,9 +105,9 @@ extension JSONArray {
 
   /// Ensures that each item in the array is unique.
   /// - Returns: A new `JSONArray` with the unique items constraint set.
-  public func uniqueItems() -> Self {
+  public func uniqueItems(_ value: Bool = true) -> Self {
     var copy = self
-    copy.options.uniqueItems = true
+    copy.options.uniqueItems = value
     return copy
   }
 }
