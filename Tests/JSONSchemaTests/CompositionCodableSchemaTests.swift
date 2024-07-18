@@ -112,4 +112,22 @@ struct CompositionCodableSchemaTests {
     #expect(json == jsonString) // Encoding
     #expect(try Schema(json: jsonString) == schema) // Decoding
   }
+
+  @Test func not() throws {
+    let schema = Schema.noType(
+      composition: .not(
+        .string()
+      )
+    )
+    let jsonString = """
+      {
+        "not" : {
+          "type" : "string"
+        }
+      }
+      """
+    let json = try schema.json()
+    #expect(json == jsonString) // Encoding
+    #expect(try Schema(json: jsonString) == schema) // Decoding
+  }
 }
