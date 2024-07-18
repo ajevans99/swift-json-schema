@@ -296,7 +296,6 @@ public struct Schema: Sendable {
   }
 
   /// Creates a schema definition with no explicit type.
-  /// This is a special case. No type is specified, but the schema is still valid.
   ///
   /// Example:
   /// ```json
@@ -307,6 +306,7 @@ public struct Schema: Sendable {
   ///
   /// - Parameters:
   ///   - annotations: Additional annotations for the schema.
+  ///   - options: Additional options for any type.
   ///   - enumValues: An array of possible values for the schema.
   ///   - composition: Composition options for the schema.
   /// - Returns: A schema definition with no explicit type.
