@@ -139,6 +139,10 @@ public struct Schema: Sendable {
   /// Composition options for the schema.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/combining)
   public let composition: CompositionOptions?
+  
+  /// A single value that the schema must match.
+  /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/const#constant-values)
+  public let const: JSONValue?
 
   /// Creates a schema definition for a string type.
   ///
@@ -159,7 +163,8 @@ public struct Schema: Sendable {
       options: options.eraseToAnySchemaOptions(),
       annotations: annotations,
       enumValues: enumValues,
-      composition: composition
+      composition: composition,
+      const: nil
     )
   }
 
@@ -180,7 +185,8 @@ public struct Schema: Sendable {
       options: nil,
       annotations: annotations,
       enumValues: enumValues,
-      composition: composition
+      composition: composition,
+      const: nil
     )
   }
 
@@ -203,7 +209,8 @@ public struct Schema: Sendable {
       options: options.eraseToAnySchemaOptions(),
       annotations: annotations,
       enumValues: enumValues,
-      composition: composition
+      composition: composition,
+      const: nil
     )
   }
 
@@ -226,7 +233,8 @@ public struct Schema: Sendable {
       options: options.eraseToAnySchemaOptions(),
       annotations: annotations,
       enumValues: enumValues,
-      composition: composition
+      composition: composition,
+      const: nil
     )
   }
 
@@ -249,7 +257,8 @@ public struct Schema: Sendable {
       options: options.eraseToAnySchemaOptions(),
       annotations: annotations,
       enumValues: enumValues,
-      composition: composition
+      composition: composition,
+      const: nil
     )
   }
 
@@ -270,7 +279,8 @@ public struct Schema: Sendable {
       options: nil,
       annotations: annotations,
       enumValues: enumValues,
-      composition: composition
+      composition: composition,
+      const: nil
     )
   }
 
@@ -291,7 +301,8 @@ public struct Schema: Sendable {
       options: nil,
       annotations: annotations,
       enumValues: enumValues,
-      composition: composition
+      composition: composition,
+      const: nil
     )
   }
 
@@ -321,7 +332,20 @@ public struct Schema: Sendable {
       options: options?.eraseToAnySchemaOptions(),
       annotations: annotations,
       enumValues: enumValues,
-      composition: composition
+      composition: composition,
+      const: nil
     )
   }
+
+  /// Creates a schema definition that only accepts a single value.
+  ///
+  /// - Parameters:
+  ///   - annotations: Additional annotations for the schema.
+  ///   - value: The value that the schema must match.
+  ///   - type: The type of the value. This is optional and can be inferred from the value.
+  public static func const(
+    _ annotations: AnnotationOptions = .annotations(),
+    _ value: JSONValue,
+    type: JSONType? = nil
+  ) -> Schema { .init(type: type, options: nil, annotations: annotations, enumValues: nil, composition: nil,  const: value) }
 }
