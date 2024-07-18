@@ -124,11 +124,11 @@ extension WeatherCondition: Schemable {
         }
       }
 
-      //        JSONEnum {
-      //          "snowy"
-      //          "windy"
-      //          "stormy"
-      //        }
+      JSONEnum {
+        "snowy"
+        "windy"
+        "stormy"
+      }
     }
   }
 }

@@ -1,43 +1,53 @@
 import JSONSchema
 
+public protocol JSONComposableComponent: JSONSchemaComponent {
+  var compositionOptions: CompositionOptions { get }
+}
+
+extension JSONComposableComponent {
+  public var definition: Schema {
+    .noType(annotations, composition: compositionOptions)
+  }
+}
+
 public enum JSONComposition {
-  public struct AnyOf: JSONSchemaComponent {
+  public struct AnyOf: JSONComposableComponent {
     public var annotations: AnnotationOptions = .annotations()
 
-    public var definition: Schema
+    public let compositionOptions: CompositionOptions
 
     public init(@JSONSchemaBuilder _ builder: () -> [JSONSchemaComponent]) {
-      definition = .noType(composition: .anyOf(builder().map(\.definition)))
+      compositionOptions = .anyOf(builder().map(\.definition))
     }
   }
 
-  public struct AllOf: JSONSchemaComponent {
+  public struct AllOf: JSONComposableComponent {
     public var annotations: AnnotationOptions = .annotations()
 
-    public var definition: Schema
+    public let compositionOptions: CompositionOptions
 
     public init(@JSONSchemaBuilder _ builder: () -> [JSONSchemaComponent]) {
-      definition = .noType(composition: .allOf(builder().map(\.definition)))
+      compositionOptions = .allOf(builder().map(\.definition))
     }
   }
 
-  public struct OneOf: JSONSchemaComponent {
+  public struct OneOf: JSONComposableComponent {
     public var annotations: AnnotationOptions = .annotations()
 
-    public var definition: Schema
+    public let compositionOptions: CompositionOptions
 
     public init(@JSONSchemaBuilder _ builder: () -> [JSONSchemaComponent]) {
-      definition = .noType(composition: .oneOf(builder().map(\.definition)))
+      compositionOptions = .oneOf(builder().map(\.definition))
     }
   }
 
-  public struct Not: JSONSchemaComponent {
+  public struct Not: JSONComposableComponent {
     public var annotations: AnnotationOptions = .annotations()
 
-    public var definition: Schema
+    public let compositionOptions: CompositionOptions
 
     public init(@JSONSchemaBuilder _ builder: () -> JSONSchemaComponent) {
-      definition = .noType(composition: .not(builder().definition))
+      compositionOptions = .not(builder().definition)
     }
   }
 }
