@@ -3,4 +3,4 @@ builder:
   configs:
     - documentation_targets:
       - JSONSchema
-      - JSONResultBuilders
+      - JSONSchemaBuilders
