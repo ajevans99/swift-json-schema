@@ -342,6 +342,7 @@ public struct Schema: Sendable {
   ///   - annotations: Additional annotations for the schema.
   ///   - value: The value that the schema must match.
   ///   - type: The type of the value. This is optional and can be inferred from the value.
+  /// - Returns: A schema definition that accepts only a constant.
   public static func const(
     _ annotations: AnnotationOptions = .annotations(),
     _ value: JSONValue,
