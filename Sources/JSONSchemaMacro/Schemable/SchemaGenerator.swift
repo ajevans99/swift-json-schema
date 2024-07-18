@@ -32,10 +32,21 @@ struct SchemaGenerator {
       let requiredMemebers = schemableMembers.filter { !$0.isOptional }
       let arrayExpr = ArrayExprSyntax(
         elements: ArrayElementListSyntax(
-          requiredMemebers
-            .enumerated()
-            .map { (index: $0.offset, expression: StringLiteralExprSyntax(content: $0.element.identifier.text)) }
-            .map { ArrayElementSyntax(expression: $0.expression, trailingComma: .commaToken(presence: $0.index == requiredMemebers.indices.last ? .missing : .present)) }
+          requiredMemebers.enumerated()
+            .map {
+              (
+                index: $0.offset,
+                expression: StringLiteralExprSyntax(content: $0.element.identifier.text)
+              )
+            }
+            .map {
+              ArrayElementSyntax(
+                expression: $0.expression,
+                trailingComma: .commaToken(
+                  presence: $0.index == requiredMemebers.indices.last ? .missing : .present
+                )
+              )
+            }
         )
       )
       let labeledListExpression = LabeledExprSyntax(
@@ -46,10 +57,10 @@ struct SchemaGenerator {
     }
 
     let variableDecl: DeclSyntax = """
-    static var schema: JSONSchemaComponent {
-      \(codeBlockItem)
-    }
-    """
+      static var schema: JSONSchemaComponent {
+        \(codeBlockItem)
+      }
+      """
 
     return variableDecl
   }

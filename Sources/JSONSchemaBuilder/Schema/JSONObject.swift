@@ -68,18 +68,14 @@ extension JSONObject {
 
   /// Disables additional properties in the schema.
   /// - Returns: A new `JSONObject` with additional properties disabled.
-  public func disableAdditionalProperties() -> Self {
-    self.additionalProperties(.disabled)
-  }
+  public func disableAdditionalProperties() -> Self { self.additionalProperties(.disabled) }
 
   /// Adds additional properties to the schema.
   /// - Parameter additionalProperties: A closure that returns a JSON schema representing the additional properties.
   /// - Returns: A new `JSONObject` with the additional properties set.
   public func additionalProperties(
     @JSONSchemaBuilder _ additionalProperties: () -> JSONSchemaComponent
-  ) -> Self {
-    self.additionalProperties(.schema(additionalProperties().definition))
-  }
+  ) -> Self { self.additionalProperties(.schema(additionalProperties().definition)) }
 
   /// Adds unevaluated properties to the schema.
   /// - Parameter unevaluatedProperties: A schema control option.
@@ -92,18 +88,13 @@ extension JSONObject {
 
   /// Disables unevaluated properties in the schema.
   /// - Returns: A new `JSONObject` with unevaluated properties disabled.
-  public func disableUnevaluatedProperties() -> Self {
-    self.unevaluatedProperties(.disabled)
-  }
+  public func disableUnevaluatedProperties() -> Self { self.unevaluatedProperties(.disabled) }
 
   /// Adds unevaluated properties to the schema.
   /// - Parameter content: A closure that returns a JSON schema representing the unevaluated properties.
   /// - Returns: A new `JSONObject` with the unevaluated properties set.
-  public func unevaluatedProperties(
-    @JSONSchemaBuilder _ content: () -> JSONSchemaComponent
-  ) -> Self {
-    self.unevaluatedProperties(.schema(content().definition))
-  }
+  public func unevaluatedProperties(@JSONSchemaBuilder _ content: () -> JSONSchemaComponent) -> Self
+  { self.unevaluatedProperties(.schema(content().definition)) }
 
   /// Adds a required constraint to the schema.
   /// - Parameter properties: The properties that are required.

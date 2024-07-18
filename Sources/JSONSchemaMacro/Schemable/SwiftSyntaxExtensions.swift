@@ -16,18 +16,15 @@ extension PatternBindingListSyntax.Element {
         }
       }
       return true
-    case .getter:
-      return false
-    case nil:
-      return true
+    case .getter: return false
+    case nil: return true
     }
   }
 }
 
 extension MemberBlockItemListSyntax {
   func schemableMembers() -> [SchemableMember] {
-    self
-      .compactMap { $0.decl.as(VariableDeclSyntax.self) }
+    self.compactMap { $0.decl.as(VariableDeclSyntax.self) }
       .flatMap { variableDecl in variableDecl.bindings.map { (variableDecl, $0) } }
       .filter { $0.1.isStoredProperty }
       .compactMap { (variableDecl, patternBinding) -> SchemableMember? in
@@ -35,7 +32,11 @@ extension MemberBlockItemListSyntax {
         else { return nil }
         guard let type = patternBinding.typeAnnotation?.type else { return nil }
 
-        return SchemableMember(identifier: identifier, type: type, attributes: variableDecl.attributes)
+        return SchemableMember(
+          identifier: identifier,
+          type: type,
+          attributes: variableDecl.attributes
+        )
       }
   }
 }
@@ -45,9 +46,9 @@ extension CodeBlockItemSyntax {
     for argument in arguments {
       if let label = argument.label {
         self = """
-            \(self)
-            .\(label.trimmed)(\(argument.expression))
-            """
+          \(self)
+          .\(label.trimmed)(\(argument.expression))
+          """
       }
     }
   }
@@ -80,7 +81,7 @@ extension TypeSyntax {
         """
     case .dictionaryType(let dictionaryType):
       guard let keyType = dictionaryType.key.as(IdentifierTypeSyntax.self),
-            keyType.name.text == "String"
+        keyType.name.text == "String"
       else {
         // TODO: Add warning
         return nil
@@ -102,23 +103,22 @@ extension TypeSyntax {
     case .optionalType(let optionalType): return optionalType.wrappedType.jsonSchemaCodeBlock()
     case .someOrAnyType(let someOrAnyType): return someOrAnyType.constraint.jsonSchemaCodeBlock()
     case .attributedType, .classRestrictionType, .compositionType, .functionType, .memberType,
-        .metatypeType, .missingType, .namedOpaqueReturnType, .packElementType, .packExpansionType,
-        .suppressedType, .tupleType:
+      .metatypeType, .missingType, .namedOpaqueReturnType, .packElementType, .packExpansionType,
+      .suppressedType, .tupleType:
       return nil
     }
   }
 
   func jsonType(from text: String) -> DeclReferenceExprSyntax? {
     let identifier: String? =
-    switch text {
-    case "Double": "JSONNumber"
-    case "Bool": "JSONBoolean"
-    case "Int": "JSONInteger"
-    case "String": "JSONString"
-    default: nil
-    }
+      switch text {
+      case "Double": "JSONNumber"
+      case "Bool": "JSONBoolean"
+      case "Int": "JSONInteger"
+      case "String": "JSONString"
+      default: nil
+      }
     guard let identifier else { return nil }
     return .init(baseName: .identifier(identifier))
   }
 }
-

@@ -6,9 +6,7 @@ public struct NumberOptionsMacro: PeerMacro {
     of node: AttributeSyntax,
     providingPeersOf declaration: some DeclSyntaxProtocol,
     in context: some MacroExpansionContext
-  ) throws -> [DeclSyntax] {
-    []
-  }
+  ) throws -> [DeclSyntax] { [] }
 }
 
 public struct ArrayOptionsMacro: PeerMacro {
@@ -16,9 +14,7 @@ public struct ArrayOptionsMacro: PeerMacro {
     of node: AttributeSyntax,
     providingPeersOf declaration: some DeclSyntaxProtocol,
     in context: some MacroExpansionContext
-  ) throws -> [DeclSyntax] {
-    []
-  }
+  ) throws -> [DeclSyntax] { [] }
 }
 
 public struct ObjectOptionsMacro: PeerMacro {
@@ -26,9 +22,7 @@ public struct ObjectOptionsMacro: PeerMacro {
     of node: AttributeSyntax,
     providingPeersOf declaration: some DeclSyntaxProtocol,
     in context: some MacroExpansionContext
-  ) throws -> [DeclSyntax] {
-    []
-  }
+  ) throws -> [DeclSyntax] { [] }
 }
 
 public struct StringOptionsMacro: PeerMacro {
@@ -36,7 +30,5 @@ public struct StringOptionsMacro: PeerMacro {
     of node: AttributeSyntax,
     providingPeersOf declaration: some DeclSyntaxProtocol,
     in context: some MacroExpansionContext
-  ) throws -> [DeclSyntax] {
-    []
-  }
+  ) throws -> [DeclSyntax] { [] }
 }

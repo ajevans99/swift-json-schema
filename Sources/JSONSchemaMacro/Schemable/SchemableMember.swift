@@ -5,16 +5,14 @@ struct SchemableMember {
   let type: TypeSyntax
   let attributes: AttributeListSyntax
 
-  var annotationArguments: LabeledExprListSyntax? {
-    attributes.arguments(for: "SchemaOptions")
-  }
+  var annotationArguments: LabeledExprListSyntax? { attributes.arguments(for: "SchemaOptions") }
 
   var typeSpecificArguments: LabeledExprListSyntax? {
-    let typeSpecificMacroNames = ["NumberOptions", "ArrayOptions", "ObjectOptions", "StringOptions"]
+    let typeSpecificMacroNames = [
+      "NumberOptions", "ArrayOptions", "ObjectOptions", "StringOptions",
+    ]
     for macroName in typeSpecificMacroNames {
-      if let arguments = attributes.arguments(for: macroName) {
-        return arguments
-      }
+      if let arguments = attributes.arguments(for: macroName) { return arguments }
     }
     return nil
   }
@@ -30,13 +28,9 @@ struct SchemableMember {
   }
 
   func applyArguments(to codeBlock: inout CodeBlockItemSyntax) {
-    if let annotationArguments {
-      codeBlock.applyArguments(annotationArguments)
-    }
+    if let annotationArguments { codeBlock.applyArguments(annotationArguments) }
 
-    if let typeSpecificArguments {
-      codeBlock.applyArguments(typeSpecificArguments)
-    }
+    if let typeSpecificArguments { codeBlock.applyArguments(typeSpecificArguments) }
   }
 
   func jsonSchemaCodeBlock() -> CodeBlockItemSyntax? {

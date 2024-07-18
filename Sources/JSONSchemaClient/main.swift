@@ -31,9 +31,7 @@ func printSchema<T: Schemable>(_ schema: T.Type) {
     writeOnly: false,
     deprecated: true,
     comment: "This is a comment about temperature"
-  )
-  @NumberOptions(multipleOf: 5, minimum: 0, maximum: 100)
-  let temperature: Double
+  ) @NumberOptions(multipleOf: 5, minimum: 0, maximum: 100) let temperature: Double
 
   @SchemaOptions(
     title: "Humidity",
@@ -44,27 +42,15 @@ func printSchema<T: Schemable>(_ schema: T.Type) {
     writeOnly: true,
     deprecated: false,
     comment: "This is a comment about humidity"
-  )
-  let humidity: Int
+  ) let humidity: Int
 
   @SchemaOptions(title: "Temperature Readings")
-  @ArrayOptions(
-    minContains: 1,
-    maxContains: 5,
-    minItems: 2,
-    maxItems: 10,
-    uniqueItems: true
-  )
+  @ArrayOptions(minContains: 1, maxContains: 5, minItems: 2, maxItems: 10, uniqueItems: true)
   let temperatureReadings: [Double]
 
   @SchemaOptions(title: "Location")
-  @StringOptions(
-    minLength: 5,
-    maxLength: 100,
-    pattern: "^[a-zA-Z]+$",
-    format: nil
-  )
-  let cityName: String
+  @StringOptions(minLength: 5, maxLength: 100, pattern: "^[a-zA-Z]+$", format: nil) let cityName:
+    String
 }
 
 //@Schemable
@@ -73,7 +59,12 @@ func printSchema<T: Schemable>(_ schema: T.Type) {
 //  case celcius
 //}
 
-let now = Weather(temperature: 72, humidity: 30, temperatureReadings: [32, 70.1, 84], cityName: "Detroit")
+let now = Weather(
+  temperature: 72,
+  humidity: 30,
+  temperatureReadings: [32, 70.1, 84],
+  cityName: "Detroit"
+)
 
 extension Weather: Codable {}
 
@@ -93,4 +84,3 @@ printSchema(Weather.self)
 
 printSchema(Book.self)
 printSchema(Library.self)
-

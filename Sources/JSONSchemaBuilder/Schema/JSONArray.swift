@@ -22,9 +22,7 @@ extension JSONArray {
 
   /// Disallows array elements beyond what are provided in `prefixItems`.
   /// - Returns: A new `JSONArray` with the annotation added.
-  public func disableItems() -> Self {
-    self.items(.disabled)
-  }
+  public func disableItems() -> Self { self.items(.disabled) }
 
   /// Adds items to the schema.
   /// - Parameter items: A closure that returns a JSON schema representing the items.
@@ -60,18 +58,14 @@ extension JSONArray {
 
   /// Disables unevaluated items in the schema.
   /// - Returns: A new `JSONArray` with unevaluated items disabled.
-  public func disableUnevaluatedItems() -> Self {
-    self.unevaluatedItems(.disabled)
-  }
+  public func disableUnevaluatedItems() -> Self { self.unevaluatedItems(.disabled) }
 
   /// Adds unevaluated items to the schema.
   /// - Parameter unevaluatedItems: A closure that returns a JSON schema representing the unevaluated items.
   /// - Returns: A new `JSONArray` with the unevaluated items set.
   public func unevaluatedItems(
     @JSONSchemaBuilder _ unevaluatedItems: () -> JSONSchemaComponent
-  ) -> Self {
-    self.unevaluatedItems(.schema(unevaluatedItems().definition))
-  }
+  ) -> Self { self.unevaluatedItems(.schema(unevaluatedItems().definition)) }
 
   /// Adds a `contains` schema to the schema.
   /// - Parameter contains: A JSON schema representing the `contains` schema.
