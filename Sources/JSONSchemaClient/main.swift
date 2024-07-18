@@ -53,12 +53,6 @@ func printSchema<T: Schemable>(_ schema: T.Type) {
     String
 }
 
-//@Schemable
-//enum TemperatureType {
-//  case farhenheit
-//  case celcius
-//}
-
 let now = Weather(
   temperature: 72,
   humidity: 30,
@@ -84,3 +78,84 @@ printSchema(Weather.self)
 
 printSchema(Book.self)
 printSchema(Library.self)
+
+// MARK: - Enums
+
+//@Schemable
+enum WeatherCondition: Codable {
+  case sunny(hoursOfSunlight: Int)
+  case cloudy(coverage: Double)
+  case rainy(chanceOfRain: Double, amount: Double)
+  case snowy
+  case windy
+  case stormy
+}
+
+//extension TemperatureType: Schemable {
+//  static var schema: JSONSchemaComponent {
+//    JSONEnum {
+//      "fahrenheit"
+//      "celcius"
+//    }
+//  }
+//}
+
+extension WeatherCondition: Schemable {
+  static var schema: JSONSchemaComponent {
+    JSONComposition.AnyOf {
+      JSONObject {
+        JSONProperty(key: "sunny") {
+          JSONObject {
+            JSONProperty(key: "hoursOfSunlight", value: JSONInteger())
+          }
+        }
+      }
+
+      JSONObject {
+        JSONProperty(key: "cloudy") {
+          JSONObject {
+            JSONProperty(key: "coverage", value: JSONNumber())
+          }
+        }
+      }
+
+      JSONObject {
+        JSONProperty(key: "rainy") {
+          JSONObject {
+            JSONProperty(key: "chanceOfRain", value: JSONNumber())
+            JSONProperty(key: "amount", value: JSONNumber())
+          }
+        }
+      }
+
+//        JSONEnum {
+//          "snowy"
+//          "windy"
+//          "stormy"
+//        }
+    }
+  }
+}
+
+//@Schemable
+enum TemperatureType: Codable {
+  case fahrenheit
+  case celcius
+}
+
+//@Schemable
+//struct NewWeather {
+//  let temperature: Double
+//  let unit: TemperatureType
+//}
+//
+//let temperatureType = TemperatureType.celcius
+//printInstance(temperatureType)
+//
+//let temperatureString = #"{"celcius": {}}"#
+//let decoder = JSONDecoder()
+//try! decoder.decode(TemperatureType.self, from: temperatureString.data(using: .utf8)!)
+//
+let conditions = WeatherCondition.sunny(hoursOfSunlight: 5)
+printInstance(conditions)
+printSchema(WeatherCondition.self)

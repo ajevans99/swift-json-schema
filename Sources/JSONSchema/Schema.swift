@@ -146,6 +146,7 @@ public struct Schema: Sendable {
   ///   - annotations: Additional annotations for the schema.
   ///   - options: Additional options specific to the string type.
   ///   - enumValues: An array of possible values for the schema.
+  ///   - composition: Composition options for the schema.
   /// - Returns: A schema definition for a string type.
   public static func string(
     _ annotations: AnnotationOptions = .annotations(),
@@ -167,6 +168,7 @@ public struct Schema: Sendable {
   /// - Parameters:
   ///   - annotations: Additional annotations for the schema.
   ///   - enumValues: An array of possible values for the schema.
+  ///   - composition: Composition options for the schema.
   /// - Returns: A schema definition for an integer type.
   public static func integer(
     _ annotations: AnnotationOptions = .annotations(),
@@ -188,6 +190,7 @@ public struct Schema: Sendable {
   ///   - annotations: Additional annotations for the schema.
   ///   - options: Additional options specific to the number type.
   ///   - enumValues: An array of possible values for the schema.
+  ///   - composition: Composition options for the schema.
   /// - Returns: A schema definition for a number type.
   public static func number(
     _ annotations: AnnotationOptions = .annotations(),
@@ -210,6 +213,7 @@ public struct Schema: Sendable {
   ///   - annotations: Additional annotations for the schema.
   ///   - options: Additional options specific to the object type.
   ///   - enumValues: An array of possible values for the schema.
+  ///   - composition: Composition options for the schema.
   /// - Returns: A schema definition for an object type.
   public static func object(
     _ annotations: AnnotationOptions = .annotations(),
@@ -232,6 +236,7 @@ public struct Schema: Sendable {
   ///   - annotations: Additional annotations for the schema.
   ///   - options: Additional options specific to the array type.
   ///   - enumValues: An array of possible values for the schema.
+  ///   - composition: Composition options for the schema.
   /// - Returns: A schema definition for an array type.
   public static func array(
     _ annotations: AnnotationOptions = .annotations(),
@@ -253,6 +258,7 @@ public struct Schema: Sendable {
   /// - Parameters:
   ///   - annotations: Additional annotations for the schema.
   ///   - enumValues: An array of possible values for the schema.
+  ///   - composition: Composition options for the schema.
   /// - Returns: A schema definition for a boolean type.
   public static func boolean(
     _ annotations: AnnotationOptions = .annotations(),
@@ -273,6 +279,7 @@ public struct Schema: Sendable {
   /// - Parameters:
   ///   - annotations: Additional annotations for the schema.
   ///   - enumValues: An array of possible values for the schema.
+  ///   - composition: Composition options for the schema.
   /// - Returns: A schema definition for a null type.
   public static func null(
     _ annotations: AnnotationOptions = .annotations(),
@@ -301,6 +308,7 @@ public struct Schema: Sendable {
   /// - Parameters:
   ///   - annotations: Additional annotations for the schema.
   ///   - enumValues: An array of possible values for the schema.
+  ///   - composition: Composition options for the schema.
   /// - Returns: A schema definition with no explicit type.
   public static func noType(
     _ annotations: AnnotationOptions = .annotations(),
