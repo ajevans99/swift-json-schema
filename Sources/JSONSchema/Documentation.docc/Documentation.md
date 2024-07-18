@@ -8,7 +8,7 @@ Generate JSON Schema documents from Swift.
 
 At the core of the library is the ``Schema`` type, which is used to define the structure of a JSON schema document. The ``RootSchema`` type represents the root of the schema document, and the ``Schema`` type represents a JSON schema object.
 
-The ``Schema`` type provides a variety of factory methods to create different types of JSON schema type. For example, the ``Schema/string(_:_:enumValues:)`` method creates a schema object that represents a string type, and the ``Schema/object(_:_:enumValues:)`` method creates a schema object that represents an object type.
+The ``Schema`` type provides a variety of factory methods to create different types of JSON schema type. For example, the ``Schema/string(_:_:enumValues:composition:)`` method creates a schema object that represents a string type, and the ``Schema/object(_:_:enumValues:composition:)`` method creates a schema object that represents an object type.
 
 ```swift
 let veggie = Schema
@@ -47,6 +47,8 @@ let schema = RootSchema(
   )
 )
 ```
+
+Composition of schemas is supported with ``CompositionOptions`` on ``Schema/composition``.
 
 #### Annotations
 

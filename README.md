@@ -209,7 +209,6 @@ This library is in active development. If you have any feedback or suggestions, 
 
 Goals for future releases include:
 - [ ] [Support `const` keyword](https://json-schema.org/understanding-json-schema/reference/const#constant-values)
-- [ ] [Support schema composition (`allOf`, `anyOf`, `oneOf`, `not`)](https://json-schema.org/understanding-json-schema/reference/combining#allof)
 - [ ] [Support applying subschemas conditionally](https://json-schema.org/understanding-json-schema/reference/conditionals)
 - [ ] Support `$ref` and `$defs` keywords
 - [ ] Support enums in result builders and macro expansion
