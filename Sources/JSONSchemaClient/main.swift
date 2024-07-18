@@ -74,7 +74,8 @@ printSchema(Weather.self)
 @Schemable struct Book {
   let title: String
   let authors: [String]
-  let yearPublished: Int  //  let library: Library
+  let yearPublished: Int
+  let rating: Double
 }
 
 @Schemable struct Library {

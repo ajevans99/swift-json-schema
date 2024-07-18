@@ -17,7 +17,7 @@ struct SchemaGenerator {
   func makeSchema() -> DeclSyntax {
     let schemableMembers = members.schemableMembers()
 
-    let statements = schemableMembers.compactMap { $0.jsonSchemaCodeBlock() }
+    let statements = schemableMembers.compactMap { $0.generateSchema() }
 
     var codeBlockItem: CodeBlockItemSyntax = "JSONObject { \(CodeBlockItemListSyntax(statements)) }"
 
