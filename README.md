@@ -6,8 +6,6 @@
 
 JSON Schema is a powerful tool for defining the structure of JSON documents. Swift JSON Schema aims to make it easier to generate JSON schema documents directly in Swift.
 
-The [OpenAI Functions Tools API](https://platform.openai.com/docs/api-reference/assistants/createAssistant#assistants-createassistant-tools) is an example of a service that uses JSON schema to define the structure of API requests and responses.
-
 * [Schema Generation](#schema-generation)
 * [Macros](#macros)
 * [Documentation](#documentation)
