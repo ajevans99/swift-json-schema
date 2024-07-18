@@ -13,10 +13,7 @@ struct JSONCompositionTests {
     }
 
     let expectedSchema = Schema.noType(
-      composition: .anyOf([
-        .string(),
-        .number(.annotations(), .options(minimum: 0))
-      ])
+      composition: .anyOf([.string(), .number(.annotations(), .options(minimum: 0))])
     )
 
     #expect(sample.definition == expectedSchema)
@@ -31,10 +28,7 @@ struct JSONCompositionTests {
     }
 
     let expectedSchema = Schema.noType(
-      composition: .allOf([
-        .string(),
-        .number(.annotations(), .options(maximum: 10))
-      ])
+      composition: .allOf([.string(), .number(.annotations(), .options(maximum: 10))])
     )
 
     #expect(sample.definition == expectedSchema)
@@ -49,27 +43,16 @@ struct JSONCompositionTests {
     }
 
     let expectedSchema = Schema.noType(
-      composition: .oneOf([
-        .string(.annotations(), .options(pattern: "^[a-zA-Z]+$")),
-        .boolean()
-      ])
+      composition: .oneOf([.string(.annotations(), .options(pattern: "^[a-zA-Z]+$")), .boolean()])
     )
 
     #expect(sample.definition == expectedSchema)
   }
 
   @Test func notComposition() throws {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent {
-      JSONComposition.Not {
-        JSONString()
-      }
-    }
+    @JSONSchemaBuilder var sample: JSONSchemaComponent { JSONComposition.Not { JSONString() } }
 
-    let expectedSchema = Schema.noType(
-      composition: .not(
-        .string()
-      )
-    )
+    let expectedSchema = Schema.noType(composition: .not(.string()))
 
     #expect(sample.definition == expectedSchema)
   }

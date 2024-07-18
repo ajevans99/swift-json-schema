@@ -1,8 +1,7 @@
 /// Configure composition of JSON schemas. Keywords correspond to boolean algebra concepts AND, OR, XOR, and NOT.
 ///
 /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/combining)
-public indirect enum CompositionOptions: Equatable, Sendable {
-  /// To validate against `allOf`, the given data must be valid against all of the given subschemas.
+public indirect enum CompositionOptions: Equatable, Sendable { /// To validate against `allOf`, the given data must be valid against all of the given subschemas.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/combining#allOf)
   case allOf([Schema])
 
@@ -39,7 +38,11 @@ extension CompositionOptions: Codable {
     } else if let not = try container.decodeIfPresent(Schema.self, forKey: .not) {
       self = .not(not)
     } else {
-      throw DecodingError.dataCorruptedError(forKey: CodingKeys.allOf, in: container, debugDescription: "Invalid CompositionOptions")
+      throw DecodingError.dataCorruptedError(
+        forKey: CodingKeys.allOf,
+        in: container,
+        debugDescription: "Invalid CompositionOptions"
+      )
     }
   }
 
@@ -47,14 +50,10 @@ extension CompositionOptions: Codable {
     var container = encoder.container(keyedBy: CodingKeys.self)
 
     switch self {
-    case .allOf(let schemas):
-      try container.encode(schemas, forKey: .allOf)
-    case .anyOf(let schemas):
-      try container.encode(schemas, forKey: .anyOf)
-    case .oneOf(let schemas):
-      try container.encode(schemas, forKey: .oneOf)
-    case .not(let schema):
-      try container.encode(schema, forKey: .not)
+    case .allOf(let schemas): try container.encode(schemas, forKey: .allOf)
+    case .anyOf(let schemas): try container.encode(schemas, forKey: .anyOf)
+    case .oneOf(let schemas): try container.encode(schemas, forKey: .oneOf)
+    case .not(let schema): try container.encode(schema, forKey: .not)
     }
   }
 }

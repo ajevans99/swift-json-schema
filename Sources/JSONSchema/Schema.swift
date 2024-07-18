@@ -173,7 +173,13 @@ public struct Schema: Sendable {
     enumValues: [JSONValue]? = nil,
     composition: CompositionOptions? = nil
   ) -> Schema {
-    .init(type: .integer, options: nil, annotations: annotations, enumValues: enumValues, composition: composition)
+    .init(
+      type: .integer,
+      options: nil,
+      annotations: annotations,
+      enumValues: enumValues,
+      composition: composition
+    )
   }
 
   /// Creates a schema definition for a number type.
@@ -193,7 +199,8 @@ public struct Schema: Sendable {
       type: .number,
       options: options.eraseToAnySchemaOptions(),
       annotations: annotations,
-      enumValues: enumValues, composition: composition
+      enumValues: enumValues,
+      composition: composition
     )
   }
 
@@ -214,7 +221,8 @@ public struct Schema: Sendable {
       type: .object,
       options: options.eraseToAnySchemaOptions(),
       annotations: annotations,
-      enumValues: enumValues, composition: composition
+      enumValues: enumValues,
+      composition: composition
     )
   }
 
@@ -235,7 +243,8 @@ public struct Schema: Sendable {
       type: .array,
       options: options.eraseToAnySchemaOptions(),
       annotations: annotations,
-      enumValues: enumValues, composition: composition
+      enumValues: enumValues,
+      composition: composition
     )
   }
 
@@ -250,7 +259,13 @@ public struct Schema: Sendable {
     enumValues: [JSONValue]? = nil,
     composition: CompositionOptions? = nil
   ) -> Schema {
-    .init(type: .boolean, options: nil, annotations: annotations, enumValues: enumValues, composition: composition)
+    .init(
+      type: .boolean,
+      options: nil,
+      annotations: annotations,
+      enumValues: enumValues,
+      composition: composition
+    )
   }
 
   /// Creates a schema definition for a null type.
@@ -263,7 +278,15 @@ public struct Schema: Sendable {
     _ annotations: AnnotationOptions = .annotations(),
     enumValues: [JSONValue]? = nil,
     composition: CompositionOptions? = nil
-  ) -> Schema { .init(type: .null, options: nil, annotations: annotations, enumValues: enumValues, composition: composition) }
+  ) -> Schema {
+    .init(
+      type: .null,
+      options: nil,
+      annotations: annotations,
+      enumValues: enumValues,
+      composition: composition
+    )
+  }
 
   /// Creates a schema definition with no explicit type.
   /// This is a special case. No type is specified, but the schema is still valid.
@@ -284,5 +307,13 @@ public struct Schema: Sendable {
     _ options: (any SchemaOptions)? = nil,
     enumValues: [JSONValue]? = nil,
     composition: CompositionOptions? = nil
-  ) -> Schema { .init(type: nil, options: options?.eraseToAnySchemaOptions(), annotations: annotations, enumValues: enumValues, composition: composition) }
+  ) -> Schema {
+    .init(
+      type: nil,
+      options: options?.eraseToAnySchemaOptions(),
+      annotations: annotations,
+      enumValues: enumValues,
+      composition: composition
+    )
+  }
 }

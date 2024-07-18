@@ -6,12 +6,9 @@ import Testing
 struct CompositionCodableSchemaTests {
   @Test func allOf() throws {
     let schema = Schema.noType(
-      composition: .allOf(
-        [
-          .string(),
-          .noType(.annotations(), StringSchemaOptions.options(maxLength: 5)),
-        ]
-      )
+      composition: .allOf([
+        .string(), .noType(.annotations(), StringSchemaOptions.options(maxLength: 5)),
+      ])
     )
     let jsonString = """
       {
@@ -26,18 +23,16 @@ struct CompositionCodableSchemaTests {
       }
       """
     let json = try schema.json()
-    #expect(json == jsonString) // Encoding
-    #expect(try Schema(json: jsonString) == schema) // Decoding
+    #expect(json == jsonString)  // Encoding
+    #expect(try Schema(json: jsonString) == schema)  // Decoding
   }
 
   @Test func anyOf() throws {
     let schema = Schema.noType(
-      composition: .anyOf(
-        [
-          .string(.annotations(), .options(maxLength: 5)),
-          .number(.annotations(), .options(minimum: 0)),
-        ]
-      )
+      composition: .anyOf([
+        .string(.annotations(), .options(maxLength: 5)),
+        .number(.annotations(), .options(minimum: 0)),
+      ])
     )
     let jsonString = """
       {
@@ -54,18 +49,16 @@ struct CompositionCodableSchemaTests {
       }
       """
     let json = try schema.json()
-    #expect(json == jsonString) // Encoding
-    #expect(try Schema(json: jsonString) == schema) // Decoding
+    #expect(json == jsonString)  // Encoding
+    #expect(try Schema(json: jsonString) == schema)  // Decoding
   }
 
   @Test func oneOf() throws {
     let schema = Schema.noType(
-      composition: .oneOf(
-        [
-          .number(.annotations(), .options(multipleOf: 5)),
-          .number(.annotations(), .options(multipleOf: 3)),
-        ]
-      )
+      composition: .oneOf([
+        .number(.annotations(), .options(multipleOf: 5)),
+        .number(.annotations(), .options(multipleOf: 3)),
+      ])
     )
     let jsonString = """
       {
@@ -82,18 +75,16 @@ struct CompositionCodableSchemaTests {
       }
       """
     let json = try schema.json()
-    #expect(json == jsonString) // Encoding
-    #expect(try Schema(json: jsonString) == schema) // Decoding
+    #expect(json == jsonString)  // Encoding
+    #expect(try Schema(json: jsonString) == schema)  // Decoding
   }
 
   @Test func factored() throws {
     let schema = Schema.number(
-      composition: .oneOf(
-        [
-          .noType(.annotations(), NumberSchemaOptions.options(multipleOf: 5)),
-          .noType(.annotations(), NumberSchemaOptions.options(multipleOf: 3)),
-        ]
-      )
+      composition: .oneOf([
+        .noType(.annotations(), NumberSchemaOptions.options(multipleOf: 5)),
+        .noType(.annotations(), NumberSchemaOptions.options(multipleOf: 3)),
+      ])
     )
     let jsonString = """
       {
@@ -109,16 +100,12 @@ struct CompositionCodableSchemaTests {
       }
       """
     let json = try schema.json()
-    #expect(json == jsonString) // Encoding
-    #expect(try Schema(json: jsonString) == schema) // Decoding
+    #expect(json == jsonString)  // Encoding
+    #expect(try Schema(json: jsonString) == schema)  // Decoding
   }
 
   @Test func not() throws {
-    let schema = Schema.noType(
-      composition: .not(
-        .string()
-      )
-    )
+    let schema = Schema.noType(composition: .not(.string()))
     let jsonString = """
       {
         "not" : {
@@ -127,7 +114,7 @@ struct CompositionCodableSchemaTests {
       }
       """
     let json = try schema.json()
-    #expect(json == jsonString) // Encoding
-    #expect(try Schema(json: jsonString) == schema) // Decoding
+    #expect(json == jsonString)  // Encoding
+    #expect(try Schema(json: jsonString) == schema)  // Decoding
   }
 }
