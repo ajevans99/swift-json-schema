@@ -7,8 +7,9 @@ JSON Schema is a powerful tool for defining the structure of JSON documents. Swi
 The [OpenAI Functions Tools API](https://platform.openai.com/docs/api-reference/assistants/createAssistant#assistants-createassistant-tools) is an example of a service that uses JSON schema to define the structure of API requests and responses.
 
 * [Schema Generation](#schema-generation)
-* [Installation](#installation)
+* [Macros](#macros)
 * [Documentation](#documentation)
+* [Installation](#installation)
 * [Next Steps](#next-steps)
 * [License](#license)
 
@@ -111,8 +112,59 @@ Import the `JSONSchemaBuilder` target and improve schema generation ergonomics w
   .title("Person")
 }
 
-jsonSchema.schema // Same `Schema` type as above for quick serialization
+let schema: JSONSchema = jsonSchema.defintion
 ```
+
+## Macros
+
+Use the `@Schemable` macro from `JSONSchemaBuilder` to automatically expand Swift types into JSON schema components.
+
+```swift
+@Schemable
+struct Person {
+  let firstName: String
+  let lastName: String
+  @NumberOptions(minimum: 0, maximum: 120)
+  let age: Int
+}
+```
+
+The `@Schemable` attribute automatically expands the `Person` type into a JSON schema component.
+
+```swift
+struct Person {
+  let firstName: String
+  let lastName: String
+  let age: Int
+
+  // Auto-generated schema ↴
+  static var schema: JSONSchemaComponent {
+    JSONObject {
+      JSONProperty(key: "firstName") {
+        JSONString()
+      }
+
+      JSONProperty(key: "lastName") {
+        JSONString()
+      }
+
+      JSONProperty(key: "age") {
+        JSONInteger()
+          .minimum(0)
+          .maximum(120)
+      }
+    }
+  }
+}
+extension Person: Schemable {}
+```
+
+## Documentation
+
+The full documentation for this library is available through the Swift Package Index.
+
+[JSONSchema Documentation](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschema)
+[JSONSchemaBuilder Documentation](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder)
 
 ## Installation
 
@@ -124,7 +176,7 @@ To add SwiftJSONSchema to your project using Swift Package Manager, add the foll
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/ajevans99/swift-json-schema", from: "1.0.0")
+  .package(url: "https://github.com/ajevans99/swift-json-schema", from: "1.0.0")
 ]
 ```
 
@@ -132,13 +184,13 @@ Then, include `JSONSchema` and/or `JSONSchemaBuilder` as a dependency for your t
 
 ```swift
 targets: [
-    .target(
-        name: "YourTarget",
-        dependencies: [
-            .product(name: "JSONSchema", package: "swift-json-schema"),
-            .product(name: "JSONSchemaBuilder", package: "swift-json-schema"),
-        ]
-    )
+  .target(
+    name: "YourTarget",
+    dependencies: [
+      .product(name: "JSONSchema", package: "swift-json-schema"),
+      .product(name: "JSONSchemaBuilder", package: "swift-json-schema"),
+    ]
+  )
 ]
 ```
 
@@ -151,12 +203,6 @@ targets: [
 
 Once added, you can import `JSONSchema` in your Swift files and start using it in your project.
 
-## Documentation
-
-The full documentation for this library is available through the Swift Package Index.
-
-[View the documentation](https://swiftpackageindex.com/ajevans99/swift-json-schema)
-
 ## Next Steps
 
 This library is in active development. If you have any feedback or suggestions, please open an issue or pull request.
@@ -166,74 +212,11 @@ Goals for future releases include:
 - [ ] [Support schema composition (`allOf`, `anyOf`, `oneOf`, `not`)](https://json-schema.org/understanding-json-schema/reference/combining#allof)
 - [ ] [Support applying subschemas conditionally](https://json-schema.org/understanding-json-schema/reference/conditionals)
 - [ ] Support `$ref` and `$defs` keywords
-- [ ] Support enums in result builders
+- [ ] Support enums in result builders and macro expansion
 - [ ] Root schema in result builders
 - [ ] Support multiple types like `{ "type": ["number", "string"] }`
 - [ ] Validate JSON instances against schemas
-- [ ] **Macros** for struct-based schema generation
 - [ ] Parse JSON instances into Swift types and functions
-
-### Detailed Macro _Goal_ Example
-
-Add a `@Schemable` attribute to a struct to generate a schema for the struct.
-
-```swift
-// Future macro-based schema generation goal example
-@Schemable
-struct Person: Codable {
-  @SchemaOptions(description: "The person's first name.")
-  let firstName: String
-  
-  @SchemaOptions(description: "The person's last name.")
-  let lastName: String
-  
-  @SchemaOptions(description: "Age in years.", minimum: 0)
-  let age: Int
-}
-```
-
-The `@Schemable` attribute would generate a schema for the `Person` struct.
-
-```swift
-/// Generated property on `Person` struct by `@Schemable` attribute
-@JSONSchemaBuilder static var schemaRepresentation: JSONSchemaComponent {
-  JSONObject {
-    JSONProperty(key: "firstName") {
-      JSONString()
-        .description("The person's first name.")
-    }
-
-    JSONProperty(key: "lastName") {
-      JSONString()
-        .description("The person's last name.")
-    }
-
-    JSONProperty(key: "age") {
-      JSONInteger()
-        .description("Age in years which must be equal to or greater than zero.")
-        .minimum(0)
-    }
-  }
-  .title("Person")
-}
-```
-
-Validation and parsing would be handled by the library.
-
-```swift
-let person = """
-{
-  "firstName": "John",
-  "lastName": "Doe",
-  "age": 30
-}
-"""
-
-let validation = try Person.validate(person)
-#expect(validation == .success)
-let instance = try Person.parse(person)
-#expect(instance == Person(firstName: "John", lastName: "Doe", age: 30))
-```
 
 ## License
 

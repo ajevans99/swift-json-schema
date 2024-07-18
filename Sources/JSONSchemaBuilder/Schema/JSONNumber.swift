@@ -20,6 +20,9 @@ extension JSONNumber {
     return copy
   }
 
+  /// Adds a minimum constraint to the schema.
+  /// - Parameter boundary: The minimum value that the number must be greater than or equal to.
+  /// - Returns: A new `JSONNumber` with the minimum constraint set.
   public func minimum(boundary: NumberSchemaOptions.BoundaryValue?) -> Self {
     var copy = self
     copy.options.minimum = boundary
@@ -40,6 +43,9 @@ extension JSONNumber {
     self.minimum(boundary: minimum == nil ? nil : .exclusive(minimum!))
   }
 
+  /// Adds a maximum constraint to the schema.
+  /// - Parameter boundary: The maximum value that the number must be less than or equal to.
+  /// - Returns: A new `JSONNumber` with the maximum constraint set.
   public func maximum(boundary: NumberSchemaOptions.BoundaryValue?) -> Self {
     var copy = self
     copy.options.maximum = boundary

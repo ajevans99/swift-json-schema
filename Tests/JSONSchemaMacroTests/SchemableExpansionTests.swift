@@ -5,11 +5,12 @@ import Testing
 struct SchemableExpansionTests {
   let testMacros: [String: Macro.Type] = ["Schemable": SchemableMacro.self]
 
-  @Test func basicTypes() {
+  @Test(arguments: ["struct", "class"])
+  func basicTypes(declarationType: String) {
     assertMacroExpansion(
       """
       @Schemable
-      struct Weather {
+      \(declarationType) Weather {
         let temperature: Double
         let location: String
         let isRaining: Bool
@@ -18,7 +19,7 @@ struct SchemableExpansionTests {
       }
       """,
       expandedSource: """
-        struct Weather {
+        \(declarationType) Weather {
           let temperature: Double
           let location: String
           let isRaining: Bool
@@ -54,17 +55,18 @@ struct SchemableExpansionTests {
     )
   }
 
-  @Test func arraysAndDictionaries() {
+  @Test(arguments: ["struct", "class"])
+  func arraysAndDictionaries(declarationType: String) {
     assertMacroExpansion(
       """
       @Schemable
-      struct Weather {
+      \(declarationType) Weather {
         let temperatures: [Double]
         let temperatureByLocation: [String: Double?]
       }
       """,
       expandedSource: """
-        struct Weather {
+        \(declarationType) Weather {
           let temperatures: [Double]
           let temperatureByLocation: [String: Double?]
 
@@ -94,16 +96,17 @@ struct SchemableExpansionTests {
     )
   }
 
-  @Test func multipleBindings() {
+  @Test(arguments: ["struct", "class"])
+  func multipleBindings(declarationType: String) {
     assertMacroExpansion(
       """
       @Schemable
-      struct Weather {
+      \(declarationType) Weather {
         let isRaining: Bool?, temperature: Int?, location: String
       }
       """,
       expandedSource: """
-        struct Weather {
+        \(declarationType) Weather {
           let isRaining: Bool?, temperature: Int?, location: String
 
           static var schema: JSONSchemaComponent {
@@ -125,6 +128,76 @@ struct SchemableExpansionTests {
         extension Weather: Schemable {
         }
         """,
+      macros: testMacros
+    )
+  }
+
+  @Test
+  func skipComputedProperties() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct Weather {
+        var temperature: Double {
+          didSet { print("Updated temperature") }
+          willSet { print("Will update temperature") }
+        }
+
+        var temperatureInCelsius: Double {
+          get { (temperature - 32) * 5 / 9 }
+          set { temperature = newValue * 9 / 5 + 32 }
+        }
+
+        var isCold: Bool { temperature < 50 }
+      }
+      """,
+      expandedSource: """
+        struct Weather {
+          var temperature: Double {
+            didSet { print("Updated temperature") }
+            willSet { print("Will update temperature") }
+          }
+
+          var temperatureInCelsius: Double {
+            get { (temperature - 32) * 5 / 9 }
+            set { temperature = newValue * 9 / 5 + 32 }
+          }
+
+          var isCold: Bool { temperature < 50 }
+
+          static var schema: JSONSchemaComponent {
+            JSONObject {
+              JSONProperty(key: "temperature") {
+                JSONNumber()
+              }
+            }
+            .required(["temperature"])
+          }
+        }
+
+        extension Weather: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test(.disabled("TODO: Test diagnostics."))
+  func `enum`() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      enum TempertureKind {
+        case celsius
+        case fahrenheit
+      }
+      """,
+      expandedSource: """
+      enum TempertureKind {
+        case celsius
+        case fahrenheit
+      }
+      """,
       macros: testMacros
     )
   }
@@ -233,6 +306,43 @@ struct SchemaOptionsTests {
         extension Weather: Schemable {
         }
         """,
+      macros: testMacros
+    )
+  }
+
+  @Test func onStruct() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      @SchemaOptions(
+        title: "Weather Data",
+        description: "Contains weather-related information",
+        deprecated: false
+      )
+      struct Weather {
+        let cityName: String
+      }
+      """,
+      expandedSource: """
+      struct Weather {
+        let cityName: String
+
+        static var schema: JSONSchemaComponent {
+          JSONObject {
+            JSONProperty(key: "cityName") {
+              JSONString()
+            }
+          }
+          .title("Weather Data")
+          .description("Contains weather-related information")
+          .deprecated(false)
+          .required(["cityName"])
+        }
+      }
+
+      extension Weather: Schemable {
+      }
+      """,
       macros: testMacros
     )
   }
@@ -403,6 +513,7 @@ struct ObjectOptionsTests {
       @Schemable
       struct Weather {
         @ObjectOptions(
+          propertyNames: .options(pattern: "^[A-Za-z_][A-Za-z0-9_]*$"),
           minProperties: 2,
           maxProperties: 5
         )
@@ -420,11 +531,46 @@ struct ObjectOptionsTests {
                 .additionalProperties {
                   JSONString()
                 }
+                .propertyNames(.options(pattern: "^[A-Za-z_][A-Za-z0-9_]*$"))
                 .minProperties(2)
                 .maxProperties(5)
             }
           }
           .required(["metadata"])
+        }
+      }
+
+      extension Weather: Schemable {
+      }
+      """,
+      macros: testMacros
+    )
+  }
+
+  @Test func onStructDeclaration() {
+    assertMacroExpansion(
+      """
+      @ObjectOptions(
+        minProperties: 2,
+        maxProperties: 5
+      )
+      @Schemable
+      struct Weather {
+        let cityName: String
+      }
+      """,
+      expandedSource: """
+      struct Weather {
+        let cityName: String
+
+        static var schema: JSONSchemaComponent {
+          JSONObject {
+            JSONProperty(key: "cityName") {
+              JSONString()
+            }
+          }
+          .minProperties(2)
+          .maxProperties(5)
         }
       }
 

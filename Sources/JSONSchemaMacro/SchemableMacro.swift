@@ -7,7 +7,7 @@ enum SchemableError: Error { case unsupportedDeclaration }
 extension SchemableError: CustomStringConvertible {
   var description: String {
     switch self {
-    case .unsupportedDeclaration: "Macro can only be applied to struct"
+    case .unsupportedDeclaration: "Macro can only be applied to struct or class"
     }
   }
 }
@@ -33,39 +33,69 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
   ) throws -> [DeclSyntax] {
     if let structDecl = declaration.as(StructDeclSyntax.self) {
       let structBuilder = makeSchema(fromStruct: structDecl)
-      return [DeclSyntax(structBuilder)]
+      return [structBuilder]
+    } else if let classDecl = declaration.as(ClassDeclSyntax.self) {
+      let classBuilder = makeSchema(fromClass: classDecl)
+      return [classBuilder]
     }
 
     throw SchemableError.unsupportedDeclaration
   }
 }
 
+func makeSchema(fromClass classDecl: ClassDeclSyntax) -> DeclSyntax {
+  let members = classDecl.memberBlock.members
+  let attributes = classDecl.attributes
+  return makeSchema(members: members, attributes: attributes)
+}
+
 func makeSchema(fromStruct structDecl: StructDeclSyntax) -> DeclSyntax {
-  let members = structDecl.memberBlock.members.compactMap { $0.decl.as(VariableDeclSyntax.self) }
-    .flatMap { variableDecl in variableDecl.bindings.map { (variableDecl, $0) } }
-    .compactMap { (variableDecl, patternBinding) -> Member? in
-      guard let identifier = patternBinding.pattern.as(IdentifierPatternSyntax.self)?.identifier
-      else { return nil }
-      guard let type = patternBinding.typeAnnotation?.type else { return nil }
+  let members = structDecl.memberBlock.members
+  let attributes = structDecl.attributes
+  return makeSchema(members: members, attributes: attributes)
+}
 
-      return Member(identifier: identifier, type: type, attributes: variableDecl.attributes)
-    }
+func makeSchema(members: MemberBlockItemListSyntax, attributes: AttributeListSyntax) -> DeclSyntax {
+  let schemableMembers = members.schemableMembers()
 
-  let statements = members.compactMap { $0.jsonSchemaCodeBlock() }
+  let statements = schemableMembers.compactMap { $0.jsonSchemaCodeBlock() }
 
-  let requiredMemebers = members.filter { !$0.isOptional }
+  var codeBlockItem: CodeBlockItemSyntax = "JSONObject { \(CodeBlockItemListSyntax(statements)) }"
+
+  if let annotationArguments = attributes.arguments(for: "SchemaOptions") {
+    codeBlockItem.applyArguments(annotationArguments)
+  }
+
+  if let objectArguemnts = attributes.arguments(for: "ObjectOptions") {
+    codeBlockItem.applyArguments(objectArguemnts)
+  } else {
+    // Default to adding requirement for non-optional members
+    let requiredMemebers = schemableMembers.filter { !$0.isOptional }
+    let arrayExpr = ArrayExprSyntax(
+      elements: ArrayElementListSyntax(
+        requiredMemebers
+          .enumerated()
+          .map { (index: $0.offset, expression: StringLiteralExprSyntax(content: $0.element.identifier.text)) }
+          .map { ArrayElementSyntax(expression: $0.expression, trailingComma: .commaToken(presence: $0.index == requiredMemebers.indices.last ? .missing : .present)) }
+      )
+    )
+    let labeledListExpression = LabeledExprSyntax(
+      label: .identifier("required"),
+      expression: arrayExpr
+    )
+    codeBlockItem.applyArguments([labeledListExpression])
+  }
 
   let variableDecl: DeclSyntax = """
     static var schema: JSONSchemaComponent {
-      JSONObject { \(CodeBlockItemListSyntax(statements)) }
-      .required([\(raw: requiredMemebers.map { "\"\($0.identifier.text)\"" }.joined(separator: ","))])
+      \(codeBlockItem)
     }
     """
 
   return variableDecl
 }
 
-struct Member {
+struct SchemableMember {
   let identifier: TokenSyntax
   let type: TypeSyntax
   let attributes: AttributeListSyntax
@@ -95,23 +125,12 @@ struct Member {
   }
 
   func applyArguments(to codeBlock: inout CodeBlockItemSyntax) {
-    func applyArguments(_ arguments: LabeledExprListSyntax) {
-      for argument in arguments {
-        if let label = argument.label {
-          codeBlock = """
-            \(codeBlock)
-              .\(label.trimmed)(\(argument.expression))
-            """
-        }
-      }
-    }
-
     if let annotationArguments {
-      applyArguments(annotationArguments)
+      codeBlock.applyArguments(annotationArguments)
     }
 
     if let typeSpecificArguments {
-      applyArguments(typeSpecificArguments)
+      codeBlock.applyArguments(typeSpecificArguments)
     }
   }
 
@@ -123,6 +142,59 @@ struct Member {
     return """
       JSONProperty(key: "\(raw: identifier.text)") { \(typeCodeBlock) }
       """
+  }
+}
+
+extension PatternBindingListSyntax.Element {
+  // Modified implementation from https://github.com/swiftlang/swift-syntax/blob/248dcef04d9e03b7fc47905a81fc84c6f6c23837/Examples/Sources/MacroExamples/Implementation/MemberAttribute/WrapStoredPropertiesMacro.swift#L65
+  var isStoredProperty: Bool {
+    switch accessorBlock?.accessors {
+    case .accessors(let accessors):
+      for accessor in accessors {
+        switch accessor.accessorSpecifier.tokenKind {
+        case .keyword(.willSet), .keyword(.didSet):
+          // Observers can occur on a stored property.
+          break
+        default:
+          // Other accessors make it a computed property.
+          return false
+        }
+      }
+      return true
+    case .getter:
+      return false
+    case nil:
+      return true
+    }
+  }
+}
+
+extension MemberBlockItemListSyntax {
+  func schemableMembers() -> [SchemableMember] {
+    self
+      .compactMap { $0.decl.as(VariableDeclSyntax.self) }
+      .flatMap { variableDecl in variableDecl.bindings.map { (variableDecl, $0) } }
+      .filter { $0.1.isStoredProperty }
+      .compactMap { (variableDecl, patternBinding) -> SchemableMember? in
+        guard let identifier = patternBinding.pattern.as(IdentifierPatternSyntax.self)?.identifier
+        else { return nil }
+        guard let type = patternBinding.typeAnnotation?.type else { return nil }
+
+        return SchemableMember(identifier: identifier, type: type, attributes: variableDecl.attributes)
+      }
+  }
+}
+
+extension CodeBlockItemSyntax {
+  mutating func applyArguments(_ arguments: LabeledExprListSyntax) {
+    for argument in arguments {
+      if let label = argument.label {
+        self = """
+            \(self)
+            .\(label.trimmed)(\(argument.expression))
+            """
+      }
+    }
   }
 }
 
@@ -147,9 +219,9 @@ extension TypeSyntax {
       guard let type = arrayType.element.jsonSchemaCodeBlock() else { return nil }
       return """
         JSONArray()
-          .items {
-            \(type)
-          }
+        .items {
+          \(type)
+        }
         """
     case .dictionaryType(let dictionaryType):
       guard let keyType = dictionaryType.key.as(IdentifierTypeSyntax.self),
@@ -161,9 +233,9 @@ extension TypeSyntax {
       guard let type = dictionaryType.value.jsonSchemaCodeBlock() else { return nil }
       return """
         JSONObject()
-          .additionalProperties {
-            \(type)
-          }
+        .additionalProperties {
+          \(type)
+        }
         """
     case .identifierType(let identifierType):
       guard let type = jsonType(from: identifierType.name.text) else {

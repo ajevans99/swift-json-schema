@@ -9,6 +9,8 @@ import JSONSchemaBuilder
 
   // Exprimental
   let temperatures: [Double]
+
+  @ObjectOptions(propertyNames: .options(pattern: "^[A-Za-z][A-Za-z_]*$"))
   let temperatureByLocation: [String: Double]
 }
 
@@ -59,7 +61,37 @@ struct Weather2: Schemable {
     uniqueItems: true
   )
   let temperatureReadings: [Double]
+
+  @SchemaOptions(title: "Location")
+  @StringOptions(
+    minLength: 5,
+    maxLength: 100,
+    pattern: "^[a-zA-Z]+$",
+    format: nil
+  )
+  let cityName: String
 }
+
+//@Schemable
+struct Weather4 {
+  var temperature: Double {
+    didSet { print("Updated temperature") }
+    willSet { print("Will update temperature") }
+  }
+
+  var temperatureInCelsius: Double {
+    get { (temperature - 32) * 5 / 9 }
+    set { temperature = newValue * 9 / 5 + 32 }
+  }
+
+  var isCold: Bool { temperature < 50 }
+}
+
+//@Schemable
+//enum TemperatureType {
+//  case farhenheit
+//  case celcius
+//}
 
 let x = \Weather2.rain
 print("\(x)")
