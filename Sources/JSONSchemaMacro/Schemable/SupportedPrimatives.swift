@@ -9,18 +9,12 @@ enum SupportedPrimative: String, CaseIterable {
 
   var schema: String {
     switch self {
-    case .double, .float:
-      "JSONNumber"
-    case .string:
-      "JSONString"
-    case .int:
-      "JSONInteger"
-    case .bool:
-      "JSONBoolean"
-    case .array:
-      "JSONArray"
-    case .dictionary:
-      "JSONObject"
+    case .double, .float: "JSONNumber"
+    case .string: "JSONString"
+    case .int: "JSONInteger"
+    case .bool: "JSONBoolean"
+    case .array: "JSONArray"
+    case .dictionary: "JSONObject"
     }
   }
 }

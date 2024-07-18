@@ -107,7 +107,9 @@ struct SchemableExpansionTests {
     )
   }
 
-  @Test(arguments: ["struct", "class"]) func alternativeArraysAndDictionaries(declarationType: String) {
+  @Test(arguments: ["struct", "class"]) func alternativeArraysAndDictionaries(
+    declarationType: String
+  ) {
     assertMacroExpansion(
       """
       @Schemable

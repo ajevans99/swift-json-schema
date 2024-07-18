@@ -26,8 +26,7 @@ extension MemberBlockItemListSyntax {
   func schemableMembers() -> [SchemableMember] {
     self.compactMap { $0.decl.as(VariableDeclSyntax.self) }
       .flatMap { variableDecl in variableDecl.bindings.map { (variableDecl, $0) } }
-      .filter { $0.1.isStoredProperty }
-      .compactMap(SchemableMember.init)
+      .filter { $0.1.isStoredProperty }.compactMap(SchemableMember.init)
   }
 }
 
@@ -58,6 +57,4 @@ extension AttributeListSyntax {
   }
 }
 
-extension TypeSyntax {
-  
-}
+extension TypeSyntax {}

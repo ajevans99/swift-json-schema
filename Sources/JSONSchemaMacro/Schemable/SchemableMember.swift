@@ -28,7 +28,12 @@ struct SchemableMember {
     return type.is(OptionalTypeSyntax.self)
   }
 
-  private init(identifier: TokenSyntax, type: TypeSyntax, attributes: AttributeListSyntax, defaultValue: ExprSyntax? = nil) {
+  private init(
+    identifier: TokenSyntax,
+    type: TypeSyntax,
+    attributes: AttributeListSyntax,
+    defaultValue: ExprSyntax? = nil
+  ) {
     self.identifier = identifier
     self.type = type
     self.attributes = attributes
@@ -61,12 +66,9 @@ struct SchemableMember {
 
     var codeBlock: CodeBlockItemSyntax? {
       switch self {
-      case .primative(_, let schema):
-        schema
-      case .schemable(_, let schema):
-        schema
-      case .notSupported:
-        nil
+      case .primative(_, let schema): schema
+      case .schemable(_, let schema): schema
+      case .notSupported: nil
       }
     }
   }
@@ -81,12 +83,11 @@ struct SchemableMember {
       // In the future, JSONValue types should also be allowed to apply default value
       if let defaultValue {
         codeBlock = """
-        \(codeBlock)
-        .default(\(defaultValue))
-        """
+          \(codeBlock)
+          .default(\(defaultValue))
+          """
       }
-    case .schemable(_, let code):
-      codeBlock = code
+    case .schemable(_, let code): codeBlock = code
     case .notSupported: return nil
     }
 
@@ -100,7 +101,9 @@ struct SchemableMember {
   private func typeInformation(from typeSyntax: TypeSyntax) -> TypeInformation {
     switch typeSyntax.as(TypeSyntaxEnum.self) {
     case .arrayType(let arrayType):
-      guard let codeBlock = typeInformation(from: arrayType.element).codeBlock else { return .notSupported }
+      guard let codeBlock = typeInformation(from: arrayType.element).codeBlock else {
+        return .notSupported
+      }
       return .primative(
         .array,
         schema: """
@@ -109,14 +112,14 @@ struct SchemableMember {
             \(codeBlock)
           }
           """
-        )
+      )
     case .dictionaryType(let dictionaryType):
       guard let keyType = dictionaryType.key.as(IdentifierTypeSyntax.self),
-            keyType.name.text == "String"
-      else {
+        keyType.name.text == "String"
+      else { return .notSupported }
+      guard let codeBlock = typeInformation(from: dictionaryType.value).codeBlock else {
         return .notSupported
       }
-      guard let codeBlock = typeInformation(from: dictionaryType.value).codeBlock else { return .notSupported }
       return .primative(
         .dictionary,
         schema: """
@@ -125,7 +128,7 @@ struct SchemableMember {
             \(codeBlock)
           }
           """
-        )
+      )
     case .identifierType(let identifierType):
       if let generic = identifierType.genericArgumentClause {
         guard identifierType.name.text != "Array" else {
@@ -141,7 +144,10 @@ struct SchemableMember {
       }
 
       guard let primative = SupportedPrimative(rawValue: identifierType.name.text) else {
-        return .schemable(identifierType.name.text, schema: "\(raw: identifierType.name.text).schema")
+        return .schemable(
+          identifierType.name.text,
+          schema: "\(raw: identifierType.name.text).schema"
+        )
       }
 
       return .primative(primative, schema: "\(raw: primative.schema)()")
@@ -150,8 +156,8 @@ struct SchemableMember {
     case .optionalType(let optionalType): return typeInformation(from: optionalType.wrappedType)
     case .someOrAnyType(let someOrAnyType): return typeInformation(from: someOrAnyType.constraint)
     case .attributedType, .classRestrictionType, .compositionType, .functionType, .memberType,
-        .metatypeType, .missingType, .namedOpaqueReturnType, .packElementType, .packExpansionType,
-        .suppressedType, .tupleType:
+      .metatypeType, .missingType, .namedOpaqueReturnType, .packElementType, .packExpansionType,
+      .suppressedType, .tupleType:
       return .notSupported
     }
   }
