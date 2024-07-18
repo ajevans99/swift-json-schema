@@ -19,12 +19,17 @@ let package = Package(
       targets: ["JSONSchema"]
     ),
     .library(
-      name: "JSONResultBuilders",
-      targets: ["JSONResultBuilders"]
+      name: "JSONSchemaBuilder",
+      targets: ["JSONSchemaBuilder"]
+    ),
+    .executable(
+      name: "JSONSchemaClient",
+      targets: ["JSONSchemaClient"]
     ),
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.0-latest"),
   ],
   targets: [
     // Library that defines the JSON schema related types.
@@ -38,12 +43,45 @@ let package = Package(
 
     // Library for building JSON schemas with Swift's result builders.
     .target(
-      name: "JSONResultBuilders",
-      dependencies: ["JSONSchema"]
+      name: "JSONSchemaBuilder",
+      dependencies: [
+        "JSONSchema",
+        "JSONSchemaMacro",
+      ]
     ),
     .testTarget(
-      name: "JSONResultBuildersTests",
-      dependencies: ["JSONResultBuilders"]
+      name: "JSONSchemaBuilderTests",
+      dependencies: [
+        "JSONSchemaBuilder",
+      ]
+    ),
+
+    // Macro implementation that preforms the source transformation of a macro.
+    .macro(
+      name: "JSONSchemaMacro",
+      dependencies: [
+        .product(name: "SwiftSyntax", package: "swift-syntax"),
+        .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+        .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+      ]
+    ),
+    .testTarget(
+      name: "JSONSchemaMacroTests",
+      dependencies: [
+        "JSONSchemaMacro",
+        .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),
+        .product(name: "SwiftSyntaxMacrosGenericTestSupport", package: "swift-syntax"),
+      ]
+    ),
+
+    // A client of the library, which is able to use the macro in its own code.
+    .executableTarget(
+      name: "JSONSchemaClient",
+      dependencies: [
+        "JSONSchema",
+        "JSONSchemaBuilder",
+        "JSONSchemaMacro",
+      ]
     ),
   ]
 )

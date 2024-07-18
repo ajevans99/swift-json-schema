@@ -1,7 +1,7 @@
 import JSONSchema
 import Testing
 
-@testable import JSONResultBuilders
+@testable import JSONSchemaBuilder
 
 struct JSONPropertyBuilderTests {
   @Test func single() throws {
@@ -74,7 +74,7 @@ struct JSONPropertySchemaTests {
 
     let firstProp = try #require(sample.first)
     #expect(firstProp.key == "prop0")
-    #expect(firstProp.value.schema == .string())
+    #expect(firstProp.value.definition == .string())
   }
 
   @Test func multiple() throws {
@@ -88,7 +88,7 @@ struct JSONPropertySchemaTests {
     try #require(sample.count == 4)
     for (index, sample) in sample.enumerated() {
       #expect(sample.key == "prop\(index)")
-      #expect(sample.value.schema == .string())
+      #expect(sample.value.definition == .string())
     }
   }
 
@@ -124,7 +124,7 @@ struct JSONPropertySchemaTests {
     try #require(sample.count == 4)
     for (index, sample) in sample.enumerated() {
       #expect(sample.key == "prop\(index)")
-      #expect(sample.value.schema == .integer())
+      #expect(sample.value.definition == .integer())
     }
   }
 }

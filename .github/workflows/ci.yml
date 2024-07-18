@@ -16,6 +16,11 @@ jobs:
     name: Build on macOS
     steps:
     - uses: actions/checkout@v4
+    # Should be default on July 22, 2024
+    - name: Xcode setup
+      run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+    - name: Xcode version
+      run: xcodebuild -version
     - name: Get swift version
       run: swift --version
     - name: Delete Package.resolved
@@ -31,6 +36,8 @@ jobs:
     - uses: actions/checkout@v4
     - name: Xcode setup
       run: sudo xcode-select -s /Applications/Xcode_16.0.app/Contents/Developer
+    - name: Xcode version
+      run: xcodebuild -version
     - name: Get swift version
       run: swift --version
     - name: Build
