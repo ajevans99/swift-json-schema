@@ -302,23 +302,25 @@ struct EncodingSchemaTests {
   @Test func const() throws {
     let schema = Schema.const(.annotations(), "United States of America")
     let json = try schema.json()
-    #expect(json == """
-      {
-        "const" : "United States of America"
-      }
-      """
+    #expect(
+      json == """
+        {
+          "const" : "United States of America"
+        }
+        """
     )
   }
 
   @Test func constWithType() throws {
     let schema = Schema.const(.annotations(), "United States of America", type: .string)
     let json = try schema.json()
-    #expect(json == """
-      {
-        "const" : "United States of America",
-        "type" : "string"
-      }
-      """
+    #expect(
+      json == """
+        {
+          "const" : "United States of America",
+          "type" : "string"
+        }
+        """
     )
   }
 
