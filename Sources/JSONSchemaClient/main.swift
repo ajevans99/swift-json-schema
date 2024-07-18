@@ -2,31 +2,26 @@ import Foundation
 import JSONSchema
 import JSONSchemaBuilder
 
-@Schemable struct Weather {
-  @SchemaOptions(description: "The current temperature in fahrenheit, like 70°F") let temperature:
-    Double
-  let location: String
+let encoder = JSONEncoder()
+encoder.outputFormatting = .prettyPrinted
 
-  // Exprimental
-  let temperatures: [Double]
-
-  @ObjectOptions(propertyNames: .options(pattern: "^[A-Za-z][A-Za-z_]*$"))
-  let temperatureByLocation: [String: Double]
-}
-
-struct Weather2: Schemable {
-  let rain: Double
-
-  static var schema: JSONSchemaComponent {
-    JSONObject {
-      JSONProperty(key: "rain") { JSONNumber() }
-
-    }
-    .required(["rain"])
+func printInstance<T: Codable>(_ instance: T) {
+  let instanceData = try? encoder.encode(instance)
+  if let instanceData {
+    print("\(T.self) Instance")
+    print(String(decoding: instanceData, as: UTF8.self))
   }
 }
 
-@Schemable struct Weather3 {
+func printSchema<T: Schemable>(_ schema: T.Type) {
+  let schemaData = try? encoder.encode(T.schema.definition)
+  if let schemaData {
+    print("\(T.self) Schema")
+    print(String(decoding: schemaData, as: UTF8.self))
+  }
+}
+
+@Schemable struct Weather {
   @SchemaOptions(
     title: "Temperature",
     description: "The current temperature in fahrenheit, like 70°F",
@@ -73,71 +68,17 @@ struct Weather2: Schemable {
 }
 
 //@Schemable
-struct Weather4 {
-  var temperature: Double {
-    didSet { print("Updated temperature") }
-    willSet { print("Will update temperature") }
-  }
-
-  var temperatureInCelsius: Double {
-    get { (temperature - 32) * 5 / 9 }
-    set { temperature = newValue * 9 / 5 + 32 }
-  }
-
-  var isCold: Bool { temperature < 50 }
-}
-
-//@Schemable
 //enum TemperatureType {
 //  case farhenheit
 //  case celcius
 //}
 
-let x = \Weather2.rain
-print("\(x)")
-
-let now = Weather(
-  temperature: 72,
-  location: "Detroit",
-  temperatures: [32, 70.1, 84],
-  temperatureByLocation: ["Seattle": 64.5, "New York": 75]
-)
-
-let test = JSONObject {
-  JSONProperty(key: "temperature") { JSONNumber() }
-
-  JSONProperty(key: "location") { JSONString() }
-
-  JSONProperty(key: "temperatures") { JSONArray().items { JSONNumber() } }
-
-  JSONProperty(key: "temperatureByLocation") { JSONObject().additionalProperties { JSONNumber() } }
-}
+let now = Weather(temperature: 72, humidity: 30, temperatureReadings: [32, 70.1, 84], cityName: "Detroit")
 
 extension Weather: Codable {}
 
-let encoder = JSONEncoder()
-encoder.outputFormatting = .prettyPrinted
-
-func printInstance<T: Codable>(_ instance: T) {
-  let instanceData = try? encoder.encode(instance)
-  if let instanceData {
-    print("\(T.self) Instance")
-    print(String(decoding: instanceData, as: UTF8.self))
-  }
-}
-
-func printSchema<T: Schemable>(_ schema: T.Type) {
-  let schemaData = try? encoder.encode(T.schema.definition)
-  if let schemaData {
-    print("\(T.self) Schema")
-    print(String(decoding: schemaData, as: UTF8.self))
-  }
-}
-
 printInstance(now)
 printSchema(Weather.self)
-
-printSchema(Weather3.self)
 
 @Schemable struct Book {
   let title: String
@@ -153,40 +94,3 @@ printSchema(Weather3.self)
 printSchema(Book.self)
 printSchema(Library.self)
 
-//import SwiftData
-//
-//@available(macOS 14, *)
-//@Model
-//final class Animal {
-//  var name: String
-//  var diet: Diet
-//  var category: AnimalCategory?
-//
-//  init(name: String, diet: Diet) {
-//    self.name = name
-//    self.diet = diet
-//  }
-//}
-//
-//@available(macOS 14, *)
-//extension Animal {
-//  enum Diet: String, CaseIterable, Codable {
-//    case herbivorous = "Herbivore"
-//    case carnivorous = "Carnivore"
-//    case omnivorous = "Omnivore"
-//  }
-//}
-//
-//@available(macOS 14, *)
-//@Model
-//final class AnimalCategory {
-//  @Attribute(.unique) var name: String
-//  // `.cascade` tells SwiftData to delete all animals contained in the
-//  // category when deleting it.
-//  @Relationship(deleteRule: .cascade, inverse: \Animal.category)
-//  var animals = [Animal]()
-//
-//  init(name: String) {
-//    self.name = name
-//  }
-//}
