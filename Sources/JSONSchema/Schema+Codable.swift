@@ -34,6 +34,7 @@ extension Schema: Codable {
     self.enumValues = try container.decodeIfPresent([JSONValue].self, forKey: .enumValues)
     self.annotations = try AnnotationOptions(from: decoder)
     self.options = if let type { try AnySchemaOptions(from: decoder, typeHint: type) } else { nil }
+    self.composition = try? CompositionOptions(from: decoder)
   }
 
   public func encode(to encoder: any Encoder) throws {
@@ -42,5 +43,6 @@ extension Schema: Codable {
     try container.encodeIfPresent(enumValues, forKey: .enumValues)
     try annotations.encode(to: encoder)
     try options?.encode(to: encoder)
+    try composition?.encode(to: encoder)
   }
 }
