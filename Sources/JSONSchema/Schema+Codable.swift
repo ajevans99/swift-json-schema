@@ -24,7 +24,7 @@ extension RootSchema: Codable {
 
 extension Schema: Codable {
   enum CodingKeys: String, CodingKey {
-    case type
+    case type, const
     case enumValues = "enum"
   }
 
@@ -35,6 +35,7 @@ extension Schema: Codable {
     self.annotations = try AnnotationOptions(from: decoder)
     self.options = if let type { try AnySchemaOptions(from: decoder, typeHint: type) } else { nil }
     self.composition = try? CompositionOptions(from: decoder)
+    self.const = try container.decodeIfPresent(JSONValue.self, forKey: .const)
   }
 
   public func encode(to encoder: any Encoder) throws {
@@ -44,5 +45,6 @@ extension Schema: Codable {
     try annotations.encode(to: encoder)
     try options?.encode(to: encoder)
     try composition?.encode(to: encoder)
+    try container.encodeIfPresent(const, forKey: .const)
   }
 }
