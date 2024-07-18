@@ -82,8 +82,7 @@ printSchema(Library.self)
 // MARK: - Enums
 
 //@Schemable
-enum WeatherCondition: Codable {
-  case sunny(hoursOfSunlight: Int)
+enum WeatherCondition: Codable { case sunny(hoursOfSunlight: Int)
   case cloudy(coverage: Double)
   case rainy(chanceOfRain: Double, amount: Double)
   case snowy
@@ -105,17 +104,13 @@ extension WeatherCondition: Schemable {
     JSONComposition.AnyOf {
       JSONObject {
         JSONProperty(key: "sunny") {
-          JSONObject {
-            JSONProperty(key: "hoursOfSunlight", value: JSONInteger())
-          }
+          JSONObject { JSONProperty(key: "hoursOfSunlight", value: JSONInteger()) }
         }
       }
 
       JSONObject {
         JSONProperty(key: "cloudy") {
-          JSONObject {
-            JSONProperty(key: "coverage", value: JSONNumber())
-          }
+          JSONObject { JSONProperty(key: "coverage", value: JSONNumber()) }
         }
       }
 
@@ -128,11 +123,11 @@ extension WeatherCondition: Schemable {
         }
       }
 
-//        JSONEnum {
-//          "snowy"
-//          "windy"
-//          "stormy"
-//        }
+      //        JSONEnum {
+      //          "snowy"
+      //          "windy"
+      //          "stormy"
+      //        }
     }
   }
 }
