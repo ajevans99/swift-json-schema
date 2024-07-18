@@ -4,6 +4,15 @@ import Testing
 @testable import JSONSchemaBuilder
 
 struct JSONEnumTests {
+  @Test func singleValue() {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
+      JSONEnum {
+        "red"
+      }
+    }
+    #expect(sample.definition.enumValues == ["red"])
+  }
+
   @Test func sameType() {
     @JSONSchemaBuilder var sample: JSONSchemaComponent {
       JSONEnum {
@@ -34,5 +43,17 @@ struct JSONEnumTests {
       JSONEnum(values: ["red", "amber", "green"])
     }
     #expect(sample.definition.enumValues == ["red", "amber", "green"])
+  }
+
+  @Test func annotations() {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
+      JSONEnum {
+        "red"
+        "amber"
+        "green"
+      }
+      .title("Color")
+    }
+    #expect(sample.annotations.title == "Color")
   }
 }

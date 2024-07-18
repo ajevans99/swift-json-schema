@@ -4,7 +4,7 @@ import Testing
 @testable import JSONSchemaBuilder
 
 struct JSONCompositionTests {
-  @Test func anyOfComposition() throws {
+  @Test func anyOfComposition() {
     @JSONSchemaBuilder var sample: JSONSchemaComponent {
       JSONComposition.AnyOf {
         JSONString()
@@ -19,7 +19,7 @@ struct JSONCompositionTests {
     #expect(sample.definition == expectedSchema)
   }
 
-  @Test func allOfComposition() throws {
+  @Test func allOfComposition() {
     @JSONSchemaBuilder var sample: JSONSchemaComponent {
       JSONComposition.AllOf {
         JSONString()
@@ -34,7 +34,7 @@ struct JSONCompositionTests {
     #expect(sample.definition == expectedSchema)
   }
 
-  @Test func oneOfComposition() throws {
+  @Test func oneOfComposition() {
     @JSONSchemaBuilder var sample: JSONSchemaComponent {
       JSONComposition.OneOf {
         JSONString().pattern("^[a-zA-Z]+$")
@@ -49,11 +49,25 @@ struct JSONCompositionTests {
     #expect(sample.definition == expectedSchema)
   }
 
-  @Test func notComposition() throws {
+  @Test func notComposition() {
     @JSONSchemaBuilder var sample: JSONSchemaComponent { JSONComposition.Not { JSONString() } }
 
     let expectedSchema = Schema.noType(composition: .not(.string()))
 
     #expect(sample.definition == expectedSchema)
+  }
+
+  @Test func annotations() {
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
+      JSONComposition.AllOf {
+        JSONString()
+        JSONNumber().maximum(10)
+      }
+      .title("Item")
+      .description("This is the description")
+    }
+
+    #expect(sample.annotations.title == "Item")
+    #expect(sample.annotations.description == "This is the description")
   }
 }
