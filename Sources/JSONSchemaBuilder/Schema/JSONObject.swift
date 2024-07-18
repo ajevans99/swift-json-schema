@@ -12,7 +12,7 @@ public struct JSONObject: JSONSchemaComponent {
 
 extension JSONObject {
   /// Adds a property to the object schema.
-  /// - Parameter property: A dictionary where the key is the property name and the value is the schema for the property.
+  /// - Parameter properties: A dictionary where the key is the property name and the value is the schema for the property.
   /// - Returns: A new `JSONObject` with the property set.
   public func properties(_ properties: [String: Schema]?) -> Self {
     var copy = self
@@ -35,7 +35,7 @@ extension JSONObject {
   }
 
   /// Adds a property names schema to the object schema.
-  /// - Parameter option: A dictionary where the key is the property name and the value is the schema for the property.
+  /// - Parameter patternProperties: A dictionary where the key is the property name and the value is the schema for the property.
   /// - Returns: A new `JSONObject` with the property names set.
   public func patternProperties(_ patternProperties: [String: Schema]?) -> Self {
     var copy = self
@@ -58,7 +58,7 @@ extension JSONObject {
   }
 
   /// Adds additional properties to the schema.
-  /// - Parameter option: A schema control option.
+  /// - Parameter addionalProperties: A schema control option.
   /// - Returns: A new `JSONObject` with the additional properties set.
   public func additionalProperties(_ addionalProperties: SchemaControlOption?) -> Self {
     var copy = self
