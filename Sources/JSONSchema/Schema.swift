@@ -139,7 +139,6 @@ public struct Schema: Sendable {
   /// Composition options for the schema.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/combining)
   public let composition: CompositionOptions?
-  
   /// A single value that the schema must match.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/const#constant-values)
   public let const: JSONValue?
@@ -347,5 +346,14 @@ public struct Schema: Sendable {
     _ annotations: AnnotationOptions = .annotations(),
     _ value: JSONValue,
     type: JSONType? = nil
-  ) -> Schema { .init(type: type, options: nil, annotations: annotations, enumValues: nil, composition: nil,  const: value) }
+  ) -> Schema {
+    .init(
+      type: type,
+      options: nil,
+      annotations: annotations,
+      enumValues: nil,
+      composition: nil,
+      const: value
+    )
+  }
 }
