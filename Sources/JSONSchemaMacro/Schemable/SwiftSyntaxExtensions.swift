@@ -145,4 +145,13 @@ extension AttributeListSyntax {
   }
 }
 
-extension TypeSyntax {}
+extension CodeBlockItemListSyntax {
+  init(_ children: [CodeBlockItemSyntax.Item], separator: Trivia) {
+    let newChildren = children
+      .enumerated()
+      .map {
+        CodeBlockItemSyntax(leadingTrivia: separator, item: $0.element)
+      }
+    self.init(newChildren)
+  }
+}

@@ -1,40 +1,4 @@
 import SwiftSyntax
-import SwiftSyntaxBuilder
-
-struct SchemableEnumCase {
-  let identifier: TokenSyntax
-  let associatedValues: EnumCaseParameterListSyntax?
-
-  init(enumCaseDecl: EnumCaseDeclSyntax, caseElement: EnumCaseElementSyntax) {
-    identifier = caseElement.name
-    associatedValues = caseElement.parameterClause?.parameters
-  }
-
-  func generateSchema() -> CodeBlockItemSyntax? {
-    if let associatedValues {
-      let properties: [CodeBlockItemSyntax] = associatedValues
-        .enumerated()
-        .compactMap { index, parameter in
-          // firstName, type, defaultValue
-          let key = parameter.firstName?.text ?? "_\(index)"
-          guard let typeSchema = parameter.type.typeInformation().codeBlock else { return nil }
-          return """
-            JSONProperty(key: "\(raw: key)") { \(typeSchema) }
-            """
-        }
-
-      let list = CodeBlockItemListSyntax(properties)
-
-      return """
-        JSONObject { JSONProperty(key: "\(identifier)") { JSONObject { \(list) } } }
-        """
-    } else {
-      return """
-        "\(identifier)"
-        """
-    }
-  }
-}
 
 struct EnumSchemaGenerator {
   let members: MemberBlockItemListSyntax
@@ -50,8 +14,6 @@ struct EnumSchemaGenerator {
 
     let casesWithoutAssociatedValues = schemableCases.filter { $0.associatedValues == nil }
     let casesWithAssociatedValues = schemableCases.filter { $0.associatedValues != nil }
-
-
 
     var codeBlockItem: CodeBlockItemSyntax
 

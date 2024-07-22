@@ -104,3 +104,8 @@ enum WeatherCondition: Codable {
 let conditions = WeatherCondition.sunny(hoursOfSunlight: 5)
 printInstance(conditions)
 printSchema(WeatherCondition.self)
+
+@Schemable
+enum Category {
+  case fiction, nonFiction, science, history, kids, entertainment
+}

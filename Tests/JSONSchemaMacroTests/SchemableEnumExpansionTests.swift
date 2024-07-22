@@ -188,4 +188,245 @@ struct SchemableEnumExpansionTests {
       macros: testMacros
     )
   }
+
+  @Test func arraysAndDictionaries() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      enum UserProfileSetting {
+        case username(String)
+        case age(Int)
+        case preferredLanguages([String])
+        case contactInfo([String: String])
+      }
+      """,
+      expandedSource: """
+      enum UserProfileSetting {
+        case username(String)
+        case age(Int)
+        case preferredLanguages([String])
+        case contactInfo([String: String])
+
+        static var schema: JSONSchemaComponent {
+          JSONComposition.AnyOf {
+            JSONObject {
+              JSONProperty(key: "username") {
+                JSONObject {
+                  JSONProperty(key: "_0") {
+                    JSONString()
+                  }
+                }
+              }
+            }
+            JSONObject {
+              JSONProperty(key: "age") {
+                JSONObject {
+                  JSONProperty(key: "_0") {
+                    JSONInteger()
+                  }
+                }
+              }
+            }
+            JSONObject {
+              JSONProperty(key: "preferredLanguages") {
+                JSONObject {
+                  JSONProperty(key: "_0") {
+                    JSONArray()
+                      .items {
+                        JSONString()
+                      }
+                  }
+                }
+              }
+            }
+            JSONObject {
+              JSONProperty(key: "contactInfo") {
+                JSONObject {
+                  JSONProperty(key: "_0") {
+                    JSONObject()
+                      .additionalProperties {
+                        JSONString()
+                      }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      extension UserProfileSetting: Schemable {
+      }
+      """,
+      macros: testMacros
+    )
+  }
+
+  @Test func defaultValue() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      enum FlightInfo {
+        case flightNumber(_ value: Int = 0)
+        case departureDetails(city: String = "Unknown", isInternational: Bool = false)
+        case arrivalDetails(city: String = "Unknown")
+        case passengerInfo(name: String = "Unknown", seatNumber: String = "Unknown")
+      }
+      """,
+      expandedSource: """
+      enum FlightInfo {
+        case flightNumber(_ value: Int = 0)
+        case departureDetails(city: String = "Unknown", isInternational: Bool = false)
+        case arrivalDetails(city: String = "Unknown")
+        case passengerInfo(name: String = "Unknown", seatNumber: String = "Unknown")
+
+        static var schema: JSONSchemaComponent {
+          JSONComposition.AnyOf {
+            JSONObject {
+              JSONProperty(key: "flightNumber") {
+                JSONObject {
+                  JSONProperty(key: "_") {
+                    JSONInteger()
+                      .default(0)
+                  }
+                }
+              }
+            }
+            JSONObject {
+              JSONProperty(key: "departureDetails") {
+                JSONObject {
+                  JSONProperty(key: "city") {
+                    JSONString()
+                      .default("Unknown")
+                  }
+                  JSONProperty(key: "isInternational") {
+                    JSONBoolean()
+                      .default(false)
+                  }
+                }
+              }
+            }
+            JSONObject {
+              JSONProperty(key: "arrivalDetails") {
+                JSONObject {
+                  JSONProperty(key: "city") {
+                    JSONString()
+                      .default("Unknown")
+                  }
+                }
+              }
+            }
+            JSONObject {
+              JSONProperty(key: "passengerInfo") {
+                JSONObject {
+                  JSONProperty(key: "name") {
+                    JSONString()
+                      .default("Unknown")
+                  }
+                  JSONProperty(key: "seatNumber") {
+                    JSONString()
+                      .default("Unknown")
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      extension FlightInfo: Schemable {
+      }
+      """,
+      macros: testMacros
+    )
+  }
+
+  @Test func nestedEnumAndNonPrimativeType() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      enum Category {
+        case fiction, nonFiction, science, history, kids, entertainment
+      }
+      @Schemable
+      enum LibraryItem {
+        case book(details: ItemDetails, category: Category)
+        case movie(details: ItemDetails, category: Category, duration: Int)
+        case music(details: ItemDetails, category: Category)
+      }
+      """,
+      expandedSource: """
+      enum Category {
+        case fiction, nonFiction, science, history, kids, entertainment
+
+        static var schema: JSONSchemaComponent {
+          JSONEnum {
+            "fiction"
+            "nonFiction"
+            "science"
+            "history"
+            "kids"
+            "entertainment"
+          }
+        }
+      }
+      enum LibraryItem {
+        case book(details: ItemDetails, category: Category)
+        case movie(details: ItemDetails, category: Category, duration: Int)
+        case music(details: ItemDetails, category: Category)
+
+        static var schema: JSONSchemaComponent {
+          JSONComposition.AnyOf {
+            JSONObject {
+              JSONProperty(key: "book") {
+                JSONObject {
+                  JSONProperty(key: "details") {
+                    ItemDetails.schema
+                  }
+                  JSONProperty(key: "category") {
+                    Category.schema
+                  }
+                }
+              }
+            }
+            JSONObject {
+              JSONProperty(key: "movie") {
+                JSONObject {
+                  JSONProperty(key: "details") {
+                    ItemDetails.schema
+                  }
+                  JSONProperty(key: "category") {
+                    Category.schema
+                  }
+                  JSONProperty(key: "duration") {
+                    JSONInteger()
+                  }
+                }
+              }
+            }
+            JSONObject {
+              JSONProperty(key: "music") {
+                JSONObject {
+                  JSONProperty(key: "details") {
+                    ItemDetails.schema
+                  }
+                  JSONProperty(key: "category") {
+                    Category.schema
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      extension Category: Schemable {
+      }
+
+      extension LibraryItem: Schemable {
+      }
+      """,
+      macros: testMacros
+    )
+  }
 }
