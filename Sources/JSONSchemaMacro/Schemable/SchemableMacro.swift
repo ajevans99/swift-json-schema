@@ -39,6 +39,10 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
       let generator = SchemaGenerator(fromClass: classDecl)
       let schemaDecl = generator.makeSchema()
       return [schemaDecl]
+    } else if let enumDecl = declaration.as(EnumDeclSyntax.self) {
+      let generator = EnumSchemaGenerator(fromEnum: enumDecl)
+      let schemaDecl = generator.makeSchema()
+      return [schemaDecl]
     }
 
     throw SchemableError.unsupportedDeclaration
