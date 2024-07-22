@@ -262,6 +262,106 @@ All other types will be assumed to also conform to the ``Schemable`` protocol an
 
 Computed properties are not included in generated schemas.
 
+### Enums
+
+The ``Schemable()`` macro can also be applied to Swift enums. The enum cases will be expanded as string literals in the schema.
+
+```swift
+@Schemable
+enum TemperatureType: String {
+  case fahrenheit
+  case celsius
+  case kelvin
+}
+```
+
+will expand to:
+
+```swift
+enum TemperatureType: String {
+  case fahrenheit
+  case celsius
+  case kelvin
+
+  // Auto-generated schema ↴
+  static var schema: JSONSchemaComponent {
+    JSONEnum {
+      "fahrenheit"
+      "celsius"
+      "kelvin"
+    }
+  }
+}
+```
+
+If any of the enum cases have an associated value, the macro will instead expand using the ``JSONComposition/AnyOf/init(_:)`` builder.
+
+```swift
+@Schemable
+enum TemperatureKind {
+  case cloudy(Double)
+  case rainy(chanceOfRain: Double, amount: Double)
+  case snowy
+  case windy
+}
+```
+
+will expand to:
+
+```swift
+enum TemperatureType {
+  case cloudy(Double)
+  case rainy(chanceOfRain: Double, amount: Double)
+  case snowy
+  case windy
+
+  // Auto-generated schema ↴
+  static var schema: JSONSchemaComponent {
+    enum TemperatureKind {
+      case cloudy(Double)
+      case rainy(chanceOfRain: Double, amount: Double)
+      case snowy
+      case windy
+
+      static var schema: JSONSchemaComponent {
+        JSONComposition.AnyOf {
+          JSONObject {
+            JSONProperty(key: "cloudy") {
+              JSONObject {
+                JSONProperty(key: "_0") {
+                  JSONNumber()
+                }
+              }
+            }
+          }
+          JSONObject {
+            JSONProperty(key: "rainy") {
+              JSONObject {
+                JSONProperty(key: "chanceOfRain") {
+                  JSONNumber()
+                }
+                JSONProperty(key: "amount") {
+                  JSONNumber()
+                }
+              }
+            }
+          }
+          JSONEnum {
+            "snowy"
+            "windy"
+          }
+        }
+      }
+    }
+
+    extension TemperatureKind: Schemable {
+    }
+  }
+}
+```
+
+Notice how unnamed associated values are represented as `_0`, `_1`, etc.
+
 ### Other Behaviors
 
 #### Required properties
