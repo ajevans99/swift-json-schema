@@ -32,7 +32,7 @@ extension TypeSyntax {
       )
     case .dictionaryType(let dictionaryType):
       guard let keyType = dictionaryType.key.as(IdentifierTypeSyntax.self),
-            keyType.name.text == "String"
+        keyType.name.text == "String"
       else { return .notSupported }
       guard let codeBlock = dictionaryType.value.typeInformation().codeBlock else {
         return .notSupported
@@ -70,13 +70,11 @@ extension TypeSyntax {
       return .primative(primative, schema: "\(raw: primative.schema)()")
     case .implicitlyUnwrappedOptionalType(let implicitlyUnwrappedOptionalType):
       return implicitlyUnwrappedOptionalType.wrappedType.typeInformation()
-    case .optionalType(let optionalType):
-      return optionalType.wrappedType.typeInformation()
-    case .someOrAnyType(let someOrAnyType):
-      return someOrAnyType.constraint.typeInformation()
+    case .optionalType(let optionalType): return optionalType.wrappedType.typeInformation()
+    case .someOrAnyType(let someOrAnyType): return someOrAnyType.constraint.typeInformation()
     case .attributedType, .classRestrictionType, .compositionType, .functionType, .memberType,
-        .metatypeType, .missingType, .namedOpaqueReturnType, .packElementType, .packExpansionType,
-        .suppressedType, .tupleType:
+      .metatypeType, .missingType, .namedOpaqueReturnType, .packElementType, .packExpansionType,
+      .suppressedType, .tupleType:
       return .notSupported
     }
   }
@@ -113,8 +111,7 @@ extension MemberBlockItemListSyntax {
 
   func schemableEnumCases() -> [SchemableEnumCase] {
     self.compactMap { $0.decl.as(EnumCaseDeclSyntax.self) }
-      .flatMap { caseDecl in caseDecl.elements.map { (caseDecl, $0) } }
-      .map(SchemableEnumCase.init)
+      .flatMap { caseDecl in caseDecl.elements.map { (caseDecl, $0) } }.map(SchemableEnumCase.init)
   }
 }
 
@@ -147,11 +144,8 @@ extension AttributeListSyntax {
 
 extension CodeBlockItemListSyntax {
   init(_ children: [CodeBlockItemSyntax.Item], separator: Trivia) {
-    let newChildren = children
-      .enumerated()
-      .map {
-        CodeBlockItemSyntax(leadingTrivia: separator, item: $0.element)
-      }
+    let newChildren = children.enumerated()
+      .map { CodeBlockItemSyntax(leadingTrivia: separator, item: $0.element) }
     self.init(newChildren)
   }
 }

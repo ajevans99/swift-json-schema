@@ -82,17 +82,14 @@ printSchema(Library.self)
 
 // MARK: - Enums
 
-@Schemable
-enum TemperatureType: Codable {
+@Schemable enum TemperatureType: Codable {
   case fahrenheit
   case celcius
 }
 
 printSchema(TemperatureType.self)
 
-@Schemable
-enum WeatherCondition: Codable {
-  case sunny(hoursOfSunlight: Int)
+@Schemable enum WeatherCondition: Codable { case sunny(hoursOfSunlight: Int)
   case hail(Bool)
   case cloudy(coverage: Double)
   case rainy(chanceOfRain: Double, amount: Double)
@@ -105,7 +102,4 @@ let conditions = WeatherCondition.sunny(hoursOfSunlight: 5)
 printInstance(conditions)
 printSchema(WeatherCondition.self)
 
-@Schemable
-enum Category {
-  case fiction, nonFiction, science, history, kids, entertainment
-}
+@Schemable enum Category { case fiction, nonFiction, science, history, kids, entertainment }

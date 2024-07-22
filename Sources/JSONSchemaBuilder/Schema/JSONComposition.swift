@@ -5,9 +5,7 @@ public protocol JSONComposableComponent: JSONSchemaComponent {
 }
 
 extension JSONComposableComponent {
-  public var definition: Schema {
-    .noType(annotations, composition: compositionOptions)
-  }
+  public var definition: Schema { .noType(annotations, composition: compositionOptions) }
 }
 
 public enum JSONComposition {

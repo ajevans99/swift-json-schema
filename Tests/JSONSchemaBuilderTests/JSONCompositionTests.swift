@@ -63,8 +63,7 @@ struct JSONCompositionTests {
         JSONString()
         JSONNumber().maximum(10)
       }
-      .title("Item")
-      .description("This is the description")
+      .title("Item").description("This is the description")
     }
 
     #expect(sample.annotations.title == "Item")

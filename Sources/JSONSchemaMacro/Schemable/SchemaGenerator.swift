@@ -27,7 +27,6 @@ struct EnumSchemaGenerator {
         let statements = casesWithoutAssociatedValues.compactMap { $0.generateSchema() }
         codeBlockItemList.append("JSONEnum { \(CodeBlockItemListSyntax(statements)) }")
       }
-      
       codeBlockItem = "JSONComposition.AnyOf { \(codeBlockItemList) }"
     } else {
       // When no case has an associated value, use simple enum schema

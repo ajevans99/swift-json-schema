@@ -5,11 +5,7 @@ import Testing
 
 struct JSONEnumTests {
   @Test func singleValue() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent {
-      JSONEnum {
-        "red"
-      }
-    }
+    @JSONSchemaBuilder var sample: JSONSchemaComponent { JSONEnum { "red" } }
     #expect(sample.definition.enumValues == ["red"])
   }
 

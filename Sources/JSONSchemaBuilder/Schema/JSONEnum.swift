@@ -3,9 +3,7 @@ import JSONSchema
 public struct JSONEnum: JSONSchemaComponent {
   public var annotations: AnnotationOptions = .annotations()
 
-  public var definition: Schema {
-    .noType(annotations, enumValues: values)
-  }
+  public var definition: Schema { .noType(annotations, enumValues: values) }
 
   let values: [JSONValue]
 
@@ -13,7 +11,5 @@ public struct JSONEnum: JSONSchemaComponent {
     values = Array(builder().value)
   }
 
-  public init(values: [JSONValue]) {
-    self.values = values
-  }
+  public init(values: [JSONValue]) { self.values = values }
 }

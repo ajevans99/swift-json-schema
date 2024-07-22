@@ -10,45 +10,41 @@ struct SchemableEnumCase {
   }
 
   func generateSchema() -> CodeBlockItemSyntax? {
-    if let associatedValues {
-      let properties: [CodeBlockItemSyntax] = associatedValues
-        .enumerated()
-        .compactMap { index, parameter in
-          let key = parameter.firstName?.text ?? "_\(index)"
+    guard let associatedValues else {
+      return """
+        "\(raw: identifier.text)"
+        """
+    }
+    let properties: [CodeBlockItemSyntax] = associatedValues.enumerated()
+      .compactMap { index, parameter in
+        let key = parameter.firstName?.text ?? "_\(index)"
 
-          let typeInfo = parameter.type.typeInformation()
-          let codeBlock: CodeBlockItemSyntax
+        let typeInfo = parameter.type.typeInformation()
+        let codeBlock: CodeBlockItemSyntax
 
-          switch typeInfo {
-          case .primative(_, schema: let code):
-            if let defaultValue = parameter.defaultValue?.value {
-              codeBlock = """
-                \(code)
-                .default(\(defaultValue))
-                """
-            } else {
-              codeBlock = code
-            }
-          case .schemable(_, schema: let code):
+        switch typeInfo {
+        case .primative(_, schema: let code):
+          if let defaultValue = parameter.defaultValue?.value {
+            codeBlock = """
+              \(code)
+              .default(\(defaultValue))
+              """
+          } else {
             codeBlock = code
-          case .notSupported:
-            return nil
           }
-
-          return """
-            JSONProperty(key: "\(raw: key)") { \(codeBlock) }
-            """
+        case .schemable(_, schema: let code): codeBlock = code
+        case .notSupported: return nil
         }
 
-      let list = CodeBlockItemListSyntax(properties)
+        return """
+          JSONProperty(key: "\(raw: key)") { \(codeBlock) }
+          """
+      }
 
-      return """
-        JSONObject { JSONProperty(key: "\(raw: identifier.text)") { JSONObject { \(list) } } }
-        """
-    } else {
-      return """
-      "\(raw: identifier.text)"
+    let list = CodeBlockItemListSyntax(properties)
+
+    return """
+      JSONObject { JSONProperty(key: "\(raw: identifier.text)") { JSONObject { \(list) } } }
       """
-    }
   }
 }
