@@ -208,7 +208,6 @@ Once added, you can import `JSONSchema` in your Swift files and start using it i
 This library is in active development. If you have any feedback or suggestions, please open an issue or pull request.
 
 Goals for future releases include:
-- [ ] [Support `const` keyword](https://json-schema.org/understanding-json-schema/reference/const#constant-values)
 - [ ] [Support applying subschemas conditionally](https://json-schema.org/understanding-json-schema/reference/conditionals)
 - [ ] Support `$ref` and `$defs` keywords
 - [ ] Support enums in result builders and macro expansion

@@ -299,6 +299,31 @@ struct EncodingSchemaTests {
     )
   }
 
+  @Test func const() throws {
+    let schema = Schema.const(.annotations(), "United States of America")
+    let json = try schema.json()
+    #expect(
+      json == """
+        {
+          "const" : "United States of America"
+        }
+        """
+    )
+  }
+
+  @Test func constWithType() throws {
+    let schema = Schema.const(.annotations(), "United States of America", type: .string)
+    let json = try schema.json()
+    #expect(
+      json == """
+        {
+          "const" : "United States of America",
+          "type" : "string"
+        }
+        """
+    )
+  }
+
   @Test func root() throws {
     let schema = RootSchema(
       id: "https://example.com/schemas/myschema",

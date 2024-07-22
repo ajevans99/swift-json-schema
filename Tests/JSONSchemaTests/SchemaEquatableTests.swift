@@ -44,14 +44,16 @@ struct SchemaEquatableTests {
         options: nil,
         annotations: .annotations(),
         enumValues: nil,
-        composition: nil
+        composition: nil,
+        const: nil
       )
         != Schema(
           type: .object,
           options: ObjectSchemaOptions().eraseToAnySchemaOptions(),
           annotations: .annotations(),
           enumValues: nil,
-          composition: nil
+          composition: nil,
+          const: nil
         )
     )
   }
