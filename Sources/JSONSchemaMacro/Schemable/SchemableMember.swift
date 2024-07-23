@@ -53,29 +53,15 @@ struct SchemableMember {
     )
   }
 
-  func applyArguments(to codeBlock: inout CodeBlockItemSyntax) {
+  private func applyArguments(to codeBlock: inout CodeBlockItemSyntax) {
     if let annotationArguments { codeBlock.applyArguments(annotationArguments) }
 
     if let typeSpecificArguments { codeBlock.applyArguments(typeSpecificArguments) }
   }
 
-  enum TypeInformation {
-    case primative(SupportedPrimative, schema: CodeBlockItemSyntax)
-    case schemable(String, schema: CodeBlockItemSyntax)
-    case notSupported
-
-    var codeBlock: CodeBlockItemSyntax? {
-      switch self {
-      case .primative(_, let schema): schema
-      case .schemable(_, let schema): schema
-      case .notSupported: nil
-      }
-    }
-  }
-
   func generateSchema() -> CodeBlockItemSyntax? {
     var codeBlock: CodeBlockItemSyntax
-    switch typeInformation(from: type) {
+    switch type.typeInformation() {
     case .primative(_, let code):
       codeBlock = code
       // Only use default value on primatives that can be `ExpressibleBy*Literal` to transform
@@ -96,69 +82,5 @@ struct SchemableMember {
     return """
       JSONProperty(key: "\(raw: identifier.text)") { \(codeBlock) }
       """
-  }
-
-  private func typeInformation(from typeSyntax: TypeSyntax) -> TypeInformation {
-    switch typeSyntax.as(TypeSyntaxEnum.self) {
-    case .arrayType(let arrayType):
-      guard let codeBlock = typeInformation(from: arrayType.element).codeBlock else {
-        return .notSupported
-      }
-      return .primative(
-        .array,
-        schema: """
-          JSONArray()
-          .items {
-            \(codeBlock)
-          }
-          """
-      )
-    case .dictionaryType(let dictionaryType):
-      guard let keyType = dictionaryType.key.as(IdentifierTypeSyntax.self),
-        keyType.name.text == "String"
-      else { return .notSupported }
-      guard let codeBlock = typeInformation(from: dictionaryType.value).codeBlock else {
-        return .notSupported
-      }
-      return .primative(
-        .dictionary,
-        schema: """
-          JSONObject()
-          .additionalProperties {
-            \(codeBlock)
-          }
-          """
-      )
-    case .identifierType(let identifierType):
-      if let generic = identifierType.genericArgumentClause {
-        guard identifierType.name.text != "Array" else {
-          let arrayType = ArrayTypeSyntax(element: generic.arguments.first!.argument)
-          return typeInformation(from: TypeSyntax(arrayType))
-        }
-
-        guard identifierType.name.text != "Dictionary" else {
-          let test = Array(generic.arguments.prefix(2))
-          let dictionaryType = DictionaryTypeSyntax(key: test[0].argument, value: test[1].argument)
-          return typeInformation(from: TypeSyntax(dictionaryType))
-        }
-      }
-
-      guard let primative = SupportedPrimative(rawValue: identifierType.name.text) else {
-        return .schemable(
-          identifierType.name.text,
-          schema: "\(raw: identifierType.name.text).schema"
-        )
-      }
-
-      return .primative(primative, schema: "\(raw: primative.schema)()")
-    case .implicitlyUnwrappedOptionalType(let implicitlyUnwrappedOptionalType):
-      return typeInformation(from: implicitlyUnwrappedOptionalType.wrappedType)
-    case .optionalType(let optionalType): return typeInformation(from: optionalType.wrappedType)
-    case .someOrAnyType(let someOrAnyType): return typeInformation(from: someOrAnyType.constraint)
-    case .attributedType, .classRestrictionType, .compositionType, .functionType, .memberType,
-      .metatypeType, .missingType, .namedOpaqueReturnType, .packElementType, .packExpansionType,
-      .suppressedType, .tupleType:
-      return .notSupported
-    }
   }
 }

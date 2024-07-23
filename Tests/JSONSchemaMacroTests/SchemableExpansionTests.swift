@@ -233,7 +233,7 @@ struct SchemableExpansionTests {
     )
   }
 
-  @Test func nestedSchemableType() {
+  @Test func defaultValue() {
     assertMacroExpansion(
       """
       @Schemable
@@ -292,29 +292,6 @@ struct SchemableExpansionTests {
         }
 
         extension Weather: Schemable {
-        }
-        """,
-      macros: testMacros
-    )
-  }
-
-  @Test func defaultValue() {
-
-  }
-
-  @Test(.disabled("TODO: Test diagnostics.")) func `enum`() {
-    assertMacroExpansion(
-      """
-      @Schemable
-      enum TempertureKind {
-        case celsius
-        case fahrenheit
-      }
-      """,
-      expandedSource: """
-        enum TempertureKind {
-          case celsius
-          case fahrenheit
         }
         """,
       macros: testMacros

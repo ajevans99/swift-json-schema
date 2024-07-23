@@ -159,6 +159,26 @@ struct Person {
 extension Person: Schemable {}
 ```
 
+Additionally, `@Schemable` can be applied to Swift enums.
+
+```swift
+@Schemable
+enum Status {
+  case active
+  case inactive
+
+  // Auto-generated schema ↴
+  static var schema: JSONSchemaComponent {
+    JSONEnum {
+      "active"
+      "inactive"
+    }
+  }
+}
+```
+
+Enums with associated values are also supported using `anyOf` schema composition. See the [JSONSchemaBuilder documentation](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder) for more information.
+
 ## Documentation
 
 The full documentation for this library is available through the Swift Package Index.
@@ -210,7 +230,6 @@ This library is in active development. If you have any feedback or suggestions, 
 Goals for future releases include:
 - [ ] [Support applying subschemas conditionally](https://json-schema.org/understanding-json-schema/reference/conditionals)
 - [ ] Support `$ref` and `$defs` keywords
-- [ ] Support enums in result builders and macro expansion
 - [ ] Root schema in result builders
 - [ ] Support multiple types like `{ "type": ["number", "string"] }`
 - [ ] Validate JSON instances against schemas

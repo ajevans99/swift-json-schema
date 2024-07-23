@@ -1,5 +1,53 @@
 import SwiftSyntax
 
+struct EnumSchemaGenerator {
+  let members: MemberBlockItemListSyntax
+  let attributes: AttributeListSyntax
+
+  init(fromEnum enumDecl: EnumDeclSyntax) {
+    members = enumDecl.memberBlock.members
+    attributes = enumDecl.attributes
+  }
+
+  func makeSchema() -> DeclSyntax {
+    let schemableCases = members.schemableEnumCases()
+
+    let casesWithoutAssociatedValues = schemableCases.filter { $0.associatedValues == nil }
+    let casesWithAssociatedValues = schemableCases.filter { $0.associatedValues != nil }
+
+    var codeBlockItem: CodeBlockItemSyntax
+
+    if !casesWithAssociatedValues.isEmpty {
+      // When any case has an associated value, use composition and any of to build schema with nested objects
+      let statements = casesWithAssociatedValues.compactMap { $0.generateSchema() }
+      var codeBlockItemList = CodeBlockItemListSyntax(statements)
+
+      // Add cases without associated value
+      if !casesWithoutAssociatedValues.isEmpty {
+        let statements = casesWithoutAssociatedValues.compactMap { $0.generateSchema() }
+        codeBlockItemList.append("JSONEnum { \(CodeBlockItemListSyntax(statements)) }")
+      }
+      codeBlockItem = "JSONComposition.AnyOf { \(codeBlockItemList) }"
+    } else {
+      // When no case has an associated value, use simple enum schema
+      let statements = casesWithoutAssociatedValues.compactMap { $0.generateSchema() }
+      codeBlockItem = "JSONEnum { \(CodeBlockItemListSyntax(statements)) }"
+    }
+
+    if let annotationArguments = attributes.arguments(for: "SchemaOptions") {
+      codeBlockItem.applyArguments(annotationArguments)
+    }
+
+    let variableDecl: DeclSyntax = """
+      static var schema: JSONSchemaComponent {
+        \(codeBlockItem)
+      }
+      """
+
+    return variableDecl
+  }
+}
+
 struct SchemaGenerator {
   let members: MemberBlockItemListSyntax
   let attributes: AttributeListSyntax
@@ -64,5 +112,4 @@ struct SchemaGenerator {
 
     return variableDecl
   }
-
 }

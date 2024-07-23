@@ -145,4 +145,44 @@ struct SchemaOptionsTests {
       macros: testMacros
     )
   }
+
+  @Test func onEnum() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      @SchemaOptions(
+        title: "Weather",
+        description: "The current weather conditions",
+        deprecated: false
+      )
+      enum Weather {
+        case sunny
+        case cloudy
+        case rainy
+      }
+      """,
+      expandedSource: """
+        enum Weather {
+          case sunny
+          case cloudy
+          case rainy
+
+          static var schema: JSONSchemaComponent {
+            JSONEnum {
+              "sunny"
+              "cloudy"
+              "rainy"
+            }
+            .title("Weather")
+            .description("The current weather conditions")
+            .deprecated(false)
+          }
+        }
+
+        extension Weather: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
 }
