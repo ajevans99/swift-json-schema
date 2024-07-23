@@ -69,7 +69,7 @@ printSchema(Weather.self)
   let title: String
   let authors: [String]
   let yearPublished: Int
-  let rating: Double
+  @ExcludeFromSchema let rating: Double
 }
 
 @Schemable struct Library {

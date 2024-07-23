@@ -3,7 +3,9 @@ import SwiftSyntaxMacros
 import Testing
 
 struct SchemableExpansionTests {
-  let testMacros: [String: Macro.Type] = ["Schemable": SchemableMacro.self]
+  let testMacros: [String: Macro.Type] = [
+    "Schemable": SchemableMacro.self, "ExcludeFromSchema": ExcludeFromSchemaMacro.self,
+  ]
 
   @Test(arguments: ["struct", "class"]) func basicTypes(declarationType: String) {
     assertMacroExpansion(
@@ -288,6 +290,38 @@ struct SchemableExpansionTests {
               }
             }
             .required(["temperature", "units", "location", "isRaining", "windSpeed", "humidity"])
+          }
+        }
+
+        extension Weather: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func excludeFromSchema() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct Weather {
+        let temperature: Double
+        @ExcludeFromSchema
+        let units: TemperatureType
+      }
+      """,
+      expandedSource: """
+        struct Weather {
+          let temperature: Double
+          let units: TemperatureType
+
+          static var schema: JSONSchemaComponent {
+            JSONObject {
+              JSONProperty(key: "temperature") {
+                JSONNumber()
+              }
+            }
+            .required(["temperature"])
           }
         }
 
