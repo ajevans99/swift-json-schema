@@ -52,9 +52,9 @@ Composition of schemas is supported with ``CompositionOptions`` on ``Schema/comp
 
 #### Annotations
 
-``AnnotationsOptions`` can be added to a schema object using the ``AnnotationOptions/annotations(title:description:default:examples:readOnly:writeOnly:deprecated:comment:)`` factory method. This is the first argument in the ``Schema`` factory methods.
+``AnnotationOptions`` can be added to a schema object using the ``AnnotationOptions/annotations(title:description:default:examples:readOnly:writeOnly:deprecated:comment:)`` factory method. This is the first argument in the ``Schema`` factory methods.
 
-Annotations are used to provide additional information about the schema object. For example, the ``title`` annotation provides a title for the schema object, and the ``description`` annotation provides a description of the schema object. They are typically not used for validation.
+Annotations are used to provide additional information about the schema object. For example, the ``AnnotationOptions/title`` annotation provides a title for the schema object, and the ``AnnotationOptions/description`` annotation provides a description of the schema object. They are typically not used for validation.
 
 ```swift
 let schema = Schema

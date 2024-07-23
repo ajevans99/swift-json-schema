@@ -417,3 +417,19 @@ struct Weather {
   }
 }
 ```
+
+#### Exclude from schema
+
+Use the ``ExcludeFromSchema()`` macro on a property you wish to exclude from the generated schema.
+
+```swift
+@Schemable
+struct Weather {
+  let temperature: Double
+  let units: TemperatureType
+  let location: String
+
+  @ExcludeFromSchema
+  let secret: String
+}
+```
