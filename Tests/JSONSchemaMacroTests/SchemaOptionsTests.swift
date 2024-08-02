@@ -20,14 +20,16 @@ struct SchemaOptionsTests {
         struct Weather {
           let temperature: Double
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "temperature") {
-                JSONNumber()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperature") {
+                  JSONNumber()
                   .description("The current temperature in fahrenheit, like 70°F")
+                }
+                .required()
               }
             }
-            .required(["temperature"])
           }
         }
 
@@ -73,10 +75,11 @@ struct SchemaOptionsTests {
           let temperature: Double
           let humidity: Int
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "temperature") {
-                JSONNumber()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperature") {
+                  JSONNumber()
                   .title("Temperature")
                   .description("The current temperature in fahrenheit, like 70°F")
                   .default(75.0)
@@ -85,9 +88,10 @@ struct SchemaOptionsTests {
                   .writeOnly(false)
                   .deprecated(true)
                   .comment("This is a comment about temperature")
-              }
-              JSONProperty(key: "humidity") {
-                JSONInteger()
+                }
+                .required()
+                JSONProperty(key: "humidity") {
+                  JSONInteger()
                   .title("Humidity")
                   .description("The current humidity percentage")
                   .default(50)
@@ -96,9 +100,10 @@ struct SchemaOptionsTests {
                   .writeOnly(true)
                   .deprecated(false)
                   .comment("This is a comment about humidity")
+                }
+                .required()
               }
             }
-            .required(["temperature", "humidity"])
           }
         }
 
@@ -126,16 +131,18 @@ struct SchemaOptionsTests {
         struct Weather {
           let cityName: String
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "cityName") {
-                JSONString()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "cityName") {
+                  JSONString()
+                }
+                .required()
               }
+              .title("Weather Data")
+              .description("Contains weather-related information")
+              .deprecated(false)
             }
-            .title("Weather Data")
-            .description("Contains weather-related information")
-            .deprecated(false)
-            .required(["cityName"])
           }
         }
 
@@ -167,7 +174,7 @@ struct SchemaOptionsTests {
           case cloudy
           case rainy
 
-          static var schema: JSONSchemaComponent {
+          static var schema: some JSONSchemaComponent<Weather> {
             JSONEnum {
               "sunny"
               "cloudy"
@@ -176,6 +183,21 @@ struct SchemaOptionsTests {
             .title("Weather")
             .description("The current weather conditions")
             .deprecated(false)
+            .compactMap { value in
+              guard case .string(let string) = value else {
+                return nil
+              }
+              switch string {
+              case "sunny":
+                return .sunny
+              case "cloudy":
+                return .cloudy
+              case "rainy":
+                return .rainy
+              default:
+                return nil
+              }
+            }
           }
         }
 

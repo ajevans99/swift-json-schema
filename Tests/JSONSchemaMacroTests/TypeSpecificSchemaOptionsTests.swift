@@ -20,15 +20,17 @@ struct NumberOptionsTests {
         struct Weather {
           let temperature: Double
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "temperature") {
-                JSONNumber()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperature") {
+                  JSONNumber()
                   .minimum(0)
                   .maximum(100)
+                }
+                .required()
               }
             }
-            .required(["temperature"])
           }
         }
 
@@ -52,15 +54,17 @@ struct NumberOptionsTests {
         struct Weather {
           let temperature: Double
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "temperature") {
-                JSONNumber()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperature") {
+                  JSONNumber()
                   .exclusiveMinimum(0)
                   .exclusiveMaximum(100)
+                }
+                .required()
               }
             }
-            .required(["temperature"])
           }
         }
 
@@ -84,14 +88,16 @@ struct NumberOptionsTests {
         struct Weather {
           let temperature: Double
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "temperature") {
-                JSONNumber()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperature") {
+                  JSONNumber()
                   .multipleOf(5)
+                }
+                .required()
               }
             }
-            .required(["temperature"])
           }
         }
 
@@ -127,10 +133,11 @@ struct ArrayOptionsTests {
         struct Weather {
           let temperatureReadings: [Double]
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "temperatureReadings") {
-                JSONArray()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperatureReadings") {
+                  JSONArray()
                   .items {
                     JSONNumber()
                   }
@@ -139,9 +146,10 @@ struct ArrayOptionsTests {
                   .minItems(2)
                   .maxItems(10)
                   .uniqueItems(true)
+                }
+                .required()
               }
             }
-            .required(["temperatureReadings"])
           }
         }
 
@@ -175,19 +183,21 @@ struct ObjectOptionsTests {
         struct Weather {
           let metadata: [String: String]
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "metadata") {
-                JSONObject()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "metadata") {
+                  JSONObject()
                   .additionalProperties {
                     JSONString()
                   }
                   .propertyNames(.options(pattern: "^[A-Za-z_][A-Za-z0-9_]*$"))
                   .minProperties(2)
                   .maxProperties(5)
+                }
+                .required()
               }
             }
-            .required(["metadata"])
           }
         }
 
@@ -214,14 +224,17 @@ struct ObjectOptionsTests {
         struct Weather {
           let cityName: String
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "cityName") {
-                JSONString()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "cityName") {
+                  JSONString()
+                }
+                .required()
               }
+              .minProperties(2)
+              .maxProperties(5)
             }
-            .minProperties(2)
-            .maxProperties(5)
           }
         }
 
@@ -256,17 +269,19 @@ struct StringOptionsTests {
         struct Weather {
           let cityName: String
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "cityName") {
-                JSONString()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "cityName") {
+                  JSONString()
                   .minLength(5)
                   .maxLength(100)
                   .pattern("^[a-zA-Z]+$")
                   .format(nil)
+                }
+                .required()
               }
             }
-            .required(["cityName"])
           }
         }
 

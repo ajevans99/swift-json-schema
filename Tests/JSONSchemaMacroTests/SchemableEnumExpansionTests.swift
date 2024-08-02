@@ -19,7 +19,7 @@ struct SchemableEnumExpansionTests {
           case celsius
           case fahrenheit
 
-          static var schema: JSONSchemaComponent {
+          static var schema: some JSONSchemaComponent<TemperatureKind> {
             JSONEnum {
               "celsius"
               "fahrenheit"
@@ -48,7 +48,7 @@ struct SchemableEnumExpansionTests {
           case cloudy(coverage: Double)
           case rainy(chanceOfRain: Double, amount: Double)
 
-          static var schema: JSONSchemaComponent {
+          static var schema: some JSONSchemaComponent<TemperatureKind> {
             JSONComposition.AnyOf {
               JSONObject {
                 JSONProperty(key: "cloudy") {
@@ -96,7 +96,7 @@ struct SchemableEnumExpansionTests {
           case cloudy(Double)
           case rainy(Double, Double)
 
-          static var schema: JSONSchemaComponent {
+          static var schema: some JSONSchemaComponent<TemperatureKind> {
             JSONComposition.AnyOf {
               JSONObject {
                 JSONProperty(key: "cloudy") {
@@ -150,7 +150,7 @@ struct SchemableEnumExpansionTests {
           case windy
           case stormy
 
-          static var schema: JSONSchemaComponent {
+          static var schema: some JSONSchemaComponent<TemperatureKind> {
             JSONComposition.AnyOf {
               JSONObject {
                 JSONProperty(key: "cloudy") {
@@ -207,7 +207,7 @@ struct SchemableEnumExpansionTests {
           case preferredLanguages([String])
           case contactInfo([String: String])
 
-          static var schema: JSONSchemaComponent {
+          static var schema: some JSONSchemaComponent<UserProfileSetting> {
             JSONComposition.AnyOf {
               JSONObject {
                 JSONProperty(key: "username") {
@@ -280,7 +280,7 @@ struct SchemableEnumExpansionTests {
           case arrivalDetails(city: String = "Unknown")
           case passengerInfo(name: String = "Unknown", seatNumber: String = "Unknown")
 
-          static var schema: JSONSchemaComponent {
+          static var schema: some JSONSchemaComponent<FlightInfo> {
             JSONComposition.AnyOf {
               JSONObject {
                 JSONProperty(key: "flightNumber") {
@@ -359,7 +359,7 @@ struct SchemableEnumExpansionTests {
         enum Category {
           case fiction, nonFiction, science, history, kids, entertainment
 
-          static var schema: JSONSchemaComponent {
+          static var schema: some JSONSchemaComponent<Category> {
             JSONEnum {
               "fiction"
               "nonFiction"
@@ -375,7 +375,7 @@ struct SchemableEnumExpansionTests {
           case movie(details: ItemDetails, category: Category, duration: Int)
           case music(details: ItemDetails, category: Category)
 
-          static var schema: JSONSchemaComponent {
+          static var schema: some JSONSchemaComponent<LibraryItem> {
             JSONComposition.AnyOf {
               JSONObject {
                 JSONProperty(key: "book") {

@@ -106,11 +106,48 @@ func printSchema<T: Schemable>(_ schema: T.Type) {
 
 // MARK: Parsing
 
+enum Weather {
+  case sunny
+  case cloudy
+  case rainy
+
+  static var schema: some JSONSchemaComponent<Weather> {
+    JSONEnum {
+      "sunny"
+      "cloudy"
+      "rainy"
+    }
+    .title("Weather")
+    .description("The current weather conditions")
+    .deprecated(false)
+    .compactMap { value in
+      guard case .string(let string) = value else {
+        return nil
+      }
+      switch string {
+      case "sunny":
+        return .sunny
+      case "cloudy":
+        return .cloudy
+      case "rainy":
+        return .rainy
+      default:
+        return nil
+      }
+    }
+  }
+}
+
+let sunny = Weather.schema.validate(.string("sunny"))
+print(sunny)
+let notSupported = Weather.schema.validate(.string("other"))
+print(notSupported)
+
 enum Airline: String, CaseIterable, Schemable {
   case delta
   case united
   case american
-  case alasks
+  case alaska
 
   static var schema: some JSONSchemaComponent<Airline> {
     JSONEnum(cases: Airline.allCases.map { .string($0.rawValue) })
@@ -130,14 +167,6 @@ struct Flight: Sendable {
   let airline: Airline
   let duration: Double
 }
-
-let test = JSONProperty(key: "test") {
-  JSONString()
-}
-
-let ab = test.validate(["test": nil])
-print("ab", ab)
-print(type(of: ab))
 
 extension Flight: Schemable {
   static var schema: some JSONSchemaComponent<Flight> {
@@ -175,33 +204,8 @@ extension Flight: Schemable {
   }
 }
 
-let obj = JSONObject {
-  JSONProperty(key: "origin") {
-    JSONString()
-  }
-  JSONProperty(key: "destination") {
-    JSONString()
-  }
-  JSONProperty(key: "duration") {
-    JSONNumber()
-      .description("The duration of the flight in seconds")
-  }
-}
-//.patternProperties {
-//  JSONProperty(key: "Test") {
-//    JSONString()
-//  }
-//}
 
-let obj_test = obj.validate(.string("hi"))
-
-//let flightSchema = Flight.schema.definition
 printSchema(Flight.self)
-//let flightData: JSONValue = .object(["origin": "Detroit", "destination": "Cancun", "duration": .number(10_800)])
-
-//let example = [true, false].map { value in
-//  return value
-//}
 
 let flightDataJSON = """
 {

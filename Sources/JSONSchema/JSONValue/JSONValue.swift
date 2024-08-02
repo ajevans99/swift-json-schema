@@ -24,24 +24,3 @@ public enum JSONValue: Hashable, Equatable, Sendable { case string(String)
   case boolean(Bool)
   case null
 }
-
-public extension JSONValue {
-  var type: JSONType {
-    switch self {
-    case .string:
-      return .string
-    case .number:
-      return .number
-    case .integer:
-      return .integer
-    case .object:
-      return .object
-    case .array:
-      return .array
-    case .boolean:
-      return .boolean
-    case .null:
-      return .null
-    }
-  }
-}

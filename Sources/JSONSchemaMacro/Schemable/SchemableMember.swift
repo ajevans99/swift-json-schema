@@ -79,8 +79,17 @@ struct SchemableMember {
 
     applyArguments(to: &codeBlock)
 
-    return """
+    var block: CodeBlockItemSyntax = """
       JSONProperty(key: "\(raw: identifier.text)") { \(codeBlock) }
       """
+
+    if !isOptional {
+      block = """
+        \(block)
+        .required()
+        """
+    }
+
+    return block
   }
 }

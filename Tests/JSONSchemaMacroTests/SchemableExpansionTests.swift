@@ -29,28 +29,34 @@ struct SchemableExpansionTests {
           let precipitationAmount: Double?
           let humidity: Float
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "temperature") {
-                JSONNumber()
-              }
-              JSONProperty(key: "location") {
-                JSONString()
-              }
-              JSONProperty(key: "isRaining") {
-                JSONBoolean()
-              }
-              JSONProperty(key: "windSpeed") {
-                JSONInteger()
-              }
-              JSONProperty(key: "precipitationAmount") {
-                JSONNumber()
-              }
-              JSONProperty(key: "humidity") {
-                JSONNumber()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperature") {
+                  JSONNumber()
+                }
+                .required()
+                JSONProperty(key: "location") {
+                  JSONString()
+                }
+                .required()
+                JSONProperty(key: "isRaining") {
+                  JSONBoolean()
+                }
+                .required()
+                JSONProperty(key: "windSpeed") {
+                  JSONInteger()
+                }
+                .required()
+                JSONProperty(key: "precipitationAmount") {
+                  JSONNumber()
+                }
+                JSONProperty(key: "humidity") {
+                  JSONNumber()
+                }
+                .required()
               }
             }
-            .required(["temperature", "location", "isRaining", "windSpeed", "humidity"])
           }
         }
 
@@ -77,28 +83,32 @@ struct SchemableExpansionTests {
           let temperatureByLocation: [String: Double?]
           let conditionsByLocation: [String: WeatherCondition]
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "temperatures") {
-                JSONArray()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperatures") {
+                  JSONArray()
                   .items {
                     JSONNumber()
                   }
-              }
-              JSONProperty(key: "temperatureByLocation") {
-                JSONObject()
+                }
+                .required()
+                JSONProperty(key: "temperatureByLocation") {
+                  JSONObject()
                   .additionalProperties {
                     JSONNumber()
                   }
-              }
-              JSONProperty(key: "conditionsByLocation") {
-                JSONObject()
+                }
+                .required()
+                JSONProperty(key: "conditionsByLocation") {
+                  JSONObject()
                   .additionalProperties {
                     WeatherCondition.schema
                   }
+                }
+                .required()
               }
             }
-            .required(["temperatures", "temperatureByLocation", "conditionsByLocation"])
           }
         }
 
@@ -125,22 +135,25 @@ struct SchemableExpansionTests {
           let temperatures: Array<Double>
           let temperatureByLocation: Dictionary<String, Double?>
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "temperatures") {
-                JSONArray()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperatures") {
+                  JSONArray()
                   .items {
                     JSONNumber()
                   }
-              }
-              JSONProperty(key: "temperatureByLocation") {
-                JSONObject()
+                }
+                .required()
+                JSONProperty(key: "temperatureByLocation") {
+                  JSONObject()
                   .additionalProperties {
                     JSONNumber()
                   }
+                }
+                .required()
               }
             }
-            .required(["temperatures", "temperatureByLocation"])
           }
         }
 
@@ -163,19 +176,21 @@ struct SchemableExpansionTests {
         \(declarationType) Weather {
           let isRaining: Bool?, temperature: Int?, location: String
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "isRaining") {
-                JSONBoolean()
-              }
-              JSONProperty(key: "temperature") {
-                JSONInteger()
-              }
-              JSONProperty(key: "location") {
-                JSONString()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "isRaining") {
+                  JSONBoolean()
+                }
+                JSONProperty(key: "temperature") {
+                  JSONInteger()
+                }
+                JSONProperty(key: "location") {
+                  JSONString()
+                }
+                .required()
               }
             }
-            .required(["location"])
           }
         }
 
@@ -218,13 +233,15 @@ struct SchemableExpansionTests {
 
           var isCold: Bool { temperature < 50 }
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "temperature") {
-                JSONNumber()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperature") {
+                  JSONNumber()
+                }
+                .required()
               }
             }
-            .required(["temperature"])
           }
         }
 
@@ -259,37 +276,44 @@ struct SchemableExpansionTests {
           let precipitationAmount: Double? = nil
           let humidity: Float = 0.30
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "temperature") {
-                JSONNumber()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperature") {
+                  JSONNumber()
                   .default(72.0)
-              }
-              JSONProperty(key: "units") {
-                TemperatureType.schema
-              }
-              JSONProperty(key: "location") {
-                JSONString()
+                }
+                .required()
+                JSONProperty(key: "units") {
+                  TemperatureType.schema
+                }
+                .required()
+                JSONProperty(key: "location") {
+                  JSONString()
                   .default("Detroit")
-              }
-              JSONProperty(key: "isRaining") {
-                JSONBoolean()
+                }
+                .required()
+                JSONProperty(key: "isRaining") {
+                  JSONBoolean()
                   .default(false)
-              }
-              JSONProperty(key: "windSpeed") {
-                JSONInteger()
+                }
+                .required()
+                JSONProperty(key: "windSpeed") {
+                  JSONInteger()
                   .default(12)
-              }
-              JSONProperty(key: "precipitationAmount") {
-                JSONNumber()
+                }
+                .required()
+                JSONProperty(key: "precipitationAmount") {
+                  JSONNumber()
                   .default(nil)
-              }
-              JSONProperty(key: "humidity") {
-                JSONNumber()
+                }
+                JSONProperty(key: "humidity") {
+                  JSONNumber()
                   .default(0.30)
+                }
+                .required()
               }
             }
-            .required(["temperature", "units", "location", "isRaining", "windSpeed", "humidity"])
           }
         }
 
@@ -315,13 +339,15 @@ struct SchemableExpansionTests {
           let temperature: Double
           let units: TemperatureType
 
-          static var schema: JSONSchemaComponent {
-            JSONObject {
-              JSONProperty(key: "temperature") {
-                JSONNumber()
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperature") {
+                  JSONNumber()
+                }
+                .required()
               }
             }
-            .required(["temperature"])
           }
         }
 
