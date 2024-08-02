@@ -1,39 +1,51 @@
 import JSONSchema
 
 /// A JSON object schema component for use in ``JSONSchemaBuilder``.
-public struct JSONObject: JSONSchemaComponent {
+public struct JSONObject<each Property: JSONPropertyComponent>: JSONSchemaComponent {
   public var annotations: AnnotationOptions = .annotations()
-  var options: ObjectSchemaOptions = .options()
+  var options: ObjectSchemaOptions
 
-  public var definition: Schema { .object(annotations, options) }
-
-  public init() {}
-}
-
-extension JSONObject {
-  /// Adds a property to the object schema.
-  /// - Parameter properties: A dictionary where the key is the property name and the value is the schema for the property.
-  /// - Returns: A new `JSONObject` with the property set.
-  public func properties(_ properties: [String: Schema]?) -> Self {
-    var copy = self
-    copy.options.properties = properties
-    return copy
+  public var definition: Schema {
+    .object(annotations, options)
   }
 
-  /// Defines the schema for the properties of the object.
+  let propertiesContainer: PropertyTuple<repeat each Property>
+
+  /// Constructs a new `JSONObject` with the provided properties.
   ///
-  /// - SeeAlso: ``JSONProperty``
-  /// - Parameter properties: The properties to add to the schema.
-  /// - Returns: A new `JSONObject` with the properties set.
-  public func properties(@JSONPropertySchemaBuilder _ properties: () -> [JSONProperty]) -> Self {
-    self.properties(
-      properties()
-        .reduce(into: [:]) { partialResult, property in
-          partialResult[property.key] = property.value.definition
-        }
+  /// Example:
+  /// ```swift
+  /// let schema = JSONObject {
+  ///   JSONProperty(key: "name", value: JSONString())
+  /// }
+  /// ```
+  /// which is equivalent to:
+  /// ```swift
+  /// let schema = JSONObject().properties {
+  ///   JSONProperty(key: "name", value: JSONString())
+  /// }
+  /// ```
+  /// - Parameter content: A closure that returns an array of `JSONProperty` instances.
+  public init(
+    @JSONPropertySchemaBuilder with build: () -> PropertyTuple<repeat each Property>
+  ) {
+    annotations = .annotations()
+    propertiesContainer = build()
+    options = .options(
+      properties: propertiesContainer.schema,
+      required: propertiesContainer.requiredKeys.nilIfEmpty
     )
   }
 
+  public func validate(_ input: JSONValue) -> Validated<(repeat (each Property).Output), String> {
+    if case .object(let dictionary) = input {
+      return zip(repeat (each propertiesContainer.property).validate(dictionary))
+    }
+    return .error("Not an object")
+  }
+}
+
+extension JSONObject {
   /// Adds a property names schema to the object schema.
   /// - Parameter patternProperties: A dictionary where the key is the property name and the value is the schema for the property.
   /// - Returns: A new `JSONObject` with the property names set.
@@ -47,13 +59,10 @@ extension JSONObject {
   /// - Parameter patternProperties: A closure that returns an array of JSON properties representing the pattern properties.
   /// - Returns: A new `JSONObject` with the pattern properties set.
   public func patternProperties(
-    @JSONPropertySchemaBuilder _ patternProperties: () -> [JSONProperty]
-  ) -> Self {
+    @JSONPropertySchemaBuilder _ patternProperties: () -> [String: Schema]
+  ) -> JSONObject<repeat each Property> {
     self.patternProperties(
       patternProperties()
-        .reduce(into: [:]) { partialResult, property in
-          partialResult[property.key] = property.value.definition
-        }
     )
   }
 
@@ -73,8 +82,8 @@ extension JSONObject {
   /// Adds additional properties to the schema.
   /// - Parameter additionalProperties: A closure that returns a JSON schema representing the additional properties.
   /// - Returns: A new `JSONObject` with the additional properties set.
-  public func additionalProperties(
-    @JSONSchemaBuilder _ additionalProperties: () -> JSONSchemaComponent
+  public func additionalProperties<C: JSONSchemaComponent>(
+    @JSONSchemaBuilder _ additionalProperties: () -> C
   ) -> Self { self.additionalProperties(.schema(additionalProperties().definition)) }
 
   /// Adds unevaluated properties to the schema.
@@ -93,7 +102,7 @@ extension JSONObject {
   /// Adds unevaluated properties to the schema.
   /// - Parameter content: A closure that returns a JSON schema representing the unevaluated properties.
   /// - Returns: A new `JSONObject` with the unevaluated properties set.
-  public func unevaluatedProperties(@JSONSchemaBuilder _ content: () -> JSONSchemaComponent) -> Self
+  public func unevaluatedProperties<C: JSONSchemaComponent>(@JSONSchemaBuilder _ content: () -> C) -> Self
   { self.unevaluatedProperties(.schema(content().definition)) }
 
   /// Adds a required constraint to the schema.

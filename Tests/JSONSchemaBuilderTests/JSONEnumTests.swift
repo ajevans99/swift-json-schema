@@ -5,12 +5,12 @@ import Testing
 
 struct JSONEnumTests {
   @Test func singleValue() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent { JSONEnum { "red" } }
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent { JSONEnum { "red" } }
     #expect(sample.definition.enumValues == ["red"])
   }
 
   @Test func sameType() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
       JSONEnum {
         "red"
         "amber"
@@ -21,7 +21,7 @@ struct JSONEnumTests {
   }
 
   @Test func differentType() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
       JSONEnum {
         "red"
         "amber"
@@ -35,14 +35,14 @@ struct JSONEnumTests {
   }
 
   @Test func withoutBuilder() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent {
-      JSONEnum(values: ["red", "amber", "green"])
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
+      JSONEnum(cases: ["red", "amber", "green"])
     }
     #expect(sample.definition.enumValues == ["red", "amber", "green"])
   }
 
   @Test func annotations() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
       JSONEnum {
         "red"
         "amber"
@@ -50,6 +50,7 @@ struct JSONEnumTests {
       }
       .title("Color")
     }
+    print(sample.annotations)
     #expect(sample.annotations.title == "Color")
   }
 }

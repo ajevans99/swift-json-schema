@@ -8,6 +8,13 @@ public struct JSONNumber: JSONSchemaComponent {
   public var definition: Schema { .number(annotations, options) }
 
   public init() {}
+
+  public func validate(_ value: JSONValue) -> Validated<Double, String> {
+    if case .number(let double) = value {
+      return .valid(double)
+    }
+    return .error("Expected a number.")
+  }
 }
 
 extension JSONNumber {

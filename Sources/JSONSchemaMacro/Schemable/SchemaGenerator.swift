@@ -39,7 +39,7 @@ struct EnumSchemaGenerator {
     }
 
     let variableDecl: DeclSyntax = """
-      static var schema: JSONSchemaComponent {
+      static var schema: some JSONSchemaComponent {
         \(codeBlockItem)
       }
       """
@@ -105,7 +105,7 @@ struct SchemaGenerator {
     }
 
     let variableDecl: DeclSyntax = """
-      static var schema: JSONSchemaComponent {
+      static var schema: some JSONSchemaComponent {
         \(codeBlockItem)
       }
       """

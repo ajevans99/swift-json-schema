@@ -1,13 +1,25 @@
 import JSONSchema
 
 /// A JSON array type component for use in ``JSONSchemaBuilder``.
-public struct JSONArray: JSONSchemaComponent {
+public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
   public var annotations: AnnotationOptions = .annotations()
-  var options: ArraySchemaOptions = .options()
+  var options: ArraySchemaOptions
 
   public var definition: Schema { .array(annotations, options) }
 
-  public init() {}
+  let items: T
+
+  public init(@JSONSchemaBuilder items: () -> T) {
+    self.items = items()
+    self.options = .options(items: .schema(self.items.definition))
+  }
+
+  public func validate(_ value: JSONValue) -> Validated<[T.Output], String> {
+    if case .array(let array) = value {
+      return .error("Not yet implemented")
+    }
+    return .error("Expected array value")
+  }
 }
 
 extension JSONArray {
@@ -27,9 +39,9 @@ extension JSONArray {
   /// Adds items to the schema.
   /// - Parameter items: A closure that returns a JSON schema representing the items.
   /// - Returns: A new `JSONArray` with the items set.
-  public func items(@JSONSchemaBuilder _ items: () -> JSONSchemaComponent) -> Self {
-    self.items(.schema(items().definition))
-  }
+//  public func items(@JSONSchemaBuilder _ items: () -> JSONSchemaComponent) -> Self {
+//    self.items(.schema(items().definition))
+//  }
 
   /// Adds prefix items to the schema.
   /// - Parameter prefixItems: An array of JSON schemas representing the prefix items.
@@ -43,8 +55,12 @@ extension JSONArray {
   /// Adds prefix items to the schema.
   /// - Parameter prefixItems: A closure that returns an array of JSON schemas representing the prefix items.
   /// - Returns: A new `JSONArray` with the prefix items set.
-  public func prefixItems(@JSONSchemaBuilder _ prefixItems: () -> [JSONSchemaComponent]) -> Self {
-    self.prefixItems(prefixItems().map(\.definition))
+  public func prefixItems<each Component: JSONSchemaComponent>(@JSONSchemaBuilder _ prefixItems: () -> SchemaTuple<repeat each Component>) -> Self {
+    var defintions = [Schema]()
+    for component in repeat each prefixItems().component {
+      defintions.append(component.definition)
+    }
+    return self.prefixItems(defintions)
   }
 
   /// Adds unevaluated items to the schema.
@@ -63,8 +79,8 @@ extension JSONArray {
   /// Adds unevaluated items to the schema.
   /// - Parameter unevaluatedItems: A closure that returns a JSON schema representing the unevaluated items.
   /// - Returns: A new `JSONArray` with the unevaluated items set.
-  public func unevaluatedItems(
-    @JSONSchemaBuilder _ unevaluatedItems: () -> JSONSchemaComponent
+  public func unevaluatedItems<Component: JSONSchemaComponent>(
+    @JSONSchemaBuilder _ unevaluatedItems: () -> Component
   ) -> Self { self.unevaluatedItems(.schema(unevaluatedItems().definition)) }
 
   /// Adds a `contains` schema to the schema.
@@ -79,7 +95,7 @@ extension JSONArray {
   /// Adds a `contains` schema to the schema.
   /// - Parameter contains: A closure that returns a JSON schema representing the `contains` schema.
   /// - Returns: A new `JSONArray` with the `contains` schema set.
-  public func contains(@JSONSchemaBuilder _ contains: () -> JSONSchemaComponent) -> Self {
+  public func contains(@JSONSchemaBuilder _ contains: () -> any JSONSchemaComponent) -> Self {
     self.contains(contains().definition)
   }
 
