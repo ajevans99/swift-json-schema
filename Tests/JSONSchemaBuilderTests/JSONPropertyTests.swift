@@ -89,40 +89,26 @@ struct JSONPropertySchemaTests {
     }
   }
 
-  @Test(.disabled(), arguments: [true, false]) func optional(_ bool: Bool) {
+  @Test(arguments: [true, false]) func optional(_ bool: Bool) {
     @JSONPropertySchemaBuilder var sample: [String: Schema] {
-//      if bool {
+      if bool {
         JSONProperty(key: "prop0", value: JSONString())
-        JSONProperty(key: "prop1", value: JSONString())
-//      }
+      }
     }
 
-    #expect(sample.count == (bool ? 2 : 0))
+    #expect(sample.count == (bool ? 1 : 0))
   }
 
-  @Test(.disabled(), arguments: [true, false]) func either(_ bool: Bool) throws {
+  @Test(arguments: [true, false]) func either(_ bool: Bool) throws {
     @JSONPropertySchemaBuilder var sample: [String: Schema] {
-//      if bool {
+      if bool {
         JSONProperty(key: "prop0", value: JSONString())
-//      } else {
+      } else {
         JSONProperty(key: "prop1", value: JSONString())
-//      }
+      }
     }
 
     let firstProperty = try #require(sample.first)
     #expect(firstProperty.key == (bool ? "prop0" : "prop1"))
-  }
-
-  @Test(.disabled()) func array() throws {
-    @JSONPropertySchemaBuilder var sample: [String: Schema] {
-//      for num in 0 ..< 4 { JSONProperty(key: "prop\(num)", value: JSONInteger()) }
-      JSONProperty(key: "prop0", value: JSONInteger())
-    }
-
-    try #require(sample.count == 4)
-    for (index, sample) in sample.enumerated() {
-      #expect(sample.key == "prop\(index)")
-//      #expect(sample.value.definition == .integer())
-    }
   }
 }

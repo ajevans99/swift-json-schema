@@ -226,3 +226,16 @@ case .valid(let a):
 case .invalid(let array):
   print("Invalid: \(array.joined(separator: "\n"))")
 }
+
+let sample =
+  JSONComposition.AnyOf {
+    JSONString()
+    JSONNumber().minimum(0)
+  }
+print(sample.definition)
+
+let expectedSchema = Schema.noType(
+  composition: .anyOf([.string(), .number(.annotations(), .options(minimum: 0))])
+)
+
+print(sample.definition == expectedSchema)

@@ -79,34 +79,6 @@ struct SchemaGenerator {
     if let objectArguemnts = attributes.arguments(for: "ObjectOptions") {
       codeBlockItem.applyArguments(objectArguemnts)
     }
-//    else {
-//      // Default to adding requirement for non-optional members
-//      let requiredMemebers = schemableMembers.filter { !$0.isOptional }
-//      let arrayExpr = ArrayExprSyntax(
-//        elements: ArrayElementListSyntax(
-//          requiredMemebers.enumerated()
-//            .map {
-//              (
-//                index: $0.offset,
-//                expression: StringLiteralExprSyntax(content: $0.element.identifier.text)
-//              )
-//            }
-//            .map {
-//              ArrayElementSyntax(
-//                expression: $0.expression,
-//                trailingComma: .commaToken(
-//                  presence: $0.index == requiredMemebers.indices.last ? .missing : .present
-//                )
-//              )
-//            }
-//        )
-//      )
-//      let labeledListExpression = LabeledExprSyntax(
-//        label: .identifier("required"),
-//        expression: arrayExpr
-//      )
-//      codeBlockItem.applyArguments([labeledListExpression])
-//    }
 
     let variableDecl: DeclSyntax = """
       static var schema: some JSONSchemaComponent<\(name)> {

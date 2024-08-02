@@ -21,18 +21,13 @@ import JSONSchema
 
   // MARK: Advanced builers
 
-//  public static func buildOptional<C: JSONSchemaComponent>(_ component: C?) -> C {
-//    // I think to properly do this, will neeed a SchemaConditionalComponent or somethign
-//    component ?? JSONNull()
-//  }
-//
-//  public static func buildEither(first: JSONSchemaComponent) -> JSONSchemaComponent { first }
-//
-//  public static func buildEither(second: JSONSchemaComponent) -> JSONSchemaComponent { second }
-//
-//  public static func buildArray(_ components: [JSONSchemaComponent]) -> [JSONSchemaComponent] {
-//    components
-//  }
+  public static func buildOptional<Component: JSONSchemaComponent>(_ component: Component?) -> JSONComponents.OptionalNoType<Component> {
+    .init(wrapped: component)
+  }
+
+  public static func buildEither<TrueComponent, FalseComponent>(first component: TrueComponent) -> JSONComponents.Conditional<TrueComponent, FalseComponent> { .first(component) }
+
+  public static func buildEither<TrueComponent, FalseComponent>(second component: FalseComponent) -> JSONComponents.Conditional<TrueComponent, FalseComponent> { .second(component) }
 }
 
 public struct SchemaTuple<each Component: JSONSchemaComponent>: JSONSchemaComponent {

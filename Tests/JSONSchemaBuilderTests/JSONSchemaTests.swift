@@ -219,27 +219,22 @@ struct JSONSchemaAnnotationsBuilderTests {
   }
 }
 
-//struct JSONAdvancedBuilderTests {
-//  @Test(arguments: [true, false]) func optional(_ bool: Bool) {
-//    @JSONSchemaBuilder var sample: JSONSchemaComponent { if bool { JSONString() } }
-//
-//    #expect(sample.definition == (bool ? Schema.string() : .null()))
-//  }
-//
-//  @Test(arguments: [true, false]) func either(_ bool: Bool) {
-//    @JSONSchemaBuilder var sample: JSONSchemaComponent {
-//      if bool { JSONString() } else { JSONInteger() }
-//    }
-//
-//    #expect(sample.definition == (bool ? Schema.string() : .integer()))
-//  }
-//
-//  @Test func array() throws {
-//    @JSONSchemaBuilder var sample: JSONSchemaComponent {
-//      JSONArray().prefixItems { for _ in 0 ..< 10 { JSONString() } }
-//    }
-//
-//    let options: ArraySchemaOptions = try #require(sample.definition.options?.asType())
-//    #expect(options.prefixItems?.count == 10)
-//  }
-//}
+struct JSONAdvancedBuilderTests {
+  @Test(arguments: [true, false]) func optional(_ bool: Bool) {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
+      if bool {
+        JSONString()
+      }
+    }
+
+    #expect(sample.definition == (bool ? Schema.string() : .noType()))
+  }
+
+  @Test(arguments: [true, false]) func either(_ bool: Bool) {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
+      if bool { JSONNumber().maximum(100) } else { JSONNumber() }
+    }
+
+    #expect(sample.definition == (bool ? Schema.number(.annotations(), .options(maximum: 100)) : .number()))
+  }
+}

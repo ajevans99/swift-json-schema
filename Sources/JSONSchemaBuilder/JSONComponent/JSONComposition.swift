@@ -18,8 +18,8 @@ public enum JSONComposition {
 
     public let compositionOptions: CompositionOptions
 
-    public init(@JSONSchemaBuilder _ builder: () -> [Component]) {
-      compositionOptions = .anyOf(builder().map(\.definition))
+    public init(@JSONSchemaBuilder _ builder: () -> Component) {
+      compositionOptions = .anyOf([builder().definition])
     }
   }
 
@@ -28,8 +28,8 @@ public enum JSONComposition {
 
     public let compositionOptions: CompositionOptions
 
-    public init(@JSONSchemaBuilder _ builder: () -> [Component]) {
-      compositionOptions = .allOf(builder().map(\.definition))
+    public init(@JSONSchemaBuilder _ builder: () -> Component) {
+      compositionOptions = .allOf([builder().definition])
     }
   }
 
@@ -38,8 +38,8 @@ public enum JSONComposition {
 
     public let compositionOptions: CompositionOptions
 
-    public init(@JSONSchemaBuilder _ builder: () -> [Component]) {
-      compositionOptions = .oneOf(builder().map(\.definition))
+    public init(@JSONSchemaBuilder _ builder: () -> Component) {
+      compositionOptions = .oneOf([builder().definition])
     }
   }
 

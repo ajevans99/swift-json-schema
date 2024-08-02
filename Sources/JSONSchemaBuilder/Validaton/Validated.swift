@@ -1,13 +1,13 @@
 // Adapted from https://github.com/pointfreeco/swift-validated
-public enum Validated<A, E> {
-  case valid(A)
-  case invalid([E])
+public enum Validated<Value, Error> {
+  case valid(Value)
+  case invalid([Error])
 
-  static func error(_ error: E) -> Self {
+  static func error(_ error: Error) -> Self {
     return .invalid([error])
   }
 
-  public func map<ValueOfResult>(_ transform: (A) -> ValueOfResult) -> Validated<ValueOfResult, E> {
+  public func map<ValueOfResult>(_ transform: (Value) -> ValueOfResult) -> Validated<ValueOfResult, Error> {
     switch self {
     case let .valid(value):
       return .valid(transform(value))
@@ -16,7 +16,7 @@ public enum Validated<A, E> {
     }
   }
 
-  public func flatMap<ValueOfResult>(_ transform: (A) -> Validated<ValueOfResult, E>) -> Validated<ValueOfResult, E> {
+  public func flatMap<ValueOfResult>(_ transform: (Value) -> Validated<ValueOfResult, Error>) -> Validated<ValueOfResult, Error> {
     switch self {
     case let .valid(value):
       return transform(value)
