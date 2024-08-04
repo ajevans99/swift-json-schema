@@ -15,7 +15,7 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
   }
 
   public func validate(_ value: JSONValue) -> Validated<[T.Output], String> {
-    if case .array(let array) = value {
+    if case .array = value {
       return .error("Not yet implemented")
     }
     return .error("Expected array value")
@@ -23,26 +23,6 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
 }
 
 extension JSONArray {
-  /// Configure the items option schema.
-  /// - Parameter items: A schema control option.
-  /// - Returns: A new `JSONArray` with the items set.
-  public func items(_ items: SchemaControlOption? = nil) -> Self {
-    var copy = self
-    copy.options.items = items
-    return copy
-  }
-
-  /// Disallows array elements beyond what are provided in `prefixItems`.
-  /// - Returns: A new `JSONArray` with the annotation added.
-  public func disableItems() -> Self { self.items(.disabled) }
-
-  /// Adds items to the schema.
-  /// - Parameter items: A closure that returns a JSON schema representing the items.
-  /// - Returns: A new `JSONArray` with the items set.
-//  public func items(@JSONSchemaBuilder _ items: () -> JSONSchemaComponent) -> Self {
-//    self.items(.schema(items().definition))
-//  }
-
   /// Adds prefix items to the schema.
   /// - Parameter prefixItems: An array of JSON schemas representing the prefix items.
   /// - Returns: A new `JSONArray` with the prefix items set.
@@ -56,11 +36,19 @@ extension JSONArray {
   /// - Parameter prefixItems: A closure that returns an array of JSON schemas representing the prefix items.
   /// - Returns: A new `JSONArray` with the prefix items set.
   public func prefixItems<each Component: JSONSchemaComponent>(@JSONSchemaBuilder _ prefixItems: () -> SchemaTuple<repeat each Component>) -> Self {
-    var defintions = [Schema]()
+    var definitions = [Schema]()
+#if swift(>=6)
     for component in repeat each prefixItems().component {
-      defintions.append(component.definition)
+      definitions.append(component.definition)
     }
-    return self.prefixItems(defintions)
+#else
+    func appendDefinition<Comp: JSONSchemaComponent>(_ component: Comp) {
+      definitions.append(component.definition)
+    }
+    let components = prefixItems().component
+    repeat appendDefinition(each components)
+#endif
+    return self.prefixItems(definitions)
   }
 
   /// Adds unevaluated items to the schema.

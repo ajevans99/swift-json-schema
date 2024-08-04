@@ -33,21 +33,41 @@ import JSONSchema
 public struct SchemaTuple<each Component: JSONSchemaComponent>: JSONSchemaComponent {
   public var definition: Schema {
     // TODO: Multiple types should be supported here
+#if swift(>=6)
     for component in repeat each component {
       return component.definition
     }
     return .noType()
+#else
+    var definition: Schema?
+    func getDefinition<Comp: JSONSchemaComponent>(_ component: Comp) {
+      guard definition == nil else { return }
+      definition = component.definition
+    }
+    repeat getDefinition(each component)
+    return definition ?? .noType()
+#endif
   }
 
   public var annotations: AnnotationOptions {
     get {
+#if swift(>=6)
       for component in repeat each component {
         return component.annotations
       }
       return .annotations()
+#else
+      var annotation: AnnotationOptions?
+      func getAnnotations<Comp: JSONSchemaComponent>(_ component: Comp) {
+        guard annotation == nil else { return }
+        annotation = component.annotations
+      }
+      repeat getAnnotations(each component)
+      return annotation ?? .annotations()
+#endif
     }
     set {
-      fatalError()
+      fatalError("Setting annotations on \(Self.self) is not supported.")
     }
   }
 

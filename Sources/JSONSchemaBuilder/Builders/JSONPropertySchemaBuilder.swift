@@ -27,21 +27,38 @@ public struct PropertyTuple<each Property: JSONPropertyComponent>: Sendable {
 
   var schema: [String: Schema] {
     var output = [String: Schema]()
+#if swift(>=6)
     for property in repeat each property {
       guard !property.key.isEmpty else { continue }
 
       output[property.key] = property.value.definition
     }
+#else
+    func schemaForProperty<Prop: JSONPropertyComponent>(_ property: Prop) {
+      guard !property.key.isEmpty else { return }
+      output[property.key] = property.value.definition
+    }
+    repeat schemaForProperty(each property)
+#endif
     return output
   }
 
   var requiredKeys: [String] {
     var keys = [String]()
+#if swift(>=6)
     for property in repeat each property {
       if property.isRequired {
         keys.append(property.key)
       }
     }
+#else
+    func addKeyIfRequired<Prop: JSONPropertyComponent>(_ property: Prop) {
+      if property.isRequired {
+        keys.append(property.key)
+      }
+    }
+    repeat addKeyIfRequired(each property)
+#endif
     return keys
   }
 

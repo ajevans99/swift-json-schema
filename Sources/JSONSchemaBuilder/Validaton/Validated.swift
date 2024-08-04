@@ -43,10 +43,13 @@ public func zip<each Value, Error>(
   }
 
   do {
-    return .valid((repeat try valid(each validated)))
+    // Compiler crash in Swift 5.10 when simply `.valid((repeat try valid(each validated)))`
+    let tuple = (repeat try valid(each validated))
+    return .valid(tuple)
   } catch {
     var errors: [Error] = []
 
+#if swift(>=6)
     for validated in repeat each validated {
       switch validated {
       case .valid:
@@ -55,6 +58,18 @@ public func zip<each Value, Error>(
         errors.append(contentsOf: array)
       }
     }
+#else
+    func collectErrors<Val>(_ v: Validated<Val, Error>) {
+      switch v {
+      case .valid:
+        break
+      case .invalid(let array):
+        errors.append(contentsOf: array)
+      }
+    }
+    repeat collectErrors(each validated)
+#endif
+
     return .invalid(errors)
   }
 }

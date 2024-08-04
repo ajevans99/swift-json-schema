@@ -27,12 +27,6 @@ public struct JSONProperty<Value: JSONSchemaComponent>: JSONPropertyComponent {
   }
 
   public func required() -> JSONPropertyComponents.CompactMap<Self, Value.Output> {
-    return self.compactMap { output in
-      if let output = output {
-        return output
-      } else {
-        return nil
-      }
-    }
+    self.compactMap { $0 } // CompactMap type will also wrap property as `isRequired = true`
   }
 }
