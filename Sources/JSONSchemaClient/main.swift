@@ -89,27 +89,27 @@ printSchema(Library.self)
 
 // MARK: - Enums
 
-@Schemable enum TemperatureType: Codable {
-  case fahrenheit
-  case celcius
-}
+//@Schemable enum TemperatureType: Codable {
+//  case fahrenheit
+//  case celcius
+//}
 
-printSchema(TemperatureType.self)
+//printSchema(TemperatureType.self)
 
-@Schemable enum WeatherCondition: Codable { case sunny(hoursOfSunlight: Int)
-  case hail(Bool)
-  case cloudy(coverage: Double)
-  case rainy(chanceOfRain: Double, amount: Double)
-  case snowy
-  case windy
-  case stormy
-}
-
-let conditions = WeatherCondition.sunny(hoursOfSunlight: 5)
-printInstance(conditions)
-printSchema(WeatherCondition.self)
-
-@Schemable enum Category { case fiction, nonFiction, science, history, kids, entertainment }
+//@Schemable enum WeatherCondition: Codable { case sunny(hoursOfSunlight: Int)
+//  case hail(Bool)
+//  case cloudy(coverage: Double)
+//  case rainy(chanceOfRain: Double, amount: Double)
+//  case snowy
+//  case windy
+//  case stormy
+//}
+//
+//let conditions = WeatherCondition.sunny(hoursOfSunlight: 5)
+//printInstance(conditions)
+//printSchema(WeatherCondition.self)
+//
+//@Schemable enum Category { case fiction, nonFiction, science, history, kids, entertainment }
 
 // MARK: Parsing
 
@@ -119,29 +119,27 @@ enum WeatherType {
   case rainy
 
   static var schema: some JSONSchemaComponent<WeatherType> {
-    JSONEnum {
-      "sunny"
-      "cloudy"
-      "rainy"
-    }
-    .title("Weather")
-    .description("The current weather conditions")
-    .deprecated(false)
-    .compactMap { value in
-      guard case .string(let string) = value else {
-        return nil
+    JSONString()
+      .enumValues {
+        "sunny"
+        "cloudy"
+        "rainy"
       }
-      switch string {
-      case "sunny":
-        return .sunny
-      case "cloudy":
-        return .cloudy
-      case "rainy":
-        return .rainy
-      default:
-        return nil
+      .compactMap { string in
+        switch string {
+        case "sunny":
+          return .sunny
+        case "cloudy":
+          return .cloudy
+        case "rainy":
+          return .rainy
+        default:
+          return nil
+        }
       }
-    }
+      .title("Weather")
+      .description("The current weather conditions")
+      .deprecated(false)
   }
 }
 
@@ -157,12 +155,20 @@ enum Airline: String, CaseIterable, Schemable {
   case alaska
 
   static var schema: some JSONSchemaComponent<Airline> {
-    JSONEnum(cases: Airline.allCases.map { .string($0.rawValue) })
-      .compactMap { value in
-        if case .string(let value) = value {
-          return Airline(rawValue: value)
+    JSONString()
+      .compactMap { string in
+        switch string {
+        case "delta":
+          return Airline.delta
+        case "united":
+          return Airline.united
+        case "american":
+          return Airline.american
+        case "alaska":
+          return Airline.alaska
+        default:
+          return nil
         }
-        return nil
       }
   }
 }
@@ -173,6 +179,7 @@ struct Flight: Sendable {
   let destination: String?
   let airline: Airline
   let duration: Double
+  let metadata: JSONValue?
 }
 
 extension Flight: Schemable {
@@ -199,6 +206,8 @@ extension Flight: Schemable {
             .minimum(0)
         }
         .required()
+
+        JSONProperty(key: "metadata")
       }
       .title("Flight")
       .minProperties(2)

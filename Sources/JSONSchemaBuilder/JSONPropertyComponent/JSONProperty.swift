@@ -19,6 +19,11 @@ public struct JSONProperty<Value: JSONSchemaComponent>: JSONPropertyComponent {
     self.value = value
   }
 
+  public init(key: String) where Value == JSONAnyValue {
+    self.key = key
+    self.value = JSONAnyValue()
+  }
+
   public func validate(_ input: [String: JSONValue]) -> Validated<Value.Output?, String> {
     if let jsonValue = input[key] {
       return value.validate(jsonValue).map(Optional.some)

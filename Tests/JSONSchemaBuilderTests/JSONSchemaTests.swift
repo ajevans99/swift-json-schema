@@ -109,15 +109,15 @@ struct JSONSchemaOptionBuilderTests {
     )
   }
 
-//  @Test func arrayOptions() throws {
-//    @JSONSchemaBuilder var sample: JSONSchemaComponent {
-//      JSONArray().disableItems().unevaluatedItems { JSONNumber() }
-//    }
-//
-//    let options: ArraySchemaOptions = try #require(sample.definition.options?.asType())
-//
-//    #expect(options == .options(items: .disabled, unevaluatedItems: .schema(.number())))
-//  }
+  @Test func arrayOptions() throws {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
+      JSONArray(disableItems: true).unevaluatedItems { JSONNumber() }
+    }
+
+    let options: ArraySchemaOptions = try #require(sample.definition.options?.asType())
+
+    #expect(options == .options(items: .disabled, unevaluatedItems: .schema(.number())))
+  }
 
   @Test func supplementalArrayOptions() throws {
 

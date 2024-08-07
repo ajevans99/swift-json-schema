@@ -39,7 +39,7 @@ public struct JSONObject<each Property: JSONPropertyComponent>: JSONSchemaCompon
 
   public func validate(_ input: JSONValue) -> Validated<(repeat (each Property).Output), String> {
     if case .object(let dictionary) = input {
-      return zip(repeat (each propertiesContainer.property).validate(dictionary))
+      return propertiesContainer.validate(dictionary: dictionary)
     }
     return .error("Not an object")
   }

@@ -14,6 +14,11 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
     self.options = .options(items: .schema(self.items.definition))
   }
 
+  public init(disableItems: Bool = false) where T == JSONAnyValue {
+    self.items = JSONAnyValue()
+    self.options = disableItems ? .options(items: .disabled) : .options()
+  }
+
   public func validate(_ value: JSONValue) -> Validated<[T.Output], String> {
     if case .array = value {
       return .error("Not yet implemented")

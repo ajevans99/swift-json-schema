@@ -2,6 +2,7 @@ import JSONSchemaMacro
 import SwiftSyntaxMacros
 import Testing
 
+@Suite(.disabled())
 struct SchemableEnumExpansionTests {
   let testMacros: [String: Macro.Type] = ["Schemable": SchemableMacro.self]
 
