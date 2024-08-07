@@ -176,12 +176,13 @@ public struct Schema: Sendable {
   /// - Returns: A schema definition for an integer type.
   public static func integer(
     _ annotations: AnnotationOptions = .annotations(),
+    _ options: NumberSchemaOptions = .options(),
     enumValues: [JSONValue]? = nil,
     composition: CompositionOptions? = nil
   ) -> Schema {
     .init(
       type: .integer,
-      options: nil,
+      options: options.eraseToAnySchemaOptions(),
       annotations: annotations,
       enumValues: enumValues,
       composition: composition,

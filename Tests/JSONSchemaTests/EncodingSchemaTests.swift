@@ -148,6 +148,40 @@ struct EncodingSchemaTests {
     )
   }
 
+  @Test(.tags(.typeOptions)) func integerOptions() throws {
+    let schema1 = Schema.integer(
+      .annotations(),
+      .options(multipleOf: 2, minimum: 1, maximum: .exclusive(100))
+    )
+    let json1 = try schema1.json()
+    #expect(
+      json1 == """
+        {
+          "exclusiveMaximum" : 100,
+          "minimum" : 1,
+          "multipleOf" : 2,
+          "type" : "integer"
+        }
+        """
+    )
+
+    let schema2 = Schema.integer(
+      .annotations(),
+      .options(multipleOf: 5, minimum: .exclusive(0), maximum: .inclusive(5000))
+    )
+    let json2 = try schema2.json()
+    #expect(
+      json2 == """
+        {
+          "exclusiveMinimum" : 0,
+          "maximum" : 5000,
+          "multipleOf" : 5,
+          "type" : "integer"
+        }
+        """
+    )
+  }
+
   @Test(.tags(.typeOptions)) func arrayOptions() throws {
     let schema = Schema.array(
       .annotations(),

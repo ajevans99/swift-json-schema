@@ -77,17 +77,17 @@ struct NumberOptionsTests {
       @Schemable
       struct Weather {
         @NumberOptions(multipleOf: 5)
-        let temperature: Double
+        let temperature: Int
       }
       """,
       expandedSource: """
         struct Weather {
-          let temperature: Double
+          let temperature: Int
 
           static var schema: JSONSchemaComponent {
             JSONObject {
               JSONProperty(key: "temperature") {
-                JSONNumber()
+                JSONInteger()
                   .multipleOf(5)
               }
             }
