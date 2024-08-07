@@ -1,19 +1,19 @@
 import JSONSchema
 
 @resultBuilder public struct JSONPropertySchemaBuilder {
-  public static func buildBlock<Component: JSONPropertyComponent>(_ component: Component) -> Component {
+  public static func buildBlock<Component: PropertyCollection>(_ component: Component) -> Component {
     component
+  }
+
+  public static func buildBlock<Component: JSONPropertyComponent>(_ component: Component) -> PropertyTuple<Component> {
+    .init(property: component)
   }
 
   public static func buildBlock<each Component: JSONPropertyComponent>(_ component: repeat each Component) -> PropertyTuple<repeat each Component> {
     .init(property: (repeat each component))
   }
 
-  public static func buildBlock<each Component: JSONPropertyComponent>(_ component: repeat each Component) -> [String: Schema] {
-    self.buildBlock(repeat each component).schema
-  }
-
-  public static func buildOptional<Component: JSONPropertyComponent>(_ component: Component?) -> JSONPropertyComponents.OptionalNoType<Component> {
+  public static func buildOptional<Component: PropertyCollection>(_ component: Component?) -> JSONPropertyComponents.OptionalNoType<Component> {
     .init(wrapped: component)
   }
 
@@ -22,10 +22,18 @@ import JSONSchema
   public static func buildEither<TrueComponent, FalseComponent>(second component: FalseComponent) -> JSONPropertyComponents.Conditional<TrueComponent, FalseComponent> { .second(component) }
 }
 
-public struct PropertyTuple<each Property: JSONPropertyComponent>: Sendable {
+public protocol PropertyCollection: Sendable {
+  associatedtype Output
+
+  var schema: [String: Schema] { get }
+  var requiredKeys: [String] { get }
+  func validate(_ dictionary: [String: JSONValue]) -> Validated<Output, String>
+}
+
+public struct PropertyTuple<each Property: JSONPropertyComponent>: PropertyCollection {
   let property: (repeat each Property)
 
-  var schema: [String: Schema] {
+  public var schema: [String: Schema] {
     var output = [String: Schema]()
 #if swift(>=6)
     for property in repeat each property {
@@ -43,7 +51,7 @@ public struct PropertyTuple<each Property: JSONPropertyComponent>: Sendable {
     return output
   }
 
-  var requiredKeys: [String] {
+  public var requiredKeys: [String] {
     var keys = [String]()
 #if swift(>=6)
     for property in repeat each property {
@@ -62,7 +70,7 @@ public struct PropertyTuple<each Property: JSONPropertyComponent>: Sendable {
     return keys
   }
 
-  func validate(dictionary: [String: JSONValue]) -> Validated<(repeat (each Property).Output), String> {
+  public func validate(_ dictionary: [String: JSONValue]) -> Validated<(repeat (each Property).Output), String> {
     zip(repeat (each property).validate(dictionary))
   }
 }

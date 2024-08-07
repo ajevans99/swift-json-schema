@@ -1,7 +1,7 @@
 import JSONSchema
 
 /// A JSON object schema component for use in ``JSONSchemaBuilder``.
-public struct JSONObject<each Property: JSONPropertyComponent>: JSONSchemaComponent {
+public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
   public var annotations: AnnotationOptions = .annotations()
   var options: ObjectSchemaOptions
 
@@ -9,7 +9,7 @@ public struct JSONObject<each Property: JSONPropertyComponent>: JSONSchemaCompon
     .object(annotations, options)
   }
 
-  let propertiesContainer: PropertyTuple<repeat each Property>
+  let properties: Props
 
   /// Constructs a new `JSONObject` with the provided properties.
   ///
@@ -27,19 +27,19 @@ public struct JSONObject<each Property: JSONPropertyComponent>: JSONSchemaCompon
   /// ```
   /// - Parameter content: A closure that returns an array of `JSONProperty` instances.
   public init(
-    @JSONPropertySchemaBuilder with build: () -> PropertyTuple<repeat each Property>
+    @JSONPropertySchemaBuilder with build: () -> Props
   ) {
     annotations = .annotations()
-    propertiesContainer = build()
+    properties = build()
     options = .options(
-      properties: propertiesContainer.schema,
-      required: propertiesContainer.requiredKeys.nilIfEmpty
+      properties: properties.schema,
+      required: properties.requiredKeys.nilIfEmpty
     )
   }
 
-  public func validate(_ input: JSONValue) -> Validated<(repeat (each Property).Output), String> {
+  public func validate(_ input: JSONValue) -> Validated<Props.Output, String> {
     if case .object(let dictionary) = input {
-      return propertiesContainer.validate(dictionary: dictionary)
+      return properties.validate(dictionary)
     }
     return .error("Not an object")
   }
@@ -58,11 +58,11 @@ extension JSONObject {
   /// Adds a pattern properties schema to the object schema.
   /// - Parameter patternProperties: A closure that returns an array of JSON properties representing the pattern properties.
   /// - Returns: A new `JSONObject` with the pattern properties set.
-  public func patternProperties(
-    @JSONPropertySchemaBuilder _ patternProperties: () -> [String: Schema]
-  ) -> JSONObject<repeat each Property> {
+  public func patternProperties<Pattern: PropertyCollection>(
+    @JSONPropertySchemaBuilder _ patternProperties: () -> Pattern
+  ) -> Self {
     self.patternProperties(
-      patternProperties()
+      patternProperties().schema
     )
   }
 

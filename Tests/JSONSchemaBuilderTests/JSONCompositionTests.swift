@@ -4,7 +4,7 @@ import Testing
 @testable import JSONSchemaBuilder
 
 struct JSONCompositionTests {
-  @Test(.disabled()) func anyOfComposition() {
+  @Test func anyOfComposition() {
     @JSONSchemaBuilder var sample: some JSONSchemaComponent {
       JSONComposition.AnyOf {
         JSONString()
@@ -19,7 +19,7 @@ struct JSONCompositionTests {
     #expect(sample.definition == expectedSchema)
   }
 
-  @Test(.disabled()) func allOfComposition() {
+  @Test func allOfComposition() {
     @JSONSchemaBuilder var sample: some JSONSchemaComponent {
       JSONComposition.AllOf {
         JSONString()
@@ -34,7 +34,7 @@ struct JSONCompositionTests {
     #expect(sample.definition == expectedSchema)
   }
 
-  @Test(.disabled()) func oneOfComposition() {
+  @Test func oneOfComposition() {
     @JSONSchemaBuilder var sample: some JSONSchemaComponent {
       JSONComposition.OneOf {
         JSONString().pattern("^[a-zA-Z]+$")

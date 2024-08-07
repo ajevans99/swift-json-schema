@@ -15,8 +15,8 @@ import JSONSchema
 /// .description("A product from Acme's catalog")
 /// ```
 @resultBuilder public struct JSONSchemaBuilder {
-  public static func buildBlock<each Component: JSONSchemaComponent>(_ component: repeat each Component) -> SchemaTuple<repeat each Component> {
-    .init(component: (repeat each component))
+  public static func buildBlock<Component: JSONSchemaComponent>(_ component: Component) -> Component {
+    component
   }
 
   // MARK: Advanced builers
@@ -30,50 +30,52 @@ import JSONSchema
   public static func buildEither<TrueComponent, FalseComponent>(second component: FalseComponent) -> JSONComponents.Conditional<TrueComponent, FalseComponent> { .second(component) }
 }
 
-public struct SchemaTuple<each Component: JSONSchemaComponent>: JSONSchemaComponent {
-  public var definition: Schema {
-    // TODO: Multiple types should be supported here
-#if swift(>=6)
-    for component in repeat each component {
-      return component.definition
-    }
-    return .noType()
-#else
-    var definition: Schema?
-    func getDefinition<Comp: JSONSchemaComponent>(_ component: Comp) {
-      guard definition == nil else { return }
-      definition = component.definition
-    }
-    repeat getDefinition(each component)
-    return definition ?? .noType()
-#endif
+@resultBuilder public struct JSONSchemaCollectionBuilder {
+  public static func buildBlock<Component: JSONSchemaComponent>(_ component: Component) -> SchemaTuple<Component> {
+    .init(component: component)
   }
 
-  public var annotations: AnnotationOptions {
-    get {
+  public static func buildBlock<each Component: JSONSchemaComponent>(_ component: repeat each Component) -> SchemaTuple<repeat each Component> {
+    .init(component: (repeat each component))
+  }
+}
+
+public protocol SchemaCollection: Sendable {
+//  associatedtype Output
+
+  var definitions: [Schema] { get }
+  func validate(_ input: JSONValue) -> [Validated<JSONValue, String>]
+}
+
+public struct SchemaTuple<each Component: JSONSchemaComponent>: SchemaCollection {
+  public var definitions: [Schema] {
+    var definitions = [Schema]()
 #if swift(>=6)
-      for component in repeat each component {
-        return component.annotations
-      }
-      return .annotations()
+    for component in repeat each component {
+      definitions.append(component.definition)
+    }
+
 #else
-      var annotation: AnnotationOptions?
-      func getAnnotations<Comp: JSONSchemaComponent>(_ component: Comp) {
-        guard annotation == nil else { return }
-        annotation = component.annotations
-      }
-      repeat getAnnotations(each component)
-      return annotation ?? .annotations()
+    func getDefinition<Comp: JSONSchemaComponent>(_ component: Comp) {
+      definitions.append(component.definition)
+    }
+    repeat getDefinition(each component)
 #endif
-    }
-    set {
-      fatalError("Setting annotations on \(Self.self) is not supported.")
-    }
+    return definitions
   }
 
   public var component: (repeat each Component)
 
-  public func validate(_ input: JSONValue) -> Validated<(repeat (each Component).Output), String> {
-    return zip(repeat (each component).validate(input))
+  public func validate(_ input: JSONValue) -> [Validated<JSONValue, String>] {
+    var results = [Validated<JSONValue, String>]()
+    for component in repeat each component {
+      switch component.validate(input) {
+      case .valid:
+        results.append(.valid(input))
+      case .invalid(let errors):
+        results.append(.invalid(errors))
+      }
+    }
+    return results
   }
 }

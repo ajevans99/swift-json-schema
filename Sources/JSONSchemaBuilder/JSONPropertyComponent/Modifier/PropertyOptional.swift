@@ -1,18 +1,13 @@
 import JSONSchema
 
 extension JSONPropertyComponents {
-  public struct OptionalNoType<Wrapped: JSONPropertyComponent>: JSONPropertyComponent {
-    public var key: String {
-      return wrapped?.key ?? ""
+  public struct OptionalNoType<Wrapped: PropertyCollection>: PropertyCollection {
+    public var schema: [String: Schema] {
+      wrapped?.schema ?? [:]
     }
 
-    public let isRequired: Bool = false
-
-    public var value: Wrapped.Value {
-      guard let value = wrapped?.value else {
-        fatalError("Cannot access value of \(Self.self)")
-      }
-      return value
+    public var requiredKeys: [String] {
+      wrapped?.requiredKeys ?? []
     }
 
     var wrapped: Wrapped?

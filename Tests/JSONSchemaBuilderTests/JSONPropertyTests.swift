@@ -68,39 +68,38 @@ struct JSONPropertyBuilderTests {
 
 struct JSONPropertySchemaTests {
   @Test func single() throws {
-    @JSONPropertySchemaBuilder var sample: [String: Schema] {
-      JSONProperty(key: "prop0", value: JSONString())
-    }
+    let property = JSONProperty(key: "prop0", value: JSONString())
 
-    #expect(sample["prop0"] == .string())
+    #expect(property.key == "prop0")
+    #expect(property.value.definition == .string())
   }
 
   @Test func multiple() throws {
-    @JSONPropertySchemaBuilder var sample: [String: Schema] {
+    @JSONPropertySchemaBuilder var sample: some PropertyCollection {
       JSONProperty(key: "prop0", value: JSONString())
       JSONProperty(key: "prop1", value: JSONString())
       JSONProperty(key: "prop2", value: JSONString())
       JSONProperty(key: "prop3", value: JSONString())
     }
 
-    try #require(sample.count == 4)
-    for key in sample.keys {
-      #expect(sample[key] == .string())
+    try #require(sample.schema.count == 4)
+    for key in sample.schema.keys {
+      #expect(sample.schema[key] == .string())
     }
   }
 
   @Test(arguments: [true, false]) func optional(_ bool: Bool) {
-    @JSONPropertySchemaBuilder var sample: [String: Schema] {
+    @JSONPropertySchemaBuilder var sample: some PropertyCollection {
       if bool {
-        JSONProperty(key: "prop0", value: JSONString())
+        JSONProperty(key: "prop1", value: JSONString())
       }
     }
 
-    #expect(sample.count == (bool ? 1 : 0))
+    #expect(sample.schema.count == (bool ? 1 : 0))
   }
 
   @Test(arguments: [true, false]) func either(_ bool: Bool) throws {
-    @JSONPropertySchemaBuilder var sample: [String: Schema] {
+    @JSONPropertySchemaBuilder var sample: some PropertyCollection {
       if bool {
         JSONProperty(key: "prop0", value: JSONString())
       } else {
@@ -108,7 +107,7 @@ struct JSONPropertySchemaTests {
       }
     }
 
-    let firstProperty = try #require(sample.first)
+    let firstProperty = try #require(sample.schema.first)
     #expect(firstProperty.key == (bool ? "prop0" : "prop1"))
   }
 }
