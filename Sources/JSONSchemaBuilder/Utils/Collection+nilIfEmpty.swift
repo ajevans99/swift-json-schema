@@ -1,5 +1,1 @@
-extension Collection {
-  var nilIfEmpty: Self? {
-    isEmpty ? nil : self
-  }
-}
+extension Collection { var nilIfEmpty: Self? { isEmpty ? nil : self } }

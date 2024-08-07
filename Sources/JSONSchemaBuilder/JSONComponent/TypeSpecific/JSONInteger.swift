@@ -9,9 +9,7 @@ public struct JSONInteger: JSONSchemaComponent {
   public init() {}
 
   public func validate(_ value: JSONValue) -> Validated<Int, String> {
-    if case .integer(let int) = value {
-      return .valid(int)
-    }
+    if case .integer(let int) = value { return .valid(int) }
     return .error("Expected integer value.")
   }
 }

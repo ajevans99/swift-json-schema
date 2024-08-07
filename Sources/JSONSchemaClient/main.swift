@@ -44,9 +44,9 @@ func printSchema<T: Schemable>(_ schema: T.Type) {
     comment: "This is a comment about humidity"
   ) let humidity: Int
 
-//  @SchemaOptions(title: "Temperature Readings")
-//  @ArrayOptions(minContains: 1, maxContains: 5, minItems: 2, maxItems: 10, uniqueItems: true)
-//  let temperatureReadings: [Double]
+  //  @SchemaOptions(title: "Temperature Readings")
+  //  @ArrayOptions(minContains: 1, maxContains: 5, minItems: 2, maxItems: 10, uniqueItems: true)
+  //  let temperatureReadings: [Double]
 
   @SchemaOptions(title: "Location")
   @StringOptions(minLength: 5, maxLength: 100, pattern: "^[a-zA-Z]+$", format: nil) let cityName:
@@ -56,7 +56,7 @@ func printSchema<T: Schemable>(_ schema: T.Type) {
 let now = Weather(
   temperature: 72,
   humidity: 30,
-//  temperatureReadings: [32, 70.1, 84],
+  //  temperatureReadings: [32, 70.1, 84],
   cityName: "Detroit"
 )
 
@@ -67,7 +67,7 @@ printSchema(Weather.self)
 
 @Schemable struct Book {
   let title: String
-//  let authors: [String]
+  //  let authors: [String]
   let yearPublished: Int
   @ExcludeFromSchema let rating: Double
 
@@ -80,8 +80,7 @@ printSchema(Weather.self)
 }
 
 @Schemable struct Library {
-  let name: String
-//  var books: [Book] = []
+  let name: String//  var books: [Book] = []
 }
 
 printSchema(Book.self)
@@ -127,19 +126,13 @@ enum WeatherType {
       }
       .compactMap { string in
         switch string {
-        case "sunny":
-          return .sunny
-        case "cloudy":
-          return .cloudy
-        case "rainy":
-          return .rainy
-        default:
-          return nil
+        case "sunny": return .sunny
+        case "cloudy": return .cloudy
+        case "rainy": return .rainy
+        default: return nil
         }
       }
-      .title("Weather")
-      .description("The current weather conditions")
-      .deprecated(false)
+      .title("Weather").description("The current weather conditions").deprecated(false)
   }
 }
 
@@ -158,21 +151,15 @@ enum Airline: String, CaseIterable, Schemable {
     JSONString()
       .compactMap { string in
         switch string {
-        case "delta":
-          return Airline.delta
-        case "united":
-          return Airline.united
-        case "american":
-          return Airline.american
-        case "alaska":
-          return Airline.alaska
-        default:
-          return nil
+        case "delta": return Airline.delta
+        case "united": return Airline.united
+        case "american": return Airline.american
+        case "alaska": return Airline.alaska
+        default: return nil
         }
       }
   }
 }
-
 
 struct Flight: Sendable {
   let origin: String
@@ -186,50 +173,35 @@ extension Flight: Schemable {
   static var schema: some JSONSchemaComponent<Flight> {
     JSONSchema(Flight.init) {
       JSONObject {
-        JSONProperty(key: "origin") {
-          JSONString()
-        }
-        .required()
+        JSONProperty(key: "origin") { JSONString() }.required()
 
-        JSONProperty(key: "destination") {
-          JSONString()
-        }
+        JSONProperty(key: "destination") { JSONString() }
 
-        JSONProperty(key: "airline") {
-          Airline.schema
-        }
-        .required()
+        JSONProperty(key: "airline") { Airline.schema }.required()
 
         JSONProperty(key: "duration") {
-          JSONNumber()
-            .description("The duration of the flight in seconds")
-            .minimum(0)
+          JSONNumber().description("The duration of the flight in seconds").minimum(0)
         }
         .required()
 
         JSONProperty(key: "metadata")
       }
-      .title("Flight")
-      .minProperties(2)
-      .patternProperties {
-        JSONProperty(key: "regular-expression") {
-          JSONString()
-        }
-      }
+      .title("Flight").minProperties(2)
+      .patternProperties { JSONProperty(key: "regular-expression") { JSONString() } }
     }
   }
 }
 
-
 printSchema(Flight.self)
 
 let flightDataJSON = """
-{
-  "origin": "Detroit",
-  "airline": "delta",
-  "duration": 10800.1
-}
-""".data(using: .utf8)!
+  {
+    "origin": "Detroit",
+    "airline": "delta",
+    "duration": 10800.1
+  }
+  """
+  .data(using: .utf8)!
 let flightData = try! JSONDecoder().decode(JSONValue.self, from: flightDataJSON)
 print(flightData)
 
@@ -237,26 +209,21 @@ let flight = Flight.schema.validate(flightData)
 print(flight)
 
 switch flight {
-case .valid(let a):
-  print("Valid: \(a)")
-case .invalid(let array):
-  print("Invalid: \(array.joined(separator: "\n"))")
+case .valid(let a): print("Valid: \(a)")
+case .invalid(let array): print("Invalid: \(array.joined(separator: "\n"))")
 }
 
-let anyOf =
-  JSONComposition.AnyOf {
-    JSONString()
-    JSONNumber().minimum(0)
-  }
+let anyOf = JSONComposition.AnyOf {
+  JSONString()
+  JSONNumber().minimum(0)
+}
 print(anyOf.definition)
 
 print(anyOf.validate(.string("Hello")))
 print(anyOf.validate(.number(1)))
 print(anyOf.validate(.null))
 
-let array = JSONArray {
-  JSONInteger()
-}
+let array = JSONArray { JSONInteger() }
 
 let arrayResult = array.validate(.array([1, 2, 3, 4, 5]))
 print(arrayResult)

@@ -14,8 +14,7 @@ struct JSONSchemaOptionBuilderTests {
       }
       .patternProperties { JSONProperty(key: "^property[0-1]$") { JSONString() } }
       .additionalProperties { JSONBoolean() }.disableUnevaluatedProperties()
-      .propertyNames(.options(pattern: "^property[0-9]$"))
-      .minProperties(1).maxProperties(10)
+      .propertyNames(.options(pattern: "^property[0-9]$")).minProperties(1).maxProperties(10)
     }
 
     let options: ObjectSchemaOptions = try #require(sample.definition.options?.asType())
@@ -122,17 +121,15 @@ struct JSONSchemaOptionBuilderTests {
   @Test func supplementalArrayOptions() throws {
 
     @JSONSchemaBuilder var sample: some JSONSchemaComponent<[Double]> {
-      JSONArray {
-        JSONNumber()
-      }
-      .prefixItems {
-        JSONNumber()
-        JSONString()
-        JSONBoolean()
-        JSONInteger()
-      }
-      .disableUnevaluatedItems().contains { JSONNumber() }.minContains(1).maxContains(25)
-      .minItems(1).maxItems(50).uniqueItems()
+      JSONArray { JSONNumber() }
+        .prefixItems {
+          JSONNumber()
+          JSONString()
+          JSONBoolean()
+          JSONInteger()
+        }
+        .disableUnevaluatedItems().contains { JSONNumber() }.minContains(1).maxContains(25)
+        .minItems(1).maxItems(50).uniqueItems()
     }
 
     let options: ArraySchemaOptions = try #require(sample.definition.options?.asType())
@@ -221,11 +218,7 @@ struct JSONSchemaAnnotationsBuilderTests {
 
 struct JSONAdvancedBuilderTests {
   @Test(arguments: [true, false]) func optional(_ bool: Bool) {
-    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
-      if bool {
-        JSONString()
-      }
-    }
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent { if bool { JSONString() } }
 
     #expect(sample.definition == (bool ? Schema.string() : .noType()))
   }
@@ -235,6 +228,9 @@ struct JSONAdvancedBuilderTests {
       if bool { JSONNumber().maximum(100) } else { JSONNumber() }
     }
 
-    #expect(sample.definition == (bool ? Schema.number(.annotations(), .options(maximum: 100)) : .number()))
+    #expect(
+      sample.definition
+        == (bool ? Schema.number(.annotations(), .options(maximum: 100)) : .number())
+    )
   }
 }

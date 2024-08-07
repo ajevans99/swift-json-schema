@@ -1,1 +1,1 @@
-public enum JSONComponents { }
+public enum JSONComponents {}

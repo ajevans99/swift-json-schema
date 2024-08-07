@@ -18,15 +18,15 @@ func assertMacroExpansion(
     macroSpecs: macros.mapValues { MacroSpec(type: $0) },
     indentationWidth: .spaces(2),
     failureHandler: { spec in
-       Issue.record(
-         "\(spec.message)",
-         sourceLocation: SourceLocation(
-           fileID: spec.location.fileID,
-           filePath: spec.location.filePath,
-           line: spec.location.line,
-           column: spec.location.column
-         )
-       )
+      Issue.record(
+        "\(spec.message)",
+        sourceLocation: SourceLocation(
+          fileID: spec.location.fileID,
+          filePath: spec.location.filePath,
+          line: spec.location.line,
+          column: spec.location.column
+        )
+      )
     },
     fileID: fileID,
     filePath: filePath,

@@ -24,10 +24,8 @@ public enum JSONComposition {
       components.validate(value)
         .first { result in
           switch result {
-          case .valid:
-            return true
-          case .invalid:
-            return false
+          case .valid: return true
+          case .invalid: return false
           }
         } ?? .error("\(value) failed to match any of schemas")
     }
@@ -47,9 +45,7 @@ public enum JSONComposition {
     public func validate(_ value: JSONValue) -> Validated<JSONValue, String> {
       let results = components.validate(value)
       for result in results {
-        if case .invalid(let error) = result {
-          return .error("Failed allOf validation: \(error)")
-        }
+        if case .invalid(let error) = result { return .error("Failed allOf validation: \(error)") }
       }
       return .valid(value)
     }
@@ -69,16 +65,9 @@ public enum JSONComposition {
     public func validate(_ value: JSONValue) -> Validated<JSONValue, String> {
       let results = components.validate(value)
       var validCount = 0
-      for result in results {
-        if case .valid = result {
-          validCount += 1
-        }
-      }
-      if validCount == 1 {
-        return .valid(value)
-      } else {
-        return .error("\(value) did not match exactly one schema")
-      }
+      for result in results { if case .valid = result { validCount += 1 } }
+      guard validCount == 1 else { return .error("\(value) did not match exactly one schema") }
+      return .valid(value)
     }
   }
 
@@ -95,10 +84,8 @@ public enum JSONComposition {
 
     public func validate(_ value: JSONValue) -> Validated<JSONValue, String> {
       switch component.validate(value) {
-      case .valid:
-        return .error("\(value) is valid against the not schema.")
-      case .invalid:
-        return .valid(value)
+      case .valid: return .error("\(value) is valid against the not schema.")
+      case .invalid: return .valid(value)
       }
     }
   }

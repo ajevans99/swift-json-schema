@@ -3,30 +3,25 @@ import JSONSchema
 extension JSONSchemaComponent {
   public func flatMap<NewComponent: JSONSchemaComponent>(
     _ transform: @Sendable @escaping (Output) -> NewComponent
-  ) -> JSONComponents.FlatMap<NewComponent, Self> {
-    .init(upstream: self, transform: transform)
-  }
+  ) -> JSONComponents.FlatMap<NewComponent, Self> { .init(upstream: self, transform: transform) }
 }
 
 extension JSONComponents {
-  public struct FlatMap<NewSchemaComponent: JSONSchemaComponent, Upstream: JSONSchemaComponent>: JSONSchemaComponent {
-    public var definition: Schema {
-      upstream.definition
-    }
+  public struct FlatMap<NewSchemaComponent: JSONSchemaComponent, Upstream: JSONSchemaComponent>:
+    JSONSchemaComponent
+  {
+    public var definition: Schema { upstream.definition }
 
     public var annotations: AnnotationOptions {
-      get {
-        upstream.annotations
-      }
-      set {
-        upstream.annotations = newValue
-      }
+      get { upstream.annotations }
+      set { upstream.annotations = newValue }
     }
 
     var upstream: Upstream
     let transform: @Sendable (Upstream.Output) -> NewSchemaComponent
 
-    init(upstream: Upstream, transform: @Sendable @escaping (Upstream.Output) -> NewSchemaComponent) {
+    init(upstream: Upstream, transform: @Sendable @escaping (Upstream.Output) -> NewSchemaComponent)
+    {
       self.upstream = upstream
       self.transform = transform
     }
@@ -36,8 +31,7 @@ extension JSONComponents {
       case .valid(let upstreamOutput):
         let newSchemaComponent = transform(upstreamOutput)
         return newSchemaComponent.validate(value)
-      case .invalid(let error):
-        return .invalid(error)
+      case .invalid(let error): return .invalid(error)
       }
     }
   }

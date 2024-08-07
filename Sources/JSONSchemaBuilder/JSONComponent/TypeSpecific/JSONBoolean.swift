@@ -9,9 +9,7 @@ public struct JSONBoolean: JSONSchemaComponent {
   public init() {}
 
   public func validate(_ value: JSONValue) -> Validated<Bool, String> {
-    if case .boolean(let bool) = value {
-      return .valid(bool)
-    }
+    if case .boolean(let bool) = value { return .valid(bool) }
     return .error("Not a bool")
   }
 }

@@ -25,17 +25,12 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
       var errors: [String] = []
       for item in array {
         switch items.validate(item) {
-        case .valid(let value):
-          outputs.append(value)
-        case .invalid(let e):
-          errors.append(contentsOf: e)
+        case .valid(let value): outputs.append(value)
+        case .invalid(let e): errors.append(contentsOf: e)
         }
       }
-      if !errors.isEmpty {
-        return .invalid(errors)
-      } else {
-        return .valid(outputs)
-      }
+      guard !errors.isEmpty else { return .valid(outputs) }
+      return .invalid(errors)
     }
     return .error("Expected array value")
   }
@@ -54,9 +49,9 @@ extension JSONArray {
   /// Adds prefix items to the schema.
   /// - Parameter prefixItems: A closure that returns an array of JSON schemas representing the prefix items.
   /// - Returns: A new `JSONArray` with the prefix items set.
-  public func prefixItems<Component: SchemaCollection>(@JSONSchemaCollectionBuilder _ prefixItems: () -> Component) -> Self {
-    return self.prefixItems(prefixItems().definitions)
-  }
+  public func prefixItems<Component: SchemaCollection>(
+    @JSONSchemaCollectionBuilder _ prefixItems: () -> Component
+  ) -> Self { self.prefixItems(prefixItems().definitions) }
 
   /// Adds unevaluated items to the schema.
   /// - Parameter unevaluatedItems: A schema control option.

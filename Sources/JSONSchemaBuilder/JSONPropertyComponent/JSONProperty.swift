@@ -25,13 +25,11 @@ public struct JSONProperty<Value: JSONSchemaComponent>: JSONPropertyComponent {
   }
 
   public func validate(_ input: [String: JSONValue]) -> Validated<Value.Output?, String> {
-    if let jsonValue = input[key] {
-      return value.validate(jsonValue).map(Optional.some)
-    }
+    if let jsonValue = input[key] { return value.validate(jsonValue).map(Optional.some) }
     return .valid(nil)
   }
 
   public func required() -> JSONPropertyComponents.CompactMap<Self, Value.Output> {
-    self.compactMap { $0 } // CompactMap type will also wrap property as `isRequired = true`
+    self.compactMap { $0 }  // CompactMap type will also wrap property as `isRequired = true`
   }
 }

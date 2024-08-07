@@ -1,9 +1,9 @@
 import JSONSchema
 
 extension JSONSchemaComponent {
-  public func enumValues(@JSONValueBuilder with builder: () -> JSONValueRepresentable) -> JSONComponents.Enum<Self> {
-    .init(upstream: self, cases: Array(builder().value))
-  }
+  public func enumValues(
+    @JSONValueBuilder with builder: () -> JSONValueRepresentable
+  ) -> JSONComponents.Enum<Self> { .init(upstream: self, cases: Array(builder().value)) }
 }
 
 extension JSONComponents {
@@ -15,12 +15,8 @@ extension JSONComponents {
     }
 
     public var annotations: AnnotationOptions {
-      get {
-        upstream.annotations
-      }
-      set {
-        upstream.annotations = newValue
-      }
+      get { upstream.annotations }
+      set { upstream.annotations = newValue }
     }
 
     var upstream: Upstream
@@ -32,11 +28,7 @@ extension JSONComponents {
     }
 
     public func validate(_ value: JSONValue) -> Validated<Upstream.Output, String> {
-      for `case` in cases {
-        if `case` == value {
-          return upstream.validate(value)
-        }
-      }
+      for `case` in cases where `case` == value { return upstream.validate(value) }
       return .error("\(value) does not match any enum case.")
     }
   }

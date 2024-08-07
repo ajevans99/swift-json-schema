@@ -83,16 +83,12 @@ struct JSONPropertySchemaTests {
     }
 
     try #require(sample.schema.count == 4)
-    for key in sample.schema.keys {
-      #expect(sample.schema[key] == .string())
-    }
+    for key in sample.schema.keys { #expect(sample.schema[key] == .string()) }
   }
 
   @Test(arguments: [true, false]) func optional(_ bool: Bool) {
     @JSONPropertySchemaBuilder var sample: some PropertyCollection {
-      if bool {
-        JSONProperty(key: "prop1", value: JSONString())
-      }
+      if bool { JSONProperty(key: "prop1", value: JSONString()) }
     }
 
     #expect(sample.schema.count == (bool ? 1 : 0))

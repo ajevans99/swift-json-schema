@@ -8,10 +8,8 @@ public struct JSONNull: JSONSchemaComponent {
 
   public init() {}
 
-  public func validate(_ value: JSONValue) -> Validated<Optional<Void>, String> {
-    if case .null = value {
-      return .valid(.none)
-    }
+  public func validate(_ value: JSONValue) -> Validated<Void?, String> {
+    if case .null = value { return .valid(.none) }
     return .error("Expected null value, but got \(value)")
   }
 }

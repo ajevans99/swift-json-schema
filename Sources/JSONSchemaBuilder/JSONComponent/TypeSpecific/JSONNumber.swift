@@ -10,9 +10,7 @@ public struct JSONNumber: JSONSchemaComponent {
   public init() {}
 
   public func validate(_ value: JSONValue) -> Validated<Double, String> {
-    if case .number(let double) = value {
-      return .valid(double)
-    }
+    if case .number(let double) = value { return .valid(double) }
     return .error("Expected a number.")
   }
 }

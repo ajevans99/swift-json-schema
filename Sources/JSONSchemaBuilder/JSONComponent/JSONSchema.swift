@@ -13,9 +13,7 @@ public struct JSONSchema<Components: JSONSchemaComponent, NewOutput>: JSONSchema
     self.components = component()
   }
 
-  public init(
-    @JSONSchemaBuilder component: () -> Components
-  ) where Components.Output == NewOutput {
+  public init(@JSONSchemaBuilder component: () -> Components) where Components.Output == NewOutput {
     self.transform = { $0 }
     self.components = component()
   }
@@ -24,17 +22,11 @@ public struct JSONSchema<Components: JSONSchemaComponent, NewOutput>: JSONSchema
 
   /// The annotations for this component.
   public var annotations: AnnotationOptions {
-    get {
-      components.annotations
-    }
-    set {
-      components.annotations = newValue
-    }
+    get { components.annotations }
+    set { components.annotations = newValue }
   }
 
   public func validate(_ value: JSONValue) -> Validated<NewOutput, String> {
-    components
-      .validate(value)
-      .map(transform)
+    components.validate(value).map(transform)
   }
 }

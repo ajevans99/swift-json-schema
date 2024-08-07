@@ -10,9 +10,7 @@ public struct JSONString: JSONSchemaComponent {
   public init() {}
 
   public func validate(_ value: JSONValue) -> Validated<String, String> {
-    if case .string(let string) = value {
-      return .valid(string)
-    }
+    if case .string(let string) = value { return .valid(string) }
     return .error("Expected a string value.")
   }
 }

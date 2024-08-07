@@ -27,4 +27,3 @@ extension JSONObjectValue {
       .reduce(into: [:]) { partialResult, property in partialResult[property.key] = property.value }
   }
 }
-

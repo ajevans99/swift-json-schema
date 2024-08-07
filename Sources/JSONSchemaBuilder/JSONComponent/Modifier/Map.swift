@@ -3,24 +3,16 @@ import JSONSchema
 extension JSONSchemaComponent {
   public func map<NewOutput>(
     _ transform: @Sendable @escaping (Output) -> NewOutput
-  ) -> JSONComponents.Map<Self, NewOutput> {
-    .init(upstream: self, transform: transform)
-  }
+  ) -> JSONComponents.Map<Self, NewOutput> { .init(upstream: self, transform: transform) }
 }
 
 extension JSONComponents {
   public struct Map<Upstream: JSONSchemaComponent, NewOutput>: JSONSchemaComponent {
-    public var definition: Schema {
-      upstream.definition
-    }
+    public var definition: Schema { upstream.definition }
 
     public var annotations: AnnotationOptions {
-      get {
-        upstream.annotations
-      }
-      set {
-        upstream.annotations = newValue
-      }
+      get { upstream.annotations }
+      set { upstream.annotations = newValue }
     }
 
     var upstream: Upstream
