@@ -68,6 +68,7 @@ public struct SchemaTuple<each Component: JSONSchemaComponent>: SchemaCollection
 
   public func validate(_ input: JSONValue) -> [Validated<JSONValue, String>] {
     var results = [Validated<JSONValue, String>]()
+#if swift(>=6)
     for component in repeat each component {
       switch component.validate(input) {
       case .valid:
@@ -76,6 +77,17 @@ public struct SchemaTuple<each Component: JSONSchemaComponent>: SchemaCollection
         results.append(.invalid(errors))
       }
     }
+#else
+    func validateComponent<Comp: JSONSchemaComponent>(_ component: Comp) {
+      switch component.validate(input) {
+      case .valid:
+        results.append(.valid(input))
+      case .invalid(let errors):
+        results.append(.invalid(errors))
+      }
+    }
+    repeat validateComponent(each component)
+#endif
     return results
   }
 }
