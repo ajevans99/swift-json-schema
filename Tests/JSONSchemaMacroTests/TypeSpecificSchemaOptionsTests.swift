@@ -137,8 +137,7 @@ struct ArrayOptionsTests {
             JSONSchema(Weather.init) {
               JSONObject {
                 JSONProperty(key: "temperatureReadings") {
-                  JSONArray()
-                  .items {
+                  JSONArray {
                     JSONNumber()
                   }
                   .minContains(1)

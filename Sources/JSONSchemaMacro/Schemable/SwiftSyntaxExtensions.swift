@@ -24,8 +24,7 @@ extension TypeSyntax {
       return .primative(
         .array,
         schema: """
-          JSONArray()
-          .items {
+          JSONArray {
             \(codeBlock)
           }
           """

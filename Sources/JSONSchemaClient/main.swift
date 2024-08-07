@@ -44,9 +44,9 @@ func printSchema<T: Schemable>(_ schema: T.Type) {
     comment: "This is a comment about humidity"
   ) let humidity: Int
 
-  //  @SchemaOptions(title: "Temperature Readings")
-  //  @ArrayOptions(minContains: 1, maxContains: 5, minItems: 2, maxItems: 10, uniqueItems: true)
-  //  let temperatureReadings: [Double]
+  @SchemaOptions(title: "Temperature Readings")
+  @ArrayOptions(minContains: 1, maxContains: 5, minItems: 2, maxItems: 10, uniqueItems: true)
+  let temperatureReadings: [Double]
 
   @SchemaOptions(title: "Location")
   @StringOptions(minLength: 5, maxLength: 100, pattern: "^[a-zA-Z]+$", format: nil) let cityName:
@@ -56,7 +56,7 @@ func printSchema<T: Schemable>(_ schema: T.Type) {
 let now = Weather(
   temperature: 72,
   humidity: 30,
-  //  temperatureReadings: [32, 70.1, 84],
+  temperatureReadings: [32, 70.1, 84],
   cityName: "Detroit"
 )
 
@@ -67,12 +67,13 @@ printSchema(Weather.self)
 
 @Schemable struct Book {
   let title: String
-  //  let authors: [String]
+  let authors: [String]
   let yearPublished: Int
   @ExcludeFromSchema let rating: Double
 
-  init(title: String, yearPublished: Int) {
+  init(title: String, authors: [String], yearPublished: Int) {
     self.title = title
+    self.authors = authors
     self.yearPublished = yearPublished
     self.rating = 1
   }
@@ -80,7 +81,8 @@ printSchema(Weather.self)
 }
 
 @Schemable struct Library {
-  let name: String//  var books: [Book] = []
+  let name: String
+  var books: [Book] = []
 }
 
 printSchema(Book.self)

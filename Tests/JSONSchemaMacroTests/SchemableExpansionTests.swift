@@ -87,8 +87,7 @@ struct SchemableExpansionTests {
             JSONSchema(Weather.init) {
               JSONObject {
                 JSONProperty(key: "temperatures") {
-                  JSONArray()
-                  .items {
+                  JSONArray {
                     JSONNumber()
                   }
                 }
@@ -139,8 +138,7 @@ struct SchemableExpansionTests {
             JSONSchema(Weather.init) {
               JSONObject {
                 JSONProperty(key: "temperatures") {
-                  JSONArray()
-                  .items {
+                  JSONArray {
                     JSONNumber()
                   }
                 }
