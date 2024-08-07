@@ -95,16 +95,18 @@ struct JSONSchemaOptionBuilderTests {
 
     let options: NumberSchemaOptions = try #require(sample.definition.options?.asType())
 
+    #expect(sample.definition.type == .number)
     #expect(options == .options(multipleOf: 2, minimum: .inclusive(1), maximum: .exclusive(100)))
   }
 
   @Test func supplementalNumberOptions() throws {
-    @JSONSchemaBuilder var sample: some JSONSchemaComponent<Double> {
-      JSONNumber().multipleOf(1).exclusiveMinimum(0.99).maximum(5000)
+    @JSONSchemaBuilder var sample: JSONSchemaComponent {
+      JSONInteger().multipleOf(1).exclusiveMinimum(0.99).maximum(5000)
     }
 
     let options: NumberSchemaOptions = try #require(sample.definition.options?.asType())
 
+    #expect(sample.definition.type == .integer)
     #expect(
       options == .options(multipleOf: 1, minimum: .exclusive(0.99), maximum: .inclusive(5000))
     )
