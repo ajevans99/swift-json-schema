@@ -1,6 +1,10 @@
 import JSONSchema
 
 @resultBuilder public struct JSONPropertySchemaBuilder {
+  public static func buildBlock() -> EmptyPropertyCollection {
+    .init()
+  }
+
   public static func buildBlock<Component: PropertyCollection>(_ component: Component) -> Component {
     component
   }
@@ -28,6 +32,15 @@ public protocol PropertyCollection: Sendable {
   var schema: [String: Schema] { get }
   var requiredKeys: [String] { get }
   func validate(_ dictionary: [String: JSONValue]) -> Validated<Output, String>
+}
+
+public struct EmptyPropertyCollection: PropertyCollection {
+  public let schema: [String: Schema] = [:]
+  public let requiredKeys: [String] = []
+
+  public func validate(_ dictionary: [String: JSONValue]) -> Validated<Void, String> {
+    return .valid(())
+  }
 }
 
 public struct PropertyTuple<each Property: JSONPropertyComponent>: PropertyCollection {

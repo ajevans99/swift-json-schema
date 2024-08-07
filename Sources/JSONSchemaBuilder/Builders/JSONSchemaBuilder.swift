@@ -41,8 +41,6 @@ import JSONSchema
 }
 
 public protocol SchemaCollection: Sendable {
-//  associatedtype Output
-
   var definitions: [Schema] { get }
   func validate(_ input: JSONValue) -> [Validated<JSONValue, String>]
 }

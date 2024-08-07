@@ -55,18 +55,18 @@ struct JSONSchemaOptionBuilderTests {
     )
   }
 
-//  @Test func supplementalObjectOptions() throws {
-//    @JSONSchemaBuilder var sample: JSONSchemaComponent {
-//      JSONObject().disableAdditionalProperties().unevaluatedProperties { JSONInteger() }
-//    }
-//
-//    let options: ObjectSchemaOptions = try #require(sample.definition.options?.asType())
-//
-//    #expect(
-//      options
-//        == .options(additionalProperties: .disabled, unevaluatedProperties: .schema(.integer()))
-//    )
-//  }
+  @Test func supplementalObjectOptions() throws {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
+      JSONObject().disableAdditionalProperties().unevaluatedProperties { JSONInteger() }
+    }
+
+    let options: ObjectSchemaOptions = try #require(sample.definition.options?.asType())
+
+    #expect(
+      options
+        == .options(additionalProperties: .disabled, unevaluatedProperties: .schema(.integer()))
+    )
+  }
 
   @Test func stringOptions() throws {
     @JSONSchemaBuilder var sample: some JSONSchemaComponent<String> {

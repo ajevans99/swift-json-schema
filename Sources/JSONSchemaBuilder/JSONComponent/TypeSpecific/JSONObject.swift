@@ -32,9 +32,13 @@ public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
     annotations = .annotations()
     properties = build()
     options = .options(
-      properties: properties.schema,
+      properties: properties.schema.nilIfEmpty,
       required: properties.requiredKeys.nilIfEmpty
     )
+  }
+
+  public init() where Props == EmptyPropertyCollection {
+    self.init(with: {})
   }
 
   public func validate(_ input: JSONValue) -> Validated<Props.Output, String> {
