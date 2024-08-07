@@ -243,15 +243,20 @@ case .invalid(let array):
   print("Invalid: \(array.joined(separator: "\n"))")
 }
 
-let sample =
+let anyOf =
   JSONComposition.AnyOf {
     JSONString()
     JSONNumber().minimum(0)
   }
-print(sample.definition)
+print(anyOf.definition)
 
-let expectedSchema = Schema.noType(
-  composition: .anyOf([.string(), .number(.annotations(), .options(minimum: 0))])
-)
+print(anyOf.validate(.string("Hello")))
+print(anyOf.validate(.number(1)))
+print(anyOf.validate(.null))
 
-print(sample.definition == expectedSchema)
+let array = JSONArray {
+  JSONInteger()
+}
+
+let arrayResult = array.validate(.array([1, 2, 3, 4, 5]))
+print(arrayResult)

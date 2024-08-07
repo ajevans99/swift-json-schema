@@ -20,8 +20,22 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
   }
 
   public func validate(_ value: JSONValue) -> Validated<[T.Output], String> {
-    if case .array = value {
-      return .error("Not yet implemented")
+    if case .array(let array) = value {
+      var outputs: [T.Output] = []
+      var errors: [String] = []
+      for item in array {
+        switch items.validate(item) {
+        case .valid(let value):
+          outputs.append(value)
+        case .invalid(let e):
+          errors.append(contentsOf: e)
+        }
+      }
+      if !errors.isEmpty {
+        return .invalid(errors)
+      } else {
+        return .valid(outputs)
+      }
     }
     return .error("Expected array value")
   }

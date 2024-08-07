@@ -29,7 +29,7 @@ public enum JSONComposition {
           case .invalid:
             return false
           }
-        } ?? .error("\(value) failed to many any of schemas")
+        } ?? .error("\(value) failed to match any of schemas")
     }
   }
 
