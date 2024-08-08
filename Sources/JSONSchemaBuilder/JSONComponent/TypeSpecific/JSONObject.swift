@@ -1,41 +1,44 @@
 import JSONSchema
 
 /// A JSON object schema component for use in ``JSONSchemaBuilder``.
-public struct JSONObject: JSONSchemaComponent {
+public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
   public var annotations: AnnotationOptions = .annotations()
-  var options: ObjectSchemaOptions = .options()
+  var options: ObjectSchemaOptions
 
   public var definition: Schema { .object(annotations, options) }
 
-  public init() {}
-}
+  let properties: Props
 
-extension JSONObject {
-  /// Adds a property to the object schema.
-  /// - Parameter properties: A dictionary where the key is the property name and the value is the schema for the property.
-  /// - Returns: A new `JSONObject` with the property set.
-  public func properties(_ properties: [String: Schema]?) -> Self {
-    var copy = self
-    copy.options.properties = properties
-    return copy
-  }
-
-  /// Defines the schema for the properties of the object.
+  /// Constructs a new `JSONObject` with the provided properties.
   ///
-  /// - SeeAlso: ``JSONProperty``
-  /// - Parameter properties: The properties to add to the schema.
-  /// - Returns: A new `JSONObject` with the properties set.
-  public func properties(@JSONPropertySchemaBuilder _ properties: () -> [JSONProperty]) -> Self {
-    self.properties(
-      properties()
-        .reduce(into: [:]) { partialResult, property in
-          partialResult[property.key] = property.value.definition
-        }
+  /// Example:
+  /// ```swift
+  /// let schema = JSONObject {
+  ///   JSONProperty(key: "name", value: JSONString())
+  /// }
+  /// ```
+  /// - Parameter build: A closure that returns an collection of `JSONProperty` instances.
+  public init(@JSONPropertySchemaBuilder with build: () -> Props) {
+    annotations = .annotations()
+    properties = build()
+    options = .options(
+      properties: properties.schema.nilIfEmpty,
+      required: properties.requiredKeys.nilIfEmpty
     )
   }
 
-  /// Adds a property names schema to the object schema.
-  /// - Parameter patternProperties: A dictionary where the key is the property name and the value is the schema for the property.
+  /// Creates a new `JSONObject` with no property requirements.
+  public init() where Props == EmptyPropertyCollection { self.init(with: {}) }
+
+  public func validate(_ input: JSONValue) -> Validated<Props.Output, String> {
+    if case .object(let dictionary) = input { return properties.validate(dictionary) }
+    return .error("Not an object")
+  }
+}
+
+extension JSONObject {
+  /// Adds pattern properties to the object schema.
+  /// - Parameter patternProperties: A dictionary where the key is the property name as a regular expression and the value is the schema.
   /// - Returns: A new `JSONObject` with the property names set.
   public func patternProperties(_ patternProperties: [String: Schema]?) -> Self {
     var copy = self
@@ -46,16 +49,9 @@ extension JSONObject {
   /// Adds a pattern properties schema to the object schema.
   /// - Parameter patternProperties: A closure that returns an array of JSON properties representing the pattern properties.
   /// - Returns: A new `JSONObject` with the pattern properties set.
-  public func patternProperties(
-    @JSONPropertySchemaBuilder _ patternProperties: () -> [JSONProperty]
-  ) -> Self {
-    self.patternProperties(
-      patternProperties()
-        .reduce(into: [:]) { partialResult, property in
-          partialResult[property.key] = property.value.definition
-        }
-    )
-  }
+  public func patternProperties<Pattern: PropertyCollection>(
+    @JSONPropertySchemaBuilder _ patternProperties: () -> Pattern
+  ) -> Self { self.patternProperties(patternProperties().schema) }
 
   /// Adds additional properties to the schema.
   /// - Parameter addionalProperties: A schema control option.
@@ -73,8 +69,8 @@ extension JSONObject {
   /// Adds additional properties to the schema.
   /// - Parameter additionalProperties: A closure that returns a JSON schema representing the additional properties.
   /// - Returns: A new `JSONObject` with the additional properties set.
-  public func additionalProperties(
-    @JSONSchemaBuilder _ additionalProperties: () -> JSONSchemaComponent
+  public func additionalProperties<C: JSONSchemaComponent>(
+    @JSONSchemaBuilder _ additionalProperties: () -> C
   ) -> Self { self.additionalProperties(.schema(additionalProperties().definition)) }
 
   /// Adds unevaluated properties to the schema.
@@ -93,19 +89,11 @@ extension JSONObject {
   /// Adds unevaluated properties to the schema.
   /// - Parameter content: A closure that returns a JSON schema representing the unevaluated properties.
   /// - Returns: A new `JSONObject` with the unevaluated properties set.
-  public func unevaluatedProperties(@JSONSchemaBuilder _ content: () -> JSONSchemaComponent) -> Self
-  { self.unevaluatedProperties(.schema(content().definition)) }
+  public func unevaluatedProperties<C: JSONSchemaComponent>(
+    @JSONSchemaBuilder _ content: () -> C
+  ) -> Self { self.unevaluatedProperties(.schema(content().definition)) }
 
-  /// Adds a required constraint to the schema.
-  /// - Parameter properties: The properties that are required.
-  /// - Returns: A new `JSONObject` with the required constraint set.
-  public func required(_ properties: [String]?) -> Self {
-    var copy = self
-    copy.options.required = properties
-    return copy
-  }
-
-  /// Adds a property names schema to the object schema.
+  /// Adds schema options to validate property names against.
   /// - Parameter option: A string schema option.
   /// - Returns: A new `JSONObject` with the property names set.
   public func propertyNames(_ option: StringSchemaOptions?) -> Self {
@@ -114,7 +102,7 @@ extension JSONObject {
     return copy
   }
 
-  /// Adds a min properties constraint to the schema.
+  /// Adds a minimum number of properties constraint to the schema.
   /// - Parameter value: The minimum number of properties that the object must have.
   /// - Returns: A new `JSONObject` with the min properties constraint set.
   public func minProperties(_ value: Int?) -> Self {
@@ -123,7 +111,7 @@ extension JSONObject {
     return copy
   }
 
-  /// Adds a max properties constraint to the schema.
+  /// Adds a maximum number of properties constraint to the schema.
   /// - Parameter value: The maximum number of properties that the object must have.
   /// - Returns: A new `JSONObject` with the max properties constraint set.
   public func maxProperties(_ value: Int?) -> Self {

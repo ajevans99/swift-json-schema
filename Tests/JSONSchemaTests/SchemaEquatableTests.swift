@@ -57,4 +57,11 @@ struct SchemaEquatableTests {
         )
     )
   }
+
+  @Test func compositionOptions() {
+    #expect(
+      Schema.noType(composition: .allOf([.string(), .number()]))
+        != .noType(composition: .allOf([.string()]))
+    )
+  }
 }

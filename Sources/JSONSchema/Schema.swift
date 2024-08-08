@@ -134,7 +134,7 @@ public struct Schema: Sendable {
   /// An array of possible values for the schema.
   /// TODO: Use `OrderedSet` from `swift-collections` to ensure uniqueness
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/enum)
-  public let enumValues: [JSONValue]?
+  public var enumValues: [JSONValue]?
 
   /// Composition options for the schema.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/combining)

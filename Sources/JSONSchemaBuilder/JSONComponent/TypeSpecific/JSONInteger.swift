@@ -7,4 +7,9 @@ public struct JSONInteger: JSONSchemaComponent {
   public var definition: Schema { .integer(annotations) }
 
   public init() {}
+
+  public func validate(_ value: JSONValue) -> Validated<Int, String> {
+    if case .integer(let int) = value { return .valid(int) }
+    return .error("Expected integer value.")
+  }
 }

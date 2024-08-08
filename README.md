@@ -112,7 +112,7 @@ Import the `JSONSchemaBuilder` target and improve schema generation ergonomics w
   .title("Person")
 }
 
-let schema: JSONSchema = jsonSchema.defintion
+let schema: Schema = jsonSchema.defintion
 ```
 
 ## Macros
@@ -123,7 +123,7 @@ Use the `@Schemable` macro from `JSONSchemaBuilder` to automatically expand Swif
 @Schemable
 struct Person {
   let firstName: String
-  let lastName: String
+  let lastName: String?
   @NumberOptions(minimum: 0, maximum: 120)
   let age: Int
 }
@@ -134,24 +134,26 @@ The `@Schemable` attribute automatically expands the `Person` type into a JSON s
 ```swift
 struct Person {
   let firstName: String
-  let lastName: String
+  let lastName: String?
   let age: Int
 
   // Auto-generated schema ↴
-  static var schema: JSONSchemaComponent {
-    JSONObject {
-      JSONProperty(key: "firstName") {
-        JSONString()
-      }
-
-      JSONProperty(key: "lastName") {
-        JSONString()
-      }
-
-      JSONProperty(key: "age") {
-        JSONInteger()
+  static var schema: some JSONSchemaComponent<Person> {
+    JSONSchema(Person.init) {
+      JSONObject {
+        JSONProperty(key: "firstName") {
+          JSONString()
+        }
+        .required()
+        JSONProperty(key: "lastName") {
+          JSONString()
+        }
+        JSONProperty(key: "age") {
+          JSONInteger()
           .minimum(0)
           .maximum(120)
+        }
+        .required()
       }
     }
   }

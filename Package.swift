@@ -6,11 +6,12 @@ import CompilerPluginSupport
 let package = Package(
   name: "swift-json-schema",
   platforms: [
-    .macOS(.v10_15),
+    .macOS(.v14),
     .iOS(.v13),
     .watchOS(.v6),
     .tvOS(.v13),
-    .macCatalyst(.v13),
+    .macCatalyst(.v14),
+    .visionOS(.v1),
   ],
   products: [
     .library(
@@ -35,11 +36,10 @@ let package = Package(
     .target(
       name: "JSONSchema"
     ),
-    // Test target disabled because this Swift tools version does not support Swift Testing
-    // .testTarget(
-    //   name: "JSONSchemaTests",
-    //   dependencies: ["JSONSchema"]
-    // ),
+    .testTarget(
+      name: "JSONSchemaTests",
+      dependencies: ["JSONSchema"]
+    ),
 
     // Library for building JSON schemas with Swift's result builders.
     .target(
@@ -49,11 +49,12 @@ let package = Package(
         "JSONSchemaMacro",
       ]
     ),
-    // Test target disabled because this Swift tools version does not support Swift Testing
-    // .testTarget(
-    //   name: "JSONSchemaBuilderTests",
-    //   dependencies: ["JSONSchemaBuilder"]
-    // ),
+    .testTarget(
+      name: "JSONSchemaBuilderTests",
+      dependencies: [
+        "JSONSchemaBuilder",
+      ]
+    ),
 
     // Macro implementation that preforms the source transformation of a macro.
     .macro(
@@ -61,18 +62,17 @@ let package = Package(
       dependencies: [
         .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-        .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
+        .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
       ]
     ),
-    // Test target disabled because this Swift tools version does not support Swift Testing
-    // .testTarget(
-    //   name: "JSONSchemaMacroTests",
-    //   dependencies: [
-    //     "JSONSchemaMacro",
-    //     .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),
-    //     .product(name: "SwiftSyntaxMacrosGenericTestSupport", package: "swift-syntax"),
-    //   ]
-    // ),
+    .testTarget(
+      name: "JSONSchemaMacroTests",
+      dependencies: [
+        "JSONSchemaMacro",
+        .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),
+        .product(name: "SwiftSyntaxMacrosGenericTestSupport", package: "swift-syntax"),
+      ]
+    ),
 
     // A client of the library, which is able to use the macro in its own code.
     .executableTarget(
@@ -85,3 +85,9 @@ let package = Package(
     ),
   ]
 )
+
+for target in package.targets {
+  var settings = target.swiftSettings ?? []
+  settings.append(.enableExperimentalFeature("StrictConcurrency"))
+  target.swiftSettings = settings
+}
