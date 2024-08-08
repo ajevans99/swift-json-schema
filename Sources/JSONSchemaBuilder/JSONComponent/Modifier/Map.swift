@@ -1,6 +1,9 @@
 import JSONSchema
 
 extension JSONSchemaComponent {
+  /// Maps the validated output of the upstream component to a new output type.
+  /// - Parameter transform: The transform to apply to the output.
+  /// - Returns: A new component that applies the transform.
   public func map<NewOutput>(
     _ transform: @Sendable @escaping (Output) -> NewOutput
   ) -> JSONComponents.Map<Self, NewOutput> { .init(upstream: self, transform: transform) }

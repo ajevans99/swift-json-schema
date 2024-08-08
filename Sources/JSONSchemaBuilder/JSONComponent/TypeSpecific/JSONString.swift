@@ -43,7 +43,8 @@ extension JSONString {
     return copy
   }
 
-  /// Adds a format constraint to the schema.
+  /// Adds constraint for basic semantic identification of certain kinds of string values that are commonly used.
+  /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/string#format)
   /// - Parameter format: The format that the string must adhere to.
   /// - Returns: A new `JSONString` with the format constraint set.
   public func format(_ format: String?) -> Self {

@@ -1,6 +1,7 @@
 import JSONSchema
 
 extension JSONPropertyComponents {
+  /// A component that conditionally applies one of two property collections.
   public enum Conditional<First: PropertyCollection, Second: PropertyCollection>: PropertyCollection
   where First.Output == Second.Output {
     public var schema: [String: Schema] {

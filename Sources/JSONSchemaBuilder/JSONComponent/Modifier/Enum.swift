@@ -1,6 +1,9 @@
 import JSONSchema
 
 extension JSONSchemaComponent {
+  /// Adds an `enum` constraint to the schema.
+  /// - Parameter builder: A closure that returns one or more of enum values.
+  /// - Returns: A new component with the `enum` constraint applied.
   public func enumValues(
     @JSONValueBuilder with builder: () -> JSONValueRepresentable
   ) -> JSONComponents.Enum<Self> { .init(upstream: self, cases: Array(builder().value)) }

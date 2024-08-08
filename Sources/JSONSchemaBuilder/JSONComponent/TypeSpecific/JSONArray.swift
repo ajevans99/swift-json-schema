@@ -9,11 +9,15 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
 
   let items: T
 
+  /// Creates a new JSON array schema component.
+  /// - Parameter items: A JSON schema component for validating each item in the array.
   public init(@JSONSchemaBuilder items: () -> T) {
     self.items = items()
     self.options = .options(items: .schema(self.items.definition))
   }
 
+  /// Creates a new JSON array schema component.
+  /// - Parameter disableItems: A boolean value that disallows items in the array.
   public init(disableItems: Bool = false) where T == JSONAnyValue {
     self.items = JSONAnyValue()
     self.options = disableItems ? .options(items: .disabled) : .options()
@@ -37,7 +41,7 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
 }
 
 extension JSONArray {
-  /// Adds prefix items to the schema.
+  /// Each item is a schema that corresponds to each index of the document's array. That is, an array where the first element validates the first element of the input array, the second element validates the second element of the input array, etc.
   /// - Parameter prefixItems: An array of JSON schemas representing the prefix items.
   /// - Returns: A new `JSONArray` with the prefix items set.
   public func prefixItems(_ prefixItems: [Schema]?) -> Self {
@@ -46,14 +50,14 @@ extension JSONArray {
     return copy
   }
 
-  /// Adds prefix items to the schema.
+  /// Each item is a schema that corresponds to each index of the document's array. That is, an array where the first element validates the first element of the input array, the second element validates the second element of the input array, etc.
   /// - Parameter prefixItems: A closure that returns an array of JSON schemas representing the prefix items.
   /// - Returns: A new `JSONArray` with the prefix items set.
   public func prefixItems<Component: SchemaCollection>(
     @JSONSchemaCollectionBuilder _ prefixItems: () -> Component
   ) -> Self { self.prefixItems(prefixItems().definitions) }
 
-  /// Adds unevaluated items to the schema.
+  /// Schema options applied to any values not evaluated by an `items`, `prefixItems`, or `contains` keyword.
   /// - Parameter unevaluatedItems: A schema control option.
   /// - Returns: A new `JSONArray` with the unevaluated items set.
   public func unevaluatedItems(_ unevaluatedItems: SchemaControlOption? = nil) -> Self {
@@ -62,18 +66,18 @@ extension JSONArray {
     return copy
   }
 
-  /// Disables unevaluated items in the schema.
+  /// Disables any values not evaluated by an `items`, `prefix`, or `contains` keyword.
   /// - Returns: A new `JSONArray` with unevaluated items disabled.
   public func disableUnevaluatedItems() -> Self { self.unevaluatedItems(.disabled) }
 
-  /// Adds unevaluated items to the schema.
+  /// Schema options applied to any values not evaluated by an `items`, `prefixItems`, or `contains` keyword.
   /// - Parameter unevaluatedItems: A closure that returns a JSON schema representing the unevaluated items.
   /// - Returns: A new `JSONArray` with the unevaluated items set.
   public func unevaluatedItems<Component: JSONSchemaComponent>(
     @JSONSchemaBuilder _ unevaluatedItems: () -> Component
   ) -> Self { self.unevaluatedItems(.schema(unevaluatedItems().definition)) }
 
-  /// Adds a `contains` schema to the schema.
+  /// Specifies schema that must be valid against one or more items in the array.
   /// - Parameter contains: A JSON schema representing the `contains` schema.
   /// - Returns: A new `JSONArray` with the `contains` schema set.
   public func contains(_ contains: Schema?) -> Self {
@@ -89,7 +93,7 @@ extension JSONArray {
     self.contains(contains().definition)
   }
 
-  /// Adds a minimum number of `contains` to the schema.
+  /// Used with `contains` to minimum number of times a schema matches a `contains` constraint.
   /// - Parameter minContains: An integer representing the minimum number of `contains`.
   /// - Returns: A new `JSONArray` with the minimum number of `contains` set.
   public func minContains(_ minContains: Int?) -> Self {
@@ -98,7 +102,7 @@ extension JSONArray {
     return copy
   }
 
-  /// Adds a maximum number of `contains` to the schema.
+  /// Used with `contains` to maximum number of times a schema matches a `contains` constraint.
   /// - Parameter maxContains: An integer representing the maximum number of `contains`.
   /// - Returns: A new `JSONArray` with the maximum number of `contains` set.
   public func maxContains(_ maxContains: Int?) -> Self {

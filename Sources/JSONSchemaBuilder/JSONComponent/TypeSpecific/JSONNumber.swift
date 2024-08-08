@@ -16,7 +16,7 @@ public struct JSONNumber: JSONSchemaComponent {
 }
 
 extension JSONNumber {
-  /// Adds a multiple of constraint to the schema.
+  /// Restrictes value to a multiple of this number.
   /// - Parameter multipleOf: The number that the value must be a multiple of.
   /// - Returns: A new `JSONNumber` with the multiple of constraint set.
   public func multipleOf(_ multipleOf: Double?) -> JSONNumber {

@@ -229,3 +229,103 @@ let array = JSONArray { JSONInteger() }
 
 let arrayResult = array.validate(.array([1, 2, 3, 4, 5]))
 print(arrayResult)
+
+// Validation article
+
+
+let identifierSchema = JSONString()
+  .pattern("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+  .description("Unique identifier for the product")
+
+let nameSchema = JSONString()
+  .minLength(1)
+  .description("Name of the product")
+
+let priceSchema = JSONNumber()
+  .multipleOf(0.01)
+  .description("Price of the product in USD")
+
+let inStockSchema = JSONBoolean()
+  .description("Availablility status of the product")
+
+let id = identifierSchema.validate(.string("E621E1F8-C36C-495A-93FC-0C247A3E6E5F")) // Validated<String, String>
+let name = nameSchema.validate(.string("iPad")) // Validated<String, String>
+let price = priceSchema.validate(.number(199.99)) // Validated<Double, String>
+let inStock = inStockSchema.validate(.boolean(true)) // Validated<Bool, String>
+
+// Compose them together into an object
+
+let itemSchema = JSONObject {
+  JSONProperty(key: "id", value: identifierSchema)
+  JSONProperty(key: "name", value: nameSchema)
+  JSONProperty(key: "price", value: priceSchema)
+  JSONProperty(key: "inStock", value: inStockSchema)
+}
+
+let itemString = """
+{
+  "id": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
+  "name": "iPad",
+  "price": 199.99,
+  "inStock": true
+}
+"""
+let itemInstance = try! JSONDecoder().decode(JSONValue.self, from: Data(itemString.utf8))
+print(itemInstance)
+
+let itemValidationResult = itemSchema.validate(itemInstance) // Validated<(String?, String?, Double?, Bool?), String>
+
+switch itemValidationResult {
+case .valid(let value):
+  if let id = value.0 {
+    print("ID: \(id)")
+  }
+
+  if let name = value.1 {
+    print("Name: \(name)")
+  }
+
+  // ..
+
+case .invalid(let array):
+  print("Errors: \(array.joined(separator: ", "))")
+}
+
+struct Item {
+  let id: String
+  let name: String
+  let price: Double
+  let inStock: Bool
+}
+
+let newSchema = JSONObject {
+  JSONProperty(key: "id") {
+    JSONString()
+      .pattern("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+      .description("Unique identifier for the product")
+  }
+  .required()
+
+  JSONProperty(key: "name") {
+    JSONString()
+      .minLength(1)
+      .description("Name of the product")
+  }
+  .required()
+
+  JSONProperty(key: "price") {
+    JSONNumber()
+      .multipleOf(0.01)
+      .description("Price of the product in USD")
+  }
+  .required()
+
+  JSONProperty(key: "inStock") {
+    JSONBoolean()
+      .description("Availablility status of the product")
+  }
+  .required()
+}
+.map(Item.init)
+
+let item = newSchema.validate(itemInstance)

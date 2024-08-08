@@ -1,6 +1,9 @@
 import JSONSchema
 
 extension JSONSchemaComponent {
+  /// Modifies valid components by applying a transform with additional validation.
+  /// - Parameter transform: The transform to apply to the output.
+  /// - Returns: A new component that applies the transform.
   public func flatMap<NewComponent: JSONSchemaComponent>(
     _ transform: @Sendable @escaping (Output) -> NewComponent
   ) -> JSONComponents.FlatMap<NewComponent, Self> { .init(upstream: self, transform: transform) }

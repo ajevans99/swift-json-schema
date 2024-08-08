@@ -1,4 +1,6 @@
-// Adapted from https://github.com/pointfreeco/swift-validated
+/// A validated value that can be either valid or invalid.
+/// When invalid, it contains an array of errors which should be non-empty.
+/// Adapted from https://github.com/pointfreeco/swift-validated
 public enum Validated<Value, Error> {
   case valid(Value)
   case invalid([Error])
@@ -23,6 +25,8 @@ public enum Validated<Value, Error> {
     }
   }
 }
+
+extension Validated: Equatable where Value: Equatable, Error: Equatable {}
 
 struct _Invalid: Error {}
 

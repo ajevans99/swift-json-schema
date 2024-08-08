@@ -1,5 +1,6 @@
 import JSONSchema
 
+/// A compoment that accepts any JSON value.
 public struct JSONAnyValue: JSONSchemaComponent {
   public var annotations: AnnotationOptions = .annotations()
 

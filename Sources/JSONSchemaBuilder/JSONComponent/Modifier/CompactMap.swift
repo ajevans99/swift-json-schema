@@ -1,6 +1,9 @@
 import JSONSchema
 
 extension JSONSchemaComponent {
+  /// Modifies the validated output of a component by applying a transform. If the transform returns `nil`, the output sends a validation error.
+  /// - Parameter transform: The transform to apply to the output.
+  /// - Returns: A new component that applies the transform.
   public func compactMap<NewOutput>(
     _ transform: @Sendable @escaping (Output) -> NewOutput?
   ) -> JSONComponents.CompactMap<Self, NewOutput> { .init(upstream: self, transform: transform) }

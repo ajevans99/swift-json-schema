@@ -1,6 +1,7 @@
 import JSONSchema
 
 extension JSONComponents {
+  /// A component that conditionally applies one of two components based on the input value.
   public enum Conditional<First: JSONSchemaComponent, Second: JSONSchemaComponent>:
     JSONSchemaComponent
   where First.Output == Second.Output {

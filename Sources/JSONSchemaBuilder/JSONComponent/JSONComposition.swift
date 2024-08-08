@@ -9,6 +9,7 @@ extension JSONComposableComponent {
 }
 
 public enum JSONComposition {
+  /// A component that accepts any of the given schemas.
   public struct AnyOf<Components: SchemaCollection>: JSONComposableComponent {
     public var annotations: AnnotationOptions = .annotations()
 
@@ -31,6 +32,7 @@ public enum JSONComposition {
     }
   }
 
+  /// A component that requires all of the schemas to be valid.
   public struct AllOf<Components: SchemaCollection>: JSONComposableComponent {
     public var annotations: AnnotationOptions = .annotations()
 
@@ -51,6 +53,7 @@ public enum JSONComposition {
     }
   }
 
+  /// A component that requires exactly one of the schemas to be valid.
   public struct OneOf<Components: SchemaCollection>: JSONComposableComponent {
     public var annotations: AnnotationOptions = .annotations()
 
@@ -71,6 +74,7 @@ public enum JSONComposition {
     }
   }
 
+  /// A component that requires the value to not match the given schema.
   public struct Not<Component: JSONSchemaComponent>: JSONComposableComponent {
     public var annotations: AnnotationOptions = .annotations()
 

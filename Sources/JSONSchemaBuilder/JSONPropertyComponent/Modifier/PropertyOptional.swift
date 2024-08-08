@@ -1,6 +1,7 @@
 import JSONSchema
 
 extension JSONPropertyComponents {
+  /// A property collection that wraps another property collection and makes it's validation result optional.
   public struct OptionalNoType<Wrapped: PropertyCollection>: PropertyCollection {
     public var schema: [String: Schema] { wrapped?.schema ?? [:] }
 
