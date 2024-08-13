@@ -1,6 +1,5 @@
-/// A validated value that can be either valid or invalid.
-/// When invalid, it contains an array of errors which should be non-empty.
-/// Adapted from https://github.com/pointfreeco/swift-validated
+/// Similar to `Result` from Swift but `invalid` case has an array of errors.
+/// Adapted from [Point-Free](https://github.com/pointfreeco/swift-validated) to use variadic parameters.
 public enum Validated<Value, Error> {
   case valid(Value)
   case invalid([Error])
@@ -30,6 +29,9 @@ extension Validated: Equatable where Value: Equatable, Error: Equatable {}
 
 struct _Invalid: Error {}
 
+/// Combine values of Validated together into a tuple.
+/// Example:
+/// `zip(Validated<A, E>, Validated<B, E>, Validated<C, E>)` -> `Validated<(A, B, C), E>`
 public func zip<each Value, Error>(
   _ validated: repeat Validated<each Value, Error>
 ) -> Validated<(repeat each Value), Error> {
