@@ -90,26 +90,77 @@ printSchema(Library.self)
 
 // MARK: - Enums
 
-//@Schemable enum TemperatureType: Codable {
-//  case fahrenheit
-//  case celcius
-//}
+/*@Schemable */enum TemperatureType: Codable {
+  case fahrenheit
+  case celcius
+}
 
-//printSchema(TemperatureType.self)
+extension TemperatureType: Schemable {
+  static var schema: some JSONSchemaComponent<TemperatureType> {
+    JSONString()
+      .enumValues {
+        "fahrenheit"
+        "celcius"
+      }
+      .compactMap { string in
+        switch string {
+        case "fahrenheit":
+          return Self.fahrenheit
+        case "celcius":
+          return Self.celcius
+        default:
+          return nil
+        }
+      }
+  }
+}
 
-//@Schemable enum WeatherCondition: Codable { case sunny(hoursOfSunlight: Int)
-//  case hail(Bool)
-//  case cloudy(coverage: Double)
-//  case rainy(chanceOfRain: Double, amount: Double)
-//  case snowy
-//  case windy
-//  case stormy
-//}
-//
-//let conditions = WeatherCondition.sunny(hoursOfSunlight: 5)
-//printInstance(conditions)
-//printSchema(WeatherCondition.self)
-//
+let tempType = TemperatureType.schema.validate(.string("fahrenheit"))
+print("tempType", tempType)
+
+printSchema(TemperatureType.self)
+
+/*@Schemable */enum WeatherCondition: Codable {
+  case sunny(hoursOfSunlight: Int)
+  case hail(Bool)
+  case cloudy(coverage: Double)
+  case rainy(chanceOfRain: Double, amount: Double)
+  case snowy
+  case windy
+  case stormy
+}
+
+extension WeatherCondition: Schemable {
+  static var schema: some JSONSchemaComponent<WeatherCondition> {
+    JSONComposition.AnyOf(into: WeatherCondition.self) {
+      JSONObject {
+        JSONProperty(key: "cloudy") {
+          JSONObject {
+            JSONProperty(key: "coverage") {
+              JSONNumber()
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .compactMap { coverage in
+        Self.cloudy(coverage: coverage)
+      }
+    }
+//    .compactMap { jsonValue in
+//      switch jsonValue
+//    }
+  }
+}
+
+let weatherConditionResult = WeatherCondition.schema.validate(.object(["cloudy": .object(["coverage": .number(100)])]))
+print("weatherConditionResult", weatherConditionResult)
+
+let conditions = WeatherCondition.sunny(hoursOfSunlight: 5)
+printInstance(conditions)
+printSchema(WeatherCondition.self)
+
 //@Schemable enum Category { case fiction, nonFiction, science, history, kids, entertainment }
 
 // MARK: Parsing
@@ -215,9 +266,9 @@ case .valid(let a): print("Valid: \(a)")
 case .invalid(let array): print("Invalid: \(array.joined(separator: "\n"))")
 }
 
-let anyOf = JSONComposition.AnyOf {
-  JSONString()
-  JSONNumber().minimum(0)
+let anyOf = JSONComposition.AnyOf(into: JSONValue.self) {
+  JSONString().map { JSONValue.string($0) }
+  JSONNumber().minimum(0).map { JSONValue.number($0) }
 }
 print(anyOf.definition)
 

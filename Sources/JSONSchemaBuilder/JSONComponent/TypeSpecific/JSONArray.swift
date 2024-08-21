@@ -53,9 +53,10 @@ extension JSONArray {
   /// Each item is a schema that corresponds to each index of the document's array. That is, an array where the first element validates the first element of the input array, the second element validates the second element of the input array, etc.
   /// - Parameter prefixItems: A closure that returns an array of JSON schemas representing the prefix items.
   /// - Returns: A new `JSONArray` with the prefix items set.
-  public func prefixItems<Component: SchemaCollection>(
-    @JSONSchemaCollectionBuilder _ prefixItems: () -> Component
-  ) -> Self { self.prefixItems(prefixItems().definitions) }
+//  public func prefixItems<Component: SchemaCollection, Output>(
+//    into: Output.Type,
+//    @JSONSchemaCollectionBuilder<Output> _ prefixItems: () -> Component
+//  ) -> Self { self.prefixItems(prefixItems().definitions) }
 
   /// Schema options applied to any values not evaluated by an `items`, `prefixItems`, or `contains` keyword.
   /// - Parameter unevaluatedItems: A schema control option.

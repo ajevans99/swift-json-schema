@@ -1,10 +1,12 @@
 import SwiftSyntax
 
 struct EnumSchemaGenerator {
+  let name: TokenSyntax
   let members: MemberBlockItemListSyntax
   let attributes: AttributeListSyntax
 
   init(fromEnum enumDecl: EnumDeclSyntax) {
+    name = enumDecl.name
     members = enumDecl.memberBlock.members
     attributes = enumDecl.attributes
   }
@@ -39,7 +41,7 @@ struct EnumSchemaGenerator {
     }
 
     let variableDecl: DeclSyntax = """
-      static var schema: some JSONSchemaComponent {
+      static var schema: some JSONSchemaComponent<\(name)> {
         \(codeBlockItem)
       }
       """
