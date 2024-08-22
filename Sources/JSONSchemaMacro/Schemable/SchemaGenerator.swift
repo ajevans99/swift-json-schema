@@ -6,7 +6,7 @@ struct EnumSchemaGenerator {
   let attributes: AttributeListSyntax
 
   init(fromEnum enumDecl: EnumDeclSyntax) {
-    name = enumDecl.name
+    name = enumDecl.name.trimmed
     members = enumDecl.memberBlock.members
     attributes = enumDecl.attributes
   }
@@ -27,13 +27,24 @@ struct EnumSchemaGenerator {
       // Add cases without associated value
       if !casesWithoutAssociatedValues.isEmpty {
         let statements = casesWithoutAssociatedValues.compactMap { $0.generateSchema() }
-        codeBlockItemList.append("JSONEnum { \(CodeBlockItemListSyntax(statements)) }")
+//        codeBlockItemList.append("JSONEnum { \(CodeBlockItemListSyntax(statements)) }")
+        codeBlockItemList.append("""
+          JSONString()  
+            .enumValues {
+              \(CodeBlockItemListSyntax(statements))
+            }
+          """)
       }
       codeBlockItem = "JSONComposition.AnyOf { \(codeBlockItemList) }"
     } else {
       // When no case has an associated value, use simple enum schema
       let statements = casesWithoutAssociatedValues.compactMap { $0.generateSchema() }
-      codeBlockItem = "JSONEnum { \(CodeBlockItemListSyntax(statements)) }"
+      codeBlockItem = """
+          JSONString()  
+            .enumValues {
+              \(CodeBlockItemListSyntax(statements))
+            }
+          """
     }
 
     if let annotationArguments = attributes.arguments(for: "SchemaOptions") {

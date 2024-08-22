@@ -144,18 +144,56 @@ extension WeatherCondition: Schemable {
         }
         .required()
       }
-      .compactMap { coverage in
+      .map { coverage in
         Self.cloudy(coverage: coverage)
       }
+
+      JSONObject {
+        JSONProperty(key: "rainy") {
+          JSONObject {
+            JSONProperty(key: "chanceOfRain") {
+              JSONNumber()
+            }
+            .required()
+            JSONProperty(key: "amount") {
+              JSONNumber()
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { chanceOfRain, amount in
+        Self.rainy(chanceOfRain: chanceOfRain, amount: amount)
+      }
+
+      JSONString()
+        .enumValues {
+          "snowy"
+          "windy"
+          "stormy"
+        }
+        .compactMap { string in
+          switch string {
+          case "snowy":
+            return WeatherCondition.snowy
+          case "windy":
+            return WeatherCondition.windy
+          case "stormy":
+            return WeatherCondition.stormy
+          default:
+            return nil
+          }
+        }
     }
-//    .compactMap { jsonValue in
-//      switch jsonValue
-//    }
   }
 }
 
-let weatherConditionResult = WeatherCondition.schema.validate(.object(["cloudy": .object(["coverage": .number(100)])]))
-print("weatherConditionResult", weatherConditionResult)
+let weatherConditionResult1 = WeatherCondition.schema.validate(.object(["cloudy": .object(["coverage": .number(100)])]))
+print("weatherConditionResult1", weatherConditionResult1)
+let weatherConditionResult2 = WeatherCondition.schema.validate(.string("snowy"))
+print("weatherConditionResult2", weatherConditionResult2)
+
 
 let conditions = WeatherCondition.sunny(hoursOfSunlight: 5)
 printInstance(conditions)
@@ -267,14 +305,14 @@ case .invalid(let array): print("Invalid: \(array.joined(separator: "\n"))")
 }
 
 let anyOf = JSONComposition.AnyOf(into: JSONValue.self) {
-  JSONString().map { JSONValue.string($0) }
-  JSONNumber().minimum(0).map { JSONValue.number($0) }
+  JSONString()
+  JSONNumber().minimum(0)
 }
-print(anyOf.definition)
+print("anyOf", anyOf.definition)
 
-print(anyOf.validate(.string("Hello")))
-print(anyOf.validate(.number(1)))
-print(anyOf.validate(.null))
+print("anyOf", anyOf.validate(.string("Hello")))
+print("anyOf", anyOf.validate(.number(1)))
+print("anyOf", anyOf.validate(.null))
 
 let array = JSONArray { JSONInteger() }
 
@@ -380,3 +418,343 @@ let newSchema = JSONObject {
 .map(Item.init)
 
 let item = newSchema.validate(itemInstance)
+
+enum TemperatureKind {
+  case cloudy(Double)
+  case rainy(chanceOfRain: Double, amount: Double?)
+  case snowy
+  case windy
+  case stormy
+
+  static var schema: some JSONSchemaComponent<TemperatureKind> {
+    JSONComposition.AnyOf(into: TemperatureKind.self) {
+      JSONObject {
+        JSONProperty(key: "cloudy") {
+          JSONObject {
+            JSONProperty(key: "_0") {
+              JSONNumber()
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { Self.cloudy($0) }
+      JSONObject {
+        JSONProperty(key: "rainy") {
+          JSONObject {
+            JSONProperty(key: "chanceOfRain") {
+              JSONNumber()
+            }
+            .required()
+            JSONProperty(key: "amount") {
+              JSONNumber()
+            }
+          }
+        }
+        .required()
+      }
+      .map { Self.rainy(chanceOfRain: $0, amount: $1) }
+      JSONString()
+        .enumValues {
+          "snowy"
+          "windy"
+          "stormy"
+        }
+        .compactMap {
+          switch $0 {
+          case "snowy":
+            return Self.snowy
+          case "windy":
+            return Self.windy
+          case "stormy":
+            return Self.stormy
+          default:
+            return nil
+          }
+        }
+    }
+  }
+}
+
+enum UserProfileSetting {
+  case username(String)
+  case age(Int)
+  case preferredLanguages([String])
+  case contactInfo([String: String])
+
+  static var schema: some JSONSchemaComponent<UserProfileSetting> {
+    JSONComposition.AnyOf(into: UserProfileSetting.self) {
+      JSONObject {
+        JSONProperty(key: "username") {
+          JSONObject {
+            JSONProperty(key: "_0") {
+              JSONString()
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { Self.username($0) }
+      JSONObject {
+        JSONProperty(key: "age") {
+          JSONObject {
+            JSONProperty(key: "_0") {
+              JSONInteger()
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { Self.age($0) }
+      JSONObject {
+        JSONProperty(key: "preferredLanguages") {
+          JSONObject {
+            JSONProperty(key: "_0") {
+              JSONArray {
+                JSONString()
+              }
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { Self.preferredLanguages($0) }
+      JSONObject {
+        JSONProperty(key: "contactInfo") {
+          JSONObject {
+            JSONProperty(key: "_0") {
+              JSONObject()
+                .additionalProperties {
+                  JSONString()
+                }
+                .map { $1 }
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { Self.contactInfo($0) } // This isn't gonna work?
+    }
+  }
+}
+
+struct Weathery {
+  let metadata: [String: String]
+
+  static var schema: some JSONSchemaComponent<Weathery> {
+    JSONSchema(Weathery.init) {
+      JSONObject {
+        JSONProperty(key: "metadata") {
+          JSONObject()
+            .propertyNames(.options(pattern: "^[A-Za-z_][A-Za-z0-9_]*$"))
+            .minProperties(2)
+            .maxProperties(5)
+            .additionalProperties {
+              JSONString()
+            }
+            .map { $1 }
+        }
+        .required()
+      }
+    }
+  }
+}
+
+
+struct WeatherFoo {
+  let cityName: String
+
+  static var schema: some JSONSchemaComponent<WeatherFoo> {
+    JSONSchema(WeatherFoo.init) {
+      JSONObject {
+        JSONProperty(key: "cityName") {
+          JSONString()
+        }
+        .required()
+      }
+      .minProperties(2)
+      .maxProperties(5)
+    }
+  }
+}
+
+
+enum FlightInfo {
+  case flightNumber(_ value: Int = 0)
+  case departureDetails(city: String = "Unknown", isInternational: Bool = false)
+  case arrivalDetails(city: String = "Unknown")
+  case passengerInfo(name: String = "Unknown", seatNumber: String? = nil)
+
+  static var schema: some JSONSchemaComponent<FlightInfo> {
+    JSONComposition.AnyOf(into: FlightInfo.self) {
+      JSONObject {
+        JSONProperty(key: "flightNumber") {
+          JSONObject {
+            JSONProperty(key: "_") {
+              JSONInteger()
+                .default(0)
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { Self.flightNumber($0) }
+      JSONObject {
+        JSONProperty(key: "departureDetails") {
+          JSONObject {
+            JSONProperty(key: "city") {
+              JSONString()
+                .default("Unknown")
+            }
+            .required()
+            JSONProperty(key: "isInternational") {
+              JSONBoolean()
+                .default(false)
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { Self.departureDetails(city: $0, isInternational: $1) }
+      JSONObject {
+        JSONProperty(key: "arrivalDetails") {
+          JSONObject {
+            JSONProperty(key: "city") {
+              JSONString()
+                .default("Unknown")
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { Self.arrivalDetails(city: $0) }
+      JSONObject {
+        JSONProperty(key: "passengerInfo") {
+          JSONObject {
+            JSONProperty(key: "name") {
+              JSONString()
+                .default("Unknown")
+            }
+            .required()
+            JSONProperty(key: "seatNumber") {
+              JSONString()
+                .default(nil)
+            }
+          }
+        }
+        .required()
+      }
+      .map { Self.passengerInfo(name: $0, seatNumber: $1) }
+    }
+  }
+}
+
+enum Category {
+  case fiction, nonFiction, science, history, kids, entertainment
+
+  static var schema: some JSONSchemaComponent<Category> {
+    JSONString()
+      .enumValues {
+        "fiction"
+        "nonFiction"
+        "science"
+        "history"
+        "kids"
+        "entertainment"
+      }
+      .compactMap {
+        switch $0 {
+        case "fiction":
+          return Self.fiction
+        case "nonFiction":
+          return Self.nonFiction
+        case "science":
+          return Self.science
+        case "history":
+          return Self.history
+        case "kids":
+          return Self.kids
+        case "entertainment":
+          return Self.entertainment
+        default:
+          return nil
+        }
+      }
+  }
+}
+
+@Schemable
+struct ItemDetails {
+  let thing: String
+}
+
+enum LibraryItem {
+  case book(details: ItemDetails, category: Category)
+  case movie(details: ItemDetails, category: Category, duration: Int)
+  case music(details: ItemDetails, category: Category)
+
+  static var schema: some JSONSchemaComponent<LibraryItem> {
+    JSONComposition.AnyOf(into: LibraryItem.self) {
+      JSONObject {
+        JSONProperty(key: "book") {
+          JSONObject {
+            JSONProperty(key: "details") {
+              ItemDetails.schema
+            }
+            .required()
+            JSONProperty(key: "category") {
+              Category.schema
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { Self.book(details: $0, category: $1) }
+      JSONObject {
+        JSONProperty(key: "movie") {
+          JSONObject {
+            JSONProperty(key: "details") {
+              ItemDetails.schema
+            }
+            .required()
+            JSONProperty(key: "category") {
+              Category.schema
+            }
+            .required()
+            JSONProperty(key: "duration") {
+              JSONInteger()
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { Self.movie(details: $0, category: $1, duration: $2) }
+      JSONObject {
+        JSONProperty(key: "music") {
+          JSONObject {
+            JSONProperty(key: "details") {
+              ItemDetails.schema
+            }
+            .required()
+            JSONProperty(key: "category") {
+              Category.schema
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { Self.music(details: $0, category: $1) }
+    }
+  }
+}
