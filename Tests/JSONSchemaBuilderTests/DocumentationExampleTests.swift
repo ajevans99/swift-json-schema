@@ -28,9 +28,8 @@ struct DocumentationExampleTests {
         JSONProperty(key: "lastName") { JSONString().description("The person's last name.") }
 
         JSONProperty(key: "age") {
-          JSONInteger()
-            .description("Age in years which must be equal to or greater than zero.").minimum(0)
-            .maximum(120)
+          JSONInteger().description("Age in years which must be equal to or greater than zero.")
+            .minimum(0).maximum(120)
         }
         .required()
       }
@@ -67,8 +66,8 @@ struct DocumentationExampleTests {
       JSONObject {
         if shouldIncludeAge {
           JSONProperty(key: "age") {
-            JSONInteger()
-              .description("Age in years which must be equal to or greater than zero.").minimum(0)
+            JSONInteger().description("Age in years which must be equal to or greater than zero.")
+              .minimum(0)
           }
           .required()
         }
