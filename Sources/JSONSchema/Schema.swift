@@ -171,6 +171,7 @@ public struct Schema: Sendable {
   ///
   /// - Parameters:
   ///   - annotations: Additional annotations for the schema.
+  ///   - options: Additional options specific to a number type.
   ///   - enumValues: An array of possible values for the schema.
   ///   - composition: Composition options for the schema.
   /// - Returns: A schema definition for an integer type.
@@ -194,7 +195,7 @@ public struct Schema: Sendable {
   ///
   /// - Parameters:
   ///   - annotations: Additional annotations for the schema.
-  ///   - options: Additional options specific to the number type.
+  ///   - options: Additional options specific to a number type.
   ///   - enumValues: An array of possible values for the schema.
   ///   - composition: Composition options for the schema.
   /// - Returns: A schema definition for a number type.
