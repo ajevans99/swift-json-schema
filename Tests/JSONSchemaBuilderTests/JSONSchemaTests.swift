@@ -100,7 +100,7 @@ struct JSONSchemaOptionBuilderTests {
   }
 
   @Test func supplementalNumberOptions() throws {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
       JSONInteger().multipleOf(1).exclusiveMinimum(0.99).maximum(5000)
     }
 
