@@ -5,7 +5,7 @@ import Testing
 
 struct JSONCompositionTests {
   @Test func anyOfComposition() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
       JSONComposition.AnyOf {
         JSONString()
         JSONNumber().minimum(0)
@@ -20,7 +20,7 @@ struct JSONCompositionTests {
   }
 
   @Test func allOfComposition() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
       JSONComposition.AllOf {
         JSONString()
         JSONNumber().maximum(10)
@@ -35,7 +35,7 @@ struct JSONCompositionTests {
   }
 
   @Test func oneOfComposition() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
       JSONComposition.OneOf {
         JSONString().pattern("^[a-zA-Z]+$")
         JSONBoolean()
@@ -50,7 +50,7 @@ struct JSONCompositionTests {
   }
 
   @Test func notComposition() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent { JSONComposition.Not { JSONString() } }
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent { JSONComposition.Not { JSONString() } }
 
     let expectedSchema = Schema.noType(composition: .not(.string()))
 
@@ -58,7 +58,7 @@ struct JSONCompositionTests {
   }
 
   @Test func annotations() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
       JSONComposition.AllOf {
         JSONString()
         JSONNumber().maximum(10)

@@ -18,16 +18,6 @@ struct SchemableMember {
     return nil
   }
 
-  var isOptional: Bool {
-    // Check for explicit optional like `let snow: Optional<Double>`
-    if let identifierType = type.as(IdentifierTypeSyntax.self) {
-      return identifierType.name.text == "Optional"
-    }
-
-    // Check for postfix optional like `let rain: Double?`
-    return type.is(OptionalTypeSyntax.self)
-  }
-
   private init(
     identifier: TokenSyntax,
     type: TypeSyntax,
@@ -79,8 +69,17 @@ struct SchemableMember {
 
     applyArguments(to: &codeBlock)
 
-    return """
+    var block: CodeBlockItemSyntax = """
       JSONProperty(key: "\(raw: identifier.text)") { \(codeBlock) }
       """
+
+    if !type.isOptional {
+      block = """
+        \(block)
+        .required()
+        """
+    }
+
+    return block
   }
 }

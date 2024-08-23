@@ -24,6 +24,7 @@ extension Schema: Equatable {
       }
 
     return lhs.type == rhs.type && lhs.annotations == rhs.annotations
-      && lhs.enumValues == rhs.enumValues && areOptionsMatching
+      && lhs.enumValues == rhs.enumValues && lhs.composition == rhs.composition
+      && areOptionsMatching
   }
 }

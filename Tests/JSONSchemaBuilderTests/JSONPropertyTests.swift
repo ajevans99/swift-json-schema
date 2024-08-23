@@ -68,43 +68,34 @@ struct JSONPropertyBuilderTests {
 
 struct JSONPropertySchemaTests {
   @Test func single() throws {
-    @JSONPropertySchemaBuilder var sample: [JSONProperty] {
-      JSONProperty(key: "prop0", value: JSONString())
-    }
+    let property = JSONProperty(key: "prop0", value: JSONString())
 
-    let firstProp = try #require(sample.first)
-    #expect(firstProp.key == "prop0")
-    #expect(firstProp.value.definition == .string())
+    #expect(property.key == "prop0")
+    #expect(property.value.definition == .string())
   }
 
   @Test func multiple() throws {
-    @JSONPropertySchemaBuilder var sample: [JSONProperty] {
+    @JSONPropertySchemaBuilder var sample: some PropertyCollection {
       JSONProperty(key: "prop0", value: JSONString())
       JSONProperty(key: "prop1", value: JSONString())
       JSONProperty(key: "prop2", value: JSONString())
       JSONProperty(key: "prop3", value: JSONString())
     }
 
-    try #require(sample.count == 4)
-    for (index, sample) in sample.enumerated() {
-      #expect(sample.key == "prop\(index)")
-      #expect(sample.value.definition == .string())
-    }
+    try #require(sample.schema.count == 4)
+    for key in sample.schema.keys { #expect(sample.schema[key] == .string()) }
   }
 
   @Test(arguments: [true, false]) func optional(_ bool: Bool) {
-    @JSONPropertySchemaBuilder var sample: [JSONProperty] {
-      if bool {
-        JSONProperty(key: "prop0", value: JSONString())
-        JSONProperty(key: "prop1", value: JSONString())
-      }
+    @JSONPropertySchemaBuilder var sample: some PropertyCollection {
+      if bool { JSONProperty(key: "prop1", value: JSONString()) }
     }
 
-    #expect(sample.count == (bool ? 2 : 0))
+    #expect(sample.schema.count == (bool ? 1 : 0))
   }
 
   @Test(arguments: [true, false]) func either(_ bool: Bool) throws {
-    @JSONPropertySchemaBuilder var sample: [JSONProperty] {
+    @JSONPropertySchemaBuilder var sample: some PropertyCollection {
       if bool {
         JSONProperty(key: "prop0", value: JSONString())
       } else {
@@ -112,19 +103,7 @@ struct JSONPropertySchemaTests {
       }
     }
 
-    let firstProperty = try #require(sample.first)
+    let firstProperty = try #require(sample.schema.first)
     #expect(firstProperty.key == (bool ? "prop0" : "prop1"))
-  }
-
-  @Test func array() throws {
-    @JSONPropertySchemaBuilder var sample: [JSONProperty] {
-      for num in 0 ..< 4 { JSONProperty(key: "prop\(num)", value: JSONInteger()) }
-    }
-
-    try #require(sample.count == 4)
-    for (index, sample) in sample.enumerated() {
-      #expect(sample.key == "prop\(index)")
-      #expect(sample.value.definition == .integer())
-    }
   }
 }

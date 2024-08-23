@@ -16,9 +16,6 @@ jobs:
     name: Build on macOS
     steps:
     - uses: actions/checkout@v4
-    # Should be default on July 22, 2024
-    - name: Xcode setup
-      run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
     - name: Xcode version
       run: xcodebuild -version
     - name: Get swift version
@@ -35,9 +32,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Xcode setup
-      run: sudo xcode-select -s /Applications/Xcode_16.0.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/Xcode_16.1_beta.app
     - name: Xcode version
       run: xcodebuild -version
+      if: ${{ always() }}
+    - name: Log Xcode versions
+      run: ls -l /Applications/Xcode*
+      if: ${{ failure() }}
     - name: Get swift version
       run: swift --version
     - name: Build

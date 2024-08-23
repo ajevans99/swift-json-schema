@@ -5,51 +5,48 @@ import Testing
 
 struct JSONEnumTests {
   @Test func singleValue() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent { JSONEnum { "red" } }
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent { JSONString().enumValues { "red" } }
     #expect(sample.definition.enumValues == ["red"])
   }
 
   @Test func sameType() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent {
-      JSONEnum {
-        "red"
-        "amber"
-        "green"
-      }
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
+      JSONString()
+        .enumValues {
+          "red"
+          "amber"
+          "green"
+        }
     }
     #expect(sample.definition.enumValues == ["red", "amber", "green"])
   }
 
   @Test func differentType() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent {
-      JSONEnum {
-        "red"
-        "amber"
-        "green"
-        nil
-        42
-      }
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
+      JSONAnyValue()
+        .enumValues {
+          "red"
+          "amber"
+          "green"
+          nil
+          42
+        }
     }
 
     #expect(sample.definition.enumValues == ["red", "amber", "green", nil, 42])
   }
 
-  @Test func withoutBuilder() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent {
-      JSONEnum(values: ["red", "amber", "green"])
-    }
-    #expect(sample.definition.enumValues == ["red", "amber", "green"])
-  }
-
   @Test func annotations() {
-    @JSONSchemaBuilder var sample: JSONSchemaComponent {
-      JSONEnum {
-        "red"
-        "amber"
-        "green"
-      }
-      .title("Color")
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
+      JSONString()
+        .enumValues {
+          "red"
+          "amber"
+          "green"
+        }
+        .title("Color")
     }
+    print(sample.annotations)
     #expect(sample.annotations.title == "Color")
   }
 }
