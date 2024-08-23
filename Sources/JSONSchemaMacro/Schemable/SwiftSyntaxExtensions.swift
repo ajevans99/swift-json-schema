@@ -1,6 +1,16 @@
 import SwiftSyntax
 
 extension TypeSyntax {
+  var isOptional: Bool {
+    // Check for explicit optional like `let snow: Optional<Double>`
+    if let identifierType = self.as(IdentifierTypeSyntax.self) {
+      return identifierType.name.text == "Optional"
+    }
+
+    // Check for postfix optional like `let rain: Double?`
+    return self.is(OptionalTypeSyntax.self)
+  }
+
   enum TypeInformation {
     case primative(SupportedPrimative, schema: CodeBlockItemSyntax)
     case schemable(String, schema: CodeBlockItemSyntax)
@@ -43,6 +53,7 @@ extension TypeSyntax {
           .additionalProperties {
             \(codeBlock)
           }
+          .map(\\.1)
           """
       )
     case .identifierType(let identifierType):
@@ -152,9 +163,9 @@ extension AttributeListSyntax {
 }
 
 extension CodeBlockItemListSyntax {
-  init(_ children: [CodeBlockItemSyntax.Item], separator: Trivia) {
+  init(_ children: [CodeBlockItemSyntax], separator: Trivia) {
     let newChildren = children.enumerated()
-      .map { CodeBlockItemSyntax(leadingTrivia: separator, item: $0.element) }
+      .map { CodeBlockItemSyntax(leadingTrivia: $0.offset == 0 ? nil : separator, item: $0.element.item) }
     self.init(newChildren)
   }
 }

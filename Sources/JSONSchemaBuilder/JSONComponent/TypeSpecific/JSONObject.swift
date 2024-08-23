@@ -66,12 +66,31 @@ extension JSONObject {
   /// - Returns: A new `JSONObject` with additional properties disabled.
   public func disableAdditionalProperties() -> Self { self.additionalProperties(.disabled) }
 
-  /// Adds additional properties to the schema.
+  /// Adds additional properties to the schema and modifies validation output to include any additional properties as part of the tuple.
+  ///
+  /// Note that using this on an empty object with ``JSONObject/init()`` will cause the validated output to include `Void`. For example,
+  /// ```swift
+  /// let myObj = JSONObject()
+  ///   .additionalProperties {
+  ///     JSONString()
+  ///   }
+  /// ```
+  /// `myObj.validate(/* some input */)` will have a type of `Validated<(Void, String), String>`
+  ///
+  /// For now, to drop the `Void`, you can add a map, like `.map { $1 }`.
+  /// TODO: Drop `Void` values from tuple with builder.
+  ///
   /// - Parameter additionalProperties: A closure that returns a JSON schema representing the additional properties.
-  /// - Returns: A new `JSONObject` with the additional properties set.
+  /// - Returns: A new compoment with the additional properties set and validation modified.
   public func additionalProperties<C: JSONSchemaComponent>(
     @JSONSchemaBuilder _ additionalProperties: () -> C
-  ) -> Self { self.additionalProperties(.schema(additionalProperties().definition)) }
+  ) -> JSONComponents.AdditionalProperties<Props, C> {
+    let additionalPropertiesSchema = additionalProperties()
+    return JSONComponents.AdditionalProperties(
+      base: self,
+      additionalProperties: additionalPropertiesSchema
+    )
+  }
 
   /// Adds unevaluated properties to the schema.
   /// - Parameter unevaluatedProperties: A schema control option.

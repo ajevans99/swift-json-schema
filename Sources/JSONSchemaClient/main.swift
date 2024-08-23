@@ -77,7 +77,6 @@ printSchema(Weather.self)
     self.yearPublished = yearPublished
     self.rating = 1
   }
-
 }
 
 @Schemable struct Library {
@@ -90,27 +89,96 @@ printSchema(Library.self)
 
 // MARK: - Enums
 
-//@Schemable enum TemperatureType: Codable {
-//  case fahrenheit
-//  case celcius
-//}
+@Schemable enum TemperatureType: Codable {
+  case fahrenheit
+  case celcius
+}
 
-//printSchema(TemperatureType.self)
+let tempType = TemperatureType.schema.validate(.string("fahrenheit"))
+print("tempType", tempType)
 
-//@Schemable enum WeatherCondition: Codable { case sunny(hoursOfSunlight: Int)
-//  case hail(Bool)
-//  case cloudy(coverage: Double)
-//  case rainy(chanceOfRain: Double, amount: Double)
-//  case snowy
-//  case windy
-//  case stormy
-//}
-//
-//let conditions = WeatherCondition.sunny(hoursOfSunlight: 5)
-//printInstance(conditions)
-//printSchema(WeatherCondition.self)
-//
-//@Schemable enum Category { case fiction, nonFiction, science, history, kids, entertainment }
+printSchema(TemperatureType.self)
+
+/*@Schemable */enum WeatherCondition: Codable {
+  case sunny(hoursOfSunlight: Int)
+  case hail(Bool)
+  case cloudy(coverage: Double)
+  case rainy(chanceOfRain: Double, amount: Double)
+  case snowy
+  case windy
+  case stormy
+}
+
+extension WeatherCondition: Schemable {
+  static var schema: some JSONSchemaComponent<WeatherCondition> {
+    JSONComposition.AnyOf(into: WeatherCondition.self) {
+      JSONObject {
+        JSONProperty(key: "cloudy") {
+          JSONObject {
+            JSONProperty(key: "coverage") {
+              JSONNumber()
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { coverage in
+        Self.cloudy(coverage: coverage)
+      }
+
+      JSONObject {
+        JSONProperty(key: "rainy") {
+          JSONObject {
+            JSONProperty(key: "chanceOfRain") {
+              JSONNumber()
+            }
+            .required()
+            JSONProperty(key: "amount") {
+              JSONNumber()
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { chanceOfRain, amount in
+        Self.rainy(chanceOfRain: chanceOfRain, amount: amount)
+      }
+
+      JSONString()
+        .enumValues {
+          "snowy"
+          "windy"
+          "stormy"
+        }
+        .compactMap { string in
+          switch string {
+          case "snowy":
+            return WeatherCondition.snowy
+          case "windy":
+            return WeatherCondition.windy
+          case "stormy":
+            return WeatherCondition.stormy
+          default:
+            return nil
+          }
+        }
+    }
+  }
+}
+
+let weatherConditionResult1 = WeatherCondition.schema.validate(.object(["cloudy": .object(["coverage": .number(100)])]))
+print("weatherConditionResult1", weatherConditionResult1)
+let weatherConditionResult2 = WeatherCondition.schema.validate(.string("snowy"))
+print("weatherConditionResult2", weatherConditionResult2)
+
+
+let conditions = WeatherCondition.sunny(hoursOfSunlight: 5)
+printInstance(conditions)
+printSchema(WeatherCondition.self)
+
+@Schemable enum Category { case fiction, nonFiction, science, history, kids, entertainment }
 
 // MARK: Parsing
 
@@ -215,15 +283,15 @@ case .valid(let a): print("Valid: \(a)")
 case .invalid(let array): print("Invalid: \(array.joined(separator: "\n"))")
 }
 
-let anyOf = JSONComposition.AnyOf {
+let anyOf = JSONComposition.AnyOf(into: JSONValue.self) {
   JSONString()
   JSONNumber().minimum(0)
 }
-print(anyOf.definition)
+print("anyOf", anyOf.definition)
 
-print(anyOf.validate(.string("Hello")))
-print(anyOf.validate(.number(1)))
-print(anyOf.validate(.null))
+print("anyOf", anyOf.validate(.string("Hello")))
+print("anyOf", anyOf.validate(.number(1)))
+print("anyOf", anyOf.validate(.null))
 
 let array = JSONArray { JSONInteger() }
 
@@ -329,3 +397,147 @@ let newSchema = JSONObject {
 .map(Item.init)
 
 let item = newSchema.validate(itemInstance)
+
+@Schemable enum TemperatureKind {
+  case cloudy(Double)
+  case rainy(chanceOfRain: Double, amount: Double?)
+  case snowy
+  case windy
+  case stormy
+}
+
+@Schemable enum UserProfileSetting {
+  case username(String)
+  case age(Int)
+  case preferredLanguages([String])
+  case contactInfo([String: String])
+}
+
+let contactInfoData: JSONValue = .object(["contactInfo": .object(["_0": .object(["austin": "555-555-5555", "dallas": "214-555-5555"])])])
+print("user-profile-settings", UserProfileSetting.schema.validate(contactInfoData))
+
+struct Weathery {
+  let metadata: [String: String]
+
+  static var schema: some JSONSchemaComponent<Weathery> {
+    JSONSchema(Weathery.init) {
+      JSONObject {
+        JSONProperty(key: "metadata") {
+          JSONObject()
+            .propertyNames(.options(pattern: "^[A-Za-z_][A-Za-z0-9_]*$"))
+            .minProperties(2)
+            .maxProperties(5)
+            .additionalProperties {
+              JSONString()
+            }
+            .map { $1 }
+        }
+        .required()
+      }
+    }
+  }
+}
+
+
+struct WeatherFoo {
+  let cityName: String
+
+  static var schema: some JSONSchemaComponent<WeatherFoo> {
+    JSONSchema(WeatherFoo.init) {
+      JSONObject {
+        JSONProperty(key: "cityName") {
+          JSONString()
+        }
+        .required()
+      }
+      .minProperties(2)
+      .maxProperties(5)
+    }
+  }
+}
+
+
+enum FlightInfo {
+  case flightNumber(_ value: Int = 0)
+  case departureDetails(city: String = "Unknown", isInternational: Bool = false)
+  case arrivalDetails(city: String = "Unknown")
+  case passengerInfo(name: String = "Unknown", seatNumber: String? = nil)
+
+  static var schema: some JSONSchemaComponent<FlightInfo> {
+    JSONComposition.AnyOf(into: FlightInfo.self) {
+      JSONObject {
+        JSONProperty(key: "flightNumber") {
+          JSONObject {
+            JSONProperty(key: "_") {
+              JSONInteger()
+                .default(0)
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { Self.flightNumber($0) }
+      JSONObject {
+        JSONProperty(key: "departureDetails") {
+          JSONObject {
+            JSONProperty(key: "city") {
+              JSONString()
+                .default("Unknown")
+            }
+            .required()
+            JSONProperty(key: "isInternational") {
+              JSONBoolean()
+                .default(false)
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { Self.departureDetails(city: $0, isInternational: $1) }
+      JSONObject {
+        JSONProperty(key: "arrivalDetails") {
+          JSONObject {
+            JSONProperty(key: "city") {
+              JSONString()
+                .default("Unknown")
+            }
+            .required()
+          }
+        }
+        .required()
+      }
+      .map { Self.arrivalDetails(city: $0) }
+      JSONObject {
+        JSONProperty(key: "passengerInfo") {
+          JSONObject {
+            JSONProperty(key: "name") {
+              JSONString()
+                .default("Unknown")
+            }
+            .required()
+            JSONProperty(key: "seatNumber") {
+              JSONString()
+                .default(nil)
+            }
+          }
+        }
+        .required()
+      }
+      .map { Self.passengerInfo(name: $0, seatNumber: $1) }
+    }
+  }
+}
+
+@Schemable
+struct ItemDetails {
+  let thing: String
+}
+
+@Schemable
+enum LibraryItem {
+  case book(details: ItemDetails, category: Category)
+  case movie(details: ItemDetails, category: Category, duration: Int)
+  case music(details: ItemDetails, category: Category)
+}

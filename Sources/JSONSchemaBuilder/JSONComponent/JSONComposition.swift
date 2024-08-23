@@ -8,69 +8,134 @@ extension JSONComposableComponent {
   public var definition: Schema { .noType(annotations, composition: compositionOptions) }
 }
 
+protocol JSONComposableCollectionComponent: JSONComposableComponent {
+  associatedtype Output
+
+  var components: [any JSONSchemaComponent<Output>] { get }
+
+  init(
+    into output: Output.Type,
+    @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnyComponent<Output>]
+  )
+}
+
+extension JSONComposableCollectionComponent where Output == JSONValue {
+  init(@JSONSchemaCollectionBuilder<JSONValue> _ builder: () -> [JSONComponents.AnyComponent<JSONValue>]) {
+    self.init(into: JSONValue.self, builder)
+  }
+}
+
 public enum JSONComposition {
   /// A component that accepts any of the given schemas.
-  public struct AnyOf<Components: SchemaCollection>: JSONComposableComponent {
+  public struct AnyOf<Output>: JSONComposableCollectionComponent {
     public var annotations: AnnotationOptions = .annotations()
 
-    let components: Components
+    let components: [any JSONSchemaComponent<Output>]
     public let compositionOptions: CompositionOptions
 
-    public init(@JSONSchemaCollectionBuilder _ builder: () -> Components) {
+    public init(
+      into output: Output.Type,
+      @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnyComponent<Output>]
+    ) {
       components = builder()
-      compositionOptions = .anyOf(components.definitions)
+      compositionOptions = .anyOf(components.map(\.definition))
     }
 
-    public func validate(_ value: JSONValue) -> Validated<JSONValue, String> {
-      components.validate(value)
-        .first { result in
-          switch result {
-          case .valid: return true
-          case .invalid: return false
-          }
-        } ?? .error("\(value) failed to match any of schemas")
+    public func validate(_ value: JSONValue) -> Validated<Output, String> {
+      var allErrors: [String] = []
+
+      for component in components {
+        switch component.validate(value) {
+        case .valid(let output):
+          return .valid(output)
+        case .invalid(let errors):
+          allErrors.append(contentsOf: errors)
+        }
+      }
+      return .invalid(["No valid component matched for value: \(value)"] + allErrors)
     }
   }
 
   /// A component that requires all of the schemas to be valid.
-  public struct AllOf<Components: SchemaCollection>: JSONComposableComponent {
+  public struct AllOf<Output>: JSONComposableCollectionComponent {
     public var annotations: AnnotationOptions = .annotations()
 
-    let components: Components
+    let components: [any JSONSchemaComponent<Output>]
     public let compositionOptions: CompositionOptions
 
-    public init(@JSONSchemaCollectionBuilder _ builder: () -> Components) {
+    public init(
+      into output: Output.Type,
+      @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnyComponent<Output>]
+    ) {
       components = builder()
-      compositionOptions = .allOf(components.definitions)
+      compositionOptions = .allOf(components.map(\.definition))
     }
 
-    public func validate(_ value: JSONValue) -> Validated<JSONValue, String> {
-      let results = components.validate(value)
-      for result in results {
-        if case .invalid(let error) = result { return .error("Failed allOf validation: \(error)") }
+    public func validate(_ value: JSONValue) -> Validated<Output, String> {
+      guard !components.isEmpty else {
+        return .error("AllOf validation requires at least one schema component")
       }
-      return .valid(value)
+
+      var combinedErrors: [String] = []
+      var validResult: Output?
+
+      for component in components {
+        switch component.validate(value) {
+        case .valid(let result):
+          if validResult == nil {
+            validResult = result
+          }
+        case .invalid(let errors):
+          combinedErrors.append(contentsOf: errors)
+        }
+      }
+
+      if let validResult = validResult, combinedErrors.isEmpty {
+        return .valid(validResult)
+      } else {
+        return .invalid(["Failed AllOf validation"] + combinedErrors)
+      }
     }
   }
 
   /// A component that requires exactly one of the schemas to be valid.
-  public struct OneOf<Components: SchemaCollection>: JSONComposableComponent {
+  public struct OneOf<Output>: JSONComposableCollectionComponent {
     public var annotations: AnnotationOptions = .annotations()
 
-    let components: Components
+    let components: [any JSONSchemaComponent<Output>]
     public let compositionOptions: CompositionOptions
 
-    public init(@JSONSchemaCollectionBuilder _ builder: () -> Components) {
+    public init(
+      into output: Output.Type,
+      @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnyComponent<Output>]
+    ) {
       components = builder()
-      compositionOptions = .oneOf(components.definitions)
+      compositionOptions = .oneOf(components.map(\.definition))
     }
 
-    public func validate(_ value: JSONValue) -> Validated<JSONValue, String> {
-      let results = components.validate(value)
-      var validCount = 0
-      for result in results { if case .valid = result { validCount += 1 } }
-      guard validCount == 1 else { return .error("\(value) did not match exactly one schema") }
-      return .valid(value)
+    public func validate(_ value: JSONValue) -> Validated<Output, String> {
+      var validResults: [Output] = []
+      var combinedErrors: [String] = []
+
+      for component in components {
+        switch component.validate(value) {
+        case .valid(let result):
+          validResults.append(result)
+        case .invalid(let errors):
+          combinedErrors.append(contentsOf: errors)
+        }
+      }
+
+      if validResults.count == 1 {
+        // Exactly one component validated successfully
+        return .valid(validResults.first!)
+      } else if validResults.isEmpty {
+        // No component validated successfully
+        return .invalid(["Failed OneOf validation. No valid component matched."] + combinedErrors)
+      } else {
+        // More than one component validated successfully
+        return .invalid(["Failed OneOf validation. Multiple components matched, but exactly one is required."])
+      }
     }
   }
 

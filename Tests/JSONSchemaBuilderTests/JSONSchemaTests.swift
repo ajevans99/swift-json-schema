@@ -5,7 +5,7 @@ import Testing
 
 struct JSONSchemaOptionBuilderTests {
   @Test func objectOptions() throws {
-    @JSONSchemaBuilder var sample: some JSONSchemaComponent<(String?, String, Bool?, Double)> {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent<((String?, String, Bool?, Double), [String: Bool])> {
       JSONObject {
         JSONProperty(key: "property0") { JSONString() }
         JSONProperty(key: "property1") { JSONString() }.required()
@@ -13,8 +13,9 @@ struct JSONSchemaOptionBuilderTests {
         JSONProperty(key: "property3") { JSONNumber() }.required()
       }
       .patternProperties { JSONProperty(key: "^property[0-1]$") { JSONString() } }
-      .additionalProperties { JSONBoolean() }.disableUnevaluatedProperties()
+      .disableUnevaluatedProperties()
       .propertyNames(.options(pattern: "^property[0-9]$")).minProperties(1).maxProperties(10)
+      .additionalProperties { JSONBoolean() }
     }
 
     let options: ObjectSchemaOptions = try #require(sample.definition.options?.asType())

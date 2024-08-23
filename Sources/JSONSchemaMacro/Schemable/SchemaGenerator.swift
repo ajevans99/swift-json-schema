@@ -1,10 +1,13 @@
 import SwiftSyntax
+import SwiftSyntaxBuilder
 
 struct EnumSchemaGenerator {
+  let name: TokenSyntax
   let members: MemberBlockItemListSyntax
   let attributes: AttributeListSyntax
 
   init(fromEnum enumDecl: EnumDeclSyntax) {
+    name = enumDecl.name.trimmed
     members = enumDecl.memberBlock.members
     attributes = enumDecl.attributes
   }
@@ -24,14 +27,12 @@ struct EnumSchemaGenerator {
 
       // Add cases without associated value
       if !casesWithoutAssociatedValues.isEmpty {
-        let statements = casesWithoutAssociatedValues.compactMap { $0.generateSchema() }
-        codeBlockItemList.append("JSONEnum { \(CodeBlockItemListSyntax(statements)) }")
+        codeBlockItemList.append(simpleEnumSchema(for: casesWithoutAssociatedValues))
       }
-      codeBlockItem = "JSONComposition.AnyOf { \(codeBlockItemList) }"
+      codeBlockItem = "JSONComposition.AnyOf(into: \(name).self) { \(codeBlockItemList) }"
     } else {
       // When no case has an associated value, use simple enum schema
-      let statements = casesWithoutAssociatedValues.compactMap { $0.generateSchema() }
-      codeBlockItem = "JSONEnum { \(CodeBlockItemListSyntax(statements)) }"
+      codeBlockItem = simpleEnumSchema(for: casesWithoutAssociatedValues)
     }
 
     if let annotationArguments = attributes.arguments(for: "SchemaOptions") {
@@ -39,12 +40,41 @@ struct EnumSchemaGenerator {
     }
 
     let variableDecl: DeclSyntax = """
-      static var schema: some JSONSchemaComponent {
+      static var schema: some JSONSchemaComponent<\(name)> {
         \(codeBlockItem)
       }
       """
 
     return variableDecl
+  }
+
+  /// Generates code block schema for cases without associated values.
+  private func simpleEnumSchema(for casesWithoutAssociatedValues: [SchemableEnumCase]) -> CodeBlockItemSyntax {
+    let statements = casesWithoutAssociatedValues.compactMap { $0.generateSchema() }
+    let statementList = CodeBlockItemListSyntax(statements, separator: .newline)
+
+    var switchCases = casesWithoutAssociatedValues.map(\.identifier)
+      .map { identifier -> SwitchCaseSyntax in
+        """
+        case \"\(identifier)\":
+          return Self.\(identifier)
+
+        """
+      }
+    switchCases.append("default: return nil")
+    let switchCaseList = SwitchCaseListSyntax(switchCases.map { .switchCase($0) })
+
+    return """
+      JSONString()  
+        .enumValues {
+          \(statementList)
+        }
+        .compactMap {
+          switch $0 {
+          \(switchCaseList)
+          }
+        }
+      """
   }
 }
 
@@ -70,7 +100,7 @@ struct SchemaGenerator {
 
     let statements = schemableMembers.compactMap { $0.generateSchema() }
 
-    var codeBlockItem: CodeBlockItemSyntax = "JSONObject { \(CodeBlockItemListSyntax(statements)) }"
+    var codeBlockItem: CodeBlockItemSyntax = "JSONObject { \(CodeBlockItemListSyntax(statements, separator: .newline)) }"
 
     if let annotationArguments = attributes.arguments(for: "SchemaOptions") {
       codeBlockItem.applyArguments(annotationArguments)

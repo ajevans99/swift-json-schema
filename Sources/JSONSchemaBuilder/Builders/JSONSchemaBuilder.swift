@@ -14,7 +14,7 @@ import JSONSchema
 /// }
 /// .description("A product from Acme's catalog")
 /// ```
-@resultBuilder public struct JSONSchemaBuilder {
+@resultBuilder public enum JSONSchemaBuilder {
   public static func buildBlock<Component: JSONSchemaComponent>(_ component: Component) -> Component
   { component }
 
@@ -33,56 +33,22 @@ import JSONSchema
   ) -> JSONComponents.Conditional<TrueComponent, FalseComponent> { .second(component) }
 }
 
-@resultBuilder public struct JSONSchemaCollectionBuilder {
-  public static func buildBlock<Component: JSONSchemaComponent>(
-    _ component: Component
-  ) -> SchemaTuple<Component> { .init(component: component) }
-
-  public static func buildBlock<each Component: JSONSchemaComponent>(
-    _ component: repeat each Component
-  ) -> SchemaTuple<repeat each Component> { .init(component: (repeat each component)) }
-}
-
-public protocol SchemaCollection: Sendable {
-  var definitions: [Schema] { get }
-  func validate(_ input: JSONValue) -> [Validated<JSONValue, String>]
-}
-
-public struct SchemaTuple<each Component: JSONSchemaComponent>: SchemaCollection {
-  public var definitions: [Schema] {
-    var definitions = [Schema]()
-    #if swift(>=6)
-      for component in repeat each component { definitions.append(component.definition) }
-
-    #else
-      func getDefinition<Comp: JSONSchemaComponent>(_ component: Comp) {
-        definitions.append(component.definition)
-      }
-      repeat getDefinition(each component)
-    #endif
-    return definitions
+@resultBuilder public enum JSONSchemaCollectionBuilder<Output> {
+  public static func buildPartialBlock<Component: JSONSchemaComponent>(first component: Component) -> [JSONComponents.AnyComponent<Output>] where Component.Output == Output {
+    return [component.eraseToAnyComponent()]
   }
 
-  public var component: (repeat each Component)
+  public static func buildPartialBlock<Component: JSONSchemaComponent>(accumulated: [JSONComponents.AnyComponent<Output>], next component: Component) -> [JSONComponents.AnyComponent<Output>] where Component.Output == Output {
+    return accumulated + [component.eraseToAnyComponent()]
+  }
+}
 
-  public func validate(_ input: JSONValue) -> [Validated<JSONValue, String>] {
-    var results = [Validated<JSONValue, String>]()
-    #if swift(>=6)
-      for component in repeat each component {
-        switch component.validate(input) {
-        case .valid: results.append(.valid(input))
-        case .invalid(let errors): results.append(.invalid(errors))
-        }
-      }
-    #else
-      func validateComponent<Comp: JSONSchemaComponent>(_ component: Comp) {
-        switch component.validate(input) {
-        case .valid: results.append(.valid(input))
-        case .invalid(let errors): results.append(.invalid(errors))
-        }
-      }
-      repeat validateComponent(each component)
-    #endif
-    return results
+extension JSONSchemaCollectionBuilder where Output == JSONValue {
+  public static func buildPartialBlock<Component: JSONSchemaComponent>(first component: Component) -> [JSONComponents.AnyComponent<JSONValue>] {
+    [JSONComponents.Passthrough(wrapped: component).eraseToAnyComponent()]
+  }
+
+  public static func buildPartialBlock<Component: JSONSchemaComponent>(accumulated: [JSONComponents.AnyComponent<JSONValue>], next component: Component) -> [JSONComponents.AnyComponent<JSONValue>] {
+    accumulated + [JSONComponents.Passthrough(wrapped: component).eraseToAnyComponent()]
   }
 }
