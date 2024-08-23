@@ -8,7 +8,7 @@ extension JSONComposableComponent {
   public var definition: Schema { .noType(annotations, composition: compositionOptions) }
 }
 
-protocol JSONComposableCollectionComponent: JSONComposableComponent {
+public protocol JSONComposableCollectionComponent: JSONComposableComponent {
   associatedtype Output
 
   var components: [any JSONSchemaComponent<Output>] { get }
@@ -30,7 +30,7 @@ public enum JSONComposition {
   public struct AnyOf<Output>: JSONComposableCollectionComponent {
     public var annotations: AnnotationOptions = .annotations()
 
-    let components: [any JSONSchemaComponent<Output>]
+    public let components: [any JSONSchemaComponent<Output>]
     public let compositionOptions: CompositionOptions
 
     public init(
@@ -60,7 +60,7 @@ public enum JSONComposition {
   public struct AllOf<Output>: JSONComposableCollectionComponent {
     public var annotations: AnnotationOptions = .annotations()
 
-    let components: [any JSONSchemaComponent<Output>]
+    public let components: [any JSONSchemaComponent<Output>]
     public let compositionOptions: CompositionOptions
 
     public init(
@@ -102,7 +102,7 @@ public enum JSONComposition {
   public struct OneOf<Output>: JSONComposableCollectionComponent {
     public var annotations: AnnotationOptions = .annotations()
 
-    let components: [any JSONSchemaComponent<Output>]
+    public let components: [any JSONSchemaComponent<Output>]
     public let compositionOptions: CompositionOptions
 
     public init(
@@ -143,7 +143,7 @@ public enum JSONComposition {
   public struct Not<Component: JSONSchemaComponent>: JSONComposableComponent {
     public var annotations: AnnotationOptions = .annotations()
 
-    let component: Component
+    public let component: Component
     public let compositionOptions: CompositionOptions
 
     public init(@JSONSchemaBuilder _ builder: () -> Component) {

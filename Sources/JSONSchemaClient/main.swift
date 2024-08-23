@@ -535,7 +535,8 @@ struct ItemDetails {
   let thing: String
 }
 
-@Schemable
+// Oddly, this macro is crashing compiler for Swift 5.10
+//@Schemable
 enum LibraryItem {
   case book(details: ItemDetails, category: Category)
   case movie(details: ItemDetails, category: Category, duration: Int)
