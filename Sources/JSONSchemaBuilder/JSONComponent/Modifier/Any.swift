@@ -7,7 +7,7 @@ extension JSONSchemaComponent {
 extension JSONComponents {
   /// Component for type erasure.
   public struct AnyComponent<Output>: JSONSchemaComponent {
-    private let _validate: @Sendable (JSONValue) -> Validated<Output, String>
+    private let validate: @Sendable (JSONValue) -> Validated<Output, String>
     public let definition: Schema
     public var annotations: AnnotationOptions
 
@@ -15,9 +15,9 @@ extension JSONComponents {
     where Component.Output == Output {
       self.definition = component.definition
       self.annotations = component.annotations
-      self._validate = component.validate
+      self.validate = component.validate
     }
 
-    public func validate(_ value: JSONValue) -> Validated<Output, String> { _validate(value) }
+    public func validate(_ value: JSONValue) -> Validated<Output, String> { validate(value) }
   }
 }

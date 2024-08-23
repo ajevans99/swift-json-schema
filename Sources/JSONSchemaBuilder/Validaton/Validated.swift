@@ -10,8 +10,8 @@ public enum Validated<Value, Error> {
     _ transform: (Value) -> ValueOfResult
   ) -> Validated<ValueOfResult, Error> {
     switch self {
-    case let .valid(value): return .valid(transform(value))
-    case let .invalid(errors): return .invalid(errors)
+    case .valid(let value): return .valid(transform(value))
+    case .invalid(let errors): return .invalid(errors)
     }
   }
 
@@ -19,15 +19,15 @@ public enum Validated<Value, Error> {
     _ transform: (Value) -> Validated<ValueOfResult, Error>
   ) -> Validated<ValueOfResult, Error> {
     switch self {
-    case let .valid(value): return transform(value)
-    case let .invalid(errors): return .invalid(errors)
+    case .valid(let value): return transform(value)
+    case .invalid(let errors): return .invalid(errors)
     }
   }
 }
 
 extension Validated: Equatable where Value: Equatable, Error: Equatable {}
 
-struct _Invalid: Error {}
+struct Invalid: Error {}
 
 /// Combine values of Validated together into a tuple.
 /// Example:
@@ -41,7 +41,7 @@ public func zip<each Value, Error>(
     case .invalid:
       // Could stash errors here, but would be incomplete if invalid in
       // a middle variadic parameter. Instead fetch all errors in catch.
-      throw _Invalid()
+      throw Invalid()
     }
   }
 

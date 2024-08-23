@@ -99,7 +99,7 @@ print("tempType", tempType)
 
 printSchema(TemperatureType.self)
 
-/*@Schemable */enum WeatherCondition: Codable { case sunny(hoursOfSunlight: Int)
+enum WeatherCondition: Codable { case sunny(hoursOfSunlight: Int)
   case hail(Bool)
   case cloudy(coverage: Double)
   case rainy(chanceOfRain: Double, amount: Double)
@@ -291,10 +291,10 @@ let priceSchema = JSONNumber().multipleOf(0.01).description("Price of the produc
 
 let inStockSchema = JSONBoolean().description("Availablility status of the product")
 
-let id = identifierSchema.validate(.string("E621E1F8-C36C-495A-93FC-0C247A3E6E5F"))  // Validated<String, String>
-let name = nameSchema.validate(.string("iPad"))  // Validated<String, String>
-let price = priceSchema.validate(.number(199.99))  // Validated<Double, String>
-let inStock = inStockSchema.validate(.boolean(true))  // Validated<Bool, String>
+let id = identifierSchema.validate(.string("E621E1F8-C36C-495A-93FC-0C247A3E6E5F"))
+let name = nameSchema.validate(.string("iPad"))
+let price = priceSchema.validate(.number(199.99))
+let inStock = inStockSchema.validate(.boolean(true))
 
 // Compose them together into an object
 
@@ -316,7 +316,8 @@ let itemString = """
 let itemInstance = try! JSONDecoder().decode(JSONValue.self, from: Data(itemString.utf8))
 print(itemInstance)
 
-let itemValidationResult = itemSchema.validate(itemInstance)  // Validated<(String?, String?, Double?, Bool?), String>
+// Validated<(String?, String?, Double?, Bool?), String>
+let itemValidationResult = itemSchema.validate(itemInstance)
 
 switch itemValidationResult {
 case .valid(let value):

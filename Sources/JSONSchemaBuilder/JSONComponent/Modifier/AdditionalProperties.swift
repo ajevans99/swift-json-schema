@@ -23,7 +23,7 @@ extension JSONComponents {
     public func validate(
       _ input: JSONValue
     ) -> Validated<(Props.Output, [String: AdditionalProps.Output]), String> {
-      guard case let .object(dictionary) = input else { return .error("Not an object") }
+      guard case .object(let dictionary) = input else { return .error("Not an object") }
 
       // Validate the base properties
       let baseValidation = base.validate(input)

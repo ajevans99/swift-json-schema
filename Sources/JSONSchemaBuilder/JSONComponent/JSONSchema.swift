@@ -8,8 +8,9 @@ public struct JSONSchema<Components: JSONSchemaComponent, NewOutput>: JSONSchema
   var components: Components
 
   /// Creates a new schema component and transforms the validated result into a new type.
-  /// - Parameters transform: The transform to apply to the output.
-  /// - Parameter component: The components to group together.
+  /// - Parameters:
+  ///   - transform: The transform to apply to the output.
+  ///   - component: The components to group together.
   public init(
     _ transform: @Sendable @escaping (Components.Output) -> NewOutput,
     @JSONSchemaBuilder component: () -> Components
