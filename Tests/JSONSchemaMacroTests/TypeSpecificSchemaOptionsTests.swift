@@ -165,7 +165,7 @@ struct ObjectOptionsTests {
     "Schemable": SchemableMacro.self, "ObjectOptions": ObjectOptionsMacro.self,
   ]
 
-  @Test func basic() {
+  @Test(.bug("https://github.com/ajevans99/swift-json-schema/issues/19")) func basic() {
     assertMacroExpansion(
       """
       @Schemable
