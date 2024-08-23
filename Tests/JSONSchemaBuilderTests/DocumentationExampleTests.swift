@@ -10,7 +10,7 @@ struct DocumentationExampleTests {
       properties: [
         "firstName": .string(.annotations(description: "The person's first name.")),
         "lastName": .string(.annotations(description: "The person's last name.")),
-        "age": .number(
+        "age": .integer(
           .annotations(description: "Age in years which must be equal to or greater than zero."),
           .options(minimum: 0, maximum: 120)
         ),
@@ -75,7 +75,7 @@ struct DocumentationExampleTests {
       .title("Person")
     }
 
-    #expect(schemaRepresentation.validate(.object(["age": .number(20)])) == .valid(20))
+    #expect(schemaRepresentation.validate(.object(["age": .integer(20)])) == .valid(20))
   }
 
   @Schemable struct Book {
