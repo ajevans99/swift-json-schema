@@ -32,7 +32,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Xcode setup
-      run: sudo xcode-select -s /Applications/Xcode_16.1_beta.app
+      run: sudo xcode-select -s /Applications/Xcode_16.0.app
     - name: Xcode version
       run: xcodebuild -version
       if: ${{ always() }}
