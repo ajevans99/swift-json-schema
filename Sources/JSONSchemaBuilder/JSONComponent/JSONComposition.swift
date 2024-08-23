@@ -20,9 +20,11 @@ public protocol JSONComposableCollectionComponent: JSONComposableComponent {
 }
 
 extension JSONComposableCollectionComponent where Output == JSONValue {
-  init(@JSONSchemaCollectionBuilder<JSONValue> _ builder: () -> [JSONComponents.AnyComponent<JSONValue>]) {
-    self.init(into: JSONValue.self, builder)
-  }
+  init(
+    @JSONSchemaCollectionBuilder<JSONValue> _ builder: () -> [JSONComponents.AnyComponent<
+      JSONValue
+    >]
+  ) { self.init(into: JSONValue.self, builder) }
 }
 
 public enum JSONComposition {
@@ -46,10 +48,8 @@ public enum JSONComposition {
 
       for component in components {
         switch component.validate(value) {
-        case .valid(let output):
-          return .valid(output)
-        case .invalid(let errors):
-          allErrors.append(contentsOf: errors)
+        case .valid(let output): return .valid(output)
+        case .invalid(let errors): allErrors.append(contentsOf: errors)
         }
       }
       return .invalid(["No valid component matched for value: \(value)"] + allErrors)
@@ -81,20 +81,15 @@ public enum JSONComposition {
 
       for component in components {
         switch component.validate(value) {
-        case .valid(let result):
-          if validResult == nil {
-            validResult = result
-          }
-        case .invalid(let errors):
-          combinedErrors.append(contentsOf: errors)
+        case .valid(let result): if validResult == nil { validResult = result }
+        case .invalid(let errors): combinedErrors.append(contentsOf: errors)
         }
       }
 
-      if let validResult = validResult, combinedErrors.isEmpty {
-        return .valid(validResult)
-      } else {
+      guard let validResult = validResult, combinedErrors.isEmpty else {
         return .invalid(["Failed AllOf validation"] + combinedErrors)
       }
+      return .valid(validResult)
     }
   }
 
@@ -119,10 +114,8 @@ public enum JSONComposition {
 
       for component in components {
         switch component.validate(value) {
-        case .valid(let result):
-          validResults.append(result)
-        case .invalid(let errors):
-          combinedErrors.append(contentsOf: errors)
+        case .valid(let result): validResults.append(result)
+        case .invalid(let errors): combinedErrors.append(contentsOf: errors)
         }
       }
 
@@ -134,7 +127,9 @@ public enum JSONComposition {
         return .invalid(["Failed OneOf validation. No valid component matched."] + combinedErrors)
       } else {
         // More than one component validated successfully
-        return .invalid(["Failed OneOf validation. Multiple components matched, but exactly one is required."])
+        return .invalid([
+          "Failed OneOf validation. Multiple components matched, but exactly one is required."
+        ])
       }
     }
   }

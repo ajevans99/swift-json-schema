@@ -165,7 +165,9 @@ extension AttributeListSyntax {
 extension CodeBlockItemListSyntax {
   init(_ children: [CodeBlockItemSyntax], separator: Trivia) {
     let newChildren = children.enumerated()
-      .map { CodeBlockItemSyntax(leadingTrivia: $0.offset == 0 ? nil : separator, item: $0.element.item) }
+      .map {
+        CodeBlockItemSyntax(leadingTrivia: $0.offset == 0 ? nil : separator, item: $0.element.item)
+      }
     self.init(newChildren)
   }
 }

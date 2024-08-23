@@ -49,7 +49,9 @@ struct EnumSchemaGenerator {
   }
 
   /// Generates code block schema for cases without associated values.
-  private func simpleEnumSchema(for casesWithoutAssociatedValues: [SchemableEnumCase]) -> CodeBlockItemSyntax {
+  private func simpleEnumSchema(
+    for casesWithoutAssociatedValues: [SchemableEnumCase]
+  ) -> CodeBlockItemSyntax {
     let statements = casesWithoutAssociatedValues.compactMap { $0.generateSchema() }
     let statementList = CodeBlockItemListSyntax(statements, separator: .newline)
 
@@ -100,7 +102,8 @@ struct SchemaGenerator {
 
     let statements = schemableMembers.compactMap { $0.generateSchema() }
 
-    var codeBlockItem: CodeBlockItemSyntax = "JSONObject { \(CodeBlockItemListSyntax(statements, separator: .newline)) }"
+    var codeBlockItem: CodeBlockItemSyntax =
+      "JSONObject { \(CodeBlockItemListSyntax(statements, separator: .newline)) }"
 
     if let annotationArguments = attributes.arguments(for: "SchemaOptions") {
       codeBlockItem.applyArguments(annotationArguments)

@@ -13,14 +13,12 @@ extension JSONComponents {
 
     var wrapped: Component
 
-    public init(wrapped: Component) {
-      self.wrapped = wrapped
-    }
+    public init(wrapped: Component) { self.wrapped = wrapped }
 
     public func validate(_ value: JSONValue) -> Validated<JSONValue, String> {
-      wrapped.validate(value).flatMap { _ in
-        return .valid(value)  // Ignore valid associated type and pass original string
-      }
+      wrapped.validate(value)
+        .flatMap { _ in .valid(value)  // Ignore valid associated type and pass original string
+        }
     }
   }
 }

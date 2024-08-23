@@ -1,7 +1,7 @@
-@testable import JSONSchemaBuilder
-
 import JSONSchema
 import Testing
+
+@testable import JSONSchemaBuilder
 
 struct DocumentationExampleTests {
   let personSchema = Schema.object(
@@ -10,7 +10,10 @@ struct DocumentationExampleTests {
       properties: [
         "firstName": .string(.annotations(description: "The person's first name.")),
         "lastName": .string(.annotations(description: "The person's last name.")),
-        "age": .number(.annotations(description: "Age in years which must be equal to or greater than zero."), .options(minimum: 0, maximum: 120))
+        "age": .number(
+          .annotations(description: "Age in years which must be equal to or greater than zero."),
+          .options(minimum: 0, maximum: 120)
+        ),
       ],
       required: ["firstName", "age"]
     )
@@ -19,21 +22,14 @@ struct DocumentationExampleTests {
   @Test func readMeBuilder() {
     @JSONSchemaBuilder var jsonSchema: some JSONSchemaComponent {
       JSONObject {
-        JSONProperty(key: "firstName") {
-          JSONString()
-            .description("The person's first name.")
-        }
-        .required()
+        JSONProperty(key: "firstName") { JSONString().description("The person's first name.") }
+          .required()
 
-        JSONProperty(key: "lastName") {
-          JSONString()
-            .description("The person's last name.")
-        }
+        JSONProperty(key: "lastName") { JSONString().description("The person's last name.") }
 
         JSONProperty(key: "age") {
-          JSONNumber() // TODO: Change to Integer
-            .description("Age in years which must be equal to or greater than zero.")
-            .minimum(0)
+          JSONNumber()  // TODO: Change to Integer
+            .description("Age in years which must be equal to or greater than zero.").minimum(0)
             .maximum(120)
         }
         .required()
@@ -46,23 +42,23 @@ struct DocumentationExampleTests {
     #expect(schema == personSchema)
   }
 
-  @Schemable
-  struct Person {
+  @Schemable struct Person {
     let firstName: String
     let lastName: String?
-    @NumberOptions(minimum: 0, maximum: 120)
-    let age: Double // TODO: Change back to integer
+    @NumberOptions(minimum: 0, maximum: 120) let age: Double  // TODO: Change back to integer
   }
 
   @Test func readMeMacros() {
-    #expect(Person.schema.definition.options?.asType(ObjectSchemaOptions.self)?.properties?.count == 3)
+    #expect(
+      Person.schema.definition.options?.asType(ObjectSchemaOptions.self)?.properties?.count == 3
+    )
   }
 
-//  @Schemable
-//  enum Status {
-//    case active
-//    case inactive
-//  }
+  //  @Schemable
+  //  enum Status {
+  //    case active
+  //    case inactive
+  //  }
 
   @Test func doccExample1() {
     let shouldIncludeAge = true
@@ -71,9 +67,8 @@ struct DocumentationExampleTests {
       JSONObject {
         if shouldIncludeAge {
           JSONProperty(key: "age") {
-            JSONNumber() // TODO: Make integer again
-              .description("Age in years which must be equal to or greater than zero.")
-              .minimum(0)
+            JSONNumber()  // TODO: Make integer again
+              .description("Age in years which must be equal to or greater than zero.").minimum(0)
           }
           .required()
         }
@@ -106,21 +101,18 @@ struct DocumentationExampleTests {
     case celsius
   }
 
-  @Schemable
-  struct Weather {
+  @Schemable struct Weather {
     var temperature: Double = 72.0
     // var units: TemperatureType = .fahrenheit
     var location: String = "Detroit"
   }
 
-  @Schemable
-  struct Weather2 {
+  @Schemable struct Weather2 {
     let temperature: Double
     // let units: TemperatureType
     let location: String
 
-    @ExcludeFromSchema
-    let secret: String
+    @ExcludeFromSchema let secret: String
 
     init(temperature: Double, location: String) {
       self.temperature = temperature
@@ -130,6 +122,9 @@ struct DocumentationExampleTests {
   }
 
   @Test func doccExample3() {
-    #expect(Weather2.schema.definition.options?.asType(ObjectSchemaOptions.self)?.properties?.keys.contains("secert") == false)
+    #expect(
+      Weather2.schema.definition.options?.asType(ObjectSchemaOptions.self)?.properties?.keys
+        .contains("secert") == false
+    )
   }
 }

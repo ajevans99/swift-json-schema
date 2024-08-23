@@ -34,21 +34,31 @@ import JSONSchema
 }
 
 @resultBuilder public enum JSONSchemaCollectionBuilder<Output> {
-  public static func buildPartialBlock<Component: JSONSchemaComponent>(first component: Component) -> [JSONComponents.AnyComponent<Output>] where Component.Output == Output {
-    return [component.eraseToAnyComponent()]
+  public static func buildPartialBlock<Component: JSONSchemaComponent>(
+    first component: Component
+  ) -> [JSONComponents.AnyComponent<Output>] where Component.Output == Output {
+    [component.eraseToAnyComponent()]
   }
 
-  public static func buildPartialBlock<Component: JSONSchemaComponent>(accumulated: [JSONComponents.AnyComponent<Output>], next component: Component) -> [JSONComponents.AnyComponent<Output>] where Component.Output == Output {
-    return accumulated + [component.eraseToAnyComponent()]
+  public static func buildPartialBlock<Component: JSONSchemaComponent>(
+    accumulated: [JSONComponents.AnyComponent<Output>],
+    next component: Component
+  ) -> [JSONComponents.AnyComponent<Output>] where Component.Output == Output {
+    accumulated + [component.eraseToAnyComponent()]
   }
 }
 
 extension JSONSchemaCollectionBuilder where Output == JSONValue {
-  public static func buildPartialBlock<Component: JSONSchemaComponent>(first component: Component) -> [JSONComponents.AnyComponent<JSONValue>] {
+  public static func buildPartialBlock<Component: JSONSchemaComponent>(
+    first component: Component
+  ) -> [JSONComponents.AnyComponent<JSONValue>] {
     [JSONComponents.Passthrough(wrapped: component).eraseToAnyComponent()]
   }
 
-  public static func buildPartialBlock<Component: JSONSchemaComponent>(accumulated: [JSONComponents.AnyComponent<JSONValue>], next component: Component) -> [JSONComponents.AnyComponent<JSONValue>] {
+  public static func buildPartialBlock<Component: JSONSchemaComponent>(
+    accumulated: [JSONComponents.AnyComponent<JSONValue>],
+    next component: Component
+  ) -> [JSONComponents.AnyComponent<JSONValue>] {
     accumulated + [JSONComponents.Passthrough(wrapped: component).eraseToAnyComponent()]
   }
 }

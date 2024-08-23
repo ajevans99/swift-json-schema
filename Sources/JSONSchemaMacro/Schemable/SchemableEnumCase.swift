@@ -59,9 +59,7 @@ struct SchemableEnumCase {
             expression: DeclReferenceExprSyntax(baseName: "$\(raw: index)")
           )
         } else {
-          LabeledExprSyntax(
-            expression: DeclReferenceExprSyntax(baseName: "$\(raw: index)")
-          )
+          LabeledExprSyntax(expression: DeclReferenceExprSyntax(baseName: "$\(raw: index)"))
         }
       }
     }

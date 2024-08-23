@@ -453,114 +453,114 @@ import Testing
       }
       """,
       expandedSource: """
-      enum Category {
-        case fiction, nonFiction, science, history, kids, entertainment
+        enum Category {
+          case fiction, nonFiction, science, history, kids, entertainment
 
-        static var schema: some JSONSchemaComponent<Category> {
-          JSONString()
-            .enumValues {
-              "fiction"
-              "nonFiction"
-              "science"
-              "history"
-              "kids"
-              "entertainment"
-            }
-            .compactMap {
-              switch $0 {
-              case "fiction":
-                return Self.fiction
-              case "nonFiction":
-                return Self.nonFiction
-              case "science":
-                return Self.science
-              case "history":
-                return Self.history
-              case "kids":
-                return Self.kids
-              case "entertainment":
-                return Self.entertainment
-              default:
-                return nil
+          static var schema: some JSONSchemaComponent<Category> {
+            JSONString()
+              .enumValues {
+                "fiction"
+                "nonFiction"
+                "science"
+                "history"
+                "kids"
+                "entertainment"
               }
-            }
-        }
-      }
-      enum LibraryItem {
-        case book(details: ItemDetails, category: Category)
-        case movie(details: ItemDetails, category: Category, duration: Int)
-        case music(details: ItemDetails, category: Category)
-
-        static var schema: some JSONSchemaComponent<LibraryItem> {
-          JSONComposition.AnyOf(into: LibraryItem.self) {
-            JSONObject {
-              JSONProperty(key: "book") {
-                JSONObject {
-                  JSONProperty(key: "details") {
-                    ItemDetails.schema
-                  }
-                    .required()
-                  JSONProperty(key: "category") {
-                    Category.schema
-                  }
-                    .required()
+              .compactMap {
+                switch $0 {
+                case "fiction":
+                  return Self.fiction
+                case "nonFiction":
+                  return Self.nonFiction
+                case "science":
+                  return Self.science
+                case "history":
+                  return Self.history
+                case "kids":
+                  return Self.kids
+                case "entertainment":
+                  return Self.entertainment
+                default:
+                  return nil
                 }
-              }
-                .required()
-            }
-              .map {
-                Self.book(details: $0, category: $1)
-              }
-            JSONObject {
-              JSONProperty(key: "movie") {
-                JSONObject {
-                  JSONProperty(key: "details") {
-                    ItemDetails.schema
-                  }
-                    .required()
-                  JSONProperty(key: "category") {
-                    Category.schema
-                  }
-                    .required()
-                  JSONProperty(key: "duration") {
-                    JSONInteger()
-                  }
-                    .required()
-                }
-              }
-                .required()
-            }
-              .map {
-                Self.movie(details: $0, category: $1, duration: $2)
-              }
-            JSONObject {
-              JSONProperty(key: "music") {
-                JSONObject {
-                  JSONProperty(key: "details") {
-                    ItemDetails.schema
-                  }
-                    .required()
-                  JSONProperty(key: "category") {
-                    Category.schema
-                  }
-                    .required()
-                }
-              }
-                .required()
-            }
-              .map {
-                Self.music(details: $0, category: $1)
               }
           }
         }
-      }
+        enum LibraryItem {
+          case book(details: ItemDetails, category: Category)
+          case movie(details: ItemDetails, category: Category, duration: Int)
+          case music(details: ItemDetails, category: Category)
 
-      extension Category: Schemable {
-      }
+          static var schema: some JSONSchemaComponent<LibraryItem> {
+            JSONComposition.AnyOf(into: LibraryItem.self) {
+              JSONObject {
+                JSONProperty(key: "book") {
+                  JSONObject {
+                    JSONProperty(key: "details") {
+                      ItemDetails.schema
+                    }
+                      .required()
+                    JSONProperty(key: "category") {
+                      Category.schema
+                    }
+                      .required()
+                  }
+                }
+                  .required()
+              }
+                .map {
+                  Self.book(details: $0, category: $1)
+                }
+              JSONObject {
+                JSONProperty(key: "movie") {
+                  JSONObject {
+                    JSONProperty(key: "details") {
+                      ItemDetails.schema
+                    }
+                      .required()
+                    JSONProperty(key: "category") {
+                      Category.schema
+                    }
+                      .required()
+                    JSONProperty(key: "duration") {
+                      JSONInteger()
+                    }
+                      .required()
+                  }
+                }
+                  .required()
+              }
+                .map {
+                  Self.movie(details: $0, category: $1, duration: $2)
+                }
+              JSONObject {
+                JSONProperty(key: "music") {
+                  JSONObject {
+                    JSONProperty(key: "details") {
+                      ItemDetails.schema
+                    }
+                      .required()
+                    JSONProperty(key: "category") {
+                      Category.schema
+                    }
+                      .required()
+                  }
+                }
+                  .required()
+              }
+                .map {
+                  Self.music(details: $0, category: $1)
+                }
+            }
+          }
+        }
 
-      extension LibraryItem: Schemable {
-      }
-      """,
+        extension Category: Schemable {
+        }
+
+        extension LibraryItem: Schemable {
+        }
+        """,
       macros: testMacros
     )
   }
