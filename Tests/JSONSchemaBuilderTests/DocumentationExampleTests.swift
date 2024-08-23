@@ -10,7 +10,7 @@ struct DocumentationExampleTests {
       properties: [
         "firstName": .string(.annotations(description: "The person's first name.")),
         "lastName": .string(.annotations(description: "The person's last name.")),
-        "age": .number(
+        "age": .integer(
           .annotations(description: "Age in years which must be equal to or greater than zero."),
           .options(minimum: 0, maximum: 120)
         ),
@@ -28,9 +28,8 @@ struct DocumentationExampleTests {
         JSONProperty(key: "lastName") { JSONString().description("The person's last name.") }
 
         JSONProperty(key: "age") {
-          JSONNumber()  // TODO: Change to Integer
-            .description("Age in years which must be equal to or greater than zero.").minimum(0)
-            .maximum(120)
+          JSONInteger().description("Age in years which must be equal to or greater than zero.")
+            .minimum(0).maximum(120)
         }
         .required()
       }
@@ -45,7 +44,7 @@ struct DocumentationExampleTests {
   @Schemable struct Person {
     let firstName: String
     let lastName: String?
-    @NumberOptions(minimum: 0, maximum: 120) let age: Double  // TODO: Change back to integer
+    @NumberOptions(minimum: 0, maximum: 120) let age: Int
   }
 
   @Test func readMeMacros() {
@@ -63,12 +62,12 @@ struct DocumentationExampleTests {
   @Test func doccExample1() {
     let shouldIncludeAge = true
 
-    @JSONSchemaBuilder var schemaRepresentation: some JSONSchemaComponent<Double?> {
+    @JSONSchemaBuilder var schemaRepresentation: some JSONSchemaComponent<Int?> {
       JSONObject {
         if shouldIncludeAge {
           JSONProperty(key: "age") {
-            JSONNumber()  // TODO: Make integer again
-              .description("Age in years which must be equal to or greater than zero.").minimum(0)
+            JSONInteger().description("Age in years which must be equal to or greater than zero.")
+              .minimum(0)
           }
           .required()
         }
@@ -76,7 +75,7 @@ struct DocumentationExampleTests {
       .title("Person")
     }
 
-    #expect(schemaRepresentation.validate(.object(["age": .number(20)])) == .valid(20))
+    #expect(schemaRepresentation.validate(.object(["age": .integer(20)])) == .valid(20))
   }
 
   @Schemable struct Book {
