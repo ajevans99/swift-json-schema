@@ -190,6 +190,7 @@ struct ObjectOptionsTests {
                   .additionalProperties {
                     JSONString()
                   }
+                  .map(\\.1)
                   .propertyNames(.options(pattern: "^[A-Za-z_][A-Za-z0-9_]*$"))
                   .minProperties(2)
                   .maxProperties(5)

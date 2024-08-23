@@ -97,6 +97,7 @@ struct SchemableExpansionTests {
                   .additionalProperties {
                     JSONNumber()
                   }
+                  .map(\\.1)
                 }
                 .required()
                 JSONProperty(key: "conditionsByLocation") {
@@ -104,6 +105,7 @@ struct SchemableExpansionTests {
                   .additionalProperties {
                     WeatherCondition.schema
                   }
+                  .map(\\.1)
                 }
                 .required()
               }
@@ -148,6 +150,7 @@ struct SchemableExpansionTests {
                   .additionalProperties {
                     JSONNumber()
                   }
+                  .map(\\.1)
                 }
                 .required()
               }

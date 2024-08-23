@@ -5,14 +5,14 @@ struct SchemableEnumCase {
   let associatedValues: EnumCaseParameterListSyntax?
 
   init(enumCaseDecl: EnumCaseDeclSyntax, caseElement: EnumCaseElementSyntax) {
-    identifier = caseElement.name
+    identifier = caseElement.name.trimmed
     associatedValues = caseElement.parameterClause?.parameters
   }
 
   func generateSchema() -> CodeBlockItemSyntax? {
     guard let associatedValues else {
       return """
-        "\(raw: identifier.text)"
+        "\(identifier)"
         """
     }
     let properties: [CodeBlockItemSyntax] = associatedValues.enumerated()
@@ -36,15 +36,48 @@ struct SchemableEnumCase {
         case .notSupported: return nil
         }
 
-        return """
+        var block: CodeBlockItemSyntax = """
           JSONProperty(key: "\(raw: key)") { \(codeBlock) }
           """
+
+        if !parameter.type.isOptional {
+          block = """
+            \(block)
+            .required()
+            """
+        }
+
+        return block
       }
+
+    let mapExpressionList = LabeledExprListSyntax {
+      for (index, parameter) in associatedValues.enumerated() {
+        if let label = parameter.firstName, label.text != "_" {
+          LabeledExprSyntax(
+            label: label,
+            colon: .colonToken(trailingTrivia: .space),
+            expression: DeclReferenceExprSyntax(baseName: "$\(raw: index)")
+          )
+        } else {
+          LabeledExprSyntax(
+            expression: DeclReferenceExprSyntax(baseName: "$\(raw: index)")
+          )
+        }
+      }
+    }
 
     let list = CodeBlockItemListSyntax(properties)
 
+    let property: CodeBlockItemSyntax = """
+      JSONProperty(key: "\(raw: identifier.text)") { JSONObject { \(list) } }
+      .required()
+      """
+
     return """
-      JSONObject { JSONProperty(key: "\(raw: identifier.text)") { JSONObject { \(list) } } }
+      JSONObject { \(property) }
+      .map {
+        Self.\(identifier)(\(mapExpressionList))
+      }
       """
   }
 }

@@ -67,28 +67,32 @@ import Testing
                     JSONProperty(key: "coverage") {
                       JSONNumber()
                     }
-                    .required()
+                      .required()
                   }
                 }
-                .required()
+                  .required()
               }
-              .map { Self.cloudy(coverage: $0) }
+                .map {
+                  Self.cloudy(coverage: $0)
+                }
               JSONObject {
                 JSONProperty(key: "rainy") {
                   JSONObject {
                     JSONProperty(key: "chanceOfRain") {
                       JSONNumber()
                     }
-                    .required()
+                      .required()
                     JSONProperty(key: "amount") {
                       JSONNumber()
                     }
-                    .required()
+                      .required()
                   }
                 }
-                .required()
+                  .required()
               }
-              .map { Self.rainy(chanceOfRain: $0, amount: $1) }
+                .map {
+                  Self.rainy(chanceOfRain: $0, amount: $1)
+                }
             }
           }
         }
@@ -122,28 +126,32 @@ import Testing
                     JSONProperty(key: "_0") {
                       JSONNumber()
                     }
-                    .required()
+                      .required()
                   }
                 }
-                .required()
+                  .required()
               }
-              .map { Self.cloudy($0) }
+                .map {
+                  Self.cloudy($0)
+                }
               JSONObject {
                 JSONProperty(key: "rainy") {
                   JSONObject {
                     JSONProperty(key: "_0") {
                       JSONNumber()
                     }
-                    .required()
+                      .required()
                     JSONProperty(key: "_1") {
                       JSONNumber()
                     }
-                    .required()
+                      .required()
                   }
                 }
-                .required()
+                  .required()
               }
-              .map { Self.rainy($0, $1) }
+                .map {
+                  Self.rainy($0, $1)
+                }
             }
           }
         }
@@ -183,45 +191,49 @@ import Testing
                     JSONProperty(key: "_0") {
                       JSONNumber()
                     }
-                    .required()
+                      .required()
                   }
                 }
-                .required()
+                  .required()
               }
-              .map { Self.cloudy($0) }
+                .map {
+                  Self.cloudy($0)
+                }
               JSONObject {
                 JSONProperty(key: "rainy") {
                   JSONObject {
                     JSONProperty(key: "chanceOfRain") {
                       JSONNumber()
                     }
-                    .required()
+                      .required()
                     JSONProperty(key: "amount") {
                       JSONNumber()
                     }
                   }
                 }
-                .required()
+                  .required()
               }
-              .map { Self.rainy(chanceOfRain: $0, amount: $1) }
+                .map {
+                  Self.rainy(chanceOfRain: $0, amount: $1)
+                }
               JSONString()
-                .enumValues {
-                  "snowy"
-                  "windy"
-                  "stormy"
-                }
-                .compactMap {
-                  switch $0 {
-                  case "snowy":
-                    return Self.snowy
-                  case "windy":
-                    return Self.windy
-                  case "stormy":
-                    return Self.stormy
-                  default:
-                    return nil
+                  .enumValues {
+                    "snowy"
+                    "windy"
+                    "stormy"
                   }
-                }
+                  .compactMap {
+                    switch $0 {
+                    case "snowy":
+                      return Self.snowy
+                    case "windy":
+                      return Self.windy
+                    case "stormy":
+                      return Self.stormy
+                    default:
+                      return nil
+                    }
+                  }
             }
           }
         }
@@ -259,38 +271,44 @@ import Testing
                     JSONProperty(key: "_0") {
                       JSONString()
                     }
-                    .required()
+                      .required()
                   }
                 }
-                .required()
+                  .required()
               }
-              .map { Self.username($0) }
+                .map {
+                  Self.username($0)
+                }
               JSONObject {
                 JSONProperty(key: "age") {
                   JSONObject {
                     JSONProperty(key: "_0") {
                       JSONInteger()
                     }
-                    .required()
+                      .required()
                   }
                 }
-                .required()
+                  .required()
               }
-              .map { Self.age($0) }
+                .map {
+                  Self.age($0)
+                }
               JSONObject {
                 JSONProperty(key: "preferredLanguages") {
                   JSONObject {
                     JSONProperty(key: "_0") {
                       JSONArray {
-                        JSONString()
-                      }
+                          JSONString()
+                        }
                     }
-                    .required()
+                      .required()
                   }
                 }
-                .required()
+                  .required()
               }
-              .map { Self.preferredLanguages($0) }
+                .map {
+                  Self.preferredLanguages($0)
+                }
               JSONObject {
                 JSONProperty(key: "contactInfo") {
                   JSONObject {
@@ -299,13 +317,16 @@ import Testing
                         .additionalProperties {
                           JSONString()
                         }
+                        .map(\\.1)
                     }
-                    .required()
+                      .required()
                   }
                 }
-                .required()
+                  .required()
               }
-              .map { Self.contactInfo($0) } // This isn't gonna work?
+                .map {
+                  Self.contactInfo($0)
+                }
             }
           }
         }
@@ -344,12 +365,14 @@ import Testing
                       JSONInteger()
                         .default(0)
                     }
-                    .required()
+                      .required()
                   }
                 }
-                .required()
+                  .required()
               }
-              .map { Self.flightNumber($0) }
+                .map {
+                  Self.flightNumber($0)
+                }
               JSONObject {
                 JSONProperty(key: "departureDetails") {
                   JSONObject {
@@ -357,17 +380,19 @@ import Testing
                       JSONString()
                         .default("Unknown")
                     }
-                    .required()
+                      .required()
                     JSONProperty(key: "isInternational") {
                       JSONBoolean()
                         .default(false)
                     }
-                    .required()
+                      .required()
                   }
                 }
-                .required()
+                  .required()
               }
-              .map { Self.departureDetails(city: $0, isInternational: $1) }
+                .map {
+                  Self.departureDetails(city: $0, isInternational: $1)
+                }
               JSONObject {
                 JSONProperty(key: "arrivalDetails") {
                   JSONObject {
@@ -375,12 +400,14 @@ import Testing
                       JSONString()
                         .default("Unknown")
                     }
-                    .required()
+                      .required()
                   }
                 }
-                .required()
+                  .required()
               }
-              .map { Self.arrivalDetails(city: $0) }
+                .map {
+                  Self.arrivalDetails(city: $0)
+                }
               JSONObject {
                 JSONProperty(key: "passengerInfo") {
                   JSONObject {
@@ -388,16 +415,18 @@ import Testing
                       JSONString()
                         .default("Unknown")
                     }
-                    .required()
+                      .required()
                     JSONProperty(key: "seatNumber") {
                       JSONString()
                         .default(nil)
                     }
                   }
                 }
-                .required()
+                  .required()
               }
-              .map { Self.passengerInfo(name: $0, seatNumber: $1) }
+                .map {
+                  Self.passengerInfo(name: $0, seatNumber: $1)
+                }
             }
           }
         }
@@ -470,52 +499,58 @@ import Testing
                   JSONProperty(key: "details") {
                     ItemDetails.schema
                   }
-                  .required()
+                    .required()
                   JSONProperty(key: "category") {
                     Category.schema
                   }
-                  .required()
+                    .required()
                 }
               }
-              .required()
+                .required()
             }
-            .map { Self.book(details: $0, category: $1) }
+              .map {
+                Self.book(details: $0, category: $1)
+              }
             JSONObject {
               JSONProperty(key: "movie") {
                 JSONObject {
                   JSONProperty(key: "details") {
                     ItemDetails.schema
                   }
-                  .required()
+                    .required()
                   JSONProperty(key: "category") {
                     Category.schema
                   }
-                  .required()
+                    .required()
                   JSONProperty(key: "duration") {
                     JSONInteger()
                   }
-                  .required()
+                    .required()
                 }
               }
-              .required()
+                .required()
             }
-            .map { Self.movie(details: $0, category: $1, duration: $2) }
+              .map {
+                Self.movie(details: $0, category: $1, duration: $2)
+              }
             JSONObject {
               JSONProperty(key: "music") {
                 JSONObject {
                   JSONProperty(key: "details") {
                     ItemDetails.schema
                   }
-                  .required()
+                    .required()
                   JSONProperty(key: "category") {
                     Category.schema
                   }
-                  .required()
+                    .required()
                 }
               }
-              .required()
+                .required()
             }
-            .map { Self.music(details: $0, category: $1) }
+              .map {
+                Self.music(details: $0, category: $1)
+              }
           }
         }
       }
