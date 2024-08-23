@@ -1,8 +1,6 @@
 import JSONSchema
 
-public protocol JSONNumberType: JSONSchemaComponent {
-  var options: NumberSchemaOptions { get set }
-}
+public protocol JSONNumberType: JSONSchemaComponent { var options: NumberSchemaOptions { get set } }
 
 /// A JSON integer schema component for use in ``JSONSchemaBuilder``.
 public struct JSONInteger: JSONNumberType {
