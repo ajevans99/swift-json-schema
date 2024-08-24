@@ -9,8 +9,16 @@ public protocol JSONSchemaComponent<Output>: Sendable {
 
   /// The annotations for this component.
   var annotations: AnnotationOptions { get set }
+
   /// Validates a JSON value against the schema.
   /// - Parameter value: The value (aka instance, document, etc.) to validate.
   /// - Returns: A validated output or error messages.
-  @Sendable func validate(_ value: JSONValue) -> Validated<Output, String>
+  @Sendable func validate(_ value: JSONValue, against validator: Validator) -> Validation<Output>
+}
+
+extension JSONSchemaComponent {
+  /// Conveinence method for default validation.
+  public func validate(_ value: JSONValue) -> Validation<Output> {
+    validate(value, against: JSONValidator.default)
+  }
 }

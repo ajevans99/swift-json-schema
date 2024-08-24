@@ -29,11 +29,11 @@ extension JSONComponents {
       self.transform = transform
     }
 
-    public func validate(_ value: JSONValue) -> Validated<NewSchemaComponent.Output, String> {
-      switch upstream.validate(value) {
+    public func validate(_ value: JSONValue, against validator: Validator) -> Validation<NewSchemaComponent.Output> {
+      switch upstream.validate(value, against: validator) {
       case .valid(let upstreamOutput):
         let newSchemaComponent = transform(upstreamOutput)
-        return newSchemaComponent.validate(value)
+        return newSchemaComponent.validate(value, against: validator)
       case .invalid(let error): return .invalid(error)
       }
     }

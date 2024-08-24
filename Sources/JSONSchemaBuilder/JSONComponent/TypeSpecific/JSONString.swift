@@ -9,9 +9,9 @@ public struct JSONString: JSONSchemaComponent {
 
   public init() {}
 
-  public func validate(_ value: JSONValue) -> Validated<String, String> {
+  public func validate(_ value: JSONValue, against validator: Validator) -> Validation<String> {
     if case .string(let string) = value { return .valid(string) }
-    return .error("Expected a string value.")
+    return .error(.typeMismatch(expected: .string, actual: value))
   }
 }
 

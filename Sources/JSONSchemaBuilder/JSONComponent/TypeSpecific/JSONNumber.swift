@@ -11,9 +11,11 @@ public struct JSONInteger: JSONNumberType {
 
   public init() {}
 
-  public func validate(_ value: JSONValue) -> Validated<Int, String> {
-    if case .integer(let int) = value { return .valid(int) }
-    return .error("Expected integer value.")
+  public func validate(_ value: JSONValue, against validator: Validator) -> Validation<Int> {
+    if case .integer(let int) = value {
+      return validator.validate(integer: int, against: options)
+    }
+    return .error(.typeMismatch(expected: .integer, actual: value))
   }
 }
 
@@ -26,9 +28,11 @@ public struct JSONNumber: JSONNumberType {
 
   public init() {}
 
-  public func validate(_ value: JSONValue) -> Validated<Double, String> {
-    if case .number(let double) = value { return .valid(double) }
-    return .error("Expected a number.")
+  public func validate(_ value: JSONValue, against validator: Validator) -> Validation<Double> {
+    if case .number(let double) = value {
+      return validator.validate(number: double, against: options)
+    }
+    return .error(.typeMismatch(expected: .number, actual: value))
   }
 }
 

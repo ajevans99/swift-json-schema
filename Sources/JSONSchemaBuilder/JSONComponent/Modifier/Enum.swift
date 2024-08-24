@@ -30,9 +30,9 @@ extension JSONComponents {
       self.cases = cases
     }
 
-    public func validate(_ value: JSONValue) -> Validated<Upstream.Output, String> {
-      for `case` in cases where `case` == value { return upstream.validate(value) }
-      return .error("\(value) does not match any enum case.")
+    public func validate(_ value: JSONValue, against validator: Validator) -> Validation<Upstream.Output> {
+      for `case` in cases where `case` == value { return upstream.validate(value, against: validator) }
+      return .error(.temporary("\(value) does not match any enum case."))
     }
   }
 }

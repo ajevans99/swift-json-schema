@@ -30,10 +30,10 @@ extension JSONComponents {
     case first(First)
     case second(Second)
 
-    public func validate(_ value: JSONValue) -> Validated<First.Output, String> {
+    public func validate(_ value: JSONValue, against validator: Validator) -> Validation<First.Output> {
       switch self {
-      case .first(let first): return first.validate(value)
-      case .second(let second): return second.validate(value)
+      case .first(let first): return first.validate(value, against: validator)
+      case .second(let second): return second.validate(value, against: validator)
       }
     }
   }

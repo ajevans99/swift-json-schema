@@ -30,9 +30,12 @@ public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
   /// Creates a new `JSONObject` with no property requirements.
   public init() where Props == EmptyPropertyCollection { self.init(with: {}) }
 
-  public func validate(_ input: JSONValue) -> Validated<Props.Output, String> {
-    if case .object(let dictionary) = input { return properties.validate(dictionary) }
-    return .error("Not an object")
+  public func validate(_ value: JSONValue, against validator: Validator) -> Validation<Props.Output> {
+    if case .object(let dictionary) = value {
+//      validator.validate(dictionary, against: options)
+      return properties.validate(dictionary, against: validator)
+    }
+    return .error(.typeMismatch(expected: .object, actual: value))
   }
 }
 
@@ -75,7 +78,7 @@ extension JSONObject {
   ///     JSONString()
   ///   }
   /// ```
-  /// `myObj.validate(/* some input */)` will have a type of `Validated<(Void, String), String>`
+  /// `myObj.validate(/* some input */)` will have a type of `Validation<(Void, String)>`
   ///
   /// For now, to drop the `Void`, you can add a map, like `.map { $1 }`.
   /// TODO: Drop `Void` values from tuple with builder.

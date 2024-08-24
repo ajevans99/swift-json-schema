@@ -94,7 +94,7 @@ printSchema(Library.self)
   case celcius
 }
 
-let tempType = TemperatureType.schema.validate(.string("fahrenheit"))
+let tempType = TemperatureType.validate(.string("fahrenheit"))
 print("tempType", tempType)
 
 printSchema(TemperatureType.self)
@@ -148,11 +148,11 @@ extension WeatherCondition: Schemable {
   }
 }
 
-let weatherConditionResult1 = WeatherCondition.schema.validate(
+let weatherConditionResult1 = WeatherCondition.validate(
   .object(["cloudy": .object(["coverage": .number(100)])])
 )
 print("weatherConditionResult1", weatherConditionResult1)
-let weatherConditionResult2 = WeatherCondition.schema.validate(.string("snowy"))
+let weatherConditionResult2 = WeatherCondition.validate(.string("snowy"))
 print("weatherConditionResult2", weatherConditionResult2)
 
 let conditions = WeatherCondition.sunny(hoursOfSunlight: 5)
@@ -163,7 +163,7 @@ printSchema(WeatherCondition.self)
 
 // MARK: Parsing
 
-enum WeatherType {
+enum WeatherType: Schemable {
   case sunny
   case cloudy
   case rainy
@@ -177,9 +177,9 @@ enum WeatherType {
       }
       .compactMap { string in
         switch string {
-        case "sunny": return .sunny
-        case "cloudy": return .cloudy
-        case "rainy": return .rainy
+        case "sunny": return Self.sunny
+        case "cloudy": return Self.cloudy
+        case "rainy": return Self.rainy
         default: return nil
         }
       }
@@ -187,9 +187,9 @@ enum WeatherType {
   }
 }
 
-let sunny = WeatherType.schema.validate(.string("sunny"))
+let sunny = WeatherType.validate(.string("sunny"))
 print(sunny)
-let notSupported = WeatherType.schema.validate(.string("other"))
+let notSupported = WeatherType.validate(.string("other"))
 print(notSupported)
 
 enum Airline: String, CaseIterable, Schemable {
@@ -261,7 +261,7 @@ print(flight)
 
 switch flight {
 case .valid(let a): print("Valid: \(a)")
-case .invalid(let array): print("Invalid: \(array.joined(separator: "\n"))")
+case .invalid(let array): print("Invalid: \(array.map(\.description).joined(separator: "\n"))")
 }
 
 let anyOf = JSONComposition.AnyOf(into: JSONValue.self) {
@@ -316,7 +316,7 @@ let itemString = """
 let itemInstance = try! JSONDecoder().decode(JSONValue.self, from: Data(itemString.utf8))
 print(itemInstance)
 
-// Validated<(String?, String?, Double?, Bool?), String>
+// Validation<(String?, String?, Double?, Bool?)>
 let itemValidationResult = itemSchema.validate(itemInstance)
 
 switch itemValidationResult {
@@ -327,7 +327,7 @@ case .valid(let value):
 
 // ..
 
-case .invalid(let array): print("Errors: \(array.joined(separator: ", "))")
+case .invalid(let array): print("Errors: \(array.map(\.description).joined(separator: ", "))")
 }
 
 struct Item {
@@ -459,3 +459,5 @@ enum LibraryItem { case book(details: ItemDetails, category: Category)
   case movie(details: ItemDetails, category: Category, duration: Int)
   case music(details: ItemDetails, category: Category)
 }
+
+// MARK: Validation

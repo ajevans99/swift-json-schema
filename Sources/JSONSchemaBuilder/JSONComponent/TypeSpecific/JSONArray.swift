@@ -23,12 +23,12 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
     self.options = disableItems ? .options(items: .disabled) : .options()
   }
 
-  public func validate(_ value: JSONValue) -> Validated<[T.Output], String> {
+  public func validate(_ value: JSONValue, against validator: Validator) -> Validation<[T.Output]> {
     if case .array(let array) = value {
       var outputs: [T.Output] = []
-      var errors: [String] = []
+      var errors: [ValidationIssue] = []
       for item in array {
-        switch items.validate(item) {
+        switch items.validate(item, against: validator) {
         case .valid(let value): outputs.append(value)
         case .invalid(let e): errors.append(contentsOf: e)
         }
@@ -36,7 +36,7 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
       guard !errors.isEmpty else { return .valid(outputs) }
       return .invalid(errors)
     }
-    return .error("Expected array value")
+    return .error(.typeMismatch(expected: .array, actual: value))
   }
 }
 

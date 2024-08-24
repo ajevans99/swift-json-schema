@@ -21,10 +21,10 @@ extension JSONPropertyComponents {
     case first(First)
     case second(Second)
 
-    public func validate(_ input: [String: JSONValue]) -> Validated<First.Output, String> {
+    public func validate(_ input: [String: JSONValue], against validator: Validator) -> Validation<First.Output> {
       switch self {
-      case .first(let first): first.validate(input)
-      case .second(let second): second.validate(input)
+      case .first(let first): first.validate(input, against: validator)
+      case .second(let second): second.validate(input, against: validator)
       }
     }
   }
