@@ -4,15 +4,9 @@ extension DefaultValidator {
   public func validate(number: Double, against options: NumberSchemaOptions) -> Validation<Double> {
     let builder = ValidationErrorBuilder()
 
-    if let multipleOf = options.multipleOf {
-      if let optionError = validateOption(multipleOf: multipleOf) {
-        builder.addError(optionError)
-      } else {
-        builder.addError(validateMultipleOf(multipleOf: multipleOf, value: number).map { .number(issue: $0, actual: number) })
-      }
-    }
-
-    builder.addErrors(validateBoundaries(value: number, options: options).map { .number(issue: $0, actual: number) })
+    let pullback: (ValidationIssue.NumberIssue) -> ValidationIssue = { .number(issue: $0, actual: number) }
+    validateMultipleOf(value: number, options: options, builder: builder, pullback: pullback)
+    validateBoundaries(value: number, options: options, builder: builder, pullback: pullback)
 
     return builder.build(for: number)
   }
@@ -20,17 +14,9 @@ extension DefaultValidator {
   public func validate(integer: Int, against options: NumberSchemaOptions) -> Validation<Int> {
     let builder = ValidationErrorBuilder()
 
-    let number = Double(integer)
-
-    if let multipleOf = options.multipleOf {
-      if let optionError = validateOption(multipleOf: multipleOf) {
-        builder.addError(optionError)
-      } else {
-        builder.addError(validateMultipleOf(multipleOf: multipleOf, value: number).map { .integer(issue: $0, actual: integer) })
-      }
-    }
-
-    builder.addErrors(validateBoundaries(value: number, options: options).map { .integer(issue: $0, actual: integer) })
+    let pullback: (ValidationIssue.NumberIssue) -> ValidationIssue = { .integer(issue: $0, actual: integer) }
+    validateMultipleOf(value: Double(integer), options: options, builder: builder, pullback: pullback)
+    validateBoundaries(value: Double(integer), options: options, builder: builder, pullback: pullback)
 
     return builder.build(for: integer)
   }
@@ -39,51 +25,72 @@ extension DefaultValidator {
 // MARK: - Helpers
 
 extension DefaultValidator {
-  private func validateOption(multipleOf: Double) -> ValidationIssue? {
+  private func validateMultipleOf(value: Double, options: NumberSchemaOptions, builder: ValidationErrorBuilder, pullback: (ValidationIssue.NumberIssue) -> ValidationIssue) {
+    guard let multipleOf = options.multipleOf else { return }
     let schema = JSONNumber().exclusiveMinimum(0)
 
-    if case let .invalid(optionsErrors) = schema.validate(.number(multipleOf), against: DefaultValidator()) {
-      return .invalidOption(option: "multipleOf", issues: optionsErrors)
+    switch schema.validate(multipleOf, against: self) {
+    case .valid(let multipleOf):
+      if value.truncatingRemainder(dividingBy: multipleOf) != 0 {
+        builder.addError(pullback(.multipleOf(expected: multipleOf)))
+      }
+    case .invalid(let errors):
+      builder.addError(.invalidOption(option: "multipleOf", issues: errors))
     }
-
-    return nil
   }
 
-  private func validateMultipleOf(multipleOf: Double, value: Double) -> ValidationIssue.NumberIssue? {
-    value.truncatingRemainder(dividingBy: multipleOf) == 0 ? nil : .multipleOf(expected: multipleOf)
-  }
+  private func validateBoundaries(value: Double, options: NumberSchemaOptions, builder: ValidationErrorBuilder, pullback: (ValidationIssue.NumberIssue) -> ValidationIssue) {
+    let schema = JSONNumber()
 
-  private func validateBoundaries(value: Double, options: NumberSchemaOptions) -> [ValidationIssue.NumberIssue] {
-    var errors = [ValidationIssue.NumberIssue]()
+    func validateBoundary(
+      boundary: JSONValue?,
+      optionName: String,
+      onValid: (Double) -> Void
+    ) {
+      guard let boundary else { return }
 
-    // Validate minimum boundary
-    if let minimum = options.minimum {
-      switch minimum {
-      case .inclusive(let minValue):
-        if value < minValue {
-          errors.append(.minimum(isInclusive: true, expected: minValue))
-        }
-      case .exclusive(let minValue):
-        if value <= minValue {
-          errors.append(.minimum(isInclusive: false, expected: minValue))
-        }
+      switch schema.validate(boundary, against: self) {
+      case .valid(let double):
+        onValid(double)
+      case .invalid(let errors):
+        builder.addError(.invalidOption(option: optionName, issues: errors))
       }
     }
 
-    // Validate maximum boundary
-    if let maximum = options.maximum {
-      switch maximum {
-      case .inclusive(let maxValue):
-        if value > maxValue {
-          errors.append(.maximum(isInclusive: true, expected: maxValue))
-        }
-      case .exclusive(let maxValue):
-        if value >= maxValue {
-          errors.append(.maximum(isInclusive: false, expected: maxValue))
-        }
+    validateBoundary(
+      boundary: options.minimum,
+      optionName: "minimum"
+    ) { minimum in
+      if value < minimum {
+        builder.addError(pullback(.minimum(isInclusive: true, expected: minimum)))
       }
     }
 
-    return errors
+    validateBoundary(
+      boundary: options.exclusiveMinimum,
+      optionName: "exclusiveMinimum"
+    ) { minimum in
+      if value <= minimum {
+        builder.addError(pullback(.minimum(isInclusive: false, expected: minimum)))
+      }
+    }
+
+    validateBoundary(
+      boundary: options.maximum,
+      optionName: "maximum"
+    ) { maximum in
+      if value > maximum {
+        builder.addError(pullback(.maximum(isInclusive: true, expected: maximum)))
+      }
+    }
+
+    validateBoundary(
+      boundary: options.exclusiveMaximum,
+      optionName: "exclusiveMaximum"
+    ) { maximum in
+      if value >= maximum {
+        builder.addError(pullback(.maximum(isInclusive: false, expected: maximum)))
+      }
+    }
   }
 }

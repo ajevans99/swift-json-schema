@@ -20,7 +20,7 @@ public struct ObjectSchemaOptions: SchemaOptions {
 
   /// List of property keywords that are required.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/object#required)
-  public var required: [String]?
+  public var required: JSONValue?
 
   /// Schema options to validate property names against.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/object#propertyNames)
@@ -28,11 +28,11 @@ public struct ObjectSchemaOptions: SchemaOptions {
 
   /// Minimum number of properties.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/object#size)
-  public var minProperties: Int?
+  public var minProperties: JSONValue?
 
   /// Maximum number of properties.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/object#size)
-  public var maxProperties: Int?
+  public var maxProperties: JSONValue?
 
   init(
     properties: [String: Schema]? = nil,
@@ -48,10 +48,15 @@ public struct ObjectSchemaOptions: SchemaOptions {
     self.patternProperties = patternProperties
     self.additionalProperties = additionalProperties
     self.unevaluatedProperties = unevaluatedProperties
-    self.required = required
+    self.required = required.map { JSONValue($0.map { JSONValue($0) }) }
+//    self.propertyNames = propertyNames.map { stringOptions in
+//      .object([
+//        "": .null
+//      ])
+//    }
     self.propertyNames = propertyNames
-    self.minProperties = minProperties
-    self.maxProperties = maxProperties
+    self.minProperties = minProperties.map { JSONValue($0) }
+    self.maxProperties = maxProperties.map { JSONValue($0) }
   }
 
   public static func options(

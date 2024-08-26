@@ -129,7 +129,7 @@ extension JSONObject {
   /// - Returns: A new `JSONObject` with the min properties constraint set.
   public func minProperties(_ value: Int?) -> Self {
     var copy = self
-    copy.options.minProperties = value
+    copy.options.minProperties = value.map { JSONValue($0) }
     return copy
   }
 
@@ -138,7 +138,7 @@ extension JSONObject {
   /// - Returns: A new `JSONObject` with the max properties constraint set.
   public func maxProperties(_ value: Int?) -> Self {
     var copy = self
-    copy.options.maxProperties = value
+    copy.options.maxProperties = value.map { JSONValue($0) }
     return copy
   }
 }

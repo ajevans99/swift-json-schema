@@ -21,7 +21,7 @@ extension JSONString {
   /// - Returns: A new `JSONString` with the minimum length constraint set.
   public func minLength(_ length: Int?) -> Self {
     var copy = self
-    copy.options.minLength = length
+    copy.options.minLength = length.map { JSONValue($0) }
     return copy
   }
 
@@ -30,7 +30,7 @@ extension JSONString {
   /// - Returns: A new `JSONString` with the maximum length constraint set.
   public func maxLength(_ length: Int?) -> Self {
     var copy = self
-    copy.options.maxLength = length
+    copy.options.maxLength = length.map { JSONValue($0) }
     return copy
   }
 
@@ -39,7 +39,7 @@ extension JSONString {
   /// - Returns: A new `JSONString` with the pattern constraint set.
   public func pattern(_ pattern: String?) -> Self {
     var copy = self
-    copy.options.pattern = pattern
+    copy.options.pattern = pattern.map { JSONValue($0) }
     return copy
   }
 
@@ -49,7 +49,7 @@ extension JSONString {
   /// - Returns: A new `JSONString` with the format constraint set.
   public func format(_ format: String?) -> Self {
     var copy = self
-    copy.options.format = format
+    copy.options.format = format.map { JSONValue($0) }
     return copy
   }
 }

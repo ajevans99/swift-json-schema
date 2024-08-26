@@ -5,7 +5,6 @@ extension DefaultValidator {
     var builder = ValidationErrorBuilder()
 
     if let maxItems = options.maxLength {
-
     }
 
     return builder.build(for: string)
