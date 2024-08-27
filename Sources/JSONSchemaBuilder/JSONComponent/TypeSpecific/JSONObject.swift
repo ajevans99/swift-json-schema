@@ -32,7 +32,14 @@ public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
 
   public func validate(_ value: JSONValue, against validator: Validator) -> Validation<Props.Output> {
     if case .object(let dictionary) = value {
-      return validator.validate(object: dictionary, properties: properties, against: options)
+      let builder = ValidationErrorBuilder()
+      builder.addErrors(validator.validate(object: dictionary, against: options).invalid)
+      switch properties.validate(dictionary, against: validator) {
+      case .valid(let value): return builder.build(for: value)
+      case .invalid(let e):
+        builder.addErrors(e)
+        return .invalid(builder.errors)
+      }
     }
     return .error(.typeMismatch(expected: .object, actual: value))
   }

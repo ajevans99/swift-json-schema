@@ -25,7 +25,18 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
 
   public func validate(_ value: JSONValue, against validator: Validator) -> Validation<[T.Output]> {
     if case .array(let array) = value {
-      return validator.validate(array: array, items: items, against: options)
+      let builder = ValidationErrorBuilder()
+      builder.addErrors(validator.validate(array: array, against: options).invalid)
+
+      var outputs: [T.Output] = []
+      for item in array {
+        switch items.validate(item, against: validator) {
+        case .valid(let value): outputs.append(value)
+        case .invalid(let e): builder.addErrors(e)
+        }
+      }
+
+      return builder.build(for: outputs)
     }
     return .error(.typeMismatch(expected: .array, actual: value))
   }

@@ -27,7 +27,7 @@ import JSONSchema
   ) -> JSONPropertyComponents.Conditional<TrueComponent, FalseComponent> { .second(component) }
 }
 
-public protocol PropertyCollection: Sendable {
+public protocol PropertyCollection: Sendable, Equatable {
   associatedtype Output
 
   var schema: [String: Schema] { get }
@@ -38,6 +38,8 @@ public protocol PropertyCollection: Sendable {
 public struct EmptyPropertyCollection: PropertyCollection {
   public let schema: [String: Schema] = [:]
   public let requiredKeys: [String] = []
+
+  public init() {}
 
   public func validate(_ dictionary: [String: JSONValue], against validator: Validator) -> Validation<Void> { .valid(()) }
 }
@@ -80,5 +82,9 @@ public struct PropertyTuple<each Property: JSONPropertyComponent>: PropertyColle
     against validator: Validator
   ) -> Validation<(repeat (each Property).Output)> {
     zip(repeat (each property).validate(dictionary, against: validator))
+  }
+
+  public static func == (lhs: PropertyTuple<repeat each Property>, rhs: PropertyTuple<repeat each Property>) -> Bool {
+    lhs.schema == rhs.schema && lhs.requiredKeys == rhs.requiredKeys
   }
 }

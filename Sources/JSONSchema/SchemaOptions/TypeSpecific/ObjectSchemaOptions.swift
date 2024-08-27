@@ -34,6 +34,12 @@ public struct ObjectSchemaOptions: SchemaOptions {
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/object#size)
   public var maxProperties: JSONValue?
 
+  /// Conditionally requires that certain properties must be present if a given property is present in an object.
+  /// This should be an object, where each key is the property that may or may not be present in the instance
+  /// and the value if an array of properties that should be present if the key is present instance.
+  /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/conditionals#dependentRequired)
+  public var dependentRequired: JSONValue?
+
   init(
     properties: [String: Schema]? = nil,
     patternProperties: [String: Schema]? = nil,
@@ -42,7 +48,8 @@ public struct ObjectSchemaOptions: SchemaOptions {
     required: [String]? = nil,
     propertyNames: StringSchemaOptions? = nil,
     minProperties: Int? = nil,
-    maxProperties: Int? = nil
+    maxProperties: Int? = nil,
+    dependentRequired: [String: [String]]? = nil
   ) {
     let encoder = JSONValueEncoder()
 
@@ -72,6 +79,9 @@ public struct ObjectSchemaOptions: SchemaOptions {
     self.propertyNames = propertyNames.map { (try? encoder.encode($0)) ?? .null }
     self.minProperties = minProperties.map { JSONValue($0) }
     self.maxProperties = maxProperties.map { JSONValue($0) }
+    self.dependentRequired = dependentRequired.map { dictionary in
+      .object(dictionary.mapValues { JSONValue($0) })
+    }
   }
 
   public static func options(
@@ -82,7 +92,8 @@ public struct ObjectSchemaOptions: SchemaOptions {
     required: [String]? = nil,
     propertyNames: StringSchemaOptions? = nil,
     minProperties: Int? = nil,
-    maxProperties: Int? = nil
+    maxProperties: Int? = nil,
+    dependentRequired: [String: [String]]? = nil
   ) -> Self {
     self.init(
       properties: properties,
@@ -92,7 +103,8 @@ public struct ObjectSchemaOptions: SchemaOptions {
       required: required,
       propertyNames: propertyNames,
       minProperties: minProperties,
-      maxProperties: maxProperties
+      maxProperties: maxProperties,
+      dependentRequired: dependentRequired
     )
   }
 }

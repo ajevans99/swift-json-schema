@@ -204,10 +204,10 @@ struct DefaultValidatorTests {
     }
 
     @Test(arguments: [
-      ("2021-08-15", "date", true),           // Format: date
-      ("hello@example.com", "email", true),   // Format: email
-      ("http://example.com", "uri", true),    // Format: uri
-      ("abc", "unknown", true)                // Unknown format (no effect on validation)
+      ("2021-08-15", "date", true),
+      ("hello@example.com", "email", true),
+      ("http://example.com", "uri", true),
+      ("abc", "unknown", true)
     ])
     /// TODO: Allow injecting schema's to validate formats
     func formatValidation(string: String, format: String, isValid: Bool) {
@@ -218,6 +218,54 @@ struct DefaultValidatorTests {
   }
 
   struct ObjectTests {
-    
+    let validator = DefaultValidator()
+
+    @Test(arguments: [
+      (["a": JSONValue.integer(1), "b": JSONValue.integer(2)], 2, true),
+      (["a": .integer(1), "b": .integer(2), "c": .integer(3)], 2, false),
+      (["a": .integer(1)], 2, true),
+      ([:], 2, true)
+    ])
+    func validateMaxProperties(object: [String: JSONValue], maxProperties: Int, isValid: Bool) {
+      let options = ObjectSchemaOptions.options(maxProperties: maxProperties)
+      let expectedResult: Validation<[String: JSONValue]> = isValid ? .valid(object) : .error(.object(issue: .maxProperties(expected: maxProperties), actual: object))
+      #expect(validator.validate(object: object, against: options) == expectedResult)
+    }
+
+    @Test(arguments: [
+      (["a": JSONValue.integer(1), "b": JSONValue.integer(2)], 2, true),
+      (["a": .integer(1)], 2, false),
+      (["a": .integer(1), "b": .integer(2), "c": .integer(3)], 2, true),
+      ([:], 0, true)
+    ])
+    func validateMinProperties(object: [String: JSONValue], minProperties: Int, isValid: Bool) {
+      let options = ObjectSchemaOptions.options(minProperties: minProperties)
+      let expectedResult: Validation<[String: JSONValue]> = isValid ? .valid(object) : .error(.object(issue: .minProperties(expected: minProperties), actual: object))
+      #expect(validator.validate(object: object, against: options) == expectedResult)
+    }
+
+    @Test(arguments: [
+      (["a": JSONValue.integer(1), "b": JSONValue.integer(2)], ["a", "b"], []),
+      (["a": .integer(1)], ["a", "b"], ["b"]),
+      (["a": .integer(1), "b": .integer(2), "c": .integer(3)], ["a", "b"], []),
+      ([:], ["a"], ["a"])
+    ])
+    func validateRequiredProperties(object: [String: JSONValue], required: [String], missingKeys: [String]) {
+      let options = ObjectSchemaOptions.options(required: required)
+      let expectedResult: Validation<[String: JSONValue]> = missingKeys.isEmpty ? .valid(object) : .invalid(missingKeys.map { .object(issue: .required(key: $0), actual: object) })
+      #expect(validator.validate(object: object, against: options) == expectedResult)
+    }
+
+    @Test(arguments: [
+      (["creditCard": JSONValue.string("1234"), "billingAddress": JSONValue.string("123 Main St")], ["creditCard": ["billingAddress"]], []),
+      (["creditCard": .string("1234")], ["creditCard": ["billingAddress"]], ["billingAddress"]),
+      (["creditCard": .string("1234"), "billingAddress": .string("123 Main St"), "shippingAddress": .string("456 Elm St")], ["creditCard": ["billingAddress"]], []),
+      (["shippingAddress": .string("456 Elm St")], ["creditCard": ["billingAddress"]], [])
+    ])
+    func validateDependentRequired(object: [String: JSONValue], dependencies: [String: [String]], missingFields: [String]) {
+      let options = ObjectSchemaOptions.options(dependentRequired: dependencies)
+      let expectedResult: Validation<[String: JSONValue]> = missingFields.isEmpty ? .valid(object) : .invalid(missingFields.map { .object(issue: .dependentRequired(mainProperty: dependencies.keys.first!, dependentProperty: $0), actual: object)})
+      #expect(validator.validate(object: object, against: options) == expectedResult)
+    }
   }
 }

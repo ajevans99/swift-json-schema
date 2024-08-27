@@ -99,14 +99,25 @@ public enum ValidationIssue: ValidationError {
   }
 
   public enum ObjectIssue: ValidationError {
+    case maxProperties(expected: Int)
+    case minProperties(expected: Int)
+
     /// Indicates an missing required key.
     /// - Parameter key: The missing key.
     case required(key: String)
 
+    case dependentRequired(mainProperty: String, dependentProperty: String)
+
     public var description: String {
       switch self {
+      case .maxProperties(let expected):
+        "not more than \(expected) properties"
+      case .minProperties(let expected):
+        "not less than \(expected) properties"
       case .required(let key):
         "missing a required key '\(key)'"
+      case .dependentRequired(let mainProperty, let dependentProperty):
+        "missing '\(dependentProperty)' which is required when '\(mainProperty)' is present"
       }
     }
   }
@@ -140,7 +151,7 @@ extension Array where Element: ValidationError {
 }
 
 class ValidationErrorBuilder {
-  private var errors: [ValidationIssue] = []
+  var errors: [ValidationIssue] = []
 
   func addError(_ error: ValidationIssue?) {
     if let error = error {
@@ -148,8 +159,10 @@ class ValidationErrorBuilder {
     }
   }
 
-  func addErrors(_ newErrors: [ValidationIssue]) {
-    errors.append(contentsOf: newErrors)
+  func addErrors(_ newErrors: [ValidationIssue]?) {
+    if let newErrors {
+      errors.append(contentsOf: newErrors)
+    }
   }
 
   func build<T>(for value: T) -> Validation<T> {
