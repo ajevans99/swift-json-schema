@@ -1,9 +1,9 @@
 public struct StringSchemaOptions: SchemaOptions, Equatable {
-  /// Minimum length of string.The value must be a non-negative number.
+  /// Minimum length of string. The value must be a non-negative number.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/string#length)
   public var minLength: JSONValue?
 
-  /// Maximum length of string.The value must be a non-negative number.
+  /// Maximum length of string. The value must be a non-negative number.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/string#length)
   public var maxLength: JSONValue?
 
@@ -12,6 +12,7 @@ public struct StringSchemaOptions: SchemaOptions, Equatable {
   public var pattern: JSONValue?
 
   /// Allows for basic semantic identification of certain kinds of string values that are commonly used.
+  /// By default, format is just an annotation and does not effect validation.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/string#format)
   public var format: JSONValue?
 

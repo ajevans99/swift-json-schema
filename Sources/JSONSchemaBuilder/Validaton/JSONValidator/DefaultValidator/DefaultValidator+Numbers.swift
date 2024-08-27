@@ -26,16 +26,12 @@ extension DefaultValidator {
 
 extension DefaultValidator {
   private func validateMultipleOf(value: Double, options: NumberSchemaOptions, builder: ValidationErrorBuilder, pullback: (ValidationIssue.NumberIssue) -> ValidationIssue) {
-    guard let multipleOf = options.multipleOf else { return }
     let schema = JSONNumber().exclusiveMinimum(0)
 
-    switch schema.validate(multipleOf, against: self) {
-    case .valid(let multipleOf):
+    validateOption(options.multipleOf, schema: schema, name: "multipleOf", builder: builder) { multipleOf in
       if value.truncatingRemainder(dividingBy: multipleOf) != 0 {
         builder.addError(pullback(.multipleOf(expected: multipleOf)))
       }
-    case .invalid(let errors):
-      builder.addError(.invalidOption(option: "multipleOf", issues: errors))
     }
   }
 
@@ -47,14 +43,13 @@ extension DefaultValidator {
       optionName: String,
       onValid: (Double) -> Void
     ) {
-      guard let boundary else { return }
-
-      switch schema.validate(boundary, against: self) {
-      case .valid(let double):
-        onValid(double)
-      case .invalid(let errors):
-        builder.addError(.invalidOption(option: optionName, issues: errors))
-      }
+      validateOption(
+        boundary,
+        schema: schema,
+        name: optionName,
+        builder: builder,
+        onValid: onValid
+      )
     }
 
     validateBoundary(

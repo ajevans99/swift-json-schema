@@ -18,6 +18,9 @@ public enum ValidationIssue: ValidationError {
   ///  - issues: An array of ``ValidationIssue`` emitted from the metaschema that determined this option was invalid.
   case invalidOption(option: String, issues: [ValidationIssue])
 
+  /// The default error used when ``JSONSchemaComponents/compactMap(_:)`` transform returns `nil` value.
+  case compactMapTranformNil
+
   /// Indicates a validation issue for a number.
   /// - Parameters:
   ///   - issue: The type of number issue.
@@ -29,6 +32,8 @@ public enum ValidationIssue: ValidationError {
   ///   - issue: The type of number issue.
   ///   - actual: The actual value encountered.
   case integer(issue: NumberIssue, actual: Int)
+
+  case string(issue: StringIssue, actual: String)
 
   case temporary(String)
 
@@ -61,6 +66,27 @@ public enum ValidationIssue: ValidationError {
     }
   }
 
+  public enum StringIssue: ValidationError {
+    case minLength(expected: Int)
+    case maxLength(expected: Int)
+    case pattern(expected: String)
+    /// Indicates an invalid regular expression was used
+    case invalidRegularExpression
+
+    public var description: String {
+      switch self {
+      case .minLength(let expected):
+        "less than \(expected) characters"
+      case .maxLength(let expected):
+        "more than \(expected) characters"
+      case .pattern(let expected):
+        "does not match pattern '\(expected)'"
+      case .invalidRegularExpression:
+        "is not a valid regular expression"
+      }
+    }
+  }
+
   public var description: String {
     switch self {
     case let .typeMismatch(expected, actual):
@@ -71,6 +97,10 @@ public enum ValidationIssue: ValidationError {
       "Value '\(actual)' is not \(issue)."
     case let .integer(issue, actual):
       "Value '\(actual)' is not \(issue)."
+    case let .string(issue, actual):
+      "Value '\(actual)' is not \(issue)."
+    case .compactMapTranformNil:
+      "The compact map transform function returned nil."
     case let .temporary(string):
       string
     }
