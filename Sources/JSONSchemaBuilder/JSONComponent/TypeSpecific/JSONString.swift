@@ -10,7 +10,7 @@ public struct JSONString: JSONSchemaComponent {
   public init() {}
 
   public func validate(_ value: JSONValue, against validator: Validator) -> Validation<String> {
-    if case .string(let string) = value { return .valid(string) }
+    if case .string(let string) = value { return validator.validate(string: string, against: options) }
     return .error(.typeMismatch(expected: .string, actual: value))
   }
 }

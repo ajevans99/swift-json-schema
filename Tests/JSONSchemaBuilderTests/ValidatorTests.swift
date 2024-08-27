@@ -216,4 +216,8 @@ struct DefaultValidatorTests {
       #expect(validator.validate(string: string, against: options) == expectedResult)
     }
   }
+
+  struct ObjectTests {
+    
+  }
 }

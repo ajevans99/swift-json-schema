@@ -33,7 +33,17 @@ public enum ValidationIssue: ValidationError {
   ///   - actual: The actual value encountered.
   case integer(issue: NumberIssue, actual: Int)
 
+  /// Indicates a validation issue for a string.
+  /// - Parameters:
+  ///  - issue: The type of string issue.
+  ///  - actual: The actual value encountered.
   case string(issue: StringIssue, actual: String)
+
+  /// Indicates a validation issue for an object.
+  /// - Parameters:
+  ///   - issue: The type of object issue.
+  ///   - actual: The actual value encountered.
+  case object(issue: ObjectIssue, actual: [String: JSONValue])
 
   case temporary(String)
 
@@ -57,11 +67,11 @@ public enum ValidationIssue: ValidationError {
     public var description: String {
       switch self {
       case .multipleOf(let expected):
-        "a multiple of \(expected)"
+        "not a multiple of \(expected)"
       case .minimum(let isInclusive, let expected):
-        isInclusive ? "greater than or equal to \(expected)" : "greater than \(expected)"
+        isInclusive ? "not greater than or equal to \(expected)" : "not greater than \(expected)"
       case .maximum(let isInclusive, let expected):
-        isInclusive ? "less than or equal to \(expected)" : "less than \(expected)"
+        isInclusive ? "not less than or equal to \(expected)" : "not less than \(expected)"
       }
     }
   }
@@ -70,19 +80,33 @@ public enum ValidationIssue: ValidationError {
     case minLength(expected: Int)
     case maxLength(expected: Int)
     case pattern(expected: String)
-    /// Indicates an invalid regular expression was used
+
+    /// Indicates an invalid regular expression was used.
     case invalidRegularExpression
 
     public var description: String {
       switch self {
       case .minLength(let expected):
-        "less than \(expected) characters"
+        "not less than \(expected) characters"
       case .maxLength(let expected):
-        "more than \(expected) characters"
+        "not more than \(expected) characters"
       case .pattern(let expected):
-        "does not match pattern '\(expected)'"
+        "not does not match pattern '\(expected)'"
       case .invalidRegularExpression:
-        "is not a valid regular expression"
+        "not a valid regular expression"
+      }
+    }
+  }
+
+  public enum ObjectIssue: ValidationError {
+    /// Indicates an missing required key.
+    /// - Parameter key: The missing key.
+    case required(key: String)
+
+    public var description: String {
+      switch self {
+      case .required(let key):
+        "missing a required key '\(key)'"
       }
     }
   }
@@ -94,11 +118,13 @@ public enum ValidationIssue: ValidationError {
     case let .invalidOption(option, issues):
       "Schema option '\(option)' does not meet validation requirements. \(issues.description)."
     case let .number(issue, actual):
-      "Value '\(actual)' is not \(issue)."
+      "Value '\(actual)' is \(issue)."
     case let .integer(issue, actual):
-      "Value '\(actual)' is not \(issue)."
+      "Value '\(actual)' is \(issue)."
     case let .string(issue, actual):
-      "Value '\(actual)' is not \(issue)."
+      "Value '\(actual)' is \(issue)."
+    case let .object(issue, actual):
+      "Value '\(actual)' is \(issue)."
     case .compactMapTranformNil:
       "The compact map transform function returned nil."
     case let .temporary(string):

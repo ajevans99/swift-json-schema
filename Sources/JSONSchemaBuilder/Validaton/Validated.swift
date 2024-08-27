@@ -6,7 +6,7 @@ public enum Validated<Value, Error> {
   case valid(Value)
   case invalid([Error])
 
-  static func error(_ error: Error) -> Self { .invalid([error]) }
+  public static func error(_ error: Error) -> Self { .invalid([error]) }
 
   public var valid: Value? {
     if case .valid(let value) = self { return value }

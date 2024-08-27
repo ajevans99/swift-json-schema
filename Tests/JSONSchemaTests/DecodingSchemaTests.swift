@@ -372,7 +372,7 @@ struct DecodingSchemaTests {
     // Dynamic member lookup
     #expect(schema.type == .object)
     let objectOptions: ObjectSchemaOptions = try #require(schema.options?.asType())
-    #expect(objectOptions.properties == ["name": .string()])
+    #expect(objectOptions.properties == JSONValue(["name": Schema.string()]))
   }
 }
 

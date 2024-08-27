@@ -36,13 +36,15 @@ public struct JSONProperty<Value: JSONSchemaComponent>: JSONPropertyComponent {
   }
 
   public func validate(_ input: [String: JSONValue], against validator: Validator) -> Validation<Value.Output?> {
-    if let jsonValue = input[key] { return value.validate(jsonValue, against: validator).map(Optional.some) }
+    if let jsonValue = input[key] {
+      return value.validate(jsonValue, against: validator).map(Optional.some)
+    }
     return .valid(nil)
   }
 
   /// By default, a property is not required and will validate as `.valid(nil)` if the key is not present in the input value.
   /// This method will mark the property as required and will validate as `.error` if the key is not present in the input value.
-  public func required() -> JSONPropertyComponents.CompactMap<Self, Value.Output> {
-    self.compactMap { $0 }  // CompactMap type will also wrap property as `isRequired = true`
+  public func required() -> JSONPropertyComponents.RequiredProperty<Self, Value.Output> {
+    .init(upstream: self, transform: { $0 })
   }
 }

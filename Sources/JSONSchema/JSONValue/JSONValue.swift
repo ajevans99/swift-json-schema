@@ -76,4 +76,8 @@ public extension JSONValue {
   init(_ bool: Bool) {
     self = .boolean(bool)
   }
+
+  init(_ encodable: Codable, encoder: JSONValueEncoder = .init()) {
+    self = (try? encoder.encode(encodable)) ?? .null
+  }
 }

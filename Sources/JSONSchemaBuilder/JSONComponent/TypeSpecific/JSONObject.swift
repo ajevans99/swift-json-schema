@@ -44,7 +44,7 @@ extension JSONObject {
   /// - Returns: A new `JSONObject` with the property names set.
   public func patternProperties(_ patternProperties: [String: Schema]?) -> Self {
     var copy = self
-    copy.options.patternProperties = patternProperties
+    copy.options.patternProperties = patternProperties.map { JSONValue($0) }
     return copy
   }
 
@@ -60,7 +60,7 @@ extension JSONObject {
   /// - Returns: A new `JSONObject` with the additional properties set.
   public func additionalProperties(_ addionalProperties: SchemaControlOption?) -> Self {
     var copy = self
-    copy.options.additionalProperties = addionalProperties
+    copy.options.additionalProperties = addionalProperties.map { JSONValue($0) }
     return copy
   }
 
@@ -99,7 +99,7 @@ extension JSONObject {
   /// - Returns: A new `JSONObject` with the unevaluated properties set.
   public func unevaluatedProperties(_ unevaluatedProperties: SchemaControlOption?) -> Self {
     var copy = self
-    copy.options.unevaluatedProperties = unevaluatedProperties
+    copy.options.unevaluatedProperties = unevaluatedProperties.map { JSONValue($0) }
     return copy
   }
 
@@ -119,7 +119,7 @@ extension JSONObject {
   /// - Returns: A new `JSONObject` with the property names set.
   public func propertyNames(_ option: StringSchemaOptions?) -> Self {
     var copy = self
-    copy.options.propertyNames = option
+    copy.options.propertyNames = option.map { JSONValue($0) }
     return copy
   }
 
