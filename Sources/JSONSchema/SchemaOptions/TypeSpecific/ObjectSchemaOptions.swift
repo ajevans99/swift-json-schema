@@ -53,35 +53,15 @@ public struct ObjectSchemaOptions: SchemaOptions {
   ) {
     let encoder = JSONValueEncoder()
 
-    self.properties = properties.map { dictionary in
-      .object(dictionary.compactMapValues { try? encoder.encode($0) })
-    }
-    self.patternProperties = patternProperties.map { dictionary in
-      .object(dictionary.compactMapValues { try? encoder.encode($0) })
-    }
-    self.additionalProperties = additionalProperties.map { option in
-      switch option {
-      case .disabled:
-        return .boolean(false)
-      case .schema(let schema):
-        return (try? encoder.encode(schema)) ?? .null
-      }
-    }
-    self.unevaluatedProperties = unevaluatedProperties.map { option in
-      switch option {
-      case .disabled:
-        return .boolean(false)
-      case .schema(let schema):
-        return (try? encoder.encode(schema)) ?? .null
-      }
-    }
-    self.required = required.map { .array($0.map { JSONValue($0) }) }
-    self.propertyNames = propertyNames.map { (try? encoder.encode($0)) ?? .null }
+    self.properties = properties.map { JSONValue($0, encoder: encoder) }
+    self.patternProperties = patternProperties.map { JSONValue($0, encoder: encoder) }
+    self.additionalProperties = additionalProperties.map { JSONValue($0, encoder: encoder) }
+    self.unevaluatedProperties = unevaluatedProperties.map { JSONValue($0, encoder: encoder) }
+    self.required = required.map { JSONValue($0, encoder: encoder) }
+    self.propertyNames = propertyNames.map { JSONValue($0, encoder: encoder) }
     self.minProperties = minProperties.map { JSONValue($0) }
     self.maxProperties = maxProperties.map { JSONValue($0) }
-    self.dependentRequired = dependentRequired.map { dictionary in
-      .object(dictionary.mapValues { JSONValue($0) })
-    }
+    self.dependentRequired = dependentRequired.map { JSONValue($0, encoder: encoder) }
   }
 
   public static func options(

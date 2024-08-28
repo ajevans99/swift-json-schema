@@ -132,13 +132,13 @@ public struct Schema: Sendable {
   public let annotations: AnnotationOptions
 
   /// An array of possible values for the schema.
-  /// TODO: Use `OrderedSet` from `swift-collections` to ensure uniqueness
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/enum)
   public var enumValues: [JSONValue]?
 
   /// Composition options for the schema.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/combining)
   public let composition: CompositionOptions?
+
   /// A single value that the schema must match.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/const#constant-values)
   public let const: JSONValue?

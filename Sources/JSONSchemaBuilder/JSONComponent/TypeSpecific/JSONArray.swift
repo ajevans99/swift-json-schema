@@ -1,34 +1,34 @@
 import JSONSchema
 
 /// A JSON array type component for use in ``JSONSchemaBuilder``.
-public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
+public struct JSONArray<Items: JSONSchemaComponent>: JSONSchemaComponent {
   public var annotations: AnnotationOptions = .annotations()
   var options: ArraySchemaOptions
 
   public var definition: Schema { .array(annotations, options) }
 
-  let items: T
+  let items: Items
 
   /// Creates a new JSON array schema component.
   /// - Parameter items: A JSON schema component for validating each item in the array.
-  public init(@JSONSchemaBuilder items: () -> T) {
+  public init(@JSONSchemaBuilder items: () -> Items) {
     self.items = items()
     self.options = .options(items: .schema(self.items.definition))
   }
 
   /// Creates a new JSON array schema component.
   /// - Parameter disableItems: A boolean value that disallows items in the array.
-  public init(disableItems: Bool = false) where T == JSONAnyValue {
+  public init(disableItems: Bool = false) where Items == JSONAnyValue {
     self.items = JSONAnyValue()
     self.options = disableItems ? .options(items: .disabled) : .options()
   }
 
-  public func validate(_ value: JSONValue, against validator: Validator) -> Validation<[T.Output]> {
+  public func validate(_ value: JSONValue, against validator: Validator) -> Validation<[Items.Output]> {
     if case .array(let array) = value {
       let builder = ValidationErrorBuilder()
       builder.addErrors(validator.validate(array: array, against: options).invalid)
 
-      var outputs: [T.Output] = []
+      var outputs: [Items.Output] = []
       for item in array {
         switch items.validate(item, against: validator) {
         case .valid(let value): outputs.append(value)
@@ -48,7 +48,7 @@ extension JSONArray {
   /// - Returns: A new `JSONArray` with the prefix items set.
   public func prefixItems(_ prefixItems: [Schema]?) -> Self {
     var copy = self
-    copy.options.prefixItems = prefixItems
+    copy.options.prefixItems = prefixItems.map { JSONValue($0) }
     return copy
   }
 
@@ -66,7 +66,7 @@ extension JSONArray {
   /// - Returns: A new `JSONArray` with the unevaluated items set.
   public func unevaluatedItems(_ unevaluatedItems: SchemaControlOption? = nil) -> Self {
     var copy = self
-    copy.options.unevaluatedItems = unevaluatedItems
+    copy.options.unevaluatedItems = unevaluatedItems.map { JSONValue($0) }
     return copy
   }
 
@@ -86,7 +86,7 @@ extension JSONArray {
   /// - Returns: A new `JSONArray` with the `contains` schema set.
   public func contains(_ contains: Schema?) -> Self {
     var copy = self
-    copy.options.contains = contains
+    copy.options.contains = contains.map { JSONValue($0) }
     return copy
   }
 
@@ -102,7 +102,7 @@ extension JSONArray {
   /// - Returns: A new `JSONArray` with the minimum number of `contains` set.
   public func minContains(_ minContains: Int?) -> Self {
     var copy = self
-    copy.options.minContains = minContains
+    copy.options.minContains = minContains.map { JSONValue($0) }
     return copy
   }
 
@@ -111,7 +111,7 @@ extension JSONArray {
   /// - Returns: A new `JSONArray` with the maximum number of `contains` set.
   public func maxContains(_ maxContains: Int?) -> Self {
     var copy = self
-    copy.options.maxContains = maxContains
+    copy.options.maxContains = maxContains.map { JSONValue($0) }
     return copy
   }
 
@@ -120,7 +120,7 @@ extension JSONArray {
   /// - Returns: A new `JSONArray` with the minimum number of items set.
   public func minItems(_ minItems: Int?) -> Self {
     var copy = self
-    copy.options.minItems = minItems
+    copy.options.minItems = minItems.map { JSONValue($0) }
     return copy
   }
 
@@ -129,15 +129,15 @@ extension JSONArray {
   /// - Returns: A new `JSONArray` with the maximum number of items set.
   public func maxItems(_ maxItems: Int?) -> Self {
     var copy = self
-    copy.options.maxItems = maxItems
+    copy.options.maxItems = maxItems.map { JSONValue($0) }
     return copy
   }
 
   /// Ensures that each item in the array is unique.
   /// - Returns: A new `JSONArray` with the unique items constraint set.
-  public func uniqueItems(_ value: Bool = true) -> Self {
+  public func uniqueItems(_ value: Bool? = true) -> Self {
     var copy = self
-    copy.options.uniqueItems = value
+    copy.options.uniqueItems = value.map { JSONValue($0) }
     return copy
   }
 }

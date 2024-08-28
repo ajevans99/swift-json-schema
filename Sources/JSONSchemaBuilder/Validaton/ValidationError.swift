@@ -45,6 +45,8 @@ public enum ValidationIssue: ValidationError {
   ///   - actual: The actual value encountered.
   case object(issue: ObjectIssue, actual: [String: JSONValue])
 
+  case array(issue: ArrayIssue, actual: [JSONValue])
+
   case temporary(String)
 
   public enum NumberIssue: ValidationError {
@@ -111,13 +113,36 @@ public enum ValidationIssue: ValidationError {
     public var description: String {
       switch self {
       case .maxProperties(let expected):
-        "not more than \(expected) properties"
-      case .minProperties(let expected):
         "not less than \(expected) properties"
+      case .minProperties(let expected):
+        "not more than \(expected) properties"
       case .required(let key):
         "missing a required key '\(key)'"
       case .dependentRequired(let mainProperty, let dependentProperty):
         "missing '\(dependentProperty)' which is required when '\(mainProperty)' is present"
+      }
+    }
+  }
+
+  public enum ArrayIssue: ValidationError {
+    case maxItems(expected: Int)
+    case minItems(expected: Int)
+    case uniqueItems(duplicate: JSONValue)
+    case maxContains(expected: Int)
+    case minContains(expected: Int)
+
+    public var description: String {
+      switch self {
+      case .maxItems(let expected):
+        "not less than \(expected) items in size"
+      case .minItems(let expected):
+        "not more than \(expected) item in size"
+      case .uniqueItems(let duplicate):
+        "not unique, '\(duplicate)' occurs more than once"
+      case .maxContains(let expected):
+        "idk"
+      case .minContains(let expected):
+        "idk"
       }
     }
   }
@@ -136,6 +161,8 @@ public enum ValidationIssue: ValidationError {
       "Value '\(actual)' is \(issue)."
     case let .object(issue, actual):
       "Value '\(actual)' is \(issue)."
+    case let .array(issue, actual):
+      "Value '\(actual)' is \(issue)"
     case .compactMapTranformNil:
       "The compact map transform function returned nil."
     case let .temporary(string):

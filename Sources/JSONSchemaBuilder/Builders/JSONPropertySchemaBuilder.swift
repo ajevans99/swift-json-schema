@@ -27,7 +27,7 @@ import JSONSchema
   ) -> JSONPropertyComponents.Conditional<TrueComponent, FalseComponent> { .second(component) }
 }
 
-public protocol PropertyCollection: Sendable, Equatable {
+public protocol PropertyCollection<Output>: Sendable, Equatable {
   associatedtype Output
 
   var schema: [String: Schema] { get }

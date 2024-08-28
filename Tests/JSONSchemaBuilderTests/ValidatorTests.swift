@@ -268,4 +268,44 @@ struct DefaultValidatorTests {
       #expect(validator.validate(object: object, against: options) == expectedResult)
     }
   }
+
+  struct ArrayTests {
+    let validator = DefaultValidator()
+
+    @Test(arguments: [
+      ([JSONValue.integer(1), JSONValue.integer(2)], 3, true),
+      ([.integer(1), .integer(2), .integer(3)], 2, false),
+      ([.integer(1)], 2, true),
+      ([], 0, true)
+    ])
+    func validateMaxItems(array: [JSONValue], maxItems: Int, isValid: Bool) {
+      let options = ArraySchemaOptions.options(maxItems: maxItems)
+      let expectedResult: Validation<[JSONValue]> = isValid ? .valid(array) : .invalid([.array(issue: .maxItems(expected: maxItems), actual: array)])
+      #expect(validator.validate(array: array, against: options) == expectedResult)
+    }
+
+    @Test(arguments: [
+      ([JSONValue.integer(1), JSONValue.integer(2)], 2, true),
+      ([.integer(1)], 2, false),
+      ([.integer(1), .integer(2), .integer(3)], 1, true),
+      ([], 0, true)
+    ])
+    func validateMinItems(array: [JSONValue], minItems: Int, isValid: Bool) {
+      let options = ArraySchemaOptions.options(minItems: minItems)
+      let expectedResult: Validation<[JSONValue]> = isValid ? .valid(array) : .invalid([.array(issue: .minItems(expected: minItems), actual: array)])
+      #expect(validator.validate(array: array, against: options) == expectedResult)
+    }
+
+    @Test(arguments: [
+      ([JSONValue.integer(1), JSONValue.integer(2)], true, true),
+      ([.integer(1), .integer(1)], true, false),
+      ([.integer(1), .integer(2), .integer(1)], true, false),
+      ([.integer(1), .integer(2)], false, true)
+    ])
+    func validateUniqueItems(array: [JSONValue], uniqueItems: Bool, isValid: Bool) {
+      let options = ArraySchemaOptions.options(uniqueItems: uniqueItems)
+      let expectedResult: Validation<[JSONValue]> = isValid ? .valid(array) : .invalid([.array(issue: .uniqueItems(duplicate: .integer(1)), actual: array)])
+      #expect(validator.validate(array: array, against: options) == expectedResult)
+    }
+  }
 }
