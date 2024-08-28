@@ -45,7 +45,6 @@ class JSONKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
 
   func encodeNil(forKey key: K) throws {
     dictionary[key.stringValue] = .null
-
   }
 
   func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type, forKey key: K) -> KeyedEncodingContainer<NestedKey> where NestedKey : CodingKey {
@@ -105,20 +104,20 @@ class JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
   func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type) -> KeyedEncodingContainer<NestedKey> where NestedKey: CodingKey {
     let nestedEncoder = JSONValueEncoder()
     let nestedContainer = JSONKeyedEncodingContainer<NestedKey>(encoder: nestedEncoder)
-    array.append(.object(nestedContainer.dictionary))  // Append the empty dictionary to the array
+    array.append(.object(nestedContainer.dictionary))
     return KeyedEncodingContainer(nestedContainer)
   }
 
   func nestedUnkeyedContainer() -> UnkeyedEncodingContainer {
     let nestedEncoder = JSONValueEncoder()
     let nestedContainer = JSONUnkeyedEncodingContainer(encoder: nestedEncoder)
-    array.append(.array(nestedContainer.array))  // Append the empty array to the parent array
+    array.append(.array(nestedContainer.array))
     return nestedContainer
   }
 
   func superEncoder() -> Encoder {
     let superEncoder = JSONValueEncoder()
-    array.append(.object([:]))  // Append an empty object to the array for the superclass
+    array.append(.object([:]))
     return superEncoder
   }
 
@@ -192,14 +191,8 @@ struct JSONSingleValueEncodingContainer: SingleValueEncodingContainer {
   }
 
   mutating func encode<T>(_ value: T) throws where T: Encodable {
-    if let jsonValue = value as? JSONValue {
-      // If the value is already a JSONValue, store it directly
-      encoder.result = jsonValue
-    } else {
-      // For other types, fallback to regular encoding
-      let jsonEncoder = JSONValueEncoder()
-      try value.encode(to: jsonEncoder)
-      encoder.result = jsonEncoder.result
-    }
+    let jsonEncoder = JSONValueEncoder()
+    try value.encode(to: jsonEncoder)
+    encoder.result = jsonEncoder.result
   }
 }
