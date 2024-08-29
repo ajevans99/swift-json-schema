@@ -516,3 +516,71 @@ print("Actual result:", result)
 
 // Assertions (useful for automated testing)
 assert(result == expectedResult, "Test failed: Expected \(expectedResult) but got \(result)")
+
+let nestedSchema = JSONObject()
+
+let schemaArray = JSONArray {
+  nestedSchema
+}
+.minItems(1)
+
+let applicatorVocabulary = JSONObject {
+  JSONProperty(key: "prefixItems") {
+    schemaArray
+  }
+  JSONProperty(key: "items", value: nestedSchema)
+  JSONProperty(key: "contains", value: nestedSchema)
+  JSONProperty(key: "additionalProperties", value: nestedSchema)
+  JSONProperty(key: "properties") {
+    JSONObject {
+      JSONProperty(key: "additionalProperties", value: nestedSchema)
+    }
+    .default([:])
+  }
+  JSONProperty(key: "patternProperties") {
+    JSONObject()
+      .propertyNames(.options(format: "regex"))
+      .additionalProperties { nestedSchema }
+      .default([:])
+  }
+  JSONProperty(key: "dependentSchemas") {
+    JSONObject()
+      .additionalProperties { nestedSchema }
+      .default([:])
+  }
+  JSONProperty(key: "propetyNames", value: nestedSchema)
+  JSONProperty(key: "allof", value: schemaArray)
+  JSONProperty(key: "anyOf", value: schemaArray)
+  JSONProperty(key: "oneOf", value: schemaArray)
+  JSONProperty(key: "not", value: nestedSchema)
+}
+.title("Applicator vocabulary")
+
+let simpleTypes = JSONAnyValue()
+  .enumValues {
+    "array"
+    "boolean"
+    "integer"
+    "null"
+    "number"
+    "object"
+    "string"
+  }
+
+let validationVocaabulary = JSONObject {
+  JSONProperty(key: "type") {
+    simpleTypes
+  }
+  JSONProperty(key: "const")
+  JSONProperty(key: "enum") {
+    JSONArray()
+  }
+//  JSONProperty
+}
+.title("Validation vocabulary meta-schema")
+
+//let metaSchema = JSONSchema(Schema.object) {
+//  JSONObject {
+//    applicatorVocabulary
+//  }
+//}
