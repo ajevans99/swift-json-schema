@@ -13,18 +13,27 @@ extension Schema: Equatable {
   public static func == (lhs: Schema, rhs: Schema) -> Bool {
     guard lhs.type == rhs.type else { return false }
 
-    // FIXME: Is there a more elegant way to do this? Type erasure makes equatable difficult
-    let areOptionsMatching =
-      switch lhs.type {
+    func areOptionsMatching(for primative: JSONPrimative) -> Bool {
+      switch primative {
       case .array: areOptionsEqual(lhs.options, rhs.options, as: ArraySchemaOptions.self)
       case .number: areOptionsEqual(lhs.options, rhs.options, as: NumberSchemaOptions.self)
       case .object: areOptionsEqual(lhs.options, rhs.options, as: ObjectSchemaOptions.self)
       case .string: areOptionsEqual(lhs.options, rhs.options, as: StringSchemaOptions.self)
-      case .boolean, .integer, .null, .none: true
+      case .boolean, .integer, .null: true
       }
+    }
+
+    let optionsMatch = switch lhs.type {
+    case .single(let primative):
+      areOptionsMatching(for: primative)
+    case .array(let primatives):
+      primatives.allSatisfy(areOptionsMatching(for:))
+    case .none:
+      true
+    }
 
     return lhs.type == rhs.type && lhs.annotations == rhs.annotations
       && lhs.enumValues == rhs.enumValues && lhs.composition == rhs.composition
-      && areOptionsMatching
+      && optionsMatch
   }
 }

@@ -25,7 +25,7 @@
 /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/about)
 ///
 /// - SeeAlso: ``Schema``
-@dynamicMemberLookup public struct RootSchema: Equatable, Sendable {
+@dynamicMemberLookup public struct RootSchema: Equatable, Sendable, JSONSchemaValidatable {
   /// An optional identifier for the schema. When serialized, this will appear as `$id`.
   /// The `$id` keyword is used to define a base URI for the schema. This base URI is used to resolve relative URIs within the schema.
   /// An example value is `/schemas/address` (relative) or `https://example.com/schemas/address` (absolute)
@@ -119,7 +119,7 @@
 /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/about)
 ///
 /// - SeeAlso: ``RootSchema``
-public struct Schema: Sendable {
+public struct Schema: Sendable, JSONSchemaValidatable {
   /// Specifies the data type for the schema.
   /// Optional to support schemas that are not tied to a specific type.
   public let type: JSONType?
@@ -132,13 +132,13 @@ public struct Schema: Sendable {
   public let annotations: AnnotationOptions
 
   /// An array of possible values for the schema.
-  /// TODO: Use `OrderedSet` from `swift-collections` to ensure uniqueness
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/enum)
   public var enumValues: [JSONValue]?
 
   /// Composition options for the schema.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/combining)
   public let composition: CompositionOptions?
+
   /// A single value that the schema must match.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/const#constant-values)
   public let const: JSONValue?
@@ -158,7 +158,7 @@ public struct Schema: Sendable {
     composition: CompositionOptions? = nil
   ) -> Schema {
     .init(
-      type: .string,
+      type: .single(.string),
       options: options.eraseToAnySchemaOptions(),
       annotations: annotations,
       enumValues: enumValues,
@@ -182,7 +182,7 @@ public struct Schema: Sendable {
     composition: CompositionOptions? = nil
   ) -> Schema {
     .init(
-      type: .integer,
+      type: .single(.integer),
       options: options.eraseToAnySchemaOptions(),
       annotations: annotations,
       enumValues: enumValues,
@@ -206,7 +206,7 @@ public struct Schema: Sendable {
     composition: CompositionOptions? = nil
   ) -> Schema {
     .init(
-      type: .number,
+      type: .single(.number),
       options: options.eraseToAnySchemaOptions(),
       annotations: annotations,
       enumValues: enumValues,
@@ -230,7 +230,7 @@ public struct Schema: Sendable {
     composition: CompositionOptions? = nil
   ) -> Schema {
     .init(
-      type: .object,
+      type: .single(.object),
       options: options.eraseToAnySchemaOptions(),
       annotations: annotations,
       enumValues: enumValues,
@@ -254,7 +254,7 @@ public struct Schema: Sendable {
     composition: CompositionOptions? = nil
   ) -> Schema {
     .init(
-      type: .array,
+      type: .single(.array),
       options: options.eraseToAnySchemaOptions(),
       annotations: annotations,
       enumValues: enumValues,
@@ -276,7 +276,7 @@ public struct Schema: Sendable {
     composition: CompositionOptions? = nil
   ) -> Schema {
     .init(
-      type: .boolean,
+      type: .single(.boolean),
       options: nil,
       annotations: annotations,
       enumValues: enumValues,
@@ -298,7 +298,7 @@ public struct Schema: Sendable {
     composition: CompositionOptions? = nil
   ) -> Schema {
     .init(
-      type: .null,
+      type: .single(.null),
       options: nil,
       annotations: annotations,
       enumValues: enumValues,
@@ -348,15 +348,59 @@ public struct Schema: Sendable {
   public static func const(
     _ annotations: AnnotationOptions = .annotations(),
     _ value: JSONValue,
-    type: JSONType? = nil
+    type: JSONPrimative? = nil
   ) -> Schema {
     .init(
-      type: type,
+      type: type.map { .single($0) },
       options: nil,
       annotations: annotations,
       enumValues: nil,
       composition: nil,
       const: value
     )
+  }
+}
+
+public enum SchemaOrBool: JSONSchemaValidatable {
+  case schema(Schema)
+  case boolean(Bool)
+
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.singleValueContainer()
+
+    if let boolValue = try? container.decode(Bool.self) {
+      self = .boolean(boolValue)
+    } else if let schemaValue = try? container.decode(Schema.self) {
+      self = .schema(schemaValue)
+    } else {
+      throw DecodingError.typeMismatch(SchemaOrBool.self, DecodingError.Context(
+        codingPath: decoder.codingPath,
+        debugDescription: "Expected either a boolean or an object representing a schema."
+      ))
+    }
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+
+    switch self {
+    case .boolean(let boolValue):
+      try container.encode(boolValue)
+    case .schema(let schemaValue):
+      try container.encode(schemaValue)
+    }
+  }
+
+  public func validate(_ instance: JSONValue) -> [ValidationIssue]? {
+    switch self {
+    case .boolean(let boolValue):
+      if boolValue {
+        return nil  // `true` means the instance is valid
+      } else {
+        return [.schemaDisallowedAllValues]
+      }
+    case .schema(let schemaValue):
+      return schemaValue.validate(instance)
+    }
   }
 }

@@ -23,4 +23,23 @@ public enum JSONValue: Hashable, Equatable, Sendable { case string(String)
   case array([Self])
   case boolean(Bool)
   case null
+
+  var type: JSONPrimative {
+    switch self {
+    case .string:
+      .string
+    case .number:
+      .number
+    case .integer:
+      .integer
+    case .object:
+      .object
+    case .array:
+      .array
+    case .boolean:
+      .boolean
+    case .null:
+      .null
+    }
+  }
 }

@@ -19,28 +19,43 @@ public struct AnySchemaOptions: Encodable, Sendable {
   public init?(from decoder: Decoder, typeHint: JSONType) throws {
     let container = try decoder.singleValueContainer()
 
+    func options(for primative: JSONPrimative) -> (any SchemaOptions)? {
+      switch primative {
+      case .string:
+        if let value = try? container.decode(StringSchemaOptions.self) {
+          return value
+        }
+      case .number:
+        if let value = try? container.decode(NumberSchemaOptions.self) {
+          return value
+        }
+      case .object:
+        if let value = try? container.decode(ObjectSchemaOptions.self) {
+          return value
+        }
+      case .array:
+        if let value = try? container.decode(ArraySchemaOptions.self) {
+          return value
+        }
+      case .integer, .boolean, .null: break
+      }
+
+      return nil
+    }
+
     switch typeHint {
-    case .string:
-      if let value = try? container.decode(StringSchemaOptions.self) {
-        self.value = value
+    case .single(let primative):
+      if let options = options(for: primative) {
+        self.value = options
         return
       }
-    case .number:
-      if let value = try? container.decode(NumberSchemaOptions.self) {
-        self.value = value
-        return
+    case .array(let primatives):
+      for primative in primatives {
+        if let options = options(for: primative) {
+          self.value = options
+          return
+        }
       }
-    case .object:
-      if let value = try? container.decode(ObjectSchemaOptions.self) {
-        self.value = value
-        return
-      }
-    case .array:
-      if let value = try? container.decode(ArraySchemaOptions.self) {
-        self.value = value
-        return
-      }
-    case .integer, .boolean, .null: break
     }
 
     return nil

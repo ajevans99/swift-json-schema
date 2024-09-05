@@ -40,7 +40,7 @@ struct SchemaEquatableTests {
   @Test func inconguentOptions() {
     #expect(
       Schema(
-        type: .object,
+        type: .single(.object),
         options: nil,
         annotations: .annotations(),
         enumValues: nil,
@@ -48,7 +48,7 @@ struct SchemaEquatableTests {
         const: nil
       )
         != Schema(
-          type: .object,
+          type: .single(.object),
           options: ObjectSchemaOptions().eraseToAnySchemaOptions(),
           annotations: .annotations(),
           enumValues: nil,

@@ -4,7 +4,7 @@ import Testing
 @testable import JSONSchema
 
 struct DecodingSchemaTests {
-  static let typeMapper: @Sendable (JSONType) -> String = { (type: JSONType) in
+  static let typeMapper: @Sendable (JSONPrimative) -> String = { (type: JSONPrimative) in
     """
     {
       "type" : "\(type.rawValue)"
@@ -13,13 +13,13 @@ struct DecodingSchemaTests {
   }
   @Test(arguments: arguments(stringBuilder: typeMapper)) func type(
     json: String,
-    type: JSONType
+    type: JSONPrimative
   ) throws {
     let schema = try Schema(json: json)
-    #expect(schema.type == type)
+    #expect(schema.type == .single(type))
   }
 
-  static let titleMapper: @Sendable (JSONType) -> String = { (type: JSONType) in
+  static let titleMapper: @Sendable (JSONPrimative) -> String = { (type: JSONPrimative) in
     """
     {
       "title": "Hello",
@@ -29,13 +29,13 @@ struct DecodingSchemaTests {
   }
   @Test(.tags(.annotations), arguments: arguments(stringBuilder: titleMapper)) func title(
     json: String,
-    type: JSONType
+    type: JSONPrimative
   ) throws {
     let schema = try Schema(json: json)
     #expect(schema.annotations.title == "Hello")
   }
 
-  static let annotationsMapper: @Sendable (JSONType) -> String = { (type: JSONType) in
+  static let annotationsMapper: @Sendable (JSONPrimative) -> String = { (type: JSONPrimative) in
     """
     {
       "$comment" : "Comment",
@@ -63,7 +63,7 @@ struct DecodingSchemaTests {
     """
   }
   @Test(.tags(.annotations), arguments: arguments(stringBuilder: annotationsMapper))
-  func allAnnotations(json: String, type: JSONType) throws {
+  func allAnnotations(json: String, type: JSONPrimative) throws {
     let schema = try Schema(json: json)
 
     #expect(
@@ -253,7 +253,7 @@ struct DecodingSchemaTests {
     )
   }
 
-  static let enumMapper: @Sendable (JSONType) -> String = { (type: JSONType) in
+  static let enumMapper: @Sendable (JSONPrimative) -> String = { (type: JSONPrimative) in
     """
     {
       "enum" : [
@@ -267,7 +267,7 @@ struct DecodingSchemaTests {
   }
   @Test(arguments: arguments(stringBuilder: enumMapper)) func enumValue(
     json: String,
-    type: JSONType
+    type: JSONPrimative
   ) throws {
     let schema = try Schema(json: json)
     #expect(schema.enumValues == ["Hello", "World", 1.2])
@@ -318,7 +318,7 @@ struct DecodingSchemaTests {
       """
     let schema = try Schema(json: json)
     #expect(schema.const == "United States of America")
-    #expect(schema.type == .string)
+    #expect(schema.type == .single(.string))
   }
 
   @Test func invalidValue() {
@@ -370,16 +370,16 @@ struct DecodingSchemaTests {
     )
 
     // Dynamic member lookup
-    #expect(schema.type == .object)
+    #expect(schema.type == .single(.object))
     let objectOptions: ObjectSchemaOptions = try #require(schema.options?.asType())
     #expect(objectOptions.properties == ["name": .string()])
   }
 }
 
 extension DecodingSchemaTests {
-  static let jsonTypes = [JSONType.string, .integer, .number, .object, .array, .boolean, .null]
+  static let jsonTypes = [JSONPrimative.string, .integer, .number, .object, .array, .boolean, .null]
 
-  static func arguments(stringBuilder: (JSONType) -> String) -> [(String, JSONType)] {
+  static func arguments(stringBuilder: (JSONPrimative) -> String) -> [(String, JSONPrimative)] {
     jsonTypes.map { (stringBuilder($0), $0) }
   }
 }
