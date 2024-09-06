@@ -93,36 +93,49 @@ struct ValidationBuilder {
 
 private extension Schema {
   private func validateComposition(_ composition: CompositionOptions, instance: JSONValue, builder: inout ValidationBuilder) {
-//    switch composition {
-//    case .allOf(let schemas):
-//      for schema in schemas {
-//        if let issues = schema.validate(instance) {
-//          builder.addIssues(issues)
-//        }
-//      }
-//    case .anyOf(let schemas):
-//      let validSchemas = schemas.filter { $0.validate(instance) == nil }
-//      if validSchemas.isEmpty {
-//        builder.addIssue(.compositionMismatch(type: "anyOf"))
-//      }
-//    case .oneOf(let schemas):
-//      var validCount = 0
-//      for schema in schemas {
-//        if schema.validate(instance) == nil {
-//          validCount += 1
-//          if validCount > 1 {
-//            break
-//          }
-//        }
-//      }
-//      if validCount != 1 {
-//        builder.addIssue(.compositionMismatch(type: "oneOf"))
-//      }
-//    case .not(let schema):
-//      if schema.validate(instance) == nil {
-//        builder.addIssue(.compositionMismatch(type: "not"))
-//      }
-//    }
+    switch composition {
+    case .allOf(let schemas):
+      var allOfBuilder = ValidationBuilder()
+      for schema in schemas {
+        if let issues = schema.validate(instance) {
+          allOfBuilder.addIssues(issues)
+        }
+      }
+      if !allOfBuilder.issues.isEmpty {
+        builder.addIssue(.composition(issue: .allOf(violations: allOfBuilder.issues), actual: instance))
+      }
+    case .anyOf(let schemas):
+      var anyOfBuilder = ValidationBuilder()
+      var didValidateAny = false
+      for schema in schemas {
+        if let issues = schema.validate(instance) {
+          anyOfBuilder.addIssues(issues)
+        } else {
+          didValidateAny = true
+          break
+        }
+      }
+      if !didValidateAny {
+        builder.addIssue(.composition(issue: .anyOf(violations: anyOfBuilder.issues), actual: instance))
+      }
+    case .oneOf(let schemas):
+      var oneOfBuilder = ValidationBuilder()
+      var validCount = 0
+      for schema in schemas {
+        if let issues = schema.validate(instance) {
+          oneOfBuilder.addIssues(issues)
+        } else {
+          validCount += 1
+        }
+      }
+      if validCount != 1 {
+        builder.addIssue(.composition(issue: .oneOf(violations: oneOfBuilder.issues), actual: instance))
+      }
+    case .not(let schema):
+      if schema.validate(instance) == nil {
+        builder.addIssue(.composition(issue: .not, actual: instance))
+      }
+    }
   }
 
   func validateString(_ value: String, options: StringSchemaOptions, builder: inout ValidationBuilder) {

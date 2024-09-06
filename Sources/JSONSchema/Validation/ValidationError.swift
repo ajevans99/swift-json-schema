@@ -1,6 +1,6 @@
 public protocol ValidationError: Error, CustomStringConvertible, Equatable {}
 
-public enum ValidationIssue: ValidationError {
+public indirect enum ValidationIssue: ValidationError {
   /// Indicates that a boolean schema is `false`, and therefore disallows all values.
   case schemaDisallowedAllValues
 
@@ -48,7 +48,17 @@ public enum ValidationIssue: ValidationError {
   ///   - actual: The actual value encountered.
   case object(issue: ObjectIssue, actual: [String: JSONValue])
 
+  /// Indicates a validation issue for an array.
+  /// - Parameters:
+  ///   - issue: The type of array issue.
+  ///   - actual: The actual value encountered.
   case array(issue: ArrayIssue, actual: [JSONValue])
+
+  /// Indicates a composition validation issue.
+  /// - Parameters:
+  ///   - issue: The type of composition issue.
+  ///   - actual: The actual value encountered during validation.
+  case composition(issue: CompositionIssue, actual: JSONValue)
 
   case temporary(String)
 
@@ -150,6 +160,36 @@ public enum ValidationIssue: ValidationError {
     }
   }
 
+  public indirect enum CompositionIssue: ValidationError {
+    /// Indicates that the instance does not match any of the schemas defined in `anyOf`.
+    /// - Parameter violations: The list of violations for each schema in `anyOf`.
+    case anyOf(violations: [ValidationIssue])
+
+    /// Indicates that the instance does not match all of the schemas defined in `allOf`.
+    /// - Parameter violations: The list of violations for each schema in `allOf`.
+    case allOf(violations: [ValidationIssue])
+
+    /// Indicates that the instance does not match exactly one of the schemas defined in `oneOf`.
+    /// - Parameter violations: The list of violations for each schema in `oneOf`.
+    case oneOf(violations: [ValidationIssue])
+
+    /// Indicates that the instance matches the schema defined in `not`.
+    case not
+
+    public var description: String {
+      switch self {
+      case let .anyOf(violations):
+        "does not match any of the schemas. Violations: \(violations.map(\.description).joined(separator: "; "))"
+      case let .allOf(violations):
+        "does not match all of the schemas. Violations: \(violations.map(\.description).joined(separator: "; "))"
+      case let .oneOf(violations):
+        "does not match exactly one of the schemas. Violations: \(violations.map(\.description).joined(separator: "; "))"
+      case .not:
+        "matches the schema in 'not'."
+      }
+    }
+  }
+
   public var description: String {
     switch self {
     case .schemaDisallowedAllValues:
@@ -172,6 +212,8 @@ public enum ValidationIssue: ValidationError {
       "Value '\(actual)' is \(issue)"
     case let .temporary(string):
       string
+    case let .composition(issue, actual):
+      "Value '\(actual)' \(issue)."
     }
   }
 }
