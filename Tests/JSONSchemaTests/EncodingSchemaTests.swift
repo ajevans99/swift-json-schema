@@ -388,6 +388,41 @@ struct EncodingSchemaTests {
         """
     )
   }
+
+  @Test func multipleTypes() throws {
+    let schema = Schema.multipleTypes(types: [.array, .string, .number])
+    let json = try schema.json()
+    #expect(
+      json == """
+        {
+          "type" : [
+            "array",
+            "string",
+            "number"
+          ]
+        }
+        """
+    )
+  }
+
+  @Test func dynamicOptions() throws {
+    let schema = Schema.noType(
+      .annotations(),
+      DynamicSchemaOptions.options(
+        array: .options(uniqueItems: true),
+        number: .options(multipleOf: 5)
+      )
+    )
+    let json = try schema.json()
+    #expect(
+      json == """
+        {
+          "multipleOf" : 5,
+          "uniqueItems" : true
+        }
+        """
+    )
+  }
 }
 
 extension RootSchema: @retroactive CustomTestStringConvertible {

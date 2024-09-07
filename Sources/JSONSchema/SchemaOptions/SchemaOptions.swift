@@ -6,6 +6,28 @@ extension SchemaOptions {
   public func eraseToAnySchemaOptions() -> AnySchemaOptions { AnySchemaOptions(self) }
 }
 
+extension SchemaOptions {
+  var isEmpty: Bool {
+    let mirror = Mirror(reflecting: self)
+    for child in mirror.children {
+      if let value = child.value as? AnyOptional, !value.isNil {
+        return false
+      }
+    }
+    return true
+  }
+
+  var nilIfEmpty: Self? { isEmpty ? nil : self }
+}
+
+protocol AnyOptional {
+  var isNil: Bool { get }
+}
+
+extension Optional: AnyOptional {
+  var isNil: Bool { self == nil }
+}
+
 /// A type-erased schema options type.
 public struct AnySchemaOptions: Encodable, Sendable {
   private let value: any SchemaOptions
@@ -16,46 +38,40 @@ public struct AnySchemaOptions: Encodable, Sendable {
 
   public func encode(to encoder: Encoder) throws { try value.encode(to: encoder) }
 
-  public init?(from decoder: Decoder, typeHint: JSONType) throws {
-    let container = try decoder.singleValueContainer()
-
-    func options(for primative: JSONPrimative) -> (any SchemaOptions)? {
-      switch primative {
-      case .string:
-        if let value = try? container.decode(StringSchemaOptions.self) {
-          return value
-        }
-      case .number:
-        if let value = try? container.decode(NumberSchemaOptions.self) {
-          return value
-        }
-      case .object:
-        if let value = try? container.decode(ObjectSchemaOptions.self) {
-          return value
-        }
-      case .array:
-        if let value = try? container.decode(ArraySchemaOptions.self) {
-          return value
-        }
-      case .integer, .boolean, .null: break
+  public init?(from decoder: Decoder, typeHint: JSONType?) throws {
+    guard let typeHint, case let .single(primative) = typeHint else {
+      if let dynamicOptions = try DynamicSchemaOptions(from: decoder).nilIfEmpty {
+        self.value = dynamicOptions
+        return
+      } else {
+        return nil
       }
-
-      return nil
     }
 
-    switch typeHint {
-    case .single(let primative):
-      if let options = options(for: primative) {
-        self.value = options
+    let container = try decoder.singleValueContainer()
+
+    switch primative {
+    case .string:
+      if let value = try? container.decode(StringSchemaOptions.self) {
+        self = value.eraseToAnySchemaOptions()
         return
       }
-    case .array(let primatives):
-      for primative in primatives {
-        if let options = options(for: primative) {
-          self.value = options
-          return
-        }
+    case .number:
+      if let value = try? container.decode(NumberSchemaOptions.self) {
+        self = value.eraseToAnySchemaOptions()
+        return
       }
+    case .object:
+      if let value = try? container.decode(ObjectSchemaOptions.self) {
+        self = value.eraseToAnySchemaOptions()
+        return
+      }
+    case .array:
+      if let value = try? container.decode(ArraySchemaOptions.self) {
+        self = value.eraseToAnySchemaOptions()
+        return
+      }
+    case .integer, .boolean, .null: return nil
     }
 
     return nil

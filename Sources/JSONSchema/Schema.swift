@@ -359,6 +359,20 @@ public struct Schema: Sendable, JSONSchemaValidatable {
       const: value
     )
   }
+
+  public static func multipleTypes(
+    _ annotations: AnnotationOptions = .annotations(),
+    _ options: (any SchemaOptions)? = nil,
+    types: [JSONPrimative]
+  ) -> Schema {
+    .init(
+      type: .array(types),
+      options: options?.eraseToAnySchemaOptions(),
+      annotations: annotations,
+      composition: nil,
+      const: nil
+    )
+  }
 }
 
 public enum SchemaOrBool: JSONSchemaValidatable {

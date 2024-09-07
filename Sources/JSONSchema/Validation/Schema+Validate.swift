@@ -53,21 +53,31 @@ extension Schema {
       case .string(let string):
         if let options = options.asType(StringSchemaOptions.self) {
           validateString(string, options: options, builder: &builder)
+        } else if let dynamicOptions = options.asType(DynamicSchemaOptions.self), let options = dynamicOptions.string {
+          validateString(string, options: options, builder: &builder)
         }
       case .number(let double):
         if let options = options.asType(NumberSchemaOptions.self) {
+          validateNumber(double, options: options, builder: &builder)
+        } else if let dynamicOptions = options.asType(DynamicSchemaOptions.self), let options = dynamicOptions.number {
           validateNumber(double, options: options, builder: &builder)
         }
       case .integer(let int):
         if let options = options.asType(NumberSchemaOptions.self) {
           validateInteger(int, options: options, builder: &builder)
+        } else if let dynamicOptions = options.asType(DynamicSchemaOptions.self), let options = dynamicOptions.number {
+          validateInteger(int, options: options, builder: &builder)
         }
       case .object(let dictionary):
         if let options = options.asType(ObjectSchemaOptions.self) {
           validateObject(dictionary, options: options, builder: &builder)
+        } else if let dynamicOptions = options.asType(DynamicSchemaOptions.self), let options = dynamicOptions.object {
+          validateObject(dictionary, options: options, builder: &builder)
         }
       case .array(let array):
         if let options = options.asType(ArraySchemaOptions.self) {
+          validateArray(array, options: options, builder: &builder)
+        } else if let dynamicOptions = options.asType(DynamicSchemaOptions.self), let options = dynamicOptions.array {
           validateArray(array, options: options, builder: &builder)
         }
       case .boolean, .null:
@@ -285,6 +295,16 @@ private extension Schema {
           }
         } catch {
           builder.addIssue(.string(issue: .invalidRegularExpression, actual: pattern))
+        }
+      }
+    }
+
+    // Validate propertyNames
+    if let propertyNames = options.propertyNames {
+      let schema = Schema.string(.annotations(), propertyNames)
+      for key in value.keys {
+        if let issues = schema.validate(.string(key)) {
+          builder.addIssue(.object(issue: .propertyNames(key: key, issues: issues), actual: value))
         }
       }
     }

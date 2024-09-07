@@ -40,6 +40,10 @@ let package = Package(
       name: "JSONSchemaTests",
       dependencies: ["JSONSchema"]
     ),
+    .testTarget(
+      name: "JSONValidationTests",
+      dependencies: ["JSONSchema"]
+    ),
 
     // Library for building JSON schemas with Swift's result builders.
     .target(

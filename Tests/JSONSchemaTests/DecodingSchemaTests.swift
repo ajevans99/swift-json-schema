@@ -374,6 +374,31 @@ struct DecodingSchemaTests {
     let objectOptions: ObjectSchemaOptions = try #require(schema.options?.asType())
     #expect(objectOptions.properties == ["name": .string()])
   }
+
+  @Test func multipleTypes() throws {
+    let json = """
+      {
+        "type" : [\(Self.jsonTypes.map { "\"\($0)\"" }.joined(separator: ", "))]
+      }
+      """
+    let schema = try Schema(json: json)
+    #expect(schema.type == .array(Self.jsonTypes))
+  }
+
+  @Test func dynamicOptions() throws {
+    let json = """
+      {
+        "multipleOf": 5,
+        "uniqueItems": true
+      }
+      """
+    let schema = try Schema(json: json)
+    let dynamicOptions = try #require(schema.options?.asType(DynamicSchemaOptions.self))
+    #expect(dynamicOptions.array?.uniqueItems == true)
+    #expect(dynamicOptions.number?.multipleOf == 5)
+    #expect(dynamicOptions.string == nil)
+    #expect(dynamicOptions.object == nil)
+  }
 }
 
 extension DecodingSchemaTests {

@@ -33,7 +33,7 @@ extension Schema: Codable {
     self.type = try container.decodeIfPresent(JSONType.self, forKey: .type)
     self.enumValues = try container.decodeIfPresent([JSONValue].self, forKey: .enumValues)
     self.annotations = try AnnotationOptions(from: decoder)
-    self.options = if let type { try AnySchemaOptions(from: decoder, typeHint: type) } else { nil }
+    self.options = try AnySchemaOptions(from: decoder, typeHint: type)
     self.composition = try? CompositionOptions(from: decoder)
     self.const = try container.decodeIfPresent(JSONValue.self, forKey: .const)
   }

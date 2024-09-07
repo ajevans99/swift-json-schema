@@ -123,6 +123,11 @@ public indirect enum ValidationIssue: ValidationError {
 
     case dependentRequired(mainProperty: String, dependentProperty: String)
 
+    // case properties
+    // case patternProperties
+
+    case propertyNames(key: String, issues: [ValidationIssue])
+
     public var description: String {
       switch self {
       case .maxProperties(let expected):
@@ -133,6 +138,8 @@ public indirect enum ValidationIssue: ValidationError {
         "missing a required key '\(key)'"
       case .dependentRequired(let mainProperty, let dependentProperty):
         "missing '\(dependentProperty)' which is required when '\(mainProperty)' is present"
+      case let .propertyNames(key, issues):
+        "key '\(key)' does not meet propery name requirements. Violations: \(issues.description)"
       }
     }
   }
@@ -179,11 +186,11 @@ public indirect enum ValidationIssue: ValidationError {
     public var description: String {
       switch self {
       case let .anyOf(violations):
-        "does not match any of the schemas. Violations: \(violations.map(\.description).joined(separator: "; "))"
+        "does not match any of the schemas. Violations: \(violations.description)"
       case let .allOf(violations):
-        "does not match all of the schemas. Violations: \(violations.map(\.description).joined(separator: "; "))"
+        "does not match all of the schemas. Violations: \(violations.description)"
       case let .oneOf(violations):
-        "does not match exactly one of the schemas. Violations: \(violations.map(\.description).joined(separator: "; "))"
+        "does not match exactly one of the schemas. Violations: \(violations.description)"
       case .not:
         "matches the schema in 'not'."
       }
@@ -220,6 +227,6 @@ public indirect enum ValidationIssue: ValidationError {
 
 extension Array where Element: ValidationError {
   var description: String {
-    self.map(\.description).joined(separator: ". ")
+    self.map(\.description).joined(separator: "; ")
   }
 }
