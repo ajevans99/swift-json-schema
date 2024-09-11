@@ -21,17 +21,18 @@ extension JSONComponents {
     }
 
     public func validate(
-      _ input: JSONValue
-    ) -> Validated<(Props.Output, [String: AdditionalProps.Output]), String> {
-      guard case .object(let dictionary) = input else { return .error("Not an object") }
+      _ value: JSONValue,
+      against validator: Validator
+    ) -> Validation<(Props.Output, [String: AdditionalProps.Output])> {
+      guard case .object(let dictionary) = value else { return .error(.typeMismatch(expected: .object, actual: value)) }
 
       // Validate the base properties
-      let baseValidation = base.validate(input)
+      let baseValidation = base.validate(value, against: validator)
 
       // Validate the additional properties
       var additionalProperties: [String: AdditionalProps.Output] = [:]
       for (key, value) in dictionary where !base.properties.schema.keys.contains(key) {
-        switch additionalPropertiesSchema.validate(value) {
+        switch additionalPropertiesSchema.validate(value, against: validator) {
         case .valid(let output): additionalProperties[key] = output
         case .invalid(let errors): return .invalid(errors)
         }

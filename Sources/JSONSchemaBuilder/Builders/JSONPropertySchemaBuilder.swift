@@ -27,19 +27,21 @@ import JSONSchema
   ) -> JSONPropertyComponents.Conditional<TrueComponent, FalseComponent> { .second(component) }
 }
 
-public protocol PropertyCollection: Sendable {
+public protocol PropertyCollection<Output>: Sendable, Equatable {
   associatedtype Output
 
   var schema: [String: Schema] { get }
   var requiredKeys: [String] { get }
-  func validate(_ dictionary: [String: JSONValue]) -> Validated<Output, String>
+  func validate(_ dictionary: [String: JSONValue], against validator: Validator) -> Validation<Output>
 }
 
 public struct EmptyPropertyCollection: PropertyCollection {
   public let schema: [String: Schema] = [:]
   public let requiredKeys: [String] = []
 
-  public func validate(_ dictionary: [String: JSONValue]) -> Validated<Void, String> { .valid(()) }
+  public init() {}
+
+  public func validate(_ dictionary: [String: JSONValue], against validator: Validator) -> Validation<Void> { .valid(()) }
 }
 
 public struct PropertyTuple<each Property: JSONPropertyComponent>: PropertyCollection {
@@ -76,8 +78,13 @@ public struct PropertyTuple<each Property: JSONPropertyComponent>: PropertyColle
   }
 
   public func validate(
-    _ dictionary: [String: JSONValue]
-  ) -> Validated<(repeat (each Property).Output), String> {
-    zip(repeat (each property).validate(dictionary))
+    _ dictionary: [String: JSONValue],
+    against validator: Validator
+  ) -> Validation<(repeat (each Property).Output)> {
+    zip(repeat (each property).validate(dictionary, against: validator))
+  }
+
+  public static func == (lhs: PropertyTuple<repeat each Property>, rhs: PropertyTuple<repeat each Property>) -> Bool {
+    lhs.schema == rhs.schema && lhs.requiredKeys == rhs.requiredKeys
   }
 }

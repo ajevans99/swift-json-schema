@@ -1,10 +1,22 @@
+public typealias Validation<Output> = Validated<Output, ValidationIssue>
+
 /// Similar to `Result` from Swift but `invalid` case has an array of errors.
 /// Adapted from [Point-Free](https://github.com/pointfreeco/swift-validated) to use variadic parameters.
 public enum Validated<Value, Error> {
   case valid(Value)
   case invalid([Error])
 
-  static func error(_ error: Error) -> Self { .invalid([error]) }
+  public static func error(_ error: Error) -> Self { .invalid([error]) }
+
+  public var valid: Value? {
+    if case .valid(let value) = self { return value }
+    return nil
+  }
+
+  public var invalid: [Error]? {
+    if case .invalid(let errors) = self { return errors }
+    return nil
+  }
 
   public func map<ValueOfResult>(
     _ transform: (Value) -> ValueOfResult
@@ -12,6 +24,17 @@ public enum Validated<Value, Error> {
     switch self {
     case .valid(let value): return .valid(transform(value))
     case .invalid(let errors): return .invalid(errors)
+    }
+  }
+
+  public func mapError<ErrorOfResult>(
+    _ transform: (Error) -> ErrorOfResult
+  ) -> Validated<Value, ErrorOfResult> {
+    switch self {
+    case .valid(let value):
+      return .valid(value)
+    case .invalid(let array):
+      return .invalid(array.map(transform))
     }
   }
 

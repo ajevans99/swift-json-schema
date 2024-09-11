@@ -15,9 +15,9 @@ extension JSONComponents {
 
     public init(wrapped: Wrapped?) { self.wrapped = wrapped }
 
-    public func validate(_ value: JSONValue) -> Validated<Wrapped.Output?, String> {
+    public func validate(_ value: JSONValue, against validator: Validator) -> Validation<Wrapped.Output?> {
       guard let wrapped else { return .valid(nil) }
-      return wrapped.validate(value).map(Optional.some)
+      return wrapped.validate(value, against: validator).map(Optional.some)
     }
   }
 }

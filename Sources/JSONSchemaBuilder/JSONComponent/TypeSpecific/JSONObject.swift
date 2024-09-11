@@ -30,9 +30,18 @@ public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
   /// Creates a new `JSONObject` with no property requirements.
   public init() where Props == EmptyPropertyCollection { self.init(with: {}) }
 
-  public func validate(_ input: JSONValue) -> Validated<Props.Output, String> {
-    if case .object(let dictionary) = input { return properties.validate(dictionary) }
-    return .error("Not an object")
+  public func validate(_ value: JSONValue, against validator: Validator) -> Validation<Props.Output> {
+    if case .object(let dictionary) = value {
+      let builder = ValidationErrorBuilder()
+      builder.addErrors(validator.validate(object: dictionary, against: options).invalid)
+      switch properties.validate(dictionary, against: validator) {
+      case .valid(let value): return builder.build(for: value)
+      case .invalid(let e):
+        builder.addErrors(e)
+        return .invalid(builder.errors)
+      }
+    }
+    return .error(.typeMismatch(expected: .object, actual: value))
   }
 }
 
@@ -42,7 +51,7 @@ extension JSONObject {
   /// - Returns: A new `JSONObject` with the property names set.
   public func patternProperties(_ patternProperties: [String: Schema]?) -> Self {
     var copy = self
-    copy.options.patternProperties = patternProperties
+    copy.options.patternProperties = patternProperties.map { JSONValue($0) }
     return copy
   }
 
@@ -58,7 +67,7 @@ extension JSONObject {
   /// - Returns: A new `JSONObject` with the additional properties set.
   public func additionalProperties(_ addionalProperties: SchemaControlOption?) -> Self {
     var copy = self
-    copy.options.additionalProperties = addionalProperties
+    copy.options.additionalProperties = addionalProperties.map { JSONValue($0) }
     return copy
   }
 
@@ -75,7 +84,7 @@ extension JSONObject {
   ///     JSONString()
   ///   }
   /// ```
-  /// `myObj.validate(/* some input */)` will have a type of `Validated<(Void, String), String>`
+  /// `myObj.validate(/* some input */)` will have a type of `Validation<(Void, String)>`
   ///
   /// For now, to drop the `Void`, you can add a map, like `.map { $1 }`.
   /// TODO: Drop `Void` values from tuple with builder.
@@ -97,7 +106,7 @@ extension JSONObject {
   /// - Returns: A new `JSONObject` with the unevaluated properties set.
   public func unevaluatedProperties(_ unevaluatedProperties: SchemaControlOption?) -> Self {
     var copy = self
-    copy.options.unevaluatedProperties = unevaluatedProperties
+    copy.options.unevaluatedProperties = unevaluatedProperties.map { JSONValue($0) }
     return copy
   }
 
@@ -117,7 +126,7 @@ extension JSONObject {
   /// - Returns: A new `JSONObject` with the property names set.
   public func propertyNames(_ option: StringSchemaOptions?) -> Self {
     var copy = self
-    copy.options.propertyNames = option
+    copy.options.propertyNames = option.map { JSONValue($0) }
     return copy
   }
 
@@ -126,7 +135,7 @@ extension JSONObject {
   /// - Returns: A new `JSONObject` with the min properties constraint set.
   public func minProperties(_ value: Int?) -> Self {
     var copy = self
-    copy.options.minProperties = value
+    copy.options.minProperties = value.map { JSONValue($0) }
     return copy
   }
 
@@ -135,7 +144,7 @@ extension JSONObject {
   /// - Returns: A new `JSONObject` with the max properties constraint set.
   public func maxProperties(_ value: Int?) -> Self {
     var copy = self
-    copy.options.maxProperties = value
+    copy.options.maxProperties = value.map { JSONValue($0) }
     return copy
   }
 }

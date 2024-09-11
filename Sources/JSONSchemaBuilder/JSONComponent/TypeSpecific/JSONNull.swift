@@ -8,8 +8,8 @@ public struct JSONNull: JSONSchemaComponent {
 
   public init() {}
 
-  public func validate(_ value: JSONValue) -> Validated<Void, String> {
+  public func validate(_ value: JSONValue, against validator: Validator) -> Validation<Void> {
     if case .null = value { return .valid(()) }
-    return .error("Expected null value, but got \(value)")
+    return .error(.typeMismatch(expected: .null, actual: value))
   }
 }

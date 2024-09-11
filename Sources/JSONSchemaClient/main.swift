@@ -94,7 +94,7 @@ printSchema(Library.self)
   case celcius
 }
 
-let tempType = TemperatureType.schema.validate(.string("fahrenheit"))
+let tempType = TemperatureType.validate(.string("fahrenheit"))
 print("tempType", tempType)
 
 printSchema(TemperatureType.self)
@@ -148,11 +148,11 @@ extension WeatherCondition: Schemable {
   }
 }
 
-let weatherConditionResult1 = WeatherCondition.schema.validate(
+let weatherConditionResult1 = WeatherCondition.validate(
   .object(["cloudy": .object(["coverage": .number(100)])])
 )
 print("weatherConditionResult1", weatherConditionResult1)
-let weatherConditionResult2 = WeatherCondition.schema.validate(.string("snowy"))
+let weatherConditionResult2 = WeatherCondition.validate(.string("snowy"))
 print("weatherConditionResult2", weatherConditionResult2)
 
 let conditions = WeatherCondition.sunny(hoursOfSunlight: 5)
@@ -163,7 +163,7 @@ printSchema(WeatherCondition.self)
 
 // MARK: Parsing
 
-enum WeatherType {
+enum WeatherType: Schemable {
   case sunny
   case cloudy
   case rainy
@@ -177,9 +177,9 @@ enum WeatherType {
       }
       .compactMap { string in
         switch string {
-        case "sunny": return .sunny
-        case "cloudy": return .cloudy
-        case "rainy": return .rainy
+        case "sunny": return Self.sunny
+        case "cloudy": return Self.cloudy
+        case "rainy": return Self.rainy
         default: return nil
         }
       }
@@ -187,9 +187,9 @@ enum WeatherType {
   }
 }
 
-let sunny = WeatherType.schema.validate(.string("sunny"))
+let sunny = WeatherType.validate(.string("sunny"))
 print(sunny)
-let notSupported = WeatherType.schema.validate(.string("other"))
+let notSupported = WeatherType.validate(.string("other"))
 print(notSupported)
 
 enum Airline: String, CaseIterable, Schemable {
@@ -261,7 +261,7 @@ print(flight)
 
 switch flight {
 case .valid(let a): print("Valid: \(a)")
-case .invalid(let array): print("Invalid: \(array.joined(separator: "\n"))")
+case .invalid(let array): print("Invalid: \(array.map(\.description).joined(separator: "\n"))")
 }
 
 let anyOf = JSONComposition.AnyOf(into: JSONValue.self) {
@@ -316,7 +316,7 @@ let itemString = """
 let itemInstance = try! JSONDecoder().decode(JSONValue.self, from: Data(itemString.utf8))
 print(itemInstance)
 
-// Validated<(String?, String?, Double?, Bool?), String>
+// Validation<(String?, String?, Double?, Bool?)>
 let itemValidationResult = itemSchema.validate(itemInstance)
 
 switch itemValidationResult {
@@ -327,7 +327,7 @@ case .valid(let value):
 
 // ..
 
-case .invalid(let array): print("Errors: \(array.joined(separator: ", "))")
+case .invalid(let array): print("Errors: \(array.map(\.description).joined(separator: ", "))")
 }
 
 struct Item {
@@ -459,3 +459,128 @@ enum LibraryItem { case book(details: ItemDetails, category: Category)
   case movie(details: ItemDetails, category: Category, duration: Int)
   case music(details: ItemDetails, category: Category)
 }
+
+// MARK: Validation
+
+// MARK: JSONValue Encoder
+
+struct Foo: Encodable {
+  let bar: String?
+  let zar: JSONValue?
+  let number: Int?
+  let boolValue: Bool
+  let nested: NestedFoo
+  let array: [String]
+}
+
+struct NestedFoo: Encodable {
+  let value: Double
+  let anotherNested: AnotherNestedFoo?
+}
+
+struct AnotherNestedFoo: Encodable {
+  let text: String
+  let boolValue: Bool
+}
+
+let foo = Foo(
+  bar: "Hello",
+  zar: .null,
+  number: 42,
+  boolValue: true,
+  nested: NestedFoo(value: 3.14, anotherNested: AnotherNestedFoo(text: "Inner", boolValue: false)),
+  array: ["One", "Two", "Three"]
+)
+
+let valueEncoder = JSONValueEncoder()
+let result = try! valueEncoder.encode(foo)
+
+// Expected result:
+let expectedResult = JSONValue.object([
+  "bar": .string("Hello"),
+  "zar": .null,
+  "number": .integer(42),
+  "boolValue": .boolean(true),
+  "nested": .object([
+    "value": .number(3.14),
+    "anotherNested": .object([
+      "text": .string("Inner"),
+      "boolValue": .boolean(false)
+    ])
+  ]),
+  "array": .array([.string("One"), .string("Two"), .string("Three")])
+])
+
+print("Expected result:", expectedResult)
+print("Actual result:", result)
+
+// Assertions (useful for automated testing)
+assert(result == expectedResult, "Test failed: Expected \(expectedResult) but got \(result)")
+
+let nestedSchema = JSONObject()
+
+let schemaArray = JSONArray {
+  nestedSchema
+}
+.minItems(1)
+
+let applicatorVocabulary = JSONObject {
+  JSONProperty(key: "prefixItems") {
+    schemaArray
+  }
+  JSONProperty(key: "items", value: nestedSchema)
+  JSONProperty(key: "contains", value: nestedSchema)
+  JSONProperty(key: "additionalProperties", value: nestedSchema)
+  JSONProperty(key: "properties") {
+    JSONObject {
+      JSONProperty(key: "additionalProperties", value: nestedSchema)
+    }
+    .default([:])
+  }
+  JSONProperty(key: "patternProperties") {
+    JSONObject()
+      .propertyNames(.options(format: "regex"))
+      .additionalProperties { nestedSchema }
+      .default([:])
+  }
+  JSONProperty(key: "dependentSchemas") {
+    JSONObject()
+      .additionalProperties { nestedSchema }
+      .default([:])
+  }
+  JSONProperty(key: "propetyNames", value: nestedSchema)
+  JSONProperty(key: "allof", value: schemaArray)
+  JSONProperty(key: "anyOf", value: schemaArray)
+  JSONProperty(key: "oneOf", value: schemaArray)
+  JSONProperty(key: "not", value: nestedSchema)
+}
+.title("Applicator vocabulary")
+
+let simpleTypes = JSONAnyValue()
+  .enumValues {
+    "array"
+    "boolean"
+    "integer"
+    "null"
+    "number"
+    "object"
+    "string"
+  }
+
+let validationVocaabulary = JSONObject {
+  JSONProperty(key: "type") {
+    simpleTypes
+  }
+  JSONProperty(key: "const")
+  JSONProperty(key: "enum") {
+    JSONArray()
+  }
+//  JSONProperty
+}
+.title("Validation vocabulary meta-schema")
+
+//let metaSchema = JSONSchema(Schema.object) {
+//  JSONObject {
+//    applicatorVocabulary
+//  }
+//}
