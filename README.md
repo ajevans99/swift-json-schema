@@ -198,7 +198,7 @@ To add SwiftJSONSchema to your project using Swift Package Manager, add the foll
 
 ```swift
 dependencies: [
-  .package(url: "https://github.com/ajevans99/swift-json-schema", from: "1.0.0")
+  .package(url: "https://github.com/ajevans99/swift-json-schema", from: "0.2.0")
 ]
 ```
 
