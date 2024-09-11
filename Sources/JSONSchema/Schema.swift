@@ -75,6 +75,18 @@
   public subscript<T>(dynamicMember keyPath: KeyPath<Schema, T?>) -> T? {
     subschema?[keyPath: keyPath] ?? nil
   }
+
+  public init(
+    id: String? = nil,
+    schema: String? = nil,
+    vocabulary: [String: JSONValue]? = nil,
+    subschema: Schema? = nil
+  ) {
+    self.id = id
+    self.schema = schema
+    self.vocabulary = vocabulary
+    self.subschema = subschema
+  }
 }
 
 /// A JSON schema definition.
