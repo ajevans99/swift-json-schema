@@ -160,9 +160,9 @@ public indirect enum ValidationIssue: ValidationError {
       case .uniqueItems(let duplicate):
         "not unique, '\(duplicate)' occurs more than once"
       case .maxContains(let expected):
-        "idk"
+        "contains more than \(expected) matching items"
       case .minContains(let expected):
-        "idk"
+        "contains fewer than \(expected) matching items"
       }
     }
   }

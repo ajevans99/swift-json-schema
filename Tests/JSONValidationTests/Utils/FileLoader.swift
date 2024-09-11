@@ -36,6 +36,7 @@ struct FileLoader<T: Decodable> {
 
   func loadAllFiles() -> [(fileName: String, decodedObject: T)] {
     let fileURLs = listFiles()
+    let package = Bundle.module
     var decodedObjects: [(fileName: String, decodedObject: T)] = []
 
     for fileURL in fileURLs {

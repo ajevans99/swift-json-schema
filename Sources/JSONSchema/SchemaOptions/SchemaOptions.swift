@@ -20,14 +20,6 @@ extension SchemaOptions {
   var nilIfEmpty: Self? { isEmpty ? nil : self }
 }
 
-protocol AnyOptional {
-  var isNil: Bool { get }
-}
-
-extension Optional: AnyOptional {
-  var isNil: Bool { self == nil }
-}
-
 /// A type-erased schema options type.
 public struct AnySchemaOptions: Encodable, Sendable {
   private let value: any SchemaOptions

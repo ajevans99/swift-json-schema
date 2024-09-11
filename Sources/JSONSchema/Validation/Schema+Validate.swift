@@ -30,7 +30,6 @@ extension Schema {
           builder.addIssue(.typeMismatch(expected: type, actual: instance.type))
         }
       }
-
     }
 
     // Validate enum values
@@ -307,6 +306,11 @@ private extension Schema {
           builder.addIssue(.object(issue: .propertyNames(key: key, issues: issues), actual: value))
         }
       }
+    }
+
+    // Validate additionalProperties
+    if let additionalProperties = options.additionalProperties {
+      
     }
   }
 

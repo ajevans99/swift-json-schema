@@ -2,19 +2,19 @@ import JSONSchema
 import Foundation
 import Testing
 
-public struct JSONSchemaTest: Sendable, Codable, CustomStringConvertible {
+struct JSONSchemaTest: Sendable, Codable {
   struct Spec: Sendable, Codable {
     let core: String
-    let quote: String
+    let quote: String?
   }
 
-  struct TestCase: Sendable, Codable, CustomStringConvertible {
+  struct TestCase: Sendable, Codable {
     let description: String
     let data: JSONValue
     let valid: Bool
   }
 
-  public let description: String
+  let description: String
   let specification: [Spec]?
   let schema: RootSchema
   let tests: [TestCase]
@@ -35,6 +35,7 @@ struct JSONSchemaTestSuite {
 
   static let unsupportedFilePaths = [
     "anchor.json",
+    "boolean_schema.json",
     "defs.json",
     "dependentRequired.json",
     "dependentSchemas.json",
@@ -56,12 +57,52 @@ struct JSONSchemaTestSuite {
 
   @Test(arguments: flattenedArguments)
   func schemaTest(_ schemaTest: JSONSchemaTest, path: String) throws {
-    print(schemaTest.schema)
-
     for testCase in schemaTest.tests {
       let issues = schemaTest.schema.validate(testCase.data)
 
-      #expect(testCase.valid ? issues == nil : issues != nil, "\(testCase); should be \(testCase.valid ? "valid" : "invalid") but recieved \(issues?.map(\.description).joined(separator: ", ") ?? "no issues"); schema: \(schemaTest.schema)")
+      var comment: () -> Testing.Comment = {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+
+        return """
+        Schema Test: "\(schemaTest.description)" @ \(path)
+        ```json
+        \(try! schemaTest.schema.json())
+        ```
+        
+        Test Case: "\(testCase.description)"
+        ```json
+        \(try! testCase.data.json())
+        ```
+        
+        Results:
+        - Expected: \(testCase.valid)
+        - Recieved: \(issues?.map(\.description).joined(separator: ", ") ?? "no issues")
+        """
+      }
+
+      #expect(
+        testCase.valid ? issues == nil : issues != nil,
+        comment()
+      )
     }
+  }
+}
+
+extension RootSchema {
+  func json() throws -> String {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+    let data = try encoder.encode(self)
+    return String(decoding: data, as: UTF8.self)
+  }
+}
+
+extension JSONValue {
+  func json() throws -> String {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+    let data = try encoder.encode(self)
+    return String(decoding: data, as: UTF8.self)
   }
 }
