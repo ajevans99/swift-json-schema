@@ -1,59 +1,61 @@
 protocol IdentifierKeyword: Keyword {
   /// Some identity keywords need to be processed before others.
-  var dependencies: Set<KeywordIdentifier> { get }
+  static var dependencies: Set<KeywordIdentifier> { get }
 
-  func processIdentifier(in value: JSONValue, at location: ValidationLocation, into context: inout Context)
+  func processIdentifier(into context: inout Context)
 }
 
 extension IdentifierKeyword {
-  var dependencies: Set<KeywordIdentifier> { [] }
+  static var dependencies: Set<KeywordIdentifier> { [] }
+
+  func processIdentifier(into context: inout Context) {}
 }
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-the-schema-keyword
   struct SchemaKeyword: IdentifierKeyword {
-    let name = "$schema"
+    static let name = "$schema"
 
-    func processIdentifier(in value: JSONValue, at location: ValidationLocation, into context: inout Context) {
+    var schema: JSONValue
+    var location: JSONPointer
+
+    func processIdentifier(into context: inout Context) {
       context.dialect = .draft2020_12
     }
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-the-schema-keyword
   struct Vocabulary: IdentifierKeyword {
-    let name = "$vocaulary"
+    static let name = "$vocabulary"
 
-    func processIdentifier(in value: JSONValue, at location: ValidationLocation, into context: inout Context) {
-      // no-op
-    }
+    var schema: JSONValue
+    var location: JSONPointer
+
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-the-id-keyword
   struct Identifier: IdentifierKeyword {
-    let name = "$id"
+    static let name = "$id"
 
-    func processIdentifier(in value: JSONValue, at location: ValidationLocation, into context: inout Context) {
-      value
-      location
-      context
-    }
+    var schema: JSONValue
+    var location: JSONPointer
   }
 
   struct Reference: IdentifierKeyword {
-    let name = "$ref"
+    static let name = "$ref"
 
-    func processIdentifier(in value: JSONValue, at location: ValidationLocation, into context: inout Context) {
-      value
-      location
-      context
-    }
+    var schema: JSONValue
+    var location: JSONPointer
   }
 
   struct Defintion: IdentifierKeyword {
-    let name = "$defs"
+    static let name = "$defs"
 
-    func processIdentifier(in value: JSONValue, at location: ValidationLocation, into context: inout Context) {
-      guard case .object(let object) = value else { return }
+    var schema: JSONValue
+    var location: JSONPointer
+
+    func processIdentifier(into context: inout Context) {
+      guard case .object(let object) = schema else { return }
       for (key, value) in object {
         if let schema = try? Schema(rawSchema: value, location: location) {
           context.defintions[key] = schema
@@ -63,41 +65,35 @@ extension Keywords {
   }
 
   struct Anchor: IdentifierKeyword {
-    let name = "$ref"
+    static let name = "$ref"
 
-    func processIdentifier(in value: JSONValue, at location: ValidationLocation, into context: inout Context) {
-      value
-      location
-      context
-    }
+    var schema: JSONValue
+    var location: JSONPointer
   }
 
   struct DynamicReference: IdentifierKeyword {
-    let name = "$dynamicRef"
+    static let name = "$dynamicRef"
 
-    func processIdentifier(in value: JSONValue, at location: ValidationLocation, into context: inout Context) {
-      value
-      location
-      context
-    }
+    var schema: JSONValue
+    var location: JSONPointer
   }
 
   struct DynamicAnchor: IdentifierKeyword {
-    let name = "$dynamicAnchor"
+    static let name = "$dynamicAnchor"
 
-    func processIdentifier(in value: JSONValue, at location: ValidationLocation, into context: inout Context) {
-      guard case let .string(string) = value else { return }
-      context.dynamicAnchors[string] = location.keywordLocation
+    var schema: JSONValue
+    var location: JSONPointer
+
+    func processIdentifier(into context: inout Context) {
+      guard case let .string(string) = schema else { return }
+      context.dynamicAnchors[string] = location
     }
   }
 
   struct Comment: IdentifierKeyword {
-    let name = "$comment"
+    static let name = "$comment"
 
-    func processIdentifier(in value: JSONValue, at location: ValidationLocation, into context: inout Context) {
-      value
-      location
-      context
-    }
+    var schema: JSONValue
+    var location: JSONPointer
   }
 }

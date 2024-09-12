@@ -4,8 +4,10 @@ public struct ValidationLocation {
   /// Required if keyworkLocation is a ref or dynamic ref
   var absoluteKeywordLocation: JSONPointer?
 
-  init() {
-    keywordLocation = .init()
-    instanceLocation = .init()
+  var isRoot: Bool { keywordLocation.isRoot }
+
+  public init(keywordLocation: JSONPointer = .init(), instanceLocation: JSONPointer = .init()) {
+    self.keywordLocation = keywordLocation
+    self.instanceLocation = instanceLocation
   }
 }

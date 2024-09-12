@@ -1,7 +1,7 @@
 ///  JSON Pointer defines a string syntax for identifying a specific value within a JavaScript Object Notation (JSON) document.
 /// https://datatracker.ietf.org/doc/html/rfc6901
-public struct JSONPointer: Equatable, Sendable {
-  enum Component: Equatable {
+public struct JSONPointer: Sendable, Hashable {
+  enum Component: Hashable {
     case index(Int)
     case key(String)
   }
@@ -29,6 +29,8 @@ public struct JSONPointer: Equatable, Sendable {
   mutating func append(_ component: Component) {
     path.append(component)
   }
+
+  var isRoot: Bool { path.isEmpty }
 }
 
 extension JSONPointer: ExpressibleByStringLiteral {

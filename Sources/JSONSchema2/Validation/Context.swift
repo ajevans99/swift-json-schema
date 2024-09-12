@@ -1,7 +1,7 @@
 /// Container for information used when validating a schema.
-struct Context {
+struct Context: Equatable {
   var dialect: Dialect
 
-  var defintions: [String: Schema]
-  var dynamicAnchors: [String: JSONPointer]
+  var defintions = [String: Schema]()
+  var dynamicAnchors = [String: JSONPointer]()
 }

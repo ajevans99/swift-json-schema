@@ -1,8 +1,8 @@
 public struct ValidationResult {
-  var valid: Bool
-  var location: ValidationLocation
+  public var valid: Bool
+  public var location: ValidationLocation
 
   /// Required if valid == false
-  var errors: [ValidationResult]?
-  var annotations: [ValidationResult]?
+  public var errors: [ValidationResult]?
+  public var annotations: [ValidationResult]?
 }
