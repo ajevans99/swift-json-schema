@@ -1,4 +1,4 @@
-public struct ValidationResult {
+public struct ValidationResult: Sendable {
   public var valid: Bool
   public var location: ValidationLocation
 

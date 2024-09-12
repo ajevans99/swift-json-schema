@@ -1,4 +1,4 @@
-public protocol ValidatableSchema: Equatable {
+public protocol ValidatableSchema: Equatable, Sendable {
   func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult
 }
 

@@ -30,6 +30,12 @@ public struct JSONPointer: Sendable, Hashable {
     path.append(component)
   }
 
+  func appending(_ component: Component) -> JSONPointer {
+    var pointer = self
+    pointer.append(component)
+    return pointer
+  }
+
   var isRoot: Bool { path.isEmpty }
 }
 

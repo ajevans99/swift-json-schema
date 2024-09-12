@@ -17,6 +17,11 @@ public struct Schema: ValidatableSchema {
     }
   }
 
+  init(schema: any ValidatableSchema, location: JSONPointer) {
+    self.schema = schema
+    self.location = location
+  }
+
   public func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
     return schema.validate(instance, at: location)
   }
@@ -44,6 +49,10 @@ struct BooleanSchema: ValidatableSchema {
       location: validationLocation,
       errors: schemaValue ? nil : [ValidationResult(valid: false, location: validationLocation)]
     )
+  }
+
+  func asSchema() -> Schema {
+    .init(schema: self, location: location)
   }
 
   public static func == (lhs: Self, rhs: Self) -> Bool {
@@ -99,6 +108,10 @@ struct ObjectSchema: ValidatableSchema {
       location: validationLocation,
       errors: isValid ? nil : errors
     )
+  }
+
+  func asSchema() -> Schema {
+    .init(schema: self, location: location)
   }
 
   public static func == (lhs: Self, rhs: Self) -> Bool {

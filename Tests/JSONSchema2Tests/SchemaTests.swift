@@ -29,7 +29,7 @@ struct SchemaTests {
       ],
       "required": ["street_address", "city", "state"]
     ]
-    
+
     let rawSchema: JSONValue = [
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$vocabulary": [
@@ -54,7 +54,7 @@ struct SchemaTests {
     ]
     let schema = try #require(try Schema(rawSchema: rawSchema).schema as? ObjectSchema)
     let addressSchema = try #require(try Schema(rawSchema: addressRawSchema))
-    
+
     #expect(
       schema.context
       == Context(

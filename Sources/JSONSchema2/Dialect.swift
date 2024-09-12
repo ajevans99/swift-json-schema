@@ -1,4 +1,4 @@
-public enum Dialect: Hashable {
+public enum Dialect: Hashable, Sendable {
   case draft2020_12
 //  case draft2019_09
 //  case draft7
@@ -14,6 +14,8 @@ public enum Dialect: Hashable {
     }
   }
 
+  /// The supported keywords by dialect.
+  /// Order matters as some keywords require annoation results of others.
   var keywords: [any Keyword.Type] {
     switch self {
     case .draft2020_12:
@@ -27,6 +29,32 @@ public enum Dialect: Hashable {
         Keywords.DynamicReference.self,
         Keywords.DynamicAnchor.self,
         Keywords.Comment.self,
+
+        Keywords.Items.self,
+        Keywords.Contains.self,
+
+        Keywords.TypeKeyword.self,
+
+        Keywords.MultipleOf.self,
+        Keywords.Maximum.self,
+        Keywords.ExclusiveMaximum.self,
+        Keywords.Minimum.self,
+        Keywords.ExclusiveMaximum.self,
+
+        Keywords.MaxLength.self,
+        Keywords.MinLength.self,
+        Keywords.Pattern.self,
+
+        Keywords.MaxItems.self,
+        Keywords.MinItems.self,
+        Keywords.UniqueItems.self,
+        Keywords.MaxContains.self,
+        Keywords.MinContains.self,
+
+        Keywords.MaxProperties.self,
+        Keywords.MinProperties.self,
+        Keywords.Required.self,
+        Keywords.DependentRequired.self,
       ]
     }
   }

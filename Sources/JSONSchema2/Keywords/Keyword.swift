@@ -1,6 +1,6 @@
 typealias KeywordIdentifier = String
 
-protocol Keyword: Hashable {
+protocol Keyword: Sendable {
   /// The name of the keyword, such as `type` or `minLength`.
   static var name: KeywordIdentifier { get }
 

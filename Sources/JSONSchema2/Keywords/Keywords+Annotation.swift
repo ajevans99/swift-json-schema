@@ -1,10 +1,18 @@
 protocol AnnotationProducingKeyword: Keyword {
   /// The type of the annoation value that can be produced as a result of this applying this keyword during validaiton.
-  associatedtype AnnotationValue: Sendable
+  associatedtype AnnotationValue: AnnotationValueConvertible
+}
+
+protocol AnnotationValueConvertible: Sendable {
+  var value: JSONValue { get }
+}
+
+extension JSONValue: AnnotationValueConvertible {
+  var value: JSONValue { self }
 }
 
 protocol AnnotationKeyword: AnnotationProducingKeyword {
-  func validate(_ input: JSONValue, against value: JSONValue, at location: ValidationLocation, using annotations: inout AnnotationContainer)
+  func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: inout AnnotationContainer)
 }
 
 extension Keywords {

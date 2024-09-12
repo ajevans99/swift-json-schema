@@ -1,7 +1,7 @@
-struct Annotation<Value: Sendable>: Sendable {
-  let keyword: KeywordIdentifier
+struct Annotation<Keyword: AnnotationProducingKeyword>: Sendable {
+  let keyword: Keyword
   let instanceLocation: JSONPointer
   let schemaLocation: JSONPointer
   let absoluteSchemaLocation: JSONPointer?
-  let value: Value
+  let value: Keyword.AnnotationValue
 }
