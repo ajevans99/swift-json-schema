@@ -38,6 +38,40 @@ extension Keywords {
       }
     }
   }
+
+  struct Enum: AssertionKeyword {
+    static let name = "enum"
+
+    let schema: JSONValue
+    let location: JSONPointer
+
+    private let enumCases: [JSONValue]
+
+    init(schema: JSONValue, location: JSONPointer) {
+      self.schema = schema
+      self.location = location
+      self.enumCases = schema.array ?? []
+    }
+
+    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+      if !enumCases.contains(input) {
+        throw .notEnumCase
+      }
+    }
+  }
+
+  struct Constant: AssertionKeyword {
+    static let name = "const"
+
+    let schema: JSONValue
+    let location: JSONPointer
+
+    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+      if input != schema {
+        throw .constantMismatch
+      }
+    }
+  }
 }
 
 // MARK: - Numbers

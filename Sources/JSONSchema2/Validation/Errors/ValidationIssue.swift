@@ -1,8 +1,10 @@
 public enum ValidationIssue: Error {
   case typeMismatch
-  case notMultipleOf
+  case notEnumCase
+  case constantMismatch
 
   // Number
+  case notMultipleOf
   case exceedsMaximum
   case exceedsExclusiveMaximum
   case belowMinimum
@@ -26,4 +28,7 @@ public enum ValidationIssue: Error {
   case belowMinProperties
   case missingRequiredProperty(key: String)
   case missingDependentProperty(key: String, dependentOn: String)
+  case invalidProperty(ValidationResult)
+  case invalidPatternProperty(ValidationResult)
+  case invalidAdditionalProperty(ValidationResult)
 }

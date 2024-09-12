@@ -16,6 +16,7 @@ public enum Dialect: Hashable, Sendable {
 
   /// The supported keywords by dialect.
   /// Order matters as some keywords require annoation results of others.
+  /// In the future, keywords should define their own dependencies and order should be determined by a dependency graph algorithm.
   var keywords: [any Keyword.Type] {
     switch self {
     case .draft2020_12:
@@ -30,10 +31,31 @@ public enum Dialect: Hashable, Sendable {
         Keywords.DynamicAnchor.self,
         Keywords.Comment.self,
 
+        Keywords.PrefixItems.self,
         Keywords.Items.self,
         Keywords.Contains.self,
 
+        Keywords.Properites.self,
+        Keywords.PatternProperties.self,
+        Keywords.AdditionalProperties.self,
+        Keywords.PropertyNames.self,
+
+        Keywords.AllOf.self,
+        Keywords.AnyOf.self,
+        Keywords.OneOf.self,
+        Keywords.Not.self,
+
+        Keywords.If.self,
+        Keywords.Then.self,
+        Keywords.Else.self,
+        Keywords.DependentSchemas.self,
+
+        Keywords.UnevaluatedItems.self,
+        Keywords.UnevaluatedProperties.self,
+
         Keywords.TypeKeyword.self,
+        Keywords.Enum.self,
+        Keywords.Constant.self,
 
         Keywords.MultipleOf.self,
         Keywords.Maximum.self,
