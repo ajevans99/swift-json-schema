@@ -1,4 +1,6 @@
-public struct JSONPointer: Equatable {
+///  JSON Pointer defines a string syntax for identifying a specific value within a JavaScript Object Notation (JSON) document.
+/// https://datatracker.ietf.org/doc/html/rfc6901
+public struct JSONPointer: Equatable, Sendable {
   enum Component: Equatable {
     case index(Int)
     case key(String)
@@ -9,22 +11,29 @@ public struct JSONPointer: Equatable {
   public init() {}
 
   public init(from string: String) {
-    // https://datatracker.ietf.org/doc/html/rfc6901#section-4
-    let unescaped = string
-      .replacing("~1", with: "/")
-      .replacing("~0", with: "~")
+    let elements = string.split(separator: "/", omittingEmptySubsequences: false).dropFirst()
+    for element in elements {
+      // https://datatracker.ietf.org/doc/html/rfc6901#section-4
+      let unescaped = element
+        .replacing("~1", with: "/")
+        .replacing("~0", with: "~")
 
-    for element in unescaped.split(separator: "/") {
-      if let int = Int(element) {
+      if let int = Int(unescaped) {
         append(.index(int))
-      } else if !element.isEmpty {
-        append(.key(String(element)))
+      } else {
+        append(.key(String(unescaped)))
       }
     }
   }
 
   mutating func append(_ component: Component) {
     path.append(component)
+  }
+}
+
+extension JSONPointer: ExpressibleByStringLiteral {
+  public init(stringLiteral value: String) {
+    self.init(from: value)
   }
 }
 
@@ -44,13 +53,24 @@ extension JSONPointer: CustomStringConvertible {
 extension JSONValue {
   public func value(at pointer: JSONPointer) -> JSONValue? {
     guard !pointer.path.isEmpty else { return self }
-    
-//    switch pointer.path.first {
-//    case .index(let index):
-//      return self[index]
-//    case .key(let key):
-//      return self[key]
-//    }
-    return nil
+
+    var current: JSONValue = self
+
+    for path in pointer.path {
+      switch path {
+      case .index(let index):
+        guard case .array(let array) = current else { return nil }
+        if array.indices.contains(index) {
+          current = array[index]
+        }
+      case .key(let key):
+        guard case .object(let dictionary) = current else { return nil }
+        if let value = dictionary[key] {
+          current = value
+        }
+      }
+    }
+
+    return current
   }
 }
