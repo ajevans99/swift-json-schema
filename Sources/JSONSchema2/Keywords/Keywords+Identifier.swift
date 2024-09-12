@@ -48,7 +48,7 @@ extension Keywords {
     var location: JSONPointer
   }
 
-  struct Defintion: IdentifierKeyword {
+  struct Defs: IdentifierKeyword {
     static let name = "$defs"
 
     var schema: JSONValue

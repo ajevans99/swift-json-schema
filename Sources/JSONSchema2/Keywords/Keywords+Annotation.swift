@@ -14,7 +14,3 @@ extension JSONValue: AnnotationValueConvertible {
 protocol AnnotationKeyword: AnnotationProducingKeyword {
   func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: inout AnnotationContainer)
 }
-
-extension Keywords {
-  
-}

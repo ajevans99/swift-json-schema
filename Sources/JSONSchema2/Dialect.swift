@@ -25,11 +25,23 @@ public enum Dialect: Hashable, Sendable {
         Keywords.Vocabulary.self,
         Keywords.Identifier.self,
         Keywords.Reference.self,
-        Keywords.Defintion.self,
+        Keywords.Defs.self,
         Keywords.Anchor.self,
         Keywords.DynamicReference.self,
         Keywords.DynamicAnchor.self,
         Keywords.Comment.self,
+
+        Keywords.Title.self,
+        Keywords.Description.self,
+        Keywords.Default.self,
+        Keywords.Deprecated.self,
+        Keywords.ReadOnly.self,
+        Keywords.WriteOnly.self,
+        Keywords.Examples.self,
+
+        Keywords.ContentEncoding.self,
+        Keywords.ContentMediaType.self,
+        Keywords.ContentSchema.self,
 
         Keywords.PrefixItems.self,
         Keywords.Items.self,
@@ -77,6 +89,11 @@ public enum Dialect: Hashable, Sendable {
         Keywords.MinProperties.self,
         Keywords.Required.self,
         Keywords.DependentRequired.self,
+
+        Keywords.Defintions.self,
+        Keywords.Dependencies.self,
+        Keywords.RecursiveAnchor.self,
+        Keywords.RecursiveReference.self,
       ]
     }
   }
