@@ -1,4 +1,4 @@
-public indirect enum ValidationIssue: Error, Codable {
+public indirect enum ValidationIssue: Error, Codable, Equatable {
   case typeMismatch
   case notEnumCase
   case constantMismatch

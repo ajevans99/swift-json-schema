@@ -243,7 +243,7 @@ extension Keywords {
     let schema: JSONValue
     let location: JSONPointer
 
-    private let regex: Regex<String>?
+    private let regex: Regex<AnyRegexOutput>?
 
     init(schema: JSONValue, location: JSONPointer) {
       self.schema = schema
@@ -262,15 +262,6 @@ extension Keywords {
           throw .patternMismatch
         }
       }
-    }
-
-    public static func == (lhs: Pattern, rhs: Pattern) -> Bool {
-      lhs.schema == rhs.schema && lhs.location == rhs.location
-    }
-
-    public func hash(into hasher: inout Hasher) {
-      hasher.combine(schema)
-      hasher.combine(location)
     }
   }
 }

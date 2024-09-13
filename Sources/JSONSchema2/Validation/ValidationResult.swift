@@ -1,4 +1,4 @@
-public struct ValidationResult: Sendable, Codable {
+public struct ValidationResult: Sendable, Codable, Equatable {
   public let valid: Bool
   public let location: ValidationLocation
 

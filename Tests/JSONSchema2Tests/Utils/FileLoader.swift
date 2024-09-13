@@ -4,21 +4,16 @@ struct FileLoader<T: Decodable> {
   let subdirectory: String
 
   func listFiles() -> [URL] {
-    do {
-      guard
-        let fileURLs = Bundle.module.urls(
-          forResourcesWithExtension: "json",
-          subdirectory: subdirectory
-        )
-      else {
-        print("Failed to find JSON files")
-        return []
-      }
-      return fileURLs
-    } catch {
-      print("Error listing files: \(error)")
+    guard
+      let fileURLs = Bundle.module.urls(
+        forResourcesWithExtension: "json",
+        subdirectory: subdirectory
+      )
+    else {
+      print("Failed to find JSON files")
       return []
     }
+    return fileURLs
   }
 
   func readFile(at url: URL) -> Data? {
