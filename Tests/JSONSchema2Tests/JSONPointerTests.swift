@@ -9,9 +9,14 @@ struct JSONPointerTests {
   }
 
   @Test(arguments: [
-    ("", [JSONPointer.Component]()), ("/", [.key("")]), ("/foo", [.key("foo")]),
-    ("/foo/bar", [.key("foo"), .key("bar")]), ("/foo/0", [.key("foo"), .index(0)]),
-    ("/0/foo", [.index(0), .key("foo")]), ("/a~1b", [.key("a/b")]), ("/m~0n", [.key("m~n")]),
+    ("", [JSONPointer.Component]()),
+    ("/", [.key("")]),
+    ("/foo", [.key("foo")]),
+    ("/foo/bar", [.key("foo"), .key("bar")]),
+    ("/foo/0", [.key("foo"), .index(0)]),
+    ("/0/foo", [.index(0), .key("foo")]),
+    ("/a~1b", [.key("a/b")]),
+    ("/m~0n", [.key("m~n")]),
   ]) func initFrom(string: String, expected: [JSONPointer.Component]) {
     let location = JSONPointer(from: string)
     #expect(location.path == expected)
@@ -26,14 +31,25 @@ struct JSONPointerTests {
   }
 
   static let exampleDocument1: JSONValue = [
-    "foo": ["bar", "baz"], "": 0, "a/b": 1, "c%d": 2, "e^f": 3, "g|h": 4, #"i\\j"#: 5, #"k"l""#: 6,
-    " ": 7, "m~n": 8,
+    "foo": ["bar", "baz"],
+    "": 0,
+    "a/b": 1,
+    "c%d": 2,
+    "e^f": 3,
+    "g|h": 4,
+    #"i\\j"#: 5,
+    #"k"l""#: 6,
+    " ": 7,
+    "m~n": 8,
   ]
 
   @Test(arguments: [
     (JSONPointer(from: ""), exampleDocument1),
-    (JSONPointer(from: "/foo"), JSONValue.array(["bar", "baz"])), ("/foo/0", "bar"), ("/", 0),
-    ("/a~1b", 1), ("/c%d", 2), ("/e^f", 3),
+    (JSONPointer(from: "/foo"),JSONValue.array(["bar", "baz"])),
+    ("/foo/0", "bar"), ("/", 0),
+    ("/a~1b", 1),
+    ("/c%d", 2),
+    ("/e^f", 3),
   ]) func valueAtPointer(at location: JSONPointer, expected: JSONValue) {
     #expect(Self.exampleDocument1.value(at: location) == expected)
   }
@@ -43,11 +59,14 @@ struct JSONPointerTests {
       "level2": [
         "level3a": "deepValue1",
         "level3b": [
-          "key1": "value1", "key2": "value2",
+          "key1": "value1",
+          "key2": "value2",
           "nestedArray": [["innerKey": "innerValue1"], ["innerKey": "innerValue2"]],
-        ], "level3c": ["arrayElement1", "arrayElement2"],
+        ],
+        "level3c": ["arrayElement1", "arrayElement2"],
       ]
-    ], "rootArray": [["arrayLevel2": ["arrayLevel3": "deepValue2"]], "simpleValue"],
+    ],
+    "rootArray": [["arrayLevel2": ["arrayLevel3": "deepValue2"]], "simpleValue"],
     "keyWithEmptyString": ["": "emptyStringValue"],
   ]
 
@@ -59,9 +78,11 @@ struct JSONPointerTests {
         "level2": [
           "level3a": "deepValue1",
           "level3b": [
-            "key1": "value1", "key2": "value2",
+            "key1": "value1",
+            "key2": "value2",
             "nestedArray": [["innerKey": "innerValue1"], ["innerKey": "innerValue2"]],
-          ], "level3c": ["arrayElement1", "arrayElement2"],
+          ],
+          "level3c": ["arrayElement1", "arrayElement2"],
         ]
       ])
     ),

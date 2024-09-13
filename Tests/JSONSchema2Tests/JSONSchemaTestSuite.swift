@@ -3,7 +3,7 @@ import JSONSchema2
 import Testing
 
 struct JSONSchemaTestSuite {
-  static let fileLoader = FileLoader<[JSONSchemaTest]>(subdirectory: "draft2020-12")
+  static let fileLoader = FileLoader<[JSONSchemaTest]>(subdirectory: "JSON-Schema-Test-Suite/tests/draft2020-12")
 
   static let unsupportedFilePaths = [String]()
 
@@ -17,34 +17,31 @@ struct JSONSchemaTestSuite {
   }()
 
   @Test(arguments: flattenedArguments)
-  func schemaTest(_ schemaTest: JSONSchemaTest, path: String) throws {
+  func schemaTest(_ schemaTest: JSONSchemaTest, path: String) {
     for testCase in schemaTest.tests {
       let validationResult = schemaTest.schema.validate(testCase.data)
 
       let comment: () -> Testing.Comment = {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        """
+        Schema Test: "\(schemaTest.description)" @ \(path)
+        ```json
+        \(try! schemaTest.schema.json())
+        ```
 
-        return """
-          Schema Test: "\(schemaTest.description)" @ \(path)
-          ```json
-          \(try! schemaTest.schema.json())
-          ```
+        Test Case: "\(testCase.description)"
+        ```json
+        \(try! testCase.data.json())
+        ```
 
-          Test Case: "\(testCase.description)"
-          ```json
-          \(try! testCase.data.json())
-          ```
+        Valid?:
+        - Expected: \(testCase.valid)
+        - Recieved: \(validationResult.valid)
 
-          Valid?:
-          - Expected: \(testCase.valid)
-          - Recieved: \(validationResult.valid)
-
-          Full result:
-          ```json
-          \(try! validationResult.json())
-          ```
-          """
+        Full result:
+        ```json
+        \(try! validationResult.json())
+        ```
+        """
       }
 
       #expect(
