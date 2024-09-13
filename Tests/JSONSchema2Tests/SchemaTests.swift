@@ -63,5 +63,6 @@ struct SchemaTests {
         dynamicAnchors: ["dynamicAnchor": .init()]
       )
     )
+    #expect(rawSchema.object?.keys.count == schema.keywords.count)
   }
 }

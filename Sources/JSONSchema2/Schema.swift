@@ -23,7 +23,7 @@ public struct Schema: ValidatableSchema {
   }
 
   public func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
-    return schema.validate(instance, at: location)
+    schema.validate(instance, at: location)
   }
 }
 
@@ -65,7 +65,6 @@ struct ObjectSchema: ValidatableSchema {
       {
         self.context = Context(dialect: dialect)
       }
-      print("Unable to determine dialect from schema. Falling back to draft 2020-09.")
       self.context = Context(dialect: .draft2020_12)
     }
     collectKeywords()
