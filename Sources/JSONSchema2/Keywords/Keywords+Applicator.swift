@@ -46,7 +46,7 @@ extension Keywords {
         let location = location.appending(.index(offset))
         let result = schema.validate(instance, at: location)
         if !result.valid {
-          throw .invalidItem(result)
+          throw .invalidItem
         }
         largestIndex = offset
       }
@@ -54,7 +54,7 @@ extension Keywords {
       annotations[Self.self] = .init(
         keyword: self,
         instanceLocation: location,
-        value: largestIndex == instances.endIndex ? .everyIndex : .largestIndex(largestIndex)
+        value: largestIndex == instances.indices.last ? .everyIndex : .largestIndex(largestIndex)
       )
     }
   }
@@ -81,14 +81,15 @@ extension Keywords {
 
       let relevantInstanceItems: ArraySlice<JSONValue> = switch annotations[PrefixItems.self]?.value {
         case .everyIndex: .init()
-        case .largestIndex(let index): instances.dropFirst(index)
+        case .largestIndex(let index): instances.dropFirst(index + 1)
         case .none: instances[...]
         }
+      // With array slice, original array indicies are used which is important here.
       for (index, instance) in zip(relevantInstanceItems.indices, relevantInstanceItems) {
         let location = location.appending(.index(index))
         let result = subschema.validate(instance, at: location)
         if !result.valid {
-          throw .invalidItem(result)
+          throw .invalidItem
         }
       }
 
@@ -145,16 +146,16 @@ extension Keywords {
         }
       }
 
+      if validIndices.isEmpty {
+        throw .containsInsufficientMatches
+      }
+
       let annotationValue = validIndices.count == instances.count ? ContainsAnnotationValue.everyIndex : .indicies(validIndices)
       annotations[Self.self] = .init(
         keyword: self,
         instanceLocation: location,
         value: annotationValue
       )
-
-      if validIndices.isEmpty {
-        throw .containsInsufficientMatches
-      }
     }
   }
 }
@@ -163,7 +164,7 @@ extension Keywords {
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-properties
-  struct Properites: ApplicatorKeyword {
+  struct Properties: ApplicatorKeyword {
     static let name = "properties"
 
     let schema: JSONValue
@@ -194,7 +195,7 @@ extension Keywords {
         let result = schemaMap[key]!.validate(value, at: location)
 
         if !result.valid {
-          throw .invalidProperty(result)
+          throw .invalidProperty
         }
 
         instancePropertyNames.insert(key)
@@ -237,7 +238,7 @@ extension Keywords {
             let result = schema.validate(value, at: propertyLocation)
 
             if !result.valid {
-              throw ValidationIssue.invalidPatternProperty(result)
+              throw ValidationIssue.invalidPatternProperty
             }
 
             matchedPropertyNames.insert(key)
@@ -269,7 +270,7 @@ extension Keywords {
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
-      let previouslyValidatedKeys = (annotations[AdditionalProperties.self]?.value ?? [])
+      let previouslyValidatedKeys = (annotations[Properties.self]?.value ?? [])
         .union(annotations[PatternProperties.self]?.value ?? [])
 
       var validatedKeys: Set<String> = []
@@ -279,7 +280,7 @@ extension Keywords {
         let result = subschema.validate(value, at: propertyLocation)
 
         if !result.valid {
-          throw ValidationIssue.invalidAdditionalProperty(result)
+          throw ValidationIssue.invalidAdditionalProperty
         }
 
         validatedKeys.insert(key)
@@ -312,7 +313,7 @@ extension Keywords {
       for key in instanceObject.keys {
         let result = subschema.validate(.string(key), at: location) // TODO: Location?
         if !result.valid {
-          throw .invalidPatternProperty(result)
+          throw .invalidPatternProperty
         }
       }
     }
@@ -322,6 +323,7 @@ extension Keywords {
 // MARK: - In Place (Logic)
 
 extension Keywords {
+  /// https://json-schema.org/draft/2020-12/json-schema-core#name-allof
   struct AllOf: ApplicatorKeyword {
     static let name = "allOf"
 

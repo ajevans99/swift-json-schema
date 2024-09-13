@@ -485,10 +485,208 @@ struct KeywordTests {
       }
     }
   }
+
+  struct ApplicatorKeywords {
+
+    // MARK: - Arrays
+
+    @Test(arguments: [
+      (JSONValue.array([1, "two", 3.0]), Keywords.PrefixItems.PrefixItemsAnnoationValue.everyIndex, true),
+      (JSONValue.array([1, "two", 3.0, true]), .largestIndex(2), true),
+      (JSONValue.array([1, 2, 3]), nil, false),
+      (JSONValue.string("not an array"), nil, true),
+    ])
+    func prefixItems(instance: JSONValue, expectedAnnotation: Keywords.PrefixItems.PrefixItemsAnnoationValue?, isValid: Bool) {
+      let schemaValue: JSONValue = [
+        ["type": "integer"],
+        ["type": "string"],
+        ["type": "number"]
+      ]
+      let context = Context(dialect: .draft2020_12)
+      var annotations = AnnotationContainer()
+      let keyword = Keywords.PrefixItems(schema: schemaValue, location: .init())
+      
+      if isValid {
+        #expect(throws: Never.self) {
+          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+        }
+      } else {
+        #expect(throws: ValidationIssue.invalidItem) {
+          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+        }
+      }
+      #expect(annotations[Keywords.PrefixItems.self]?.value == expectedAnnotation)
+    }
+    
+    @Test(arguments: [
+      (JSONValue.array(["one", "two", 3]), Keywords.PrefixItems.PrefixItemsAnnoationValue.largestIndex(1), true),
+      (JSONValue.array(["one", "two", "three"]), .largestIndex(1), false),
+      (JSONValue.array(["one", "two", "three"]), .everyIndex, true),
+      (JSONValue.array([1, "two", 3.0]), nil, false),
+      (JSONValue.array([1, 2, 3]), nil, true),
+      (JSONValue.string("not an array"), nil, true),
+    ])
+    func items(instance: JSONValue, prefixItemsAnnotaion: Keywords.PrefixItems.PrefixItemsAnnoationValue?, isValid: Bool) {
+      let schemaValue: JSONValue = ["type": "integer"]
+      let context = Context(dialect: .draft2020_12)
+      var annotations = AnnotationContainer()
+        .applying(prefixItemsAnnotaion, to: Keywords.PrefixItems.self)
+      let keyword = Keywords.Items(schema: schemaValue, location: .init())
+      
+      if isValid {
+        #expect(throws: Never.self, "\(instance)") {
+          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+        }
+      } else {
+        #expect(throws: ValidationIssue.invalidItem, "\(instance)") {
+          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+        }
+      }
+      // Nil when invalid, true when valid
+      #expect(annotations[Keywords.Items.self]?.value != !isValid)
+    }
+    
+    @Test(arguments: [
+      (JSONValue.array([1, 2, 3]), Keywords.Contains.ContainsAnnotationValue.everyIndex, true),
+      (JSONValue.array([1, "two", 3]), .indicies([0, 2]), true),
+      (JSONValue.array(["one", "two", "three"]), nil, false),
+      (JSONValue.string("not an array"), nil, true),
+    ])
+    func contains(instance: JSONValue, expectedAnnotation: Keywords.Contains.ContainsAnnotationValue?, isValid: Bool) {
+      let schemaValue: JSONValue = ["type": "integer"]
+      let context = Context(dialect: .draft2020_12)
+      var annotations = AnnotationContainer()
+      let keyword = Keywords.Contains(schema: schemaValue, location: .init())
+      
+      if isValid {
+        #expect(throws: Never.self) {
+          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+        }
+      } else {
+        #expect(throws: ValidationIssue.containsInsufficientMatches) {
+          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+        }
+      }
+      #expect(annotations[Keywords.Contains.self]?.value == expectedAnnotation)
+    }
+
+    // MARK: - Objects
+
+    @Test(arguments: [
+      (JSONValue.object(["a": 1, "b": 2]), Set(["a", "b"]), true),
+      (JSONValue.object(["a": 1, "b": "string"]), nil, false),
+      (JSONValue.object(["a": 1]), Set(["a"]), true),
+      (JSONValue.object(["b": 2]), Set(["b"]), true),
+      (JSONValue.object(["c": 3]), Set([]), true),
+      (JSONValue.string("not an object"), nil, true)
+    ])
+    func properties(instance: JSONValue, expectedAnnotation: Set<String>?, isValid: Bool) {
+      let schemaValue: JSONValue = [
+        "a": ["type": "integer"],
+        "b": ["type": "integer"]
+      ]
+      let context = Context(dialect: .draft2020_12)
+      var annotations = AnnotationContainer()
+      let keyword = Keywords.Properties(schema: schemaValue, location: .init())
+
+      if isValid {
+        #expect(throws: Never.self) {
+          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+        }
+      } else {
+        #expect(throws: ValidationIssue.invalidProperty) {
+          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+        }
+      }
+      #expect(annotations[Keywords.Properties.self]?.value == expectedAnnotation)
+    }
+
+    @Test(arguments: [
+      (JSONValue.object(["a1": 1, "b2": 2]), Set(["a1", "b2"]), true),
+      (JSONValue.object(["a1": 1, "b2": "string"]), nil, false),
+      (JSONValue.object(["a1": 1]), Set(["a1"]), true),
+      (JSONValue.object(["b2": 2]), Set(["b2"]), true),
+      (JSONValue.object(["c3": 3]), Set([]), true),
+      (JSONValue.string("not an object"), nil, true)
+    ])
+    func patternProperties(instance: JSONValue, expectedAnnotation: Set<String>?, isValid: Bool) {
+      let schemaValue: JSONValue = [
+        "a\\d": ["type": "integer"],
+        "b\\d": ["type": "integer"]
+      ]
+      let context = Context(dialect: .draft2020_12)
+      var annotations = AnnotationContainer()
+      let keyword = Keywords.PatternProperties(schema: schemaValue, location: .init())
+
+      if isValid {
+        #expect(throws: Never.self) {
+          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+        }
+      } else {
+        #expect(throws: ValidationIssue.invalidPatternProperty) {
+          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+        }
+      }
+      #expect(annotations[Keywords.PatternProperties.self]?.value == expectedAnnotation)
+    }
+
+    @Test(arguments: [
+      (JSONValue.object(["a": 1, "b": 2, "c": 3]), Set(["c"]), true),
+      (JSONValue.object(["a": 1, "b": 2, "c": "string"]), nil, false),
+      (JSONValue.object(["a": 1, "b": 2]), Set([]), true),
+      (JSONValue.object(["c": 3]), Set(["c"]), true),
+      (JSONValue.string("not an object"), nil, true)
+    ])
+    func additionalProperties(instance: JSONValue, expectedAnnotation: Set<String>?, isValid: Bool) {
+      let schemaValue: JSONValue = ["type": "integer"]
+      let context = Context(dialect: .draft2020_12)
+      var annotations = AnnotationContainer()
+      annotations.apply(["a"], to: Keywords.Properties.self)
+      annotations.apply(["b"], to: Keywords.PatternProperties.self)
+      let keyword = Keywords.AdditionalProperties(schema: schemaValue, location: .init())
+
+      if isValid {
+        #expect(throws: Never.self) {
+          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+        }
+      } else {
+        #expect(throws: ValidationIssue.invalidAdditionalProperty) {
+          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+        }
+      }
+      #expect(annotations[Keywords.AdditionalProperties.self]?.value == expectedAnnotation)
+    }
+
+    @Test(arguments: [
+      (JSONValue.object(["a": 1, "b": 2]), true),
+      (JSONValue.object(["a": 1, "b": "invalid"]), true),
+      (JSONValue.object(["a": 1, "b": 2, "c": 3]), true),
+      (JSONValue.object(["a": 1, "0": 2]), false),
+      (JSONValue.string("not an object"), true)
+    ])
+    func propertyNames(instance: JSONValue, isValid: Bool) {
+      let schemaValue: JSONValue = ["pattern": "^[a-z]+$"]
+      let context = Context(dialect: .draft2020_12)
+      var annotations = AnnotationContainer()
+      let keyword = Keywords.PropertyNames(schema: schemaValue, location: .init())
+
+      if isValid {
+        #expect(throws: Never.self) {
+          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+        }
+      } else {
+        #expect(throws: ValidationIssue.invalidPatternProperty, "\(instance)") {
+          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+        }
+      }
+    }
+  }
 }
 
 extension AnnotationContainer {
-  func applying<K: AnnotationProducingKeyword>(_ value: K.AnnotationValue, to keywordType: K.Type) -> Self {
+  func applying<K: AnnotationProducingKeyword>(_ value: K.AnnotationValue?, to keywordType: K.Type) -> Self {
+    guard let value else { return self }
+
     var copy = self
     copy.apply(value, to: keywordType)
     return copy

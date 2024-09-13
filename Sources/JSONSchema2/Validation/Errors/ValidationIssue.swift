@@ -1,4 +1,4 @@
-public indirect enum ValidationIssue: Error, Codable, Equatable {
+public enum ValidationIssue: Error, Codable, Equatable {
   case typeMismatch
   case notEnumCase
   case constantMismatch
@@ -21,14 +21,14 @@ public indirect enum ValidationIssue: Error, Codable, Equatable {
   case itemsNotUnique
   case containsInsufficientMatches
   case containsExcessiveMatches
-  case invalidItem(ValidationResult)
+  case invalidItem
 
   // Objects
   case exceedsMaxProperties
   case belowMinProperties
   case missingRequiredProperty(key: String)
   case missingDependentProperty(key: String, dependentOn: String)
-  case invalidProperty(ValidationResult)
-  case invalidPatternProperty(ValidationResult)
-  case invalidAdditionalProperty(ValidationResult)
+  case invalidProperty
+  case invalidPatternProperty
+  case invalidAdditionalProperty
 }

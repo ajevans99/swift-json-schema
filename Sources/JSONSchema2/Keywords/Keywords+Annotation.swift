@@ -3,6 +3,6 @@ protocol AnnotationProducingKeyword: Keyword {
   associatedtype AnnotationValue: AnnotationValueConvertible
 }
 
-protocol AnnotationValueConvertible: Sendable { var value: JSONValue { get } }
+protocol AnnotationValueConvertible: Sendable, Equatable { var value: JSONValue { get } }
 
 extension JSONValue: AnnotationValueConvertible { var value: JSONValue { self } }
