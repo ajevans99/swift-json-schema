@@ -87,11 +87,12 @@ struct ObjectSchema: ValidatableSchema {
 
     var annotations = AnnotationContainer()
 
+    var contextCopy = context
     for keyword in keywords {
       do throws(ValidationIssue) {
         switch keyword {
         case let applicator as any ApplicatorKeyword:
-          try applicator.validate(instance, at: location, using: &annotations, with: context)
+          try applicator.validate(instance, at: location, using: &annotations, with: &contextCopy)
         case let assertion as any AssertionKeyword:
           try assertion.validate(instance, at: location, using: annotations)
         default:

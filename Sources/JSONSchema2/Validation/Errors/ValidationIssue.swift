@@ -31,4 +31,11 @@ public enum ValidationIssue: Error, Codable, Equatable {
   case invalidProperty
   case invalidPatternProperty
   case invalidAdditionalProperty
+
+  case allOfFailed
+  case anyOfFailed
+  case oneOfFailed
+  case notFailed
+
+  case conditionalFailed
 }

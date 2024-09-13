@@ -502,17 +502,17 @@ struct KeywordTests {
         ["type": "string"],
         ["type": "number"]
       ]
-      let context = Context(dialect: .draft2020_12)
+      var context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
       let keyword = Keywords.PrefixItems(schema: schemaValue, location: .init())
       
       if isValid {
         #expect(throws: Never.self) {
-          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+          try keyword.validate(instance, at: .init(), using: &annotations, with: &context)
         }
       } else {
         #expect(throws: ValidationIssue.invalidItem) {
-          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+          try keyword.validate(instance, at: .init(), using: &annotations, with: &context)
         }
       }
       #expect(annotations[Keywords.PrefixItems.self]?.value == expectedAnnotation)
@@ -528,18 +528,18 @@ struct KeywordTests {
     ])
     func items(instance: JSONValue, prefixItemsAnnotaion: Keywords.PrefixItems.PrefixItemsAnnoationValue?, isValid: Bool) {
       let schemaValue: JSONValue = ["type": "integer"]
-      let context = Context(dialect: .draft2020_12)
+      var context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
         .applying(prefixItemsAnnotaion, to: Keywords.PrefixItems.self)
       let keyword = Keywords.Items(schema: schemaValue, location: .init())
       
       if isValid {
         #expect(throws: Never.self, "\(instance)") {
-          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+          try keyword.validate(instance, at: .init(), using: &annotations, with: &context)
         }
       } else {
         #expect(throws: ValidationIssue.invalidItem, "\(instance)") {
-          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+          try keyword.validate(instance, at: .init(), using: &annotations, with: &context)
         }
       }
       // Nil when invalid, true when valid
@@ -554,17 +554,17 @@ struct KeywordTests {
     ])
     func contains(instance: JSONValue, expectedAnnotation: Keywords.Contains.ContainsAnnotationValue?, isValid: Bool) {
       let schemaValue: JSONValue = ["type": "integer"]
-      let context = Context(dialect: .draft2020_12)
+      var context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
       let keyword = Keywords.Contains(schema: schemaValue, location: .init())
       
       if isValid {
         #expect(throws: Never.self) {
-          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+          try keyword.validate(instance, at: .init(), using: &annotations, with: &context)
         }
       } else {
         #expect(throws: ValidationIssue.containsInsufficientMatches) {
-          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+          try keyword.validate(instance, at: .init(), using: &annotations, with: &context)
         }
       }
       #expect(annotations[Keywords.Contains.self]?.value == expectedAnnotation)
@@ -585,17 +585,17 @@ struct KeywordTests {
         "a": ["type": "integer"],
         "b": ["type": "integer"]
       ]
-      let context = Context(dialect: .draft2020_12)
+      var context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
       let keyword = Keywords.Properties(schema: schemaValue, location: .init())
 
       if isValid {
         #expect(throws: Never.self) {
-          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+          try keyword.validate(instance, at: .init(), using: &annotations, with: &context)
         }
       } else {
         #expect(throws: ValidationIssue.invalidProperty) {
-          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+          try keyword.validate(instance, at: .init(), using: &annotations, with: &context)
         }
       }
       #expect(annotations[Keywords.Properties.self]?.value == expectedAnnotation)
@@ -614,17 +614,17 @@ struct KeywordTests {
         "a\\d": ["type": "integer"],
         "b\\d": ["type": "integer"]
       ]
-      let context = Context(dialect: .draft2020_12)
+      var context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
       let keyword = Keywords.PatternProperties(schema: schemaValue, location: .init())
 
       if isValid {
         #expect(throws: Never.self) {
-          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+          try keyword.validate(instance, at: .init(), using: &annotations, with: &context)
         }
       } else {
         #expect(throws: ValidationIssue.invalidPatternProperty) {
-          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+          try keyword.validate(instance, at: .init(), using: &annotations, with: &context)
         }
       }
       #expect(annotations[Keywords.PatternProperties.self]?.value == expectedAnnotation)
@@ -639,7 +639,7 @@ struct KeywordTests {
     ])
     func additionalProperties(instance: JSONValue, expectedAnnotation: Set<String>?, isValid: Bool) {
       let schemaValue: JSONValue = ["type": "integer"]
-      let context = Context(dialect: .draft2020_12)
+      var context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
       annotations.apply(["a"], to: Keywords.Properties.self)
       annotations.apply(["b"], to: Keywords.PatternProperties.self)
@@ -647,11 +647,11 @@ struct KeywordTests {
 
       if isValid {
         #expect(throws: Never.self) {
-          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+          try keyword.validate(instance, at: .init(), using: &annotations, with: &context)
         }
       } else {
         #expect(throws: ValidationIssue.invalidAdditionalProperty) {
-          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+          try keyword.validate(instance, at: .init(), using: &annotations, with: &context)
         }
       }
       #expect(annotations[Keywords.AdditionalProperties.self]?.value == expectedAnnotation)
@@ -666,17 +666,17 @@ struct KeywordTests {
     ])
     func propertyNames(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = ["pattern": "^[a-z]+$"]
-      let context = Context(dialect: .draft2020_12)
+      var context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
       let keyword = Keywords.PropertyNames(schema: schemaValue, location: .init())
 
       if isValid {
         #expect(throws: Never.self) {
-          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+          try keyword.validate(instance, at: .init(), using: &annotations, with: &context)
         }
       } else {
         #expect(throws: ValidationIssue.invalidPatternProperty, "\(instance)") {
-          try keyword.validate(instance, at: .init(), using: &annotations, with: context)
+          try keyword.validate(instance, at: .init(), using: &annotations, with: &context)
         }
       }
     }

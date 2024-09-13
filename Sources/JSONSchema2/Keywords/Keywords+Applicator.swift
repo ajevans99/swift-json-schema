@@ -1,5 +1,5 @@
 protocol ApplicatorKeyword: AnnotationProducingKeyword {
-  func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue)
+  func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue)
 }
 
 // MARK: - Arrays
@@ -38,7 +38,7 @@ extension Keywords {
       }
     }
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
       var largestIndex: Int = instances.startIndex
@@ -76,7 +76,7 @@ extension Keywords {
 
     typealias AnnotationValue = Bool
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
       let relevantInstanceItems: ArraySlice<JSONValue> = switch annotations[PrefixItems.self]?.value {
@@ -134,7 +134,7 @@ extension Keywords {
       }
     }
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
       var validIndices = [Int]()
@@ -183,7 +183,7 @@ extension Keywords {
 
     typealias AnnotationValue = Set<String>
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
       guard let instanceObject = input.object else {
         return
       }
@@ -226,7 +226,7 @@ extension Keywords {
 
     typealias AnnotationValue = Set<String>
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
       var matchedPropertyNames: Set<String> = []
@@ -267,7 +267,7 @@ extension Keywords {
 
     typealias AnnotationValue = Set<String>
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
       let previouslyValidatedKeys = (annotations[Properties.self]?.value ?? [])
@@ -307,7 +307,7 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
       for key in instanceObject.keys {
@@ -340,8 +340,20 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      // TODO
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+      var isValid = true
+
+      for subschema in subschemas {
+        let result = subschema.validate(input, at: location)
+        if !result.valid {
+          isValid = false
+          break
+        }
+      }
+
+      if !isValid {
+        throw ValidationIssue.allOfFailed
+      }
     }
   }
 
@@ -361,8 +373,20 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      // TODO
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+      var isValid = false
+
+      for subschema in subschemas {
+        let result = subschema.validate(input, at: location)
+        if result.valid {
+          isValid = true
+          break
+        }
+      }
+
+      if !isValid {
+        throw ValidationIssue.anyOfFailed
+      }
     }
   }
 
@@ -382,8 +406,19 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      // TODO
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+      var validCount = 0
+
+      for subschema in subschemas {
+        let result = subschema.validate(input, at: location)
+        if result.valid {
+          validCount += 1
+        }
+      }
+
+      if validCount != 1 {
+        throw ValidationIssue.oneOfFailed
+      }
     }
   }
 
@@ -403,8 +438,11 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      // TODO
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+      let result = subschema.validate(input, at: location)
+      if result.valid {
+        throw ValidationIssue.notFailed
+      }
     }
   }
 }
@@ -427,10 +465,10 @@ extension Keywords {
       self.subschema = schema.extractSubschema(at: location)
     }
 
-    typealias AnnotationValue = Bool
+    typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      // TODO
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+      context.ifConditionalResult = subschema.validate(input, at: location)
     }
   }
 
@@ -451,8 +489,13 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      // TODO
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+      if context.ifConditionalResult?.valid == true {
+        let result = subschema.validate(input, at: location)
+        if !result.valid {
+          throw .conditionalFailed
+        }
+      }
     }
   }
 
@@ -473,8 +516,13 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      // TODO
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+      if context.ifConditionalResult?.valid == false {
+        let result = subschema.validate(input, at: location)
+        if !result.valid {
+          throw .conditionalFailed
+        }
+      }
     }
   }
 
@@ -498,7 +546,7 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
       // TODO
     }
   }
@@ -523,7 +571,7 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
       // TODO
     }
   }
@@ -544,7 +592,7 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
       // TODO
     }
   }

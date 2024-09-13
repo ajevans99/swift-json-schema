@@ -4,4 +4,7 @@ struct Context: Equatable, Sendable {
 
   var defintions = [String: Schema]()
   var dynamicAnchors = [String: JSONPointer]()
+
+  // TODO: This probably needs to be scoped to location
+  var ifConditionalResult: ValidationResult?
 }
