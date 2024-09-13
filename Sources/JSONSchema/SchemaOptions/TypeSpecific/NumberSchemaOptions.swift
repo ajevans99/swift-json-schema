@@ -1,4 +1,4 @@
-public struct NumberSchemaOptions: SchemaOptions, Equatable {
+public struct NumberSchemaOptions: SchemaOptions {
   /// Restrictes value to a multiple of this number.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/numeric#multiples)
   public var multipleOf: Double?

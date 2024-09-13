@@ -95,7 +95,7 @@ struct JSONSchemaOptionBuilderTests {
 
     let options: NumberSchemaOptions = try #require(sample.definition.options?.asType())
 
-    #expect(sample.definition.type == .number)
+    #expect(sample.definition.type == .single(.number))
     #expect(options == .options(multipleOf: 2, minimum: .inclusive(1), maximum: .exclusive(100)))
   }
 
@@ -106,7 +106,7 @@ struct JSONSchemaOptionBuilderTests {
 
     let options: NumberSchemaOptions = try #require(sample.definition.options?.asType())
 
-    #expect(sample.definition.type == .integer)
+    #expect(sample.definition.type == .single(.integer))
     #expect(
       options == .options(multipleOf: 1, minimum: .exclusive(0.99), maximum: .inclusive(5000))
     )

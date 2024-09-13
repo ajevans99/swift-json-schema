@@ -5,10 +5,10 @@ import Testing
 
 struct EncodingSchemaTests {
   @Test(arguments: [
-    (Schema.string(), JSONType.string), (.integer(), .integer), (.number(), .number),
+    (Schema.string(), JSONPrimative.string), (.integer(), .integer), (.number(), .number),
     (.object(), .object), (.array(), .array), (.boolean(), .boolean), (.null(), .null),
-  ]) func type(schema: Schema, type: JSONType) throws {
-    #expect(schema.type == type)
+  ]) func type(schema: Schema, type: JSONPrimative) throws {
+    #expect(schema.type == .single(type))
     let json = try schema.json()
     #expect(
       json == """
@@ -34,7 +34,7 @@ struct EncodingSchemaTests {
       json == """
         {
           "title" : "Hello",
-          "type" : "\(type.rawValue)"
+          "type" : \(type.value)
         }
         """
     )
@@ -83,7 +83,7 @@ struct EncodingSchemaTests {
           ],
           "readOnly" : true,
           "title" : "Title",
-          "type" : "\(type.rawValue)",
+          "type" : \(type.value),
           "writeOnly" : false
         }
         """
@@ -308,7 +308,7 @@ struct EncodingSchemaTests {
             "Hello",
             "World"
           ],
-          "type" : "\(type)"
+          "type" : \(type.value)
         }
         """
     )
@@ -388,6 +388,41 @@ struct EncodingSchemaTests {
         """
     )
   }
+
+  @Test func multipleTypes() throws {
+    let schema = Schema.multipleTypes(types: [.array, .string, .number])
+    let json = try schema.json()
+    #expect(
+      json == """
+        {
+          "type" : [
+            "array",
+            "string",
+            "number"
+          ]
+        }
+        """
+    )
+  }
+
+  @Test func dynamicOptions() throws {
+    let schema = Schema.noType(
+      .annotations(),
+      DynamicSchemaOptions.options(
+        array: .options(uniqueItems: true),
+        number: .options(multipleOf: 5)
+      )
+    )
+    let json = try schema.json()
+    #expect(
+      json == """
+        {
+          "multipleOf" : 5,
+          "uniqueItems" : true
+        }
+        """
+    )
+  }
 }
 
 extension RootSchema: @retroactive CustomTestStringConvertible {
@@ -402,12 +437,21 @@ extension RootSchema: @retroactive CustomTestStringConvertible {
 }
 
 extension Schema: @retroactive CustomTestStringConvertible {
-  public var testDescription: String { type?.rawValue.capitalized ?? "No explicit type" }
+  public var testDescription: String { type?.value.capitalized ?? "No explicit type" }
 
   func json() throws -> String {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     let data = try encoder.encode(self)
     return String(decoding: data, as: UTF8.self)
+  }
+}
+
+private extension JSONType {
+  var value: String {
+    switch self {
+    case .single(let primative): return "\"\(primative.rawValue)\""
+    case .array(let primatives): return "[\(primatives.map(\.rawValue).joined(separator: ", "))]"
+    }
   }
 }

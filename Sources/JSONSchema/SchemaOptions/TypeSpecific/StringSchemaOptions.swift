@@ -1,4 +1,4 @@
-public struct StringSchemaOptions: SchemaOptions, Equatable {
+public struct StringSchemaOptions: SchemaOptions {
   /// Minimum length of string.The value must be a non-negative number.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/string#length)
   public var minLength: Int?
