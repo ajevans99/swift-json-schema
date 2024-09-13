@@ -1,8 +1,23 @@
-public struct ValidationResult: Sendable {
-  public var valid: Bool
-  public var location: ValidationLocation
+public struct ValidationResult: Sendable, Codable {
+  public let valid: Bool
+  public let location: ValidationLocation
 
   /// Required if valid == false
-  public var errors: [ValidationResult]?
-  public var annotations: [ValidationResult]?
+  public let errors: [ValidationResult]?
+  public let error: ValidationIssue?
+  public let annotations: [ValidationResult]?
+
+  init(
+    valid: Bool,
+    location: ValidationLocation,
+    errors: [ValidationResult]? = nil,
+    error: ValidationIssue? = nil,
+    annotations: [ValidationResult]? = nil
+  ) {
+    self.valid = valid
+    self.location = location
+    self.errors = errors
+    self.error = error
+    self.annotations = annotations
+  }
 }

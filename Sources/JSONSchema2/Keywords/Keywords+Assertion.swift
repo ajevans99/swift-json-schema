@@ -1,5 +1,5 @@
 protocol AssertionKeyword: Keyword {
-  func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue)
+  func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue)
 }
 
 extension Keywords {
@@ -32,7 +32,7 @@ extension Keywords {
       }
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if !schemaAllowedPrimitives.contains(input.primative) {
         throw .typeMismatch
       }
@@ -53,7 +53,7 @@ extension Keywords {
       self.enumCases = schema.array ?? []
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if !enumCases.contains(input) {
         throw .notEnumCase
       }
@@ -66,7 +66,7 @@ extension Keywords {
     let schema: JSONValue
     let location: JSONPointer
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if input != schema {
         throw .constantMismatch
       }
@@ -93,7 +93,7 @@ extension Keywords {
       divisor = schema.numeric ?? 1.0
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if let double = input.numeric {
         if double.truncatingRemainder(dividingBy: divisor) != 0 {
           throw .notMultipleOf
@@ -117,7 +117,7 @@ extension Keywords {
       self.maxValue = schema.numeric ?? .infinity
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if let number = input.numeric, number > maxValue {
         throw .exceedsMaximum
       }
@@ -138,7 +138,7 @@ extension Keywords {
       self.exclusiveMaxValue = schema.numeric ?? .infinity
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if let number = input.numeric, number >= exclusiveMaxValue {
         throw .exceedsExclusiveMaximum
       }
@@ -160,7 +160,7 @@ extension Keywords {
       self.minValue = schema.numeric ?? -.infinity
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if let number = input.numeric, number < minValue {
         throw .belowMinimum
       }
@@ -181,7 +181,7 @@ extension Keywords {
       self.exclusiveMinValue = schema.numeric ?? -.infinity
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if let number = input.numeric, number <= exclusiveMinValue {
         throw .belowExclusiveMinimum
       }
@@ -207,7 +207,7 @@ extension Keywords {
       self.maxLength = schema.integer ?? Int.max
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if let string = input.string, string.count > maxLength {
         throw .exceedsMaxLength
       }
@@ -229,7 +229,7 @@ extension Keywords {
       self.minLength = schema.integer ?? 0
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if let string = input.string, string.count < minLength {
         throw .belowMinLength
       }
@@ -256,7 +256,7 @@ extension Keywords {
       }
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if let string = input.string, let regex = regex {
         if string.firstMatch(of: regex) == nil {
           throw .patternMismatch
@@ -293,7 +293,7 @@ extension Keywords {
       self.maxItems = schema.integer ?? Int.max
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if let array = input.array, array.count > maxItems {
         throw .exceedsMaxItems
       }
@@ -315,7 +315,7 @@ extension Keywords {
       self.minItems = schema.integer ?? 0
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if let array = input.array, array.count < minItems {
         throw .belowMinItems
       }
@@ -337,7 +337,7 @@ extension Keywords {
       self.uniqueItemsRequired = schema.boolean ?? false
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if uniqueItemsRequired, let array = input.array {
         let set = Set(array)
         if set.count != array.count {
@@ -362,7 +362,7 @@ extension Keywords {
       self.maxContains = schema.integer ?? Int.max
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       guard let array = input.array else { return }
 
       guard let containsAnnotation = annotations[Keywords.Contains.self] else { return }
@@ -395,7 +395,7 @@ extension Keywords {
       self.minContains = schema.integer ?? 1
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       guard let array = input.array else { return }
 
       guard let containsAnnotation = annotations[Keywords.Contains.self] else { return }
@@ -432,7 +432,7 @@ extension Keywords {
       self.maxProperties = schema.integer ?? Int.max
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       guard let object = input.object else { return }
 
       if object.count > maxProperties {
@@ -456,7 +456,7 @@ extension Keywords {
       self.minProperties = schema.integer ?? 0
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       guard let object = input.object else { return }
 
       if object.count < minProperties {
@@ -480,7 +480,7 @@ extension Keywords {
       self.requiredKeys = schema.array?.compactMap { $0.string } ?? []
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       guard let object = input.object else { return }
 
       for key in requiredKeys {
@@ -506,7 +506,7 @@ extension Keywords {
       self.dependencies = schema.object?.compactMapValues { $0.array?.compactMap { $0.string } } ?? [:]
     }
 
-    func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       guard let object = input.object else { return }
 
       for (key, dependentKeys) in dependencies {

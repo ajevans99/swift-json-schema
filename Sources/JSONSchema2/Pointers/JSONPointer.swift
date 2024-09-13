@@ -14,21 +14,13 @@ public struct JSONPointer: Sendable, Hashable {
     let elements = string.split(separator: "/", omittingEmptySubsequences: false).dropFirst()
     for element in elements {
       // https://datatracker.ietf.org/doc/html/rfc6901#section-4
-      let unescaped = element
-        .replacing("~1", with: "/")
-        .replacing("~0", with: "~")
+      let unescaped = element.replacing("~1", with: "/").replacing("~0", with: "~")
 
-      if let int = Int(unescaped) {
-        append(.index(int))
-      } else {
-        append(.key(String(unescaped)))
-      }
+      if let int = Int(unescaped) { append(.index(int)) } else { append(.key(String(unescaped))) }
     }
   }
 
-  mutating func append(_ component: Component) {
-    path.append(component)
-  }
+  mutating func append(_ component: Component) { path.append(component) }
 
   func appending(_ component: Component) -> JSONPointer {
     var pointer = self
@@ -40,21 +32,30 @@ public struct JSONPointer: Sendable, Hashable {
 }
 
 extension JSONPointer: ExpressibleByStringLiteral {
-  public init(stringLiteral value: String) {
-    self.init(from: value)
-  }
+  public init(stringLiteral value: String) { self.init(from: value) }
 }
 
 extension JSONPointer: CustomStringConvertible {
   public var description: String {
     path.reduce(into: "") { partialResult, component in
       switch component {
-      case .index(let int):
-        partialResult += "/\(int)"
-      case .key(let string):
-        partialResult += "/\(string)"
+      case .index(let int): partialResult += "/\(int)"
+      case .key(let string): partialResult += "/\(string)"
       }
     }
+  }
+}
+
+extension JSONPointer: Codable {
+  public init(from decoder: any Decoder) throws {
+    let container = try decoder.singleValueContainer()
+    let string = try container.decode(String.self)
+    self.init(from: string)
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(description)
   }
 }
 
@@ -68,14 +69,10 @@ extension JSONValue {
       switch path {
       case .index(let index):
         guard case .array(let array) = current else { return nil }
-        if array.indices.contains(index) {
-          current = array[index]
-        }
+        if array.indices.contains(index) { current = array[index] }
       case .key(let key):
         guard case .object(let dictionary) = current else { return nil }
-        if let value = dictionary[key] {
-          current = value
-        }
+        if let value = dictionary[key] { current = value }
       }
     }
 

@@ -10,8 +10,4 @@ protocol Keyword: Sendable {
   init(schema: JSONValue, location: JSONPointer)
 }
 
-extension Keyword {
-  var name: KeywordIdentifier {
-    Self.name
-  }
-}
+extension Keyword { var name: KeywordIdentifier { Self.name } }

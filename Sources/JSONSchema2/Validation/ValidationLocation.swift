@@ -1,4 +1,4 @@
-public struct ValidationLocation: Sendable {
+public struct ValidationLocation: Sendable, Codable {
   var keywordLocation: JSONPointer
   var instanceLocation: JSONPointer
   /// Required if keyworkLocation is a ref or dynamic ref

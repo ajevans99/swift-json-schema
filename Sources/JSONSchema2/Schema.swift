@@ -83,14 +83,30 @@ struct ObjectSchema: ValidatableSchema {
   }
 
   public func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
-    var isValid = true
     var errors: [ValidationResult] = []
+
+    var annotations = AnnotationContainer()
+
+    for keyword in keywords {
+      do throws(ValidationIssue) {
+        switch keyword {
+        case let applicator as any ApplicatorKeyword:
+          try applicator.validate(instance, at: location, using: &annotations, with: context)
+        case let assertion as any AssertionKeyword:
+          try assertion.validate(instance, at: location, using: annotations)
+        default:
+          continue
+        }
+      } catch {
+        errors.append(.init(valid: false, location: .init(keywordLocation: location, instanceLocation: location), error: error))
+      }
+    }
 
     let validationLocation = ValidationLocation(keywordLocation: self.location, instanceLocation: location)
     return ValidationResult(
-      valid: isValid,
+      valid: errors.isEmpty,
       location: validationLocation,
-      errors: isValid ? nil : errors
+      errors: errors.isEmpty ? nil : errors
     )
   }
 

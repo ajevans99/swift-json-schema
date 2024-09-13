@@ -3,14 +3,6 @@ protocol AnnotationProducingKeyword: Keyword {
   associatedtype AnnotationValue: AnnotationValueConvertible
 }
 
-protocol AnnotationValueConvertible: Sendable {
-  var value: JSONValue { get }
-}
+protocol AnnotationValueConvertible: Sendable { var value: JSONValue { get } }
 
-extension JSONValue: AnnotationValueConvertible {
-  var value: JSONValue { self }
-}
-
-protocol AnnotationKeyword: AnnotationProducingKeyword {
-  func validate(_ input: JSONValue, at location: ValidationLocation, using annotations: inout AnnotationContainer)
-}
+extension JSONValue: AnnotationValueConvertible { var value: JSONValue { self } }

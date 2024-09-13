@@ -51,7 +51,10 @@ let package = Package(
     ),
     .testTarget(
       name: "JSONSchema2Tests",
-      dependencies: ["JSONSchema2"]
+      dependencies: ["JSONSchema2"],
+      resources: [
+        .copy("JSON-Schema-Test-Suite/tests/draft2020-12")
+      ]
     ),
 
     // Library for building JSON schemas with Swift's result builders.

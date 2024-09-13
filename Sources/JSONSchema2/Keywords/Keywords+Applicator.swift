@@ -269,7 +269,7 @@ extension Keywords {
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
-      var previouslyValidatedKeys = (annotations[AdditionalProperties.self]?.value ?? [])
+      let previouslyValidatedKeys = (annotations[AdditionalProperties.self]?.value ?? [])
         .union(annotations[PatternProperties.self]?.value ?? [])
 
       var validatedKeys: Set<String> = []
@@ -339,7 +339,7 @@ extension Keywords {
     typealias AnnotationValue = Never
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      fatalError()
+      // TODO
     }
   }
 
@@ -360,7 +360,7 @@ extension Keywords {
     typealias AnnotationValue = Never
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      fatalError()
+      // TODO
     }
   }
 
@@ -381,7 +381,7 @@ extension Keywords {
     typealias AnnotationValue = Never
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      fatalError()
+      // TODO
     }
   }
 
@@ -402,7 +402,7 @@ extension Keywords {
     typealias AnnotationValue = Never
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      fatalError()
+      // TODO
     }
   }
 }
@@ -428,7 +428,7 @@ extension Keywords {
     typealias AnnotationValue = Bool
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      fatalError()
+      // TODO
     }
   }
 
@@ -450,7 +450,7 @@ extension Keywords {
     typealias AnnotationValue = Never
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      fatalError()
+      // TODO
     }
   }
 
@@ -472,7 +472,7 @@ extension Keywords {
     typealias AnnotationValue = Never
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      fatalError()
+      // TODO
     }
   }
 
@@ -497,7 +497,7 @@ extension Keywords {
     typealias AnnotationValue = Never
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      fatalError()
+      // TODO
     }
   }
 }
@@ -522,7 +522,7 @@ extension Keywords {
     typealias AnnotationValue = Never
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      fatalError()
+      // TODO
     }
   }
 
@@ -543,7 +543,7 @@ extension Keywords {
     typealias AnnotationValue = Never
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      fatalError()
+      // TODO
     }
   }
 }

@@ -19,9 +19,7 @@ extension Keywords {
     var schema: JSONValue
     var location: JSONPointer
 
-    func processIdentifier(into context: inout Context) {
-      context.dialect = .draft2020_12
-    }
+    func processIdentifier(into context: inout Context) { context.dialect = .draft2020_12 }
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-the-schema-keyword

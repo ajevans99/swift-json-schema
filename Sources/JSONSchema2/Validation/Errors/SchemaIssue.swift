@@ -1,3 +1,1 @@
-public enum SchemaIssue: Error {
-  case schemaShouldBeBooleanOrObject
-}
+public enum SchemaIssue: Error { case schemaShouldBeBooleanOrObject }
