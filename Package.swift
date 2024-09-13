@@ -53,7 +53,7 @@ let package = Package(
       name: "JSONSchema2Tests",
       dependencies: ["JSONSchema2"],
       resources: [
-        .copy("JSON-Schema-Test-Suite/tests/draft2020-12")
+        .copy("JSON-Schema-Test-Suite")
       ]
     ),
 

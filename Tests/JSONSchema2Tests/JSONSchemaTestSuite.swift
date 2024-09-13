@@ -1,5 +1,5 @@
-import JSONSchema2
 import Foundation
+import JSONSchema2
 import Testing
 
 struct JSONSchemaTestSuite {
@@ -30,16 +30,16 @@ struct JSONSchemaTestSuite {
           ```json
           \(try! schemaTest.schema.json())
           ```
-          
+
           Test Case: "\(testCase.description)"
           ```json
           \(try! testCase.data.json())
           ```
-          
+
           Valid?:
           - Expected: \(testCase.valid)
           - Recieved: \(validationResult.valid)
-          
+
           Full result:
           ```json
           \(try! validationResult.json())
@@ -77,8 +77,8 @@ extension JSONSchemaTest: CustomTestStringConvertible {
   public var testDescription: String { description }
 }
 
-private extension Encodable {
-  func toJsonString() throws -> String {
+extension Encodable {
+  fileprivate func toJsonString() throws -> String {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     let data = try encoder.encode(self)
@@ -86,20 +86,20 @@ private extension Encodable {
   }
 }
 
-private extension Schema {
-  func json() throws -> String {
+extension Schema {
+  fileprivate func json() throws -> String {
     try toJsonString()
   }
 }
 
-private extension JSONValue {
-  func json() throws -> String {
+extension JSONValue {
+  fileprivate func json() throws -> String {
     try toJsonString()
   }
 }
 
-private extension ValidationResult {
-  func json() throws -> String {
+extension ValidationResult {
+  fileprivate func json() throws -> String {
     try toJsonString()
   }
 }

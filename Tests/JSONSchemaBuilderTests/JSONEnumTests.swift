@@ -46,7 +46,6 @@ struct JSONEnumTests {
         }
         .title("Color")
     }
-    print(sample.annotations)
     #expect(sample.annotations.title == "Color")
   }
 }

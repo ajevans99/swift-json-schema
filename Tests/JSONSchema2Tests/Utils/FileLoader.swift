@@ -5,7 +5,12 @@ struct FileLoader<T: Decodable> {
 
   func listFiles() -> [URL] {
     do {
-      guard let fileURLs = Bundle.module.urls(forResourcesWithExtension: "json", subdirectory: subdirectory) else {
+      guard
+        let fileURLs = Bundle.module.urls(
+          forResourcesWithExtension: "json",
+          subdirectory: subdirectory
+        )
+      else {
         print("Failed to find JSON files")
         return []
       }
@@ -43,7 +48,8 @@ struct FileLoader<T: Decodable> {
 
     for fileURL in fileURLs {
       if let data = readFile(at: fileURL),
-         let decodedObject = decodeFile(from: data) {
+        let decodedObject = decodeFile(from: data)
+      {
         decodedObjects.append((fileURL.lastPathComponent, decodedObject))
       }
     }
