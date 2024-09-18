@@ -72,7 +72,7 @@ public enum Dialect: Hashable, Sendable {
         Keywords.Maximum.self,
         Keywords.ExclusiveMaximum.self,
         Keywords.Minimum.self,
-        Keywords.ExclusiveMaximum.self,
+        Keywords.ExclusiveMinimum.self,
 
         Keywords.MaxLength.self,
         Keywords.MinLength.self,

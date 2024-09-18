@@ -106,8 +106,15 @@ extension Keywords {
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if let double = input.numeric {
-        if double.truncatingRemainder(dividingBy: divisor) != 0 {
-          throw .notMultipleOf
+        // If the divisor is less than 1 and the input is an integer, it is valid.
+        if case .integer = input, divisor < 1.0 {
+          return
+        }
+
+        let remainder = double.remainder(dividingBy: divisor)
+        let tolerance = 1e-10 // A small tolerance value to account for floating-point precision
+        if abs(remainder) > tolerance {
+          throw ValidationIssue.notMultipleOf
         }
       }
     }

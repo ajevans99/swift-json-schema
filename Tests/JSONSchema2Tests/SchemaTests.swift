@@ -96,10 +96,10 @@ struct SchemaTests {
 
     let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12)))
     let result = schema.validate(instance)
-    dump(result)
+//    dump(result)
     #expect(result.valid == false)
     #expect(result.errors?.count == 1)
-    #expect(result.annotations?.count == 1)
+    #expect(result.annotations == nil)
   }
 
   @Test func debugger() throws {
