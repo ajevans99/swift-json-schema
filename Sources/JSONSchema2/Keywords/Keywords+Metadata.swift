@@ -7,6 +7,7 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
   }
 
   struct Description: MetadataKeyword {
@@ -14,6 +15,7 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
   }
 
   struct Default: MetadataKeyword {
@@ -21,6 +23,7 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
   }
 
   struct Deprecated: MetadataKeyword {
@@ -28,6 +31,7 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
   }
 
   struct ReadOnly: MetadataKeyword {
@@ -35,6 +39,7 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
   }
 
   struct WriteOnly: MetadataKeyword {
@@ -42,6 +47,7 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
   }
 
   struct Examples: MetadataKeyword {
@@ -49,6 +55,7 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
   }
 }
 
@@ -58,6 +65,7 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
   }
 
   struct ContentMediaType: MetadataKeyword {
@@ -65,6 +73,7 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
   }
 
   struct ContentSchema: MetadataKeyword {
@@ -72,5 +81,6 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
   }
 }

@@ -1,5 +1,5 @@
 protocol ApplicatorKeyword: AnnotationProducingKeyword {
-  func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue)
+  func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue)
 }
 
 // MARK: - Arrays
@@ -11,13 +11,15 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let subschemas: [Schema]
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
-      self.subschemas = schema.array?.extractSubschemas(at: location) ?? []
+      self.context = context
+      self.subschemas = schema.array?.extractSubschemas(at: location, with: context) ?? []
     }
 
     typealias AnnotationValue = PrefixItemsAnnoationValue
@@ -38,7 +40,7 @@ extension Keywords {
       }
     }
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
       var largestIndex: Int = instances.startIndex
@@ -65,18 +67,20 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
-      self.subschema = schema.extractSubschema(at: location)
+      self.context = context
+      self.subschema = schema.extractSubschema(at: location, with: context)
     }
 
     typealias AnnotationValue = Bool
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
       let relevantInstanceItems: ArraySlice<JSONValue> = switch annotations[PrefixItems.self]?.value {
@@ -107,13 +111,15 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
-      self.subschema = schema.extractSubschema(at: location)
+      self.context = context
+      self.subschema = schema.extractSubschema(at: location, with: context)
     }
 
     typealias AnnotationValue = ContainsAnnotationValue
@@ -134,7 +140,7 @@ extension Keywords {
       }
     }
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
       var validIndices = [Int]()
@@ -169,21 +175,23 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let schemaMap: [String: Schema]
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
 
       self.schemaMap = schema.object?.compactMapValues { rawSchema in
-        try? Schema(rawSchema: rawSchema, location: location)
+        try? Schema(rawSchema: rawSchema, location: location, context: context)
       } ?? [:]
     }
 
     typealias AnnotationValue = Set<String>
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard let instanceObject = input.object else {
         return
       }
@@ -211,29 +219,31 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
     private let patterns: [(Regex<AnyRegexOutput>, Schema)]
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
 
       self.patterns = schema.object?.compactMap { key, rawSchema in
         guard let regex = try? Regex(key) else { return nil }
-        guard let subschema = try? Schema(rawSchema: rawSchema, location: location) else { return nil }
+        guard let subschema = try? Schema(rawSchema: rawSchema, location: location, context: context) else { return nil }
         return (regex, subschema)
       } ?? []
     }
 
     typealias AnnotationValue = Set<String>
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
       var matchedPropertyNames: Set<String> = []
 
       for (key, value) in instanceObject {
         for (regex, schema) in patterns {
-          if key.wholeMatch(of: regex) != nil {
+          if key.firstMatch(of: regex) != nil {
             let propertyLocation = location.appending(.key(key))
             let result = schema.validate(value, at: propertyLocation)
 
@@ -256,18 +266,20 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
-      self.subschema = schema.extractSubschema(at: location)
+      self.context = context
+      self.subschema = schema.extractSubschema(at: location, with: context)
     }
 
     typealias AnnotationValue = Set<String>
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
       let previouslyValidatedKeys = (annotations[Properties.self]?.value ?? [])
@@ -296,18 +308,20 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
-      self.subschema = schema.extractSubschema(at: location)
+      self.context = context
+      self.subschema = schema.extractSubschema(at: location, with: context)
     }
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
       for key in instanceObject.keys {
@@ -329,18 +343,20 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let subschemas: [Schema]
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
-      self.subschemas = schema.array?.extractSubschemas(at: location) ?? []
+      self.context = context
+      self.subschemas = schema.array?.extractSubschemas(at: location, with: context) ?? []
     }
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       var isValid = true
 
       for subschema in subschemas {
@@ -357,23 +373,26 @@ extension Keywords {
     }
   }
 
+  /// https://json-schema.org/draft/2020-12/json-schema-core#name-anyof
   struct AnyOf: ApplicatorKeyword {
     static let name = "anyOf"
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let subschemas: [Schema]
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
-      self.subschemas = schema.array?.extractSubschemas(at: location) ?? []
+      self.context = context
+      self.subschemas = schema.array?.extractSubschemas(at: location, with: context) ?? []
     }
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       var isValid = false
 
       for subschema in subschemas {
@@ -390,23 +409,26 @@ extension Keywords {
     }
   }
 
+  /// https://json-schema.org/draft/2020-12/json-schema-core#name-oneof
   struct OneOf: ApplicatorKeyword {
     static let name = "oneOf"
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let subschemas: [Schema]
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
-      self.subschemas = schema.array?.extractSubschemas(at: location) ?? []
+      self.context = context
+      self.subschemas = schema.array?.extractSubschemas(at: location, with: context) ?? []
     }
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       var validCount = 0
 
       for subschema in subschemas {
@@ -422,23 +444,26 @@ extension Keywords {
     }
   }
 
+  /// https://json-schema.org/draft/2020-12/json-schema-core#section-10.2.1.4
   struct Not: ApplicatorKeyword {
     static let name = "not"
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
-      self.subschema = schema.extractSubschema(at: location)
+      self.context = context
+      self.subschema = schema.extractSubschema(at: location, with: context)
     }
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       let result = subschema.validate(input, at: location)
       if result.valid {
         throw ValidationIssue.notFailed
@@ -456,18 +481,20 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
-      self.subschema = schema.extractSubschema(at: location)
+      self.context = context
+      self.subschema = schema.extractSubschema(at: location, with: context)
     }
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       context.ifConditionalResult = subschema.validate(input, at: location)
     }
   }
@@ -478,18 +505,20 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
-      self.subschema = schema.extractSubschema(at: location)
+      self.context = context
+      self.subschema = schema.extractSubschema(at: location, with: context)
     }
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       if context.ifConditionalResult?.valid == true {
         let result = subschema.validate(input, at: location)
         if !result.valid {
@@ -505,18 +534,20 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
-      self.subschema = schema.extractSubschema(at: location)
+      self.context = context
+      self.subschema = schema.extractSubschema(at: location, with: context)
     }
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       if context.ifConditionalResult?.valid == false {
         let result = subschema.validate(input, at: location)
         if !result.valid {
@@ -532,22 +563,35 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let schemaMap: [String: Schema]
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
 
       self.schemaMap = schema.object?.compactMapValues { rawSchema in
-        try? Schema(rawSchema: rawSchema, location: location)
+        try? Schema(rawSchema: rawSchema, location: location, context: context)
       } ?? [:]
     }
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
-      // TODO
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+      guard let instanceObject = input.object else { return }
+
+      for (key, schema) in schemaMap {
+        if instanceObject.keys.contains(key) {
+          let propertyLocation = location.appending(.key(key))
+          let result = schema.validate(input, at: propertyLocation)
+
+          if !result.valid {
+            throw ValidationIssue.invalidDependentSchema
+          }
+        }
+      }
     }
   }
 }
@@ -555,45 +599,123 @@ extension Keywords {
 // MARK: - Unevaluated Locations
 
 extension Keywords {
+  /// https://json-schema.org/draft/2020-12/json-schema-core#name-unevaluateditems
   struct UnevaluatedItems: ApplicatorKeyword {
     static let name = "unevaluatedItems"
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
-      self.subschema = schema.extractSubschema(at: location)
+      self.context = context
+      self.subschema = schema.extractSubschema(at: location, with: context)
     }
 
-    typealias AnnotationValue = Never
+    typealias AnnotationValue = Bool
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
-      // TODO
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+      guard let instances = input.array else { return }
+
+      var evaluatedIndices = Set<Int>()
+
+      if let prefixItemsAnnotation = annotations[PrefixItems.self]?.value {
+        switch prefixItemsAnnotation {
+        case .everyIndex:
+          return
+        case .largestIndex(let largestIndex):
+          evaluatedIndices.formUnion(0...largestIndex)
+        }
+      }
+
+      if let itemsAnnotation = annotations[Items.self]?.value, itemsAnnotation == true {
+        evaluatedIndices.formUnion(0..<instances.count)
+      }
+
+      if let containsAnnotation = annotations[Contains.self]?.value {
+        switch containsAnnotation {
+        case .everyIndex:
+          evaluatedIndices.formUnion(0..<instances.count)
+        case .indicies(let indicies):
+          evaluatedIndices.formUnion(indicies)
+        }
+      }
+
+      let unevaluatedIndices = Set(instances.indices).subtracting(evaluatedIndices)
+
+      // Apply unevaluatedItems subschema to unevaluated indices
+      var applied = false
+      for index in unevaluatedIndices {
+        let instance = instances[index]
+        let itemLocation = location.appending(.index(index))
+        let result = subschema.validate(instance, at: itemLocation)
+        if !result.valid {
+          throw .unevaluatedItemsFailed
+        }
+        applied = true
+      }
+
+      if applied {
+        annotations[Self.self] = .init(keyword: self, instanceLocation: location, value: true)
+      }
     }
   }
 
+  /// https://json-schema.org/draft/2020-12/json-schema-core#name-unevaluatedproperties
   struct UnevaluatedProperties: ApplicatorKeyword {
     static let name = "unevaluatedProperties"
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
-      self.subschema = schema.extractSubschema(at: location)
+      self.context = context
+      self.subschema = schema.extractSubschema(at: location, with: context)
     }
 
-    typealias AnnotationValue = Never
+    typealias AnnotationValue = Set<String>
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: inout Context) throws(ValidationIssue) {
-      // TODO
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+      guard let instanceObject = input.object else { return }
+
+      var evaluatedPropertyNames = Set<String>()
+
+      if let propertiesAnnotation = annotations[Properties.self]?.value {
+        evaluatedPropertyNames.formUnion(propertiesAnnotation)
+      }
+
+      if let patternPropertiesAnnotation = annotations[PatternProperties.self]?.value {
+        evaluatedPropertyNames.formUnion(patternPropertiesAnnotation)
+      }
+
+      if let additionalPropertiesAnnotation = annotations[AdditionalProperties.self]?.value {
+        evaluatedPropertyNames.formUnion(additionalPropertiesAnnotation)
+      }
+
+      let unevaluatedPropertyNames = Set(instanceObject.keys).subtracting(evaluatedPropertyNames)
+
+      var validatedPropertyNames = Set<String>()
+
+      for propertyName in unevaluatedPropertyNames {
+        let propertyValue = instanceObject[propertyName]!
+        let propertyLocation = location.appending(.key(propertyName))
+        let result = subschema.validate(propertyValue, at: propertyLocation)
+        if !result.valid {
+          throw .unevaluatedPropertyFailed
+        }
+        validatedPropertyNames.insert(propertyName)
+      }
+
+      annotations[Self.self] = .init(keyword: self, instanceLocation: location, value: validatedPropertyNames)
     }
   }
 }
@@ -615,13 +737,13 @@ extension Bool: AnnotationValueConvertible {
 }
 
 private extension Array where Element == JSONValue {
-  func extractSubschemas(at location: JSONPointer) -> [Schema] {
+  func extractSubschemas(at location: JSONPointer, with context: Context) -> [Schema] {
     var subschemas = [Schema]()
     subschemas.reserveCapacity(self.count)
     for (index, rawSchema) in self.enumerated() {
       let pointer = location.appending(.index(index))
       // TODO: Warn on invalid schema?
-      if let subschema = try? Schema(rawSchema: rawSchema, location: pointer) {
+      if let subschema = try? Schema(rawSchema: rawSchema, location: pointer, context: context) {
         subschemas.append(subschema)
       }
     }
@@ -630,7 +752,7 @@ private extension Array where Element == JSONValue {
 }
 
 private extension JSONValue {
-  func extractSubschema(at location: JSONPointer) -> Schema {
-    (try? Schema(rawSchema: self, location: location)) ?? BooleanSchema(schemaValue: true, location: location).asSchema()
+  func extractSubschema(at location: JSONPointer, with context: Context) -> Schema {
+    (try? Schema(rawSchema: self, location: location, context: context)) ?? BooleanSchema(schemaValue: true, location: location, context: context).asSchema()
   }
 }

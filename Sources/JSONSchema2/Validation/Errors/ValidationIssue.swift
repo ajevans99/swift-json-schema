@@ -38,4 +38,10 @@ public enum ValidationIssue: Error, Codable, Equatable {
   case notFailed
 
   case conditionalFailed
+  case invalidDependentSchema
+  case unevaluatedItemsFailed
+  case unevaluatedPropertyFailed
+
+  case invalidReference(String)
+  case referenceValidationFailed
 }

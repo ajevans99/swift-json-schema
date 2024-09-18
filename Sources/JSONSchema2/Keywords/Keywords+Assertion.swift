@@ -8,12 +8,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let schemaAllowedPrimitives: [JSONType]
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
 
       self.schemaAllowedPrimitives = switch schema {
       case .array(let allowedTypes):
@@ -33,7 +35,11 @@ extension Keywords {
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
-      if !schemaAllowedPrimitives.contains(input.primative) {
+      let instanceType = input.primative
+      let isValid = schemaAllowedPrimitives.contains { allowedType in
+        return allowedType.matches(instanceType: instanceType)
+      }
+      if !isValid {
         throw .typeMismatch
       }
     }
@@ -44,12 +50,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let enumCases: [JSONValue]
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.enumCases = schema.array ?? []
     }
 
@@ -65,6 +73,7 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       if input != schema {
@@ -83,12 +92,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let divisor: Double
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
 
       divisor = schema.numeric ?? 1.0
     }
@@ -108,12 +119,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let maxValue: Double
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.maxValue = schema.numeric ?? .infinity
     }
 
@@ -129,12 +142,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let exclusiveMaxValue: Double
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.exclusiveMaxValue = schema.numeric ?? .infinity
     }
 
@@ -151,12 +166,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let minValue: Double
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.minValue = schema.numeric ?? -.infinity
     }
 
@@ -172,12 +189,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let exclusiveMinValue: Double
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.exclusiveMinValue = schema.numeric ?? -.infinity
     }
 
@@ -198,12 +217,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let maxLength: Int
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.maxLength = schema.integer ?? Int.max
     }
 
@@ -220,12 +241,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let minLength: Int
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.minLength = schema.integer ?? 0
     }
 
@@ -242,12 +265,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let regex: Regex<AnyRegexOutput>?
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
 
       if let patternString = schema.string {
         self.regex = try? Regex(patternString)
@@ -275,12 +300,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let maxItems: Int
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.maxItems = schema.integer ?? Int.max
     }
 
@@ -297,12 +324,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let minItems: Int
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.minItems = schema.integer ?? 0
     }
 
@@ -319,12 +348,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let uniqueItemsRequired: Bool
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.uniqueItemsRequired = schema.boolean ?? false
     }
 
@@ -344,12 +375,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let maxContains: Int
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.maxContains = schema.integer ?? Int.max
     }
 
@@ -377,12 +410,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let minContains: Int
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.minContains = schema.integer ?? 1
     }
 
@@ -414,12 +449,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let maxProperties: Int
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.maxProperties = schema.integer ?? Int.max
     }
 
@@ -438,12 +475,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let minProperties: Int
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.minProperties = schema.integer ?? 0
     }
 
@@ -462,12 +501,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let requiredKeys: [String]
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.requiredKeys = schema.array?.compactMap { $0.string } ?? []
     }
 
@@ -488,12 +529,14 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
 
     private let dependencies: [String: [String]]
 
-    init(schema: JSONValue, location: JSONPointer) {
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
       self.schema = schema
       self.location = location
+      self.context = context
       self.dependencies = schema.object?.compactMapValues { $0.array?.compactMap { $0.string } } ?? [:]
     }
 

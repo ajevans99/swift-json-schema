@@ -3,9 +3,9 @@ extension Schema: Codable {
     let container = try decoder.singleValueContainer()
 
     if let bool = try? container.decode(BooleanSchema.self) {
-      self.init(schema: bool, location: .init())
+      self.init(schema: bool, location: .init(), context: Context(dialect: .draft2020_12))
     } else if let schema = try? container.decode(ObjectSchema.self) {
-      self.init(schema: schema, location: .init())
+      self.init(schema: schema, location: .init(), context: Context(dialect: .draft2020_12))
     } else {
       throw DecodingError.dataCorruptedError(
         in: container,
@@ -35,7 +35,7 @@ extension BooleanSchema: Codable {
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
     let bool = try container.decode(Bool.self)
-    self.init(schemaValue: bool, location: .init())
+    self.init(schemaValue: bool, location: .init(), context: Context(dialect: .draft2020_12))
   }
 
   public func encode(to encoder: any Encoder) throws {
@@ -52,19 +52,20 @@ extension ObjectSchema: Codable {
     var schemaValue = [String: JSONValue]()
 
     let dialect = Dialect.draft2020_12
+    let context = Context(dialect: dialect)
 
     for keywordType in dialect.keywords {
       let key = keywordType.name
       if let value = try container.decodeIfPresent(JSONValue.self, forKey: .init(stringValue: key)!)
       {
-        decodedKeywords.append(keywordType.init(schema: value, location: .init()))
+        decodedKeywords.append(keywordType.init(schema: value, location: .init(), context: context))
         schemaValue[key] = value
       }
     }
 
     self.keywords = decodedKeywords
     self.location = .init()
-    self.context = Context(dialect: dialect)
+    self.context = context
     self.schemaValue = schemaValue
   }
 

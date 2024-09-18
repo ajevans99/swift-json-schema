@@ -1,28 +1,29 @@
 import Testing
+import Foundation
 
 @testable import JSONSchema2
 
 struct SchemaTests {
   @Test func trueBooleanSchema() throws {
     let truthy: JSONValue = .boolean(true)
-    let schema = try #require(try Schema(rawSchema: truthy))
+    let schema = try #require(try Schema(rawSchema: truthy, context: Context(dialect: .draft2020_12)))
     #expect(schema.validate(.integer(4)).valid)
   }
 
   @Test func falseBooleanSchema() throws {
     let falsy: JSONValue = .boolean(false)
-    let schema = try #require(try Schema(rawSchema: falsy))
+    let schema = try #require(try Schema(rawSchema: falsy, context: Context(dialect: .draft2020_12)))
     #expect(schema.validate(.integer(4)).valid == false)
   }
 
   @Test func invalidSchema() {
     let string = JSONValue.string("Not a valid schema.")
     #expect(throws: SchemaIssue.schemaShouldBeBooleanOrObject) {
-      try Schema(rawSchema: string)
+      try Schema(rawSchema: string, context: Context(dialect: .draft2020_12))
     }
   }
 
-  @Test func identifierKeywords() throws {
+  @Test func keywordCount() throws {
     let addressRawSchema: JSONValue = [
       "type": "object",
       "properties": [
@@ -55,17 +56,30 @@ struct SchemaTests {
       ],
       "required": ["name", "age"],
     ]
-    let schema = try #require(try Schema(rawSchema: rawSchema).schema as? ObjectSchema)
-    let addressSchema = try #require(try Schema(rawSchema: addressRawSchema))
+    let schema = try #require(try Schema(rawSchema: rawSchema, context: Context(dialect: .draft2020_12)).schema as? ObjectSchema)
 
-    #expect(
-      schema.context
-        == Context(
-          dialect: .draft2020_12,
-          defintions: ["address": addressSchema],
-          dynamicAnchors: ["dynamicAnchor": .init()]
-        )
-    )
     #expect(rawSchema.object?.keys.count == schema.keywords.count)
+  }
+
+  @Test func defsAndRefs() throws {
+    let rawSchema: JSONValue = [
+      "$defs": [
+        "positiveInteger": [
+          "type": "integer",
+          "minimum": 1
+        ]
+      ],
+      "type": "object",
+      "properties": [
+        "age": ["$ref": "#/$defs/positiveInteger"]
+      ]
+    ]
+
+    let validInstance: JSONValue = ["age": 1]
+    let invalidInstance: JSONValue = ["age": 0]
+
+    let schema = try #require(try Schema(rawSchema: rawSchema, context: Context(dialect: .draft2020_12)))
+    #expect(schema.validate(validInstance).valid)
+    #expect(schema.validate(invalidInstance).valid == false)
   }
 }

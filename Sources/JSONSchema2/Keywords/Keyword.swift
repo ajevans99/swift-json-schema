@@ -6,8 +6,7 @@ protocol Keyword: Sendable {
 
   var schema: JSONValue { get }
   var location: JSONPointer { get }
+  var context: Context { get }
 
-  init(schema: JSONValue, location: JSONPointer)
+  init(schema: JSONValue, location: JSONPointer, context: Context)
 }
-
-extension Keyword { var name: KeywordIdentifier { Self.name } }

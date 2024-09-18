@@ -6,6 +6,7 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
   }
 
   struct Dependencies: ReservedKeyword {
@@ -13,6 +14,7 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
   }
 
   struct RecursiveAnchor: ReservedKeyword {
@@ -20,6 +22,7 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
   }
 
   struct RecursiveReference: ReservedKeyword {
@@ -27,5 +30,6 @@ extension Keywords {
 
     let schema: JSONValue
     let location: JSONPointer
+    let context: Context
   }
 }

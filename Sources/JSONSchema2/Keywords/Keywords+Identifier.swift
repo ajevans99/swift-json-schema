@@ -1,62 +1,34 @@
 protocol IdentifierKeyword: Keyword {
-  /// Some identity keywords need to be processed before others.
-  static var dependencies: Set<KeywordIdentifier> { get }
-
-  func processIdentifier(into context: inout Context)
-}
-
-extension IdentifierKeyword {
-  static var dependencies: Set<KeywordIdentifier> { [] }
-
-  func processIdentifier(into context: inout Context) {}
+  func processIdentifier(into context: Context)
 }
 
 extension Keywords {
-  /// https://json-schema.org/draft/2020-12/json-schema-core#name-the-schema-keyword
-  struct SchemaKeyword: IdentifierKeyword {
-    static let name = "$schema"
-
-    var schema: JSONValue
-    var location: JSONPointer
-
-    func processIdentifier(into context: inout Context) { context.dialect = .draft2020_12 }
-  }
-
-  /// https://json-schema.org/draft/2020-12/json-schema-core#name-the-schema-keyword
-  struct Vocabulary: IdentifierKeyword {
-    static let name = "$vocabulary"
-
-    var schema: JSONValue
-    var location: JSONPointer
-
-  }
-
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-the-id-keyword
   struct Identifier: IdentifierKeyword {
     static let name = "$id"
 
-    var schema: JSONValue
-    var location: JSONPointer
-  }
+    let schema: JSONValue
+    let location: JSONPointer
+    let context: Context
 
-  struct Reference: IdentifierKeyword {
-    static let name = "$ref"
+    func processIdentifier(into context: Context) {
 
-    var schema: JSONValue
-    var location: JSONPointer
+    }
   }
 
   struct Defs: IdentifierKeyword {
     static let name = "$defs"
 
-    var schema: JSONValue
-    var location: JSONPointer
+    let schema: JSONValue
+    let location: JSONPointer
+    let context: Context
 
-    func processIdentifier(into context: inout Context) {
+    func processIdentifier(into context: Context) {
       guard case .object(let object) = schema else { return }
       for (key, value) in object {
-        if let schema = try? Schema(rawSchema: value, location: location) {
-          context.defintions[key] = schema
+        let subschemaLocation = location.appending(.key(key))
+        if let schema = try? Schema(rawSchema: value, location: subschemaLocation, context: context) {
+          context.definitions[key] = schema
         }
       }
     }
@@ -65,33 +37,112 @@ extension Keywords {
   struct Anchor: IdentifierKeyword {
     static let name = "$ref"
 
-    var schema: JSONValue
-    var location: JSONPointer
-  }
+    let schema: JSONValue
+    let location: JSONPointer
+    let context: Context
 
-  struct DynamicReference: IdentifierKeyword {
-    static let name = "$dynamicRef"
-
-    var schema: JSONValue
-    var location: JSONPointer
+    func processIdentifier(into context: Context) {}
   }
 
   struct DynamicAnchor: IdentifierKeyword {
     static let name = "$dynamicAnchor"
 
-    var schema: JSONValue
-    var location: JSONPointer
+    let schema: JSONValue
+    let location: JSONPointer
+    let context: Context
 
-    func processIdentifier(into context: inout Context) {
+    func processIdentifier(into context: Context) {
       guard case let .string(string) = schema else { return }
       context.dynamicAnchors[string] = location
     }
   }
+}
 
-  struct Comment: IdentifierKeyword {
-    static let name = "$comment"
+import Foundation
 
-    var schema: JSONValue
-    var location: JSONPointer
+protocol ReferenceKeyword: Keyword {
+  func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue)
+}
+
+extension Keywords {
+  struct Reference: ReferenceKeyword {
+    static let name = "$ref"
+
+    let schema: JSONValue
+    let location: JSONPointer
+    let context: Context
+    private let referenceURI: String
+
+    init(schema: JSONValue, location: JSONPointer, context: Context) {
+      self.schema = schema
+      self.location = location
+      self.context = context
+      self.referenceURI = schema.string ?? ""
+    }
+
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+      guard !context.validationStack.contains(self.location) else {
+        // Detected a cycle, prevent infinite recursion
+        return
+      }
+      context.validationStack.insert(self.location)
+      defer { context.validationStack.remove(self.location) }
+
+      guard !referenceURI.isEmpty else {
+        throw .invalidReference("Empty \(Self.name) URL")
+      }
+
+      guard let resolvedSchema = try resolveSchema(from: referenceURI, at: self.location, context: context) else {
+        throw .invalidReference("Unable to resolve $ref '\(referenceURI)' at \(location)")
+      }
+
+      let result = resolvedSchema.validate(input, at: location)
+      if !result.valid {
+        throw .referenceValidationFailed
+      }
+    }
+
+    private func resolveSchema(from referenceURI: String, at location: JSONPointer, context: Context) throws(ValidationIssue) -> Schema? {
+      // Resolve the URI against the base URI
+//      guard let baseURI = context.baseURI else {
+//        throw ValidationIssue.invalidReference("No base URI to resolve $ref '\(referenceURI)' at \(location)")
+//      }
+
+      guard let resolvedURI = URL(string: referenceURI, relativeTo: nil)?.absoluteURL else {
+        throw ValidationIssue.invalidReference("Invalid $ref URI '\(referenceURI)' at \(location)")
+      }
+
+      if resolvedURI.fragment != nil {
+        return try resolveInternalReference(resolvedURI, context: context)
+      } else {
+        // Handle external references (not fully implemented)
+        return nil
+      }
+    }
+
+    private func resolveInternalReference(_ uri: URL, context: Context) throws(ValidationIssue) -> Schema? {
+      guard let fragment = uri.fragment else {
+        return nil
+      }
+
+      let pointer = JSONPointer(from: fragment)
+      guard let value = context.rootRawSchema?.value(at: pointer) else {
+        return nil
+      }
+      let schema = try? Schema(rawSchema: value, location: location, context: context)
+      return schema
+    }
+  }
+
+  struct DynamicReference: ReferenceKeyword {
+    static let name = "$dynamicRef"
+
+    let schema: JSONValue
+    let location: JSONPointer
+    let context: Context
+
+    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue){
+
+    }
   }
 }

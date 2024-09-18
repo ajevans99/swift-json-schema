@@ -35,7 +35,7 @@ extension JSONPointer: ExpressibleByStringLiteral {
   public init(stringLiteral value: String) { self.init(from: value) }
 }
 
-extension JSONPointer: CustomStringConvertible {
+extension JSONPointer: CustomStringConvertible, CustomDebugStringConvertible {
   public var description: String {
     path.reduce(into: "") { partialResult, component in
       switch component {
@@ -44,6 +44,8 @@ extension JSONPointer: CustomStringConvertible {
       }
     }
   }
+
+  public var debugDescription: String { description }
 }
 
 extension JSONPointer: Codable {
