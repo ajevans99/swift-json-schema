@@ -8,3 +8,9 @@ struct AnnotationContainer {
     set { storage[ObjectIdentifier(key)] = newValue }
   }
 }
+
+extension AnnotationContainer {
+  func allAnnotations() -> [AnyAnnotation] {
+    storage.values.compactMap { $0 as? AnyAnnotation }
+  }
+}

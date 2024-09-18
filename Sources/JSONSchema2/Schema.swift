@@ -38,11 +38,10 @@ struct BooleanSchema: ValidatableSchema {
   let context: Context
 
   func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
-    let validationLocation = ValidationLocation(keywordLocation: self.location, instanceLocation: location)
     return ValidationResult(
       valid: schemaValue,
-      location: validationLocation,
-      errors: schemaValue ? nil : [ValidationResult(valid: false, location: validationLocation)]
+      keywordLocation: self.location,
+      instanceLocation: location
     )
   }
 
@@ -68,7 +67,8 @@ struct ObjectSchema: ValidatableSchema {
   mutating private func collectKeywords() {
     for keywordType in context.dialect.keywords where schemaValue.keys.contains(keywordType.name) {
       let value = schemaValue[keywordType.name]!
-      let keyword = keywordType.init(schema: value, location: location, context: context)
+      let keywordLocation = location.appending(.key(keywordType.name))
+      let keyword = keywordType.init(schema: value, location: keywordLocation, context: context)
       keywords.append(keyword)
 
       if let identifier = keyword as? (any IdentifierKeyword) {
@@ -78,7 +78,7 @@ struct ObjectSchema: ValidatableSchema {
   }
 
   public func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
-    var errors: [ValidationResult] = []
+    var errors: [ValidationError] = []
 
     var annotations = AnnotationContainer()
 
@@ -95,15 +95,24 @@ struct ObjectSchema: ValidatableSchema {
           continue
         }
       } catch {
-        errors.append(.init(valid: false, location: .init(keywordLocation: location, instanceLocation: location), error: error))
+        let keywordName = type(of: keyword).name
+        let validationError = error.makeValidationError(
+          keyword: keywordName,
+          keywordLocation: self.location.appending(.key(keywordName)),
+          instanceLocation: location
+        )
+        errors.append(validationError)
       }
     }
 
-    let validationLocation = ValidationLocation(keywordLocation: self.location, instanceLocation: location)
+    let collectedAnnotations = annotations.allAnnotations()
+
     return ValidationResult(
       valid: errors.isEmpty,
-      location: validationLocation,
-      errors: errors.isEmpty ? nil : errors
+      keywordLocation: self.location,
+      instanceLocation: location,
+      errors: errors.isEmpty ? nil : errors,
+      annotations: collectedAnnotations.isEmpty ? nil : collectedAnnotations
     )
   }
 

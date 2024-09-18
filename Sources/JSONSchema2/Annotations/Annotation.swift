@@ -21,3 +21,17 @@ struct Annotation<Keyword: AnnotationProducingKeyword>: Sendable {
     self.value = value
   }
 }
+
+public protocol AnyAnnotation: Sendable {
+  var keyword: KeywordIdentifier { get }
+  var instanceLocation: JSONPointer { get }
+  var schemaLocation: JSONPointer { get }
+  var absoluteSchemaLocation: JSONPointer? { get }
+  var jsonValue: JSONValue { get }
+}
+
+extension Annotation: AnyAnnotation where Keyword.AnnotationValue: AnnotationValueConvertible {
+  var jsonValue: JSONValue {
+    self.value.value
+  }
+}

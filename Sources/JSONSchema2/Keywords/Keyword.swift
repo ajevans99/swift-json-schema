@@ -1,4 +1,4 @@
-typealias KeywordIdentifier = String
+public typealias KeywordIdentifier = String
 
 protocol Keyword: Sendable {
   /// The name of the keyword, such as `type` or `minLength`.

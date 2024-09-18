@@ -11,7 +11,7 @@ extension ValidatableSchema {
 
   /// Convenience for validating instances from `String` form. The decoder will first convert to ``JSONValue`` and then pass to standard ``validate(_:at:)``.
   public func validate(
-    _ instance: String,
+    instance: String,
     using decoder: JSONDecoder = .init(),
     at location: JSONPointer = .init()
   ) throws -> ValidationResult {

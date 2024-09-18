@@ -44,4 +44,43 @@ public enum ValidationIssue: Error, Codable, Equatable {
 
   case invalidReference(String)
   case referenceValidationFailed
+
+  case keywordFailure(keyword: KeywordIdentifier, errors: [ValidationError])
+}
+
+extension ValidationIssue {
+  func makeValidationError(
+    keyword: String,
+    keywordLocation: JSONPointer,
+    instanceLocation: JSONPointer
+  ) -> ValidationError {
+    switch self {
+    case let .keywordFailure(keyword, errors):
+      .init(
+        keyword: keyword,
+        message: "Validation failed for keyword '\(keyword)'",
+        keywordLocation: keywordLocation,
+        instanceLocation: instanceLocation,
+        errors: errors
+      )
+    default:
+      .init(
+        keyword: keyword,
+        message: description,
+        keywordLocation: keywordLocation,
+        instanceLocation: instanceLocation
+      )
+    }
+  }
+}
+
+extension ValidationIssue: CustomStringConvertible {
+  public var description: String {
+    switch self {
+    case let .keywordFailure(keyword, _):
+      return "Validation failed for keyword '\(keyword)'"
+    default:
+      return "A validation error occurred"
+    }
+  }
 }

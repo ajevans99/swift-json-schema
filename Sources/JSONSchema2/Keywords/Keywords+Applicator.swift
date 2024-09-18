@@ -7,7 +7,7 @@ protocol ApplicatorKeyword: AnnotationProducingKeyword {
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-prefixitems
   struct PrefixItems: ApplicatorKeyword {
-    static let name = "items"
+    static let name = "prefixItems"
 
     let schema: JSONValue
     let location: JSONPointer
@@ -44,14 +44,16 @@ extension Keywords {
       guard let instances = input.array else { return }
 
       var largestIndex: Int = instances.startIndex
+      var builder = ValidationResultBuilder(keyword: self, instanceLocation: location)
+
       for (offset, (instance, schema)) in zip(instances, subschemas).enumerated() {
         let location = location.appending(.index(offset))
         let result = schema.validate(instance, at: location)
-        if !result.valid {
-          throw .invalidItem
-        }
+        builder.merging(result)
         largestIndex = offset
       }
+
+      try builder.throwIfErrors()
 
       annotations[Self.self] = .init(
         keyword: self,
@@ -84,18 +86,21 @@ extension Keywords {
       guard let instances = input.array else { return }
 
       let relevantInstanceItems: ArraySlice<JSONValue> = switch annotations[PrefixItems.self]?.value {
-        case .everyIndex: .init()
-        case .largestIndex(let index): instances.dropFirst(index + 1)
-        case .none: instances[...]
-        }
+      case .everyIndex: .init()
+      case .largestIndex(let index): instances.dropFirst(index + 1)
+      case .none: instances[...]
+      }
+
+      var builder = ValidationResultBuilder(keyword: self, instanceLocation: location)
+
       // With array slice, original array indicies are used which is important here.
       for (index, instance) in zip(relevantInstanceItems.indices, relevantInstanceItems) {
         let location = location.appending(.index(index))
         let result = subschema.validate(instance, at: location)
-        if !result.valid {
-          throw .invalidItem
-        }
+        builder.merging(result)
       }
+
+      try builder.throwIfErrors()
 
       annotations[Self.self] = .init(
         keyword: self,
@@ -157,11 +162,7 @@ extension Keywords {
       }
 
       let annotationValue = validIndices.count == instances.count ? ContainsAnnotationValue.everyIndex : .indicies(validIndices)
-      annotations[Self.self] = .init(
-        keyword: self,
-        instanceLocation: location,
-        value: annotationValue
-      )
+      annotations[Self.self] = .init(keyword: self, instanceLocation: location, value: annotationValue)
     }
   }
 }
@@ -184,8 +185,12 @@ extension Keywords {
       self.location = location
       self.context = context
 
-      self.schemaMap = schema.object?.compactMapValues { rawSchema in
-        try? Schema(rawSchema: rawSchema, location: location, context: context)
+      self.schemaMap = schema.object?.reduce(into: [:]) { result, keyValue in
+        let (key, rawSchema) = keyValue
+        let updatedLocation = location.appending(.key(key))
+        if let schema = try? Schema(rawSchema: rawSchema, location: updatedLocation, context: context) {
+          result[key] = schema
+        }
       } ?? [:]
     }
 
@@ -197,17 +202,16 @@ extension Keywords {
       }
 
       var instancePropertyNames: Set<String> = []
+      var builder = ValidationResultBuilder(keyword: self, instanceLocation: location)
 
       for (key, value) in instanceObject where schemaMap.keys.contains(key) {
-        let location = location.appending(.key(key))
-        let result = schemaMap[key]!.validate(value, at: location)
-
-        if !result.valid {
-          throw .invalidProperty
-        }
-
+        let propertyLocation = location.appending(.key(key))
+        let result = schemaMap[key]!.validate(value, at: propertyLocation)
+        builder.merging(result)
         instancePropertyNames.insert(key)
       }
+
+      try builder.throwIfErrors()
 
       annotations[Self.self] = .init(keyword: self, instanceLocation: location, value: instancePropertyNames)
     }
@@ -229,7 +233,7 @@ extension Keywords {
 
       self.patterns = schema.object?.compactMap { key, rawSchema in
         guard let regex = try? Regex(key) else { return nil }
-        guard let subschema = try? Schema(rawSchema: rawSchema, location: location, context: context) else { return nil }
+        guard let subschema = try? Schema(rawSchema: rawSchema, location: location.appending(.key(key)), context: context) else { return nil }
         return (regex, subschema)
       } ?? []
     }
@@ -240,21 +244,20 @@ extension Keywords {
       guard let instanceObject = input.object else { return }
 
       var matchedPropertyNames: Set<String> = []
+      var builder = ValidationResultBuilder(keyword: self, instanceLocation: location)
 
       for (key, value) in instanceObject {
         for (regex, schema) in patterns {
           if key.firstMatch(of: regex) != nil {
             let propertyLocation = location.appending(.key(key))
             let result = schema.validate(value, at: propertyLocation)
-
-            if !result.valid {
-              throw ValidationIssue.invalidPatternProperty
-            }
-
+            builder.merging(result)
             matchedPropertyNames.insert(key)
           }
         }
       }
+
+      try builder.throwIfErrors()
 
       annotations[Self.self] = .init(keyword: self, instanceLocation: location, value: matchedPropertyNames)
     }
@@ -286,17 +289,16 @@ extension Keywords {
         .union(annotations[PatternProperties.self]?.value ?? [])
 
       var validatedKeys: Set<String> = []
+      var builder = ValidationResultBuilder(keyword: self, instanceLocation: location)
 
       for (key, value) in instanceObject where !previouslyValidatedKeys.contains(key) {
         let propertyLocation = location.appending(.key(key))
         let result = subschema.validate(value, at: propertyLocation)
-
-        if !result.valid {
-          throw ValidationIssue.invalidAdditionalProperty
-        }
-
+        builder.merging(result)
         validatedKeys.insert(key)
       }
+
+      try builder.throwIfErrors()
 
       annotations[Self.self] = .init(keyword: self, instanceLocation: location, value: validatedKeys)
     }
@@ -324,12 +326,15 @@ extension Keywords {
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
+      var builder = ValidationResultBuilder(keyword: self, instanceLocation: location)
+
       for key in instanceObject.keys {
-        let result = subschema.validate(.string(key), at: location) // TODO: Location?
-        if !result.valid {
-          throw .invalidPatternProperty
-        }
+        let keyValue = JSONValue.string(key)
+        let result = subschema.validate(keyValue, at: location.appending(.key(key)))
+        builder.merging(result)
       }
+
+      try builder.throwIfErrors()
     }
   }
 }
@@ -357,19 +362,14 @@ extension Keywords {
     typealias AnnotationValue = Never
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      var isValid = true
+      var builder = ValidationResultBuilder(keyword: self, instanceLocation: location)
 
       for subschema in subschemas {
         let result = subschema.validate(input, at: location)
-        if !result.valid {
-          isValid = false
-          break
-        }
+        builder.merging(result)
       }
 
-      if !isValid {
-        throw ValidationIssue.allOfFailed
-      }
+      try builder.throwIfErrors()
     }
   }
 
@@ -394,6 +394,7 @@ extension Keywords {
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       var isValid = false
+      var builder = ValidationResultBuilder(keyword: self, instanceLocation: location)
 
       for subschema in subschemas {
         let result = subschema.validate(input, at: location)
@@ -401,10 +402,11 @@ extension Keywords {
           isValid = true
           break
         }
+        builder.merging(result)
       }
 
       if !isValid {
-        throw ValidationIssue.anyOfFailed
+        try builder.throwIfErrors()
       }
     }
   }
@@ -430,17 +432,21 @@ extension Keywords {
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       var validCount = 0
+      var builder = ValidationResultBuilder(keyword: self, instanceLocation: location)
 
       for subschema in subschemas {
         let result = subschema.validate(input, at: location)
         if result.valid {
           validCount += 1
         }
+        builder.merging(result)
       }
 
       if validCount != 1 {
         throw ValidationIssue.oneOfFailed
       }
+
+      try builder.throwIfErrors()
     }
   }
 
@@ -495,7 +501,8 @@ extension Keywords {
     typealias AnnotationValue = Never
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      context.ifConditionalResult = subschema.validate(input, at: location)
+      let result = subschema.validate(input, at: location)
+      context.ifConditionalResult = result
     }
   }
 
@@ -582,16 +589,17 @@ extension Keywords {
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
+      var builder = ValidationResultBuilder(keyword: self, instanceLocation: location)
+
       for (key, schema) in schemaMap {
         if instanceObject.keys.contains(key) {
           let propertyLocation = location.appending(.key(key))
           let result = schema.validate(input, at: propertyLocation)
-
-          if !result.valid {
-            throw ValidationIssue.invalidDependentSchema
-          }
+          builder.merging(result)
         }
       }
+
+      try builder.throwIfErrors()
     }
   }
 }
@@ -646,20 +654,18 @@ extension Keywords {
       }
 
       let unevaluatedIndices = Set(instances.indices).subtracting(evaluatedIndices)
+      var builder = ValidationResultBuilder(keyword: self, instanceLocation: location)
 
-      // Apply unevaluatedItems subschema to unevaluated indices
-      var applied = false
       for index in unevaluatedIndices {
         let instance = instances[index]
         let itemLocation = location.appending(.index(index))
         let result = subschema.validate(instance, at: itemLocation)
-        if !result.valid {
-          throw .unevaluatedItemsFailed
-        }
-        applied = true
+        builder.merging(result)
       }
 
-      if applied {
+      try builder.throwIfErrors()
+
+      if !unevaluatedIndices.isEmpty {
         annotations[Self.self] = .init(keyword: self, instanceLocation: location, value: true)
       }
     }
@@ -702,18 +708,18 @@ extension Keywords {
       }
 
       let unevaluatedPropertyNames = Set(instanceObject.keys).subtracting(evaluatedPropertyNames)
-
+      var builder = ValidationResultBuilder(keyword: self, instanceLocation: location)
       var validatedPropertyNames = Set<String>()
 
       for propertyName in unevaluatedPropertyNames {
-        let propertyValue = instanceObject[propertyName]!
+        guard let propertyValue = instanceObject[propertyName] else { continue }
         let propertyLocation = location.appending(.key(propertyName))
         let result = subschema.validate(propertyValue, at: propertyLocation)
-        if !result.valid {
-          throw .unevaluatedPropertyFailed
-        }
+        builder.merging(result)
         validatedPropertyNames.insert(propertyName)
       }
+
+      try builder.throwIfErrors()
 
       annotations[Self.self] = .init(keyword: self, instanceLocation: location, value: validatedPropertyNames)
     }
@@ -754,5 +760,42 @@ private extension Array where Element == JSONValue {
 private extension JSONValue {
   func extractSubschema(at location: JSONPointer, with context: Context) -> Schema {
     (try? Schema(rawSchema: self, location: location, context: context)) ?? BooleanSchema(schemaValue: true, location: location, context: context).asSchema()
+  }
+}
+
+struct ValidationResultBuilder {
+  let keyword: any Keyword
+  let instanceLocation: JSONPointer
+
+  init(keyword: any Keyword, instanceLocation: JSONPointer) {
+    self.keyword = keyword
+    self.instanceLocation = instanceLocation
+  }
+
+  private var errors: [ValidationError] = []
+
+  mutating func merging(_ result: ValidationResult, onValid: (() -> Void) = {}) {
+    if result.valid {
+      onValid()
+    } else {
+      if let resultErrors = result.errors {
+        errors.append(contentsOf: resultErrors)
+      } else {
+        errors.append(
+          .init(
+            keyword: type(of: keyword).name,
+            message: "Validation failed",
+            keywordLocation: keyword.location,
+            instanceLocation: instanceLocation
+          )
+        )
+      }
+    }
+  }
+
+  func throwIfErrors() throws(ValidationIssue) {
+    if !errors.isEmpty {
+      throw .keywordFailure(keyword: type(of: keyword).name, errors: errors)
+    }
   }
 }

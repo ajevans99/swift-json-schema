@@ -82,4 +82,49 @@ struct SchemaTests {
     #expect(schema.validate(validInstance).valid)
     #expect(schema.validate(invalidInstance).valid == false)
   }
+
+  @Test func validationResult() throws {
+    let rawSchema: JSONValue = [
+      "type": "object",
+      "properties": [
+        "name": ["type": "string"],
+        "age": ["type": "integer", "minimum": 0]
+      ]
+    ]
+
+    let instance: JSONValue = ["name": 123, "age": -5]
+
+    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12)))
+    let result = schema.validate(instance)
+    dump(result)
+    #expect(result.valid == false)
+    #expect(result.errors?.count == 1)
+    #expect(result.annotations?.count == 1)
+  }
+
+  @Test func debugger() throws {
+    let testSchema = """
+      {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$defs": {
+                "tilde~field": {"type": "integer"},
+                "slash/field": {"type": "integer"},
+                "percent%field": {"type": "integer"}
+            },
+            "properties": {
+                "tilde": {"$ref": "#/$defs/tilde~0field"},
+                "slash": {"$ref": "#/$defs/slash~1field"},
+                "percent": {"$ref": "#/$defs/percent%25field"}
+            }
+        }
+      """
+
+    let testCase = """
+      {"slash": "aoeu"}
+      """
+
+    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
+    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12)))
+    #expect((try! schema.validate(instance: testCase).valid) == false)
+  }
 }
