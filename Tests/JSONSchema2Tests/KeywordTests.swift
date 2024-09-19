@@ -507,7 +507,7 @@ struct KeywordTests {
       let keyword = Keywords.PrefixItems(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
       
       if isValid {
-        #expect(throws: Never.self) {
+        #expect(throws: Never.self, "\(instance)") {
           try keyword.validate(instance, at: .init(), using: &annotations, with: context)
         }
       } else {
@@ -515,7 +515,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: &annotations, with: context)
         }
       }
-      #expect(annotations[Keywords.PrefixItems.self]?.value == expectedAnnotation)
+      #expect(annotations.annotation(for: Keywords.PrefixItems.self, at: .init())?.value == expectedAnnotation)
     }
     
     @Test(arguments: [
@@ -543,7 +543,7 @@ struct KeywordTests {
         }
       }
       // Nil when invalid, true when valid
-      #expect(annotations[Keywords.Items.self]?.value != !isValid)
+      #expect(annotations.annotation(for: Keywords.Items.self, at: .init())?.value != !isValid)
     }
     
     @Test(arguments: [
@@ -567,7 +567,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: &annotations, with: context)
         }
       }
-      #expect(annotations[Keywords.Contains.self]?.value == expectedAnnotation)
+      #expect(annotations.annotation(for: Keywords.Contains.self, at: .init())?.value == expectedAnnotation)
     }
 
     // MARK: - Objects
@@ -598,7 +598,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: &annotations, with: context)
         }
       }
-      #expect(annotations[Keywords.Properties.self]?.value == expectedAnnotation)
+      #expect(annotations.annotation(for: Keywords.Properties.self, at: .init())?.value == expectedAnnotation)
     }
 
     @Test(arguments: [
@@ -627,7 +627,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: &annotations, with: context)
         }
       }
-      #expect(annotations[Keywords.PatternProperties.self]?.value == expectedAnnotation)
+      #expect(annotations.annotation(for: Keywords.PatternProperties.self, at: .init())?.value == expectedAnnotation)
     }
 
     @Test(arguments: [
@@ -654,7 +654,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: &annotations, with: context)
         }
       }
-      #expect(annotations[Keywords.AdditionalProperties.self]?.value == expectedAnnotation)
+      #expect(annotations.annotation(for: Keywords.AdditionalProperties.self, at: .init())?.value == expectedAnnotation)
     }
 
     @Test(arguments: [
@@ -693,11 +693,13 @@ extension AnnotationContainer {
   }
 
   mutating func apply<K: AnnotationProducingKeyword>(_ value: K.AnnotationValue, to keywordType: K.Type) {
-    self[keywordType] = .init(
-      keyword: keywordType.name,
-      instanceLocation: .init(),
-      schemaLocation: .init(),
-      value: value
+    self.insert(
+      Annotation<K>(
+        keyword: keywordType.name,
+        instanceLocation: .init(),
+        schemaLocation: .init(),
+        value: value
+      )
     )
   }
 }

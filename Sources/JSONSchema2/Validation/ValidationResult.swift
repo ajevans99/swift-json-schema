@@ -31,8 +31,8 @@ public struct ValidationResult: Sendable, Encodable {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(valid, forKey: .valid)
     try container.encode(instanceLocation, forKey: .instanceLocation)
-    try container.encode(errors, forKey: .errors)
-    try container.encode(annotations?.map { AnyAnnotationWrapper(annotation: $0) }, forKey: .annotations)
+    try container.encodeIfPresent(errors, forKey: .errors)
+    try container.encodeIfPresent(annotations?.map { AnyAnnotationWrapper(annotation: $0) }, forKey: .annotations)
   }
 }
 
@@ -71,7 +71,7 @@ public struct AnyAnnotationWrapper: Sendable, Encodable {
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(annotation.schemaLocation, forKey: .keywordLocation)
-    try container.encode(annotation.absoluteSchemaLocation, forKey: .absoluteKeywordLocation)
+    try container.encodeIfPresent(annotation.absoluteSchemaLocation, forKey: .absoluteKeywordLocation)
     try container.encode(annotation.instanceLocation, forKey: .instanceLocation)
     try container.encode(annotation.jsonValue, forKey: .annotation)
   }

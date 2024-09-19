@@ -41,7 +41,8 @@ struct BooleanSchema: ValidatableSchema {
     return ValidationResult(
       valid: schemaValue,
       keywordLocation: self.location,
-      instanceLocation: location
+      instanceLocation: location,
+      errors: [.init(keyword: "boolean", message: "yoo", keywordLocation: self.location, instanceLocation: location)]
     )
   }
 

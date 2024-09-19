@@ -396,7 +396,7 @@ extension Keywords {
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       guard let array = input.array else { return }
 
-      guard let containsAnnotation = annotations[Keywords.Contains.self] else { return }
+      guard let containsAnnotation = annotations.annotation(for: Contains.self, at: location) else { return }
 
       switch containsAnnotation.value {
       case .everyIndex:
@@ -435,7 +435,7 @@ extension Keywords {
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       guard let array = input.array else { return }
 
-      guard let containsAnnotation = annotations[Keywords.Contains.self] else { return }
+      guard let containsAnnotation = annotations.annotation(for: Contains.self, at: location) else { return }
 
       switch containsAnnotation.value {
       case .everyIndex:

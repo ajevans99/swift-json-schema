@@ -1,16 +1,49 @@
 struct AnnotationContainer {
-  private var storage: [ObjectIdentifier: Sendable] = [:]
+  struct AnnotationKey: Hashable {
+    let keywordType: ObjectIdentifier
+    let instanceLocation: JSONPointer
+  }
+
+  private var storage: [AnnotationKey: AnyAnnotation] = [:]
 
   public init() {}
 
-  public subscript<K: AnnotationProducingKeyword>(_ key: K.Type) -> Annotation<K>? {
-    get { storage[ObjectIdentifier(key)] as? Annotation<K> }
-    set { storage[ObjectIdentifier(key)] = newValue }
+  mutating func insert<K: AnnotationProducingKeyword>(keyword: K, at instanceLocation: JSONPointer, value: K.AnnotationValue) {
+    let annotation = Annotation<K>(
+      keyword: type(of: keyword).name,
+      instanceLocation: instanceLocation,
+      schemaLocation: keyword.location,
+      value: value
+    )
+    insert(annotation)
   }
-}
 
-extension AnnotationContainer {
+  mutating func insert<K: AnnotationProducingKeyword>(_ annotation: Annotation<K>) {
+    let key = AnnotationKey(
+      keywordType: ObjectIdentifier(K.self),
+      instanceLocation: annotation.instanceLocation
+    )
+    storage[key] = annotation
+  }
+
+
+  func annotation<K: AnnotationProducingKeyword>(for keyword: K.Type, at instanceLocation: JSONPointer) -> Annotation<K>? {
+    let key = AnnotationKey(
+      keywordType: ObjectIdentifier(keyword),
+      instanceLocation: instanceLocation
+    )
+    return storage[key] as? Annotation<K>
+  }
+
   func allAnnotations() -> [AnyAnnotation] {
-    storage.values.compactMap { $0 as? AnyAnnotation }
+    Array(storage.values)
+  }
+
+  mutating func merge(_ other: AnnotationContainer) {
+    for (key, annotation) in other.storage {
+      // Decide how to handle conflicts if the same key exists
+      // For now, we'll assume that annotations can be merged or overwritten
+      storage[key] = annotation
+    }
   }
 }

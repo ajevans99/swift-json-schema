@@ -28,6 +28,14 @@ public struct JSONPointer: Sendable, Hashable {
     return pointer
   }
 
+  func dropLast() -> JSONPointer {
+    guard path.count > 1 else { return self }
+
+    var pointer = self
+    pointer.path.removeLast()
+    return pointer
+  }
+
   var isRoot: Bool { path.isEmpty }
 }
 

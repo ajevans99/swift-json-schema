@@ -55,9 +55,9 @@ extension Keywords {
 
       try builder.throwIfErrors()
 
-      annotations[Self.self] = .init(
+      annotations.insert(
         keyword: self,
-        instanceLocation: location,
+        at: location,
         value: largestIndex == instances.indices.last ? .everyIndex : .largestIndex(largestIndex)
       )
     }
@@ -85,7 +85,8 @@ extension Keywords {
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
-      let relevantInstanceItems: ArraySlice<JSONValue> = switch annotations[PrefixItems.self]?.value {
+      let prefixItemsAnnotation = annotations.annotation(for: PrefixItems.self, at: location)
+      let relevantInstanceItems: ArraySlice<JSONValue> = switch prefixItemsAnnotation?.value {
       case .everyIndex: .init()
       case .largestIndex(let index): instances.dropFirst(index + 1)
       case .none: instances[...]
@@ -102,11 +103,7 @@ extension Keywords {
 
       try builder.throwIfErrors()
 
-      annotations[Self.self] = .init(
-        keyword: self,
-        instanceLocation: location,
-        value: true
-      )
+      annotations.insert(keyword: self, at: location, value: true)
     }
   }
 
@@ -162,7 +159,7 @@ extension Keywords {
       }
 
       let annotationValue = validIndices.count == instances.count ? ContainsAnnotationValue.everyIndex : .indicies(validIndices)
-      annotations[Self.self] = .init(keyword: self, instanceLocation: location, value: annotationValue)
+      annotations.insert(keyword: self, at: location, value: annotationValue)
     }
   }
 }
@@ -213,7 +210,7 @@ extension Keywords {
 
       try builder.throwIfErrors()
 
-      annotations[Self.self] = .init(keyword: self, instanceLocation: location, value: instancePropertyNames)
+      annotations.insert(keyword: self, at: location, value: instancePropertyNames)
     }
   }
 
@@ -259,7 +256,7 @@ extension Keywords {
 
       try builder.throwIfErrors()
 
-      annotations[Self.self] = .init(keyword: self, instanceLocation: location, value: matchedPropertyNames)
+      annotations.insert(keyword: self, at: location, value: matchedPropertyNames)
     }
   }
 
@@ -285,8 +282,8 @@ extension Keywords {
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
-      let previouslyValidatedKeys = (annotations[Properties.self]?.value ?? [])
-        .union(annotations[PatternProperties.self]?.value ?? [])
+      let previouslyValidatedKeys = (annotations.annotation(for: Properties.self, at: location)?.value ?? [])
+        .union(annotations.annotation(for: PatternProperties.self, at: location)?.value ?? [])
 
       var validatedKeys: Set<String> = []
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: location)
@@ -300,7 +297,7 @@ extension Keywords {
 
       try builder.throwIfErrors()
 
-      annotations[Self.self] = .init(keyword: self, instanceLocation: location, value: validatedKeys)
+      annotations.insert(keyword: self, at: location, value: validatedKeys)
     }
   }
 
@@ -629,7 +626,7 @@ extension Keywords {
 
       var evaluatedIndices = Set<Int>()
 
-      if let prefixItemsAnnotation = annotations[PrefixItems.self]?.value {
+      if let prefixItemsAnnotation = annotations.annotation(for: PrefixItems.self, at: location)?.value {
         switch prefixItemsAnnotation {
         case .everyIndex:
           return
@@ -638,11 +635,11 @@ extension Keywords {
         }
       }
 
-      if let itemsAnnotation = annotations[Items.self]?.value, itemsAnnotation == true {
+      if let itemsAnnotation = annotations.annotation(for: Items.self, at: location)?.value, itemsAnnotation == true {
         evaluatedIndices.formUnion(0..<instances.count)
       }
 
-      if let containsAnnotation = annotations[Contains.self]?.value {
+      if let containsAnnotation = annotations.annotation(for: Contains.self, at: location)?.value {
         switch containsAnnotation {
         case .everyIndex:
           evaluatedIndices.formUnion(0..<instances.count)
@@ -664,7 +661,7 @@ extension Keywords {
       try builder.throwIfErrors()
 
       if !unevaluatedIndices.isEmpty {
-        annotations[Self.self] = .init(keyword: self, instanceLocation: location, value: true)
+        annotations.insert(keyword: self, at: location, value: true)
       }
     }
   }
@@ -693,15 +690,15 @@ extension Keywords {
 
       var evaluatedPropertyNames = Set<String>()
 
-      if let propertiesAnnotation = annotations[Properties.self]?.value {
+      if let propertiesAnnotation = annotations.annotation(for: Properties.self, at: location)?.value {
         evaluatedPropertyNames.formUnion(propertiesAnnotation)
       }
 
-      if let patternPropertiesAnnotation = annotations[PatternProperties.self]?.value {
+      if let patternPropertiesAnnotation = annotations.annotation(for: PatternProperties.self, at: location)?.value {
         evaluatedPropertyNames.formUnion(patternPropertiesAnnotation)
       }
 
-      if let additionalPropertiesAnnotation = annotations[AdditionalProperties.self]?.value {
+      if let additionalPropertiesAnnotation = annotations.annotation(for: AdditionalProperties.self, at: location)?.value {
         evaluatedPropertyNames.formUnion(additionalPropertiesAnnotation)
       }
 
@@ -719,7 +716,7 @@ extension Keywords {
 
       try builder.throwIfErrors()
 
-      annotations[Self.self] = .init(keyword: self, instanceLocation: location, value: validatedPropertyNames)
+      annotations.insert(keyword: self, at: location, value: validatedPropertyNames)
     }
   }
 }
@@ -773,17 +770,20 @@ struct ValidationResultBuilder {
   private var errors: [ValidationError] = []
 
   mutating func merging(_ result: ValidationResult) {
-    if let resultErrors = result.errors {
-      errors.append(contentsOf: resultErrors)
-    } else {
-      errors.append(
-        .init(
-          keyword: type(of: keyword).name,
-          message: "Validation failed",
-          keywordLocation: keyword.location,
-          instanceLocation: instanceLocation
+    if !result.valid {
+      if let resultErrors = result.errors {
+        errors.append(contentsOf: resultErrors)
+      }
+      else {
+        errors.append(
+          .init(
+            keyword: type(of: keyword).name,
+            message: "Validation failed",
+            keywordLocation: keyword.location,
+            instanceLocation: instanceLocation
+          )
         )
-      )
+      }
     }
   }
 
