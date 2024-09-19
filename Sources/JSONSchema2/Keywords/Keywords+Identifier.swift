@@ -81,13 +81,13 @@ extension Keywords {
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      guard !context.validationStack.contains(self.location) else {
+      guard !context.validationStack.contains(referenceURI) else {
         // Detected a cycle, prevent infinite recursion
         print("Cycle detected. Stack: \(context.validationStack.map(\.description).joined(separator: ","))")
         return
       }
-      context.validationStack.insert(self.location)
-      defer { context.validationStack.remove(self.location) }
+      context.validationStack.insert(referenceURI)
+      defer { context.validationStack.remove(referenceURI) }
 
       guard !referenceURI.isEmpty else {
         return

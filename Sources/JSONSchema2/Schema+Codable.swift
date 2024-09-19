@@ -48,7 +48,6 @@ extension ObjectSchema: Codable {
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: DynamicCodingKey.self)
 
-    var decodedKeywords = [any Keyword]()
     var schemaValue = [String: JSONValue]()
 
     let dialect = Dialect.draft2020_12
@@ -56,17 +55,17 @@ extension ObjectSchema: Codable {
 
     for keywordType in dialect.keywords {
       let key = keywordType.name
-      if let value = try container.decodeIfPresent(JSONValue.self, forKey: .init(stringValue: key)!)
-      {
-        decodedKeywords.append(keywordType.init(schema: value, location: .init(), context: context))
+      let keyValue = DynamicCodingKey(stringValue: key)!
+
+      if let value = try? container.decode(JSONValue.self, forKey: keyValue) {
         schemaValue[key] = value
+      } else if container.contains(keyValue) {
+        // Handle the case where the value is explicitly null
+        schemaValue[key] = .null
       }
     }
 
-    self.keywords = decodedKeywords
-    self.location = .init()
-    self.context = context
-    self.schemaValue = schemaValue
+    self.init(schemaValue: schemaValue, location: .init(), context: context)
   }
 
   public func encode(to encoder: any Encoder) throws {

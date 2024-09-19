@@ -426,6 +426,10 @@ extension Keywords {
       self.location = location
       self.context = context
       self.minContains = schema.integer ?? 1
+
+      if minContains == 0 {
+        context.minContainsIsZero = true
+      }
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {

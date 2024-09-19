@@ -157,7 +157,7 @@ extension Keywords {
         }
       }
 
-      if validIndices.isEmpty {
+      if validIndices.isEmpty && !context.minContainsIsZero {
         throw .containsInsufficientMatches
       }
 
@@ -445,8 +445,6 @@ extension Keywords {
       if validCount != 1 {
         throw ValidationIssue.oneOfFailed
       }
-
-      try builder.throwIfErrors()
     }
   }
 
