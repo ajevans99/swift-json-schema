@@ -16,7 +16,7 @@ public final class Context: Sendable {
   var minContainsIsZero: Bool = false
   var ifConditionalResult: ValidationResult?
 
-  init(dialect: Dialect) {
+  public init(dialect: Dialect) {
     self.dialect = dialect
   }
 

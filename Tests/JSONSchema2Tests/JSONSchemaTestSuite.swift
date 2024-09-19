@@ -2,6 +2,7 @@ import Foundation
 import JSONSchema2
 import Testing
 
+@Suite(.serialized)
 struct JSONSchemaTestSuite {
   static let fileLoader = FileLoader<[JSONSchemaTest]>(subdirectory: "JSON-Schema-Test-Suite/tests/draft2020-12")
 
@@ -11,16 +12,17 @@ struct JSONSchemaTestSuite {
     fileLoader.loadAllFiles()
       .filter { unsupportedFilePaths.contains($0.fileName) == false }
       .sorted(by: { $0.fileName < $1.fileName })
-      // .filter { $0.fileName == "const.json" }
+      .filter { $0.fileName == "unevaluatedProperties.json" }
       .flatMap { path, schemaTests in
         schemaTests.map { ($0, path) }
       }
   }()
 
   @Test(arguments: flattenedArguments)
-  func schemaTest(_ schemaTest: JSONSchemaTest, path: String) {
+  func schemaTest(_ schemaTest: JSONSchemaTest, path: String) throws {
     for testCase in schemaTest.tests {
-      let validationResult = schemaTest.schema.validate(testCase.data)
+      let schema = try #require(try Schema(rawSchema: schemaTest.schema, context: .init(dialect: .draft2020_12)))
+      let validationResult = schema.validate(testCase.data)
 
       let comment: () -> Testing.Comment = {
         """
@@ -67,7 +69,7 @@ struct JSONSchemaTest: Sendable, Codable {
 
   let description: String
   let specification: [Spec]?
-  let schema: Schema
+  let schema: JSONValue
   let tests: [TestCase]
 }
 

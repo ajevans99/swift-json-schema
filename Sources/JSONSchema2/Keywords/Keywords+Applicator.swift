@@ -772,22 +772,18 @@ struct ValidationResultBuilder {
 
   private var errors: [ValidationError] = []
 
-  mutating func merging(_ result: ValidationResult, onValid: (() -> Void) = {}) {
-    if result.valid {
-      onValid()
+  mutating func merging(_ result: ValidationResult) {
+    if let resultErrors = result.errors {
+      errors.append(contentsOf: resultErrors)
     } else {
-      if let resultErrors = result.errors {
-        errors.append(contentsOf: resultErrors)
-      } else {
-        errors.append(
-          .init(
-            keyword: type(of: keyword).name,
-            message: "Validation failed",
-            keywordLocation: keyword.location,
-            instanceLocation: instanceLocation
-          )
+      errors.append(
+        .init(
+          keyword: type(of: keyword).name,
+          message: "Validation failed",
+          keywordLocation: keyword.location,
+          instanceLocation: instanceLocation
         )
-      }
+      )
     }
   }
 
