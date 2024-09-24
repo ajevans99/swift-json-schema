@@ -106,25 +106,25 @@ struct SchemaTests {
     let testSchema = """
       {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "#foo",
             "$defs": {
-                "tilde~field": {"type": "integer"},
-                "slash/field": {"type": "integer"},
-                "percent%field": {"type": "integer"}
-            },
-            "properties": {
-                "tilde": {"$ref": "#/$defs/tilde~0field"},
-                "slash": {"$ref": "#/$defs/slash~1field"},
-                "percent": {"$ref": "#/$defs/percent%25field"}
+                "A": {
+                    "$anchor": "foo",
+                    "type": "integer"
+                }
             }
         }
       """
 
     let testCase = """
-      {"slash": "aoeu"}
+      1
       """
 
     let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
     let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12)))
-    #expect((try! schema.validate(instance: testCase).valid) == false)
+    let result = try #require(try schema.validate(instance: testCase))
+//    dump(result)
+//    dump(schema.context)
+    #expect((result.valid) == true, "\(result)")
   }
 }

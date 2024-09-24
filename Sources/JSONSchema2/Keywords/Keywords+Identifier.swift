@@ -11,9 +11,7 @@ extension Keywords {
     let location: JSONPointer
     let context: Context
 
-    func processIdentifier(into context: Context) {
-
-    }
+    func processIdentifier(into context: Context) {}
   }
 
   struct Defs: IdentifierKeyword {
@@ -24,12 +22,12 @@ extension Keywords {
     let context: Context
 
     func processIdentifier(into context: Context) {
-//      guard case .object(let object) = schema else { return }
-//      for (key, value) in object {
-//        let subschemaLocation = location.appending(.key(key))
-//        if let schema = try? Schema(rawSchema: value, location: subschemaLocation, context: context) {
-//        }
-//      }
+      guard case .object(let object) = schema else { return }
+      for (key, value) in object {
+        // It is important to process defs to update context
+        let subschemaLocation = location.appending(.key(key))
+        _ = try? Schema(rawSchema: value, location: subschemaLocation, context: context)
+      }
     }
   }
 
@@ -135,27 +133,15 @@ extension Keywords {
     }
 
     private func resolveInternalReference(_ uri: URL, context: Context) throws(ValidationIssue) -> Schema? {
-      guard let fragment = uri.fragment else {
+      guard let fragment = uri.fragment(percentEncoded: false) else {
         return nil
       }
 
-      let pointer = context.anchors[fragment] ?? JSONPointer(from: fragment)
+      let pointer = context.anchors[fragment]?.dropLast() ?? JSONPointer(from: fragment)
       guard let value = context.rootRawSchema?.value(at: pointer) else {
         return nil
       }
       return try? Schema(rawSchema: value, location: location, context: context)
-
-//      if let anchorLocation = context.anchors[fragment] {
-//
-//
-//      } else {
-//        let pointer = JSONPointer(from: uri.relativePath)
-//        guard let value = context.rootRawSchema?.value(at: pointer) else {
-//          return nil
-//        }
-//        let schema = try? Schema(rawSchema: value, location: location, context: context)
-//        return schema
-//      }
     }
   }
 
