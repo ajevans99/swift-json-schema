@@ -24,24 +24,26 @@ extension Keywords {
     let context: Context
 
     func processIdentifier(into context: Context) {
-      guard case .object(let object) = schema else { return }
-      for (key, value) in object {
-        let subschemaLocation = location.appending(.key(key))
-        if let schema = try? Schema(rawSchema: value, location: subschemaLocation, context: context) {
-          context.definitions[key] = schema
-        }
-      }
+//      guard case .object(let object) = schema else { return }
+//      for (key, value) in object {
+//        let subschemaLocation = location.appending(.key(key))
+//        if let schema = try? Schema(rawSchema: value, location: subschemaLocation, context: context) {
+//        }
+//      }
     }
   }
 
   struct Anchor: IdentifierKeyword {
-    static let name = "$ref"
+    static let name = "$anchor"
 
     let schema: JSONValue
     let location: JSONPointer
     let context: Context
 
-    func processIdentifier(into context: Context) {}
+    func processIdentifier(into context: Context) {
+      guard let anchorName = schema.string else { return }
+      context.anchors[anchorName] = location
+    }
   }
 
   struct DynamicAnchor: IdentifierKeyword {
@@ -52,8 +54,8 @@ extension Keywords {
     let context: Context
 
     func processIdentifier(into context: Context) {
-      guard case let .string(string) = schema else { return }
-      context.dynamicAnchors[string] = location
+      guard let anchorName = schema.string else { return }
+      context.dynamicAnchors[anchorName] = location
     }
   }
 }
@@ -61,7 +63,7 @@ extension Keywords {
 import Foundation
 
 protocol ReferenceKeyword: Keyword {
-  func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue)
+  func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue)
 }
 
 extension Keywords {
@@ -80,7 +82,7 @@ extension Keywords {
       self.referenceURI = schema.string ?? ""
     }
 
-    func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard !context.validationStack.contains(referenceURI) else {
         // Detected a cycle, prevent infinite recursion
         print("Cycle detected. Stack: \(context.validationStack.map(\.description).joined(separator: ","))")
@@ -93,24 +95,35 @@ extension Keywords {
         return
       }
 
-      guard let resolvedSchema = try resolveSchema(from: referenceURI, at: self.location, context: context) else {
-        throw .invalidReference("Unable to resolve $ref '\(referenceURI)' at \(location)")
+      if let cachedSchema = context.schemaCache[referenceURI] {
+        let result = cachedSchema.validate(input, at: location)
+        if !result.valid {
+          throw .referenceValidationFailure(ref: referenceURI, errors: result.errors ?? [])
+        }
+        return
       }
 
-      let result = resolvedSchema.validate(input, at: location)
+      guard let resolvedSchema = try resolveSchema(from: referenceURI, at: location, context: context) else {
+        throw .invalidReference("Unable to resolve $ref '\(referenceURI)' at \(instanceLocation)")
+      }
+
+      // Update cache
+      context.schemaCache[referenceURI] = resolvedSchema
+
+      let result = resolvedSchema.validate(input, at: instanceLocation)
       if !result.valid {
-        throw .referenceValidationFailed
+        throw .referenceValidationFailure(ref: referenceURI, errors: result.errors ?? [])
       }
     }
 
-    private func resolveSchema(from referenceURI: String, at location: JSONPointer, context: Context) throws(ValidationIssue) -> Schema? {
+    private func resolveSchema(from referenceURI: String, at instanceLocation: JSONPointer, context: Context) throws(ValidationIssue) -> Schema? {
       // Resolve the URI against the base URI
 //      guard let baseURI = context.baseURI else {
 //        throw ValidationIssue.invalidReference("No base URI to resolve $ref '\(referenceURI)' at \(location)")
 //      }
 
       guard let resolvedURI = URL(string: referenceURI, relativeTo: nil)?.absoluteURL else {
-        throw ValidationIssue.invalidReference("Invalid $ref URI '\(referenceURI)' at \(location)")
+        throw ValidationIssue.invalidReference("Invalid $ref URI '\(referenceURI)' at \(instanceLocation)")
       }
 
       if resolvedURI.fragment != nil {
@@ -126,12 +139,23 @@ extension Keywords {
         return nil
       }
 
-      let pointer = JSONPointer(from: fragment)
+      let pointer = context.anchors[fragment] ?? JSONPointer(from: fragment)
       guard let value = context.rootRawSchema?.value(at: pointer) else {
         return nil
       }
-      let schema = try? Schema(rawSchema: value, location: location, context: context)
-      return schema
+      return try? Schema(rawSchema: value, location: location, context: context)
+
+//      if let anchorLocation = context.anchors[fragment] {
+//
+//
+//      } else {
+//        let pointer = JSONPointer(from: uri.relativePath)
+//        guard let value = context.rootRawSchema?.value(at: pointer) else {
+//          return nil
+//        }
+//        let schema = try? Schema(rawSchema: value, location: location, context: context)
+//        return schema
+//      }
     }
   }
 

@@ -8,8 +8,9 @@ public final class Context: Sendable {
   var rootRawSchema: JSONValue?
   var validationStack = Set<String>()
 
-  // Replace with cache for refs.
-  var definitions = [String: Schema]()
+  var schemaCache = [String: Schema]()
+
+  var anchors = [String: JSONPointer]()
   var dynamicAnchors = [String: JSONPointer]()
 
   // TODO: This probably needs to be scoped to location

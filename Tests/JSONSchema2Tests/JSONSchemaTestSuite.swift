@@ -12,7 +12,7 @@ struct JSONSchemaTestSuite {
     fileLoader.loadAllFiles()
       .filter { unsupportedFilePaths.contains($0.fileName) == false }
       .sorted(by: { $0.fileName < $1.fileName })
-//      .filter { $0.fileName == "minContains.json" }
+//      .filter { $0.fileName == "anchor.json" }
       .flatMap { path, schemaTests in
         schemaTests.map { ($0, path) }
       }
