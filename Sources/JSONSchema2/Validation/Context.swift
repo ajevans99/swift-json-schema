@@ -8,6 +8,7 @@ public final class Context: Sendable {
   var rootRawSchema: JSONValue?
   var validationStack = Set<String>()
 
+  var remoteSchemaCache: [String: Schema] = [:]
   var schemaCache = [String: Schema]()
 
   var anchors = [String: JSONPointer]()
@@ -17,11 +18,24 @@ public final class Context: Sendable {
   var minContainsIsZero: Bool = false
   var ifConditionalResult: ValidationResult?
 
-  public init(dialect: Dialect) {
+  public init(dialect: Dialect, remoteSchema: [String: Schema] = [:]) {
     self.dialect = dialect
+    self.remoteSchemaCache = remoteSchema
   }
 
   static func == (lhs: Context, rhs: Context) -> Bool {
     lhs.dialect == rhs.dialect && lhs.rootRawSchema == rhs.rootRawSchema
+  }
+
+  func resolveInternalReference(_ uri: URL, location: JSONPointer) throws(ValidationIssue) -> Schema? {
+    guard let fragment = uri.fragment(percentEncoded: false) else {
+      return nil
+    }
+
+    let pointer = anchors[fragment]?.dropLast() ?? JSONPointer(from: fragment)
+    guard let value = rootRawSchema?.value(at: pointer) else {
+      return nil
+    }
+    return try? Schema(rawSchema: value, location: location, context: self)
   }
 }

@@ -11,7 +11,14 @@ extension Keywords {
     let location: JSONPointer
     let context: Context
 
-    func processIdentifier(into context: Context) {}
+    func processIdentifier(into context: Context) {
+      guard let string = schema.string else { return }
+      if let previous = context.baseURI {
+        context.baseURI = URL(string: string, relativeTo: previous)
+      } else {
+        context.baseURI = URL(string: string)
+      }
+    }
   }
 
   struct Defs: IdentifierKeyword {
@@ -115,33 +122,20 @@ extension Keywords {
     }
 
     private func resolveSchema(from referenceURI: String, at instanceLocation: JSONPointer, context: Context) throws(ValidationIssue) -> Schema? {
-      // Resolve the URI against the base URI
-//      guard let baseURI = context.baseURI else {
-//        throw ValidationIssue.invalidReference("No base URI to resolve $ref '\(referenceURI)' at \(location)")
-//      }
-
-      guard let resolvedURI = URL(string: referenceURI, relativeTo: nil)?.absoluteURL else {
+      guard let resolvedURI = URL(string: referenceURI, relativeTo: context.baseURI)?.absoluteURL else {
         throw ValidationIssue.invalidReference("Invalid $ref URI '\(referenceURI)' at \(instanceLocation)")
       }
 
-      if resolvedURI.fragment != nil {
-        return try resolveInternalReference(resolvedURI, context: context)
-      } else {
-        // Handle external references (not fully implemented)
-        return nil
-      }
-    }
-
-    private func resolveInternalReference(_ uri: URL, context: Context) throws(ValidationIssue) -> Schema? {
-      guard let fragment = uri.fragment(percentEncoded: false) else {
-        return nil
+      if let urlWithoutFragment = resolvedURI.withoutFragment, let schema = context.remoteSchemaCache[urlWithoutFragment.absoluteString] {
+        if resolvedURI.fragment() != nil {
+          return try schema.context.resolveInternalReference(resolvedURI, location: location)
+        }
+        return schema
+      } else if resolvedURI.fragment != nil {
+        return try context.resolveInternalReference(resolvedURI, location: location)
       }
 
-      let pointer = context.anchors[fragment]?.dropLast() ?? JSONPointer(from: fragment)
-      guard let value = context.rootRawSchema?.value(at: pointer) else {
-        return nil
-      }
-      return try? Schema(rawSchema: value, location: location, context: context)
+      return nil
     }
   }
 
@@ -155,5 +149,14 @@ extension Keywords {
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue){
 
     }
+  }
+}
+
+extension URL {
+  /// Returns the URL without the fragment part (everything before the `#`)
+  var withoutFragment: URL? {
+    var components = URLComponents(url: self, resolvingAgainstBaseURL: false)
+    components?.fragment = nil // Remove the fragment part
+    return components?.url // Rebuild the URL without the fragment
   }
 }

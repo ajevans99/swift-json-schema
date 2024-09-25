@@ -473,7 +473,7 @@ extension Keywords {
   }
 }
 
-// MARK: - In Place (Conditionally
+// MARK: - In Place (Conditionally)
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-if

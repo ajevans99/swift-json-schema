@@ -101,30 +101,4 @@ struct SchemaTests {
     #expect(result.errors?.count == 1)
     #expect(result.annotations == nil)
   }
-
-  @Test func debugger() throws {
-    let testSchema = """
-      {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "$ref": "#foo",
-            "$defs": {
-                "A": {
-                    "$anchor": "foo",
-                    "type": "integer"
-                }
-            }
-        }
-      """
-
-    let testCase = """
-      1
-      """
-
-    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
-    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12)))
-    let result = try #require(try schema.validate(instance: testCase))
-//    dump(result)
-//    dump(schema.context)
-    #expect((result.valid) == true, "\(result)")
-  }
 }
