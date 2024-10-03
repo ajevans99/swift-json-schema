@@ -68,25 +68,9 @@ struct RemoteLoader {
     return remoteSchemas
   }
 
-  private func processSchemas(from jsonValues: [String: JSONValue]) -> [String: Schema] {
-    var schemas: [String: Schema] = [:]
-
-    for (key, jsonValue) in jsonValues {
-      do {
-        let schema = try Schema(rawSchema: jsonValue, context: .init(dialect: .draft2020_12))
-        schemas[key] = schema
-      } catch {
-        print("Failed to process schema for key \(key): \(error)")
-      }
-    }
-
-    return schemas
-  }
-
-  func loadSchemas() -> [String: Schema] {
+  func loadSchemas() -> [String: JSONValue] {
     do {
-      let remoteSchemas = try fetchRemoteSchemas()
-      return processSchemas(from: remoteSchemas)
+      return try fetchRemoteSchemas()
     } catch {
       print("Error: \(error)")
       return [:]

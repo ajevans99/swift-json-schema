@@ -47,7 +47,10 @@ let package = Package(
 
     .target(
       name: "JSONSchema2",
-      dependencies: ["JSONSchema"]
+      dependencies: ["JSONSchema"],
+      resources: [
+        .copy("Resources")
+      ]
     ),
     .testTarget(
       name: "JSONSchema2Tests",

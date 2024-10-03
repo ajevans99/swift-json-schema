@@ -7,8 +7,8 @@ struct JSONSchemaTestSuite {
   static let fileLoader = FileLoader<[JSONSchemaTest]>(subdirectory: "JSON-Schema-Test-Suite/tests/draft2020-12")
 
   static let unsupportedFilePaths: [String] = [
-    "unevaluatedItems.json",
-    "unevaluatedProperties.json",
+//    "unevaluatedItems.json",
+//    "unevaluatedProperties.json",
   ]
 
   static let flattenedArguments: [(schemaTest: JSONSchemaTest, path: String)] = {
@@ -16,13 +16,13 @@ struct JSONSchemaTestSuite {
       .filter { unsupportedFilePaths.contains($0.fileName) == false }
       .sorted(by: { $0.fileName < $1.fileName })
 //      .filter { $0.fileName == "refRemote.json" }
-      .filter { $0.fileName == "infinite-loop-detection.json" }
+//      .filter { $0.fileName == "ref.json" }
       .flatMap { path, schemaTests in
         schemaTests.map { ($0, path) }
       }
   }()
 
-  static let remotes: [String: Schema] = RemoteLoader().loadSchemas()
+  static let remotes: [String: JSONValue] = RemoteLoader().loadSchemas()
 
   @Test(arguments: flattenedArguments)
   func schemaTest(_ schemaTest: JSONSchemaTest, path: String) throws {

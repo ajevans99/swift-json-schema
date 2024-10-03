@@ -5,57 +5,50 @@ extension Keywords {
   struct Title: MetadataKeyword {
     static let name = "title"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 
   struct Description: MetadataKeyword {
     static let name = "description"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 
   struct Default: MetadataKeyword {
     static let name = "default"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 
   struct Deprecated: MetadataKeyword {
     static let name = "deprecated"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 
   struct ReadOnly: MetadataKeyword {
     static let name = "readOnly"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 
   struct WriteOnly: MetadataKeyword {
     static let name = "writeOnly"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 
   struct Examples: MetadataKeyword {
     static let name = "examples"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 }
 
@@ -63,24 +56,21 @@ extension Keywords {
   struct ContentEncoding: MetadataKeyword {
     static let name = "contentEncoding"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 
   struct ContentMediaType: MetadataKeyword {
     static let name = "contentMediaType"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 
   struct ContentSchema: MetadataKeyword {
     static let name = "contentSchema"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 }

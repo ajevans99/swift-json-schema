@@ -6,18 +6,16 @@ extension Keywords {
   struct TypeKeyword: AssertionKeyword {
     static let name = "type"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
-    private let schemaAllowedPrimitives: [JSONType]
+    private let allowedPrimitives: [JSONType]
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
 
-      self.schemaAllowedPrimitives = switch schema {
+      self.allowedPrimitives = switch value {
       case .array(let allowedTypes):
         allowedTypes
           .compactMap {
@@ -36,7 +34,7 @@ extension Keywords {
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
       let instanceType = input.primative
-      let isValid = schemaAllowedPrimitives.contains { allowedType in
+      let isValid = allowedPrimitives.contains { allowedType in
         return allowedType.matches(instanceType: instanceType)
       }
       if !isValid {
@@ -48,17 +46,15 @@ extension Keywords {
   struct Enum: AssertionKeyword {
     static let name = "enum"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let enumCases: [JSONValue]
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.enumCases = schema.array ?? []
+      self.enumCases = value.array ?? []
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
@@ -71,12 +67,11 @@ extension Keywords {
   struct Constant: AssertionKeyword {
     static let name = "const"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
-      if input != schema {
+      if input != value {
         throw .constantMismatch
       }
     }
@@ -90,18 +85,16 @@ extension Keywords {
   struct MultipleOf: AssertionKeyword {
     static let name = "multipleOf"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let divisor: Double
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
 
-      divisor = schema.numeric ?? 1.0
+      divisor = value.numeric ?? 1.0
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
@@ -124,17 +117,15 @@ extension Keywords {
   struct Maximum: AssertionKeyword {
     static let name = "maximum"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let maxValue: Double
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.maxValue = schema.numeric ?? .infinity
+      self.maxValue = value.numeric ?? .infinity
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
@@ -147,17 +138,15 @@ extension Keywords {
   struct ExclusiveMaximum: AssertionKeyword {
     static let name = "exclusiveMaximum"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let exclusiveMaxValue: Double
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.exclusiveMaxValue = schema.numeric ?? .infinity
+      self.exclusiveMaxValue = value.numeric ?? .infinity
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
@@ -171,17 +160,15 @@ extension Keywords {
   struct Minimum: AssertionKeyword {
     static let name = "minimum"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let minValue: Double
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.minValue = schema.numeric ?? -.infinity
+      self.minValue = value.numeric ?? -.infinity
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
@@ -194,17 +181,15 @@ extension Keywords {
   struct ExclusiveMinimum: AssertionKeyword {
     static let name = "exclusiveMinimum"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let exclusiveMinValue: Double
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.exclusiveMinValue = schema.numeric ?? -.infinity
+      self.exclusiveMinValue = value.numeric ?? -.infinity
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
@@ -222,17 +207,15 @@ extension Keywords {
   struct MaxLength: AssertionKeyword {
     static let name = "maxLength"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let maxLength: Int
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.maxLength = schema.integer ?? Int.max
+      self.maxLength = value.integer ?? Int.max
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
@@ -246,17 +229,15 @@ extension Keywords {
   struct MinLength: AssertionKeyword {
     static let name = "minLength"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let minLength: Int
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.minLength = schema.integer ?? 0
+      self.minLength = value.integer ?? 0
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
@@ -270,18 +251,16 @@ extension Keywords {
   struct Pattern: AssertionKeyword {
     static let name = "pattern"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let regex: Regex<AnyRegexOutput>?
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
 
-      if let patternString = schema.string {
+      if let patternString = value.string {
         self.regex = try? Regex(patternString)
       } else {
         self.regex = nil
@@ -305,17 +284,15 @@ extension Keywords {
   struct MaxItems: AssertionKeyword {
     static let name = "maxItems"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let maxItems: Int
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.maxItems = schema.integer ?? Int.max
+      self.maxItems = value.integer ?? Int.max
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
@@ -329,17 +306,15 @@ extension Keywords {
   struct MinItems: AssertionKeyword {
     static let name = "minItems"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let minItems: Int
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.minItems = schema.integer ?? 0
+      self.minItems = value.integer ?? 0
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
@@ -353,17 +328,15 @@ extension Keywords {
   struct UniqueItems: AssertionKeyword {
     static let name = "uniqueItems"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let uniqueItemsRequired: Bool
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.uniqueItemsRequired = schema.boolean ?? false
+      self.uniqueItemsRequired = value.boolean ?? false
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
@@ -380,17 +353,15 @@ extension Keywords {
   struct MaxContains: AssertionKeyword {
     static let name = "maxContains"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let maxContains: Int
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.maxContains = schema.integer ?? Int.max
+      self.maxContains = value.integer ?? Int.max
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
@@ -415,20 +386,18 @@ extension Keywords {
   struct MinContains: AssertionKeyword {
     static let name = "minContains"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let minContains: Int
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.minContains = schema.integer ?? 1
+      self.minContains = value.integer ?? 1
 
       if minContains == 0 {
-        context.minContainsIsZero = true
+        context.context.minContainsIsZero = true
       }
     }
 
@@ -458,17 +427,15 @@ extension Keywords {
   struct MaxProperties: AssertionKeyword {
     static let name = "maxProperties"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let maxProperties: Int
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.maxProperties = schema.integer ?? Int.max
+      self.maxProperties = value.integer ?? Int.max
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
@@ -484,17 +451,15 @@ extension Keywords {
   struct MinProperties: AssertionKeyword {
     static let name = "minProperties"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let minProperties: Int
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.minProperties = schema.integer ?? 0
+      self.minProperties = value.integer ?? 0
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
@@ -510,17 +475,15 @@ extension Keywords {
   struct Required: AssertionKeyword {
     static let name = "required"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let requiredKeys: [String]
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.requiredKeys = schema.array?.compactMap { $0.string } ?? []
+      self.requiredKeys = value.array?.compactMap { $0.string } ?? []
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
@@ -538,17 +501,15 @@ extension Keywords {
   struct DependentRequired: AssertionKeyword {
     static let name = "dependentRequired"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let dependencies: [String: [String]]
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.dependencies = schema.object?.compactMapValues { $0.array?.compactMap { $0.string } } ?? [:]
+      self.dependencies = value.object?.compactMapValues { $0.array?.compactMap { $0.string } } ?? [:]
     }
 
     func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {

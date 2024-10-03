@@ -12,7 +12,7 @@ struct AnnotationContainer {
     let annotation = Annotation<K>(
       keyword: type(of: keyword).name,
       instanceLocation: instanceLocation,
-      schemaLocation: keyword.location,
+      schemaLocation: keyword.context.location,
       value: value
     )
     insert(annotation)

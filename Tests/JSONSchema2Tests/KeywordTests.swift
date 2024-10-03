@@ -13,7 +13,7 @@ struct KeywordTests {
     func singleType(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = "string"
       let annotations = AnnotationContainer()
-      let keyword = Keywords.TypeKeyword(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.TypeKeyword(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -35,7 +35,7 @@ struct KeywordTests {
     func arrayType(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = ["string", "boolean"]
       let annotations = AnnotationContainer()
-      let keyword = Keywords.TypeKeyword(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.TypeKeyword(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self, "\(instance)") {
@@ -58,7 +58,7 @@ struct KeywordTests {
     func enumKeyword(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = ["hello", 1]
       let annotations = AnnotationContainer()
-      let keyword = Keywords.Enum(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.Enum(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -81,7 +81,7 @@ struct KeywordTests {
     func const(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = "hello"
       let annotations = AnnotationContainer()
-      let keyword = Keywords.Constant(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.Constant(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -106,7 +106,7 @@ struct KeywordTests {
     func multipleOf(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 2
       let annotations = AnnotationContainer()
-      let keyword = Keywords.MultipleOf(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.MultipleOf(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -130,7 +130,7 @@ struct KeywordTests {
     func maximum(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 5
       let annotations = AnnotationContainer()
-      let keyword = Keywords.Maximum(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.Maximum(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -154,7 +154,7 @@ struct KeywordTests {
     func exclusiveMaximum(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 5
       let annotations = AnnotationContainer()
-      let keyword = Keywords.ExclusiveMaximum(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.ExclusiveMaximum(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -178,7 +178,7 @@ struct KeywordTests {
     func minimum(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 5
       let annotations = AnnotationContainer()
-      let keyword = Keywords.Minimum(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.Minimum(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -202,7 +202,7 @@ struct KeywordTests {
     func exclusiveMinimum(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 5
       let annotations = AnnotationContainer()
-      let keyword = Keywords.ExclusiveMinimum(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.ExclusiveMinimum(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -226,7 +226,7 @@ struct KeywordTests {
     func maxLength(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 5
       let annotations = AnnotationContainer()
-      let keyword = Keywords.MaxLength(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.MaxLength(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -248,7 +248,7 @@ struct KeywordTests {
     func minLength(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 3
       let annotations = AnnotationContainer()
-      let keyword = Keywords.MinLength(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.MinLength(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -270,7 +270,7 @@ struct KeywordTests {
     func pattern(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = "\\d"
       let annotations = AnnotationContainer()
-      let keyword = Keywords.Pattern(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.Pattern(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -293,7 +293,7 @@ struct KeywordTests {
     func maxItems(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 3
       let annotations = AnnotationContainer()
-      let keyword = Keywords.MaxItems(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.MaxItems(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -314,7 +314,7 @@ struct KeywordTests {
     func minItems(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 2
       let annotations = AnnotationContainer()
-      let keyword = Keywords.MinItems(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.MinItems(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -335,7 +335,7 @@ struct KeywordTests {
     func uniqueItems(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = true
       let annotations = AnnotationContainer()
-      let keyword = Keywords.UniqueItems(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.UniqueItems(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -360,7 +360,7 @@ struct KeywordTests {
       let schemaValue: JSONValue = 3
       let annotations = AnnotationContainer()
         .applying(containsAnnotation, to: Keywords.Contains.self)
-      let keyword = Keywords.MaxContains(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.MaxContains(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -386,7 +386,7 @@ struct KeywordTests {
       let schemaValue: JSONValue = 2
       let annotations = AnnotationContainer()
         .applying(containsAnnotation, to: Keywords.Contains.self)
-      let keyword = Keywords.MinContains(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.MinContains(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -407,7 +407,7 @@ struct KeywordTests {
     func maxProperties(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 2
       let annotations = AnnotationContainer()
-      let keyword = Keywords.MaxProperties(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.MaxProperties(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -428,7 +428,7 @@ struct KeywordTests {
     func minProperties(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 2
       let annotations = AnnotationContainer()
-      let keyword = Keywords.MinProperties(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.MinProperties(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -450,7 +450,7 @@ struct KeywordTests {
     func required(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = ["a", "b"]
       let annotations = AnnotationContainer()
-      let keyword = Keywords.Required(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.Required(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -472,7 +472,7 @@ struct KeywordTests {
     func dependentRequired(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = ["a": ["b"]]
       let annotations = AnnotationContainer()
-      let keyword = Keywords.DependentRequired(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.DependentRequired(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -504,7 +504,7 @@ struct KeywordTests {
       ]
       let context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
-      let keyword = Keywords.PrefixItems(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.PrefixItems(value: schemaValue)
       
       if isValid {
         #expect(throws: Never.self, "\(instance)") {
@@ -531,7 +531,7 @@ struct KeywordTests {
       let context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
         .applying(prefixItemsAnnotaion, to: Keywords.PrefixItems.self)
-      let keyword = Keywords.Items(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.Items(value: schemaValue)
       
       if isValid {
         #expect(throws: Never.self, "\(instance)") {
@@ -556,7 +556,7 @@ struct KeywordTests {
       let schemaValue: JSONValue = ["type": "integer"]
       let context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
-      let keyword = Keywords.Contains(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.Contains(value: schemaValue)
       
       if isValid {
         #expect(throws: Never.self) {
@@ -587,7 +587,7 @@ struct KeywordTests {
       ]
       let context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
-      let keyword = Keywords.Properties(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.Properties(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -616,7 +616,7 @@ struct KeywordTests {
       ]
       let context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
-      let keyword = Keywords.PatternProperties(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.PatternProperties(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -643,7 +643,7 @@ struct KeywordTests {
       var annotations = AnnotationContainer()
       annotations.apply(["a"], to: Keywords.Properties.self)
       annotations.apply(["b"], to: Keywords.PatternProperties.self)
-      let keyword = Keywords.AdditionalProperties(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.AdditionalProperties(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -668,7 +668,7 @@ struct KeywordTests {
       let schemaValue: JSONValue = ["pattern": "^[a-z]+$"]
       let context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
-      let keyword = Keywords.PropertyNames(schema: schemaValue, location: .init(), context: .init(dialect: .draft2020_12))
+      let keyword = Keywords.PropertyNames(value: schemaValue)
 
       if isValid {
         #expect(throws: Never.self) {
@@ -701,5 +701,11 @@ extension AnnotationContainer {
         value: value
       )
     )
+  }
+}
+
+extension Keyword {
+  init(value: JSONValue, location: JSONPointer = .init(), context: Context = .init(dialect: .draft2020_12)) {
+    self.init(value: value, context: .init(location: location, context: context, uri: nil))
   }
 }

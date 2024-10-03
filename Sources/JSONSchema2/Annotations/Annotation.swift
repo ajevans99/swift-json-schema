@@ -16,7 +16,7 @@ struct Annotation<Keyword: AnnotationProducingKeyword>: Sendable {
   init(keyword: Keyword, instanceLocation: JSONPointer, value: Keyword.AnnotationValue) {
     self.keyword = type(of: keyword).name
     self.instanceLocation = instanceLocation
-    self.schemaLocation = keyword.location
+    self.schemaLocation = keyword.context.location
     self.absoluteSchemaLocation = nil
     self.value = value
   }

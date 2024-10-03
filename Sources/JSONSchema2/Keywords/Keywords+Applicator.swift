@@ -9,17 +9,15 @@ extension Keywords {
   struct PrefixItems: ApplicatorKeyword {
     static let name = "prefixItems"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let subschemas: [Schema]
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.subschemas = schema.array?.extractSubschemas(at: location, with: context) ?? []
+      self.subschemas = value.array?.extractSubschemas(using: context) ?? []
     }
 
     typealias AnnotationValue = PrefixItemsAnnoationValue
@@ -67,17 +65,15 @@ extension Keywords {
   struct Items: ApplicatorKeyword {
     static let name = "items"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.subschema = schema.extractSubschema(at: location, with: context)
+      self.subschema = value.extractSubschema(using: context)
     }
 
     typealias AnnotationValue = Bool
@@ -111,17 +107,15 @@ extension Keywords {
   struct Contains: ApplicatorKeyword {
     static let name = "contains"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.subschema = schema.extractSubschema(at: location, with: context)
+      self.subschema = value.extractSubschema(using: context)
     }
 
     typealias AnnotationValue = ContainsAnnotationValue
@@ -171,21 +165,19 @@ extension Keywords {
   struct Properties: ApplicatorKeyword {
     static let name = "properties"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let schemaMap: [String: Schema]
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
 
-      self.schemaMap = schema.object?.reduce(into: [:]) { result, keyValue in
+      self.schemaMap = value.object?.reduce(into: [:]) { result, keyValue in
         let (key, rawSchema) = keyValue
-        let updatedLocation = location.appending(.key(key))
-        if let schema = try? Schema(rawSchema: rawSchema, location: updatedLocation, context: context) {
+        let updatedLocation = context.location.appending(.key(key))
+        if let schema = try? Schema(rawSchema: rawSchema, location: updatedLocation, context: context.context, baseURI: context.uri) {
           result[key] = schema
         }
       } ?? [:]
@@ -218,19 +210,17 @@ extension Keywords {
   struct PatternProperties: ApplicatorKeyword {
     static let name = "patternProperties"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
     private let patterns: [(Regex<AnyRegexOutput>, Schema)]
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
 
-      self.patterns = schema.object?.compactMap { key, rawSchema in
+      self.patterns = value.object?.compactMap { key, rawSchema in
         guard let regex = try? Regex(key) else { return nil }
-        guard let subschema = try? Schema(rawSchema: rawSchema, location: location.appending(.key(key)), context: context) else { return nil }
+        guard let subschema = try? Schema(rawSchema: rawSchema, location: context.location.appending(.key(key)), context: context.context, baseURI: context.uri) else { return nil }
         return (regex, subschema)
       } ?? []
     }
@@ -264,17 +254,15 @@ extension Keywords {
   struct AdditionalProperties: ApplicatorKeyword {
     static let name = "additionalProperties"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.subschema = schema.extractSubschema(at: location, with: context)
+      self.subschema = value.extractSubschema(using: context)
     }
 
     typealias AnnotationValue = Set<String>
@@ -305,17 +293,15 @@ extension Keywords {
   struct PropertyNames: ApplicatorKeyword {
     static let name = "propertyNames"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.subschema = schema.extractSubschema(at: location, with: context)
+      self.subschema = value.extractSubschema(using: context)
     }
 
     typealias AnnotationValue = Never
@@ -343,17 +329,15 @@ extension Keywords {
   struct AllOf: ApplicatorKeyword {
     static let name = "allOf"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let subschemas: [Schema]
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.subschemas = schema.array?.extractSubschemas(at: location, with: context) ?? []
+      self.subschemas = value.array?.extractSubschemas(using: context) ?? []
     }
 
     typealias AnnotationValue = Never
@@ -374,17 +358,15 @@ extension Keywords {
   struct AnyOf: ApplicatorKeyword {
     static let name = "anyOf"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let subschemas: [Schema]
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.subschemas = schema.array?.extractSubschemas(at: location, with: context) ?? []
+      self.subschemas = value.array?.extractSubschemas(using: context) ?? []
     }
 
     typealias AnnotationValue = Never
@@ -412,17 +394,15 @@ extension Keywords {
   struct OneOf: ApplicatorKeyword {
     static let name = "oneOf"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let subschemas: [Schema]
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.subschemas = schema.array?.extractSubschemas(at: location, with: context) ?? []
+      self.subschemas = value.array?.extractSubschemas(using: context) ?? []
     }
 
     typealias AnnotationValue = Never
@@ -449,17 +429,15 @@ extension Keywords {
   struct Not: ApplicatorKeyword {
     static let name = "not"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.subschema = schema.extractSubschema(at: location, with: context)
+      self.subschema = value.extractSubschema(using: context)
     }
 
     typealias AnnotationValue = Never
@@ -480,17 +458,15 @@ extension Keywords {
   struct If: ApplicatorKeyword {
     static let name = "if"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.subschema = schema.extractSubschema(at: location, with: context)
+      self.subschema = value.extractSubschema(using: context)
     }
 
     typealias AnnotationValue = Never
@@ -505,17 +481,15 @@ extension Keywords {
   struct Then: ApplicatorKeyword {
     static let name = "then"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.subschema = schema.extractSubschema(at: location, with: context)
+      self.subschema = value.extractSubschema(using: context)
     }
 
     typealias AnnotationValue = Never
@@ -534,17 +508,15 @@ extension Keywords {
   struct Else: ApplicatorKeyword {
     static let name = "else"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.subschema = schema.extractSubschema(at: location, with: context)
+      self.subschema = value.extractSubschema(using: context)
     }
 
     typealias AnnotationValue = Never
@@ -563,19 +535,17 @@ extension Keywords {
   struct DependentSchemas: ApplicatorKeyword {
     static let name = "dependentSchemas"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let schemaMap: [String: Schema]
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
 
-      self.schemaMap = schema.object?.compactMapValues { rawSchema in
-        try? Schema(rawSchema: rawSchema, location: location, context: context)
+      self.schemaMap = value.object?.compactMapValues { rawSchema in
+        try? Schema(rawSchema: rawSchema, location: context.location, context: context.context)
       } ?? [:]
     }
 
@@ -606,17 +576,15 @@ extension Keywords {
   struct UnevaluatedItems: ApplicatorKeyword {
     static let name = "unevaluatedItems"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.subschema = schema.extractSubschema(at: location, with: context)
+      self.subschema = value.extractSubschema(using: context)
     }
 
     typealias AnnotationValue = Bool
@@ -670,23 +638,21 @@ extension Keywords {
   struct UnevaluatedProperties: ApplicatorKeyword {
     static let name = "unevaluatedProperties"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     private let subschema: Schema
 
-    init(schema: JSONValue, location: JSONPointer, context: Context) {
-      self.schema = schema
-      self.location = location
+    init(value: JSONValue, context: KeywordContext) {
+      self.value = value
       self.context = context
-      self.subschema = schema.extractSubschema(at: location, with: context)
+      self.subschema = value.extractSubschema(using: context)
     }
 
     typealias AnnotationValue = Set<String>
 
     func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      guard let instanceObject = input.object else { return }
+      guard let instanceObject = input.object else  { return }
 
       var evaluatedPropertyNames = Set<String>()
 
@@ -738,13 +704,12 @@ extension Bool: AnnotationValueConvertible {
 }
 
 private extension Array where Element == JSONValue {
-  func extractSubschemas(at location: JSONPointer, with context: Context) -> [Schema] {
+  func extractSubschemas(using context: KeywordContext) -> [Schema] {
     var subschemas = [Schema]()
     subschemas.reserveCapacity(self.count)
     for (index, rawSchema) in self.enumerated() {
-      let pointer = location.appending(.index(index))
-      // TODO: Warn on invalid schema?
-      if let subschema = try? Schema(rawSchema: rawSchema, location: pointer, context: context) {
+      let pointer = context.location.appending(.index(index))
+      if let subschema = try? Schema(rawSchema: rawSchema, location: pointer, context: context.context, baseURI: context.uri) {
         subschemas.append(subschema)
       }
     }
@@ -753,8 +718,8 @@ private extension Array where Element == JSONValue {
 }
 
 private extension JSONValue {
-  func extractSubschema(at location: JSONPointer, with context: Context) -> Schema {
-    (try? Schema(rawSchema: self, location: location, context: context)) ?? BooleanSchema(schemaValue: true, location: location, context: context).asSchema()
+  func extractSubschema(using context: KeywordContext) -> Schema {
+    (try? Schema(rawSchema: self, location: context.location, context: context.context, baseURI: context.uri)) ?? BooleanSchema(schemaValue: true, location: context.location, context: context.context).asSchema()
   }
 }
 
@@ -779,7 +744,7 @@ struct ValidationResultBuilder {
           .init(
             keyword: type(of: keyword).name,
             message: "Validation failed",
-            keywordLocation: keyword.location,
+            keywordLocation: keyword.context.location,
             instanceLocation: instanceLocation
           )
         )

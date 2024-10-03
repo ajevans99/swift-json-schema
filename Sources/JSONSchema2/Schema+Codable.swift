@@ -72,7 +72,7 @@ extension ObjectSchema: Codable {
     var container = encoder.container(keyedBy: DynamicCodingKey.self)
     for keyword in keywords {
       let key = DynamicCodingKey(stringValue: type(of: keyword).name)!
-      try container.encode(keyword.schema, forKey: key)
+      try container.encode(keyword.value, forKey: key)
     }
   }
 }

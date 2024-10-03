@@ -4,32 +4,28 @@ extension Keywords {
   struct Defintions: ReservedKeyword {
     static let name = "defintions"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 
   struct Dependencies: ReservedKeyword {
     static let name = "dependencies"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 
   struct RecursiveAnchor: ReservedKeyword {
     static let name = "$recursiveAnchor"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 
   struct RecursiveReference: ReservedKeyword {
     static let name = "$recursiveRef"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 }

@@ -1,12 +1,19 @@
+import Foundation
+
 public typealias KeywordIdentifier = String
 
 protocol Keyword: Sendable {
   /// The name of the keyword, such as `type` or `minLength`.
   static var name: KeywordIdentifier { get }
 
-  var schema: JSONValue { get }
-  var location: JSONPointer { get }
-  var context: Context { get }
+  var value: JSONValue { get }
+  var context: KeywordContext { get }
 
-  init(schema: JSONValue, location: JSONPointer, context: Context)
+  init(value: JSONValue, context: KeywordContext)
+}
+
+struct KeywordContext {
+  let location: JSONPointer
+  let context: Context
+  let uri: URL?
 }

@@ -4,9 +4,8 @@ enum Keywords {
   struct SchemaKeyword: Keyword {
     static let name = "$schema"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
 
     func processIdentifier(into context: inout Context) { context.dialect = .draft2020_12 }
   }
@@ -15,17 +14,15 @@ enum Keywords {
   struct Vocabulary: Keyword {
     static let name = "$vocabulary"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-comments-with-comment
   struct Comment: Keyword {
     static let name = "$comment"
 
-    let schema: JSONValue
-    let location: JSONPointer
-    let context: Context
+    let value: JSONValue
+    let context: KeywordContext
   }
 }
