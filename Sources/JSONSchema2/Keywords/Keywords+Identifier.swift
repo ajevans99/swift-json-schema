@@ -121,6 +121,14 @@ extension Keywords {
         throw ValidationIssue.invalidReference("Invalid $ref URI '\(referenceURI)' at \(instanceLocation)")
       }
 
+      if context.dialect.rawValue == resolvedURI.absoluteString {
+        do {
+          return try context.dialect.loadMetaSchema()
+        } catch {
+          throw .invalidReference("Failed to create metaschema \(error)")
+        }
+      }
+
       if let schemaLocation = context.identifierRegistry[resolvedURI.absoluteURL] {
         guard let value = context.rootRawSchema?.value(at: schemaLocation.dropLast()) else {
           throw .invalidReference("Could not retrieve subschema from $id '\(resolvedURI)'")
@@ -129,25 +137,45 @@ extension Keywords {
         do {
           return try Schema(rawSchema: value, location: schemaLocation, context: context, baseURI: self.context.uri)
         } catch {
-          throw .invalidReference("Failed to create schema")
+          throw .invalidReference("Failed to create schema \(error)")
         }
       } else if let urlWithoutFragment = resolvedURI.withoutFragment, let rawSchema = context.remoteSchemaStorage[urlWithoutFragment.absoluteString] {
-        let schema: Schema
+        let scopedRawSchema: JSONValue
         do {
-          schema = try Schema(rawSchema: rawSchema, location: self.context.location, context: context, baseURI: self.context.uri)
+          if let fragment = resolvedURI.fragment(percentEncoded: false) {
+            guard let subRawSchema = rawSchema.value(at: JSONPointer(from: fragment)) else {
+              return nil
+            }
+            scopedRawSchema = subRawSchema
+          } else {
+            scopedRawSchema = rawSchema
+          }
+          return try Schema(rawSchema: scopedRawSchema, location: self.context.location, context: context, baseURI: self.context.uri)
         } catch {
           throw .invalidReference("Unable to validate remote reference '\(referenceURI)' at \(instanceLocation): \(error)")
         }
-
-        if resolvedURI.fragment() != nil {
-          return try schema.context.resolveInternalReference(resolvedURI, location: self.context.location)
-        }
-        return schema
       } else if resolvedURI.fragment != nil {
-        return try context.resolveInternalReference(resolvedURI, location: self.context.location)
+        guard let rootRawSchema = context.rootRawSchema else {
+          print("No root raw schema for local reference")
+          return nil
+        }
+        return try resolveInternalReference(resolvedURI, rawSchema: rootRawSchema, context: context)
       }
 
       return nil
+    }
+
+    func resolveInternalReference(_ uri: URL, rawSchema: JSONValue, context: Context) throws(ValidationIssue) -> Schema? {
+      guard let fragment = uri.fragment(percentEncoded: false) else {
+        return nil
+      }
+
+      let pointer = context.anchors[fragment]?.dropLast() ?? JSONPointer(from: fragment)
+      guard let value = rawSchema.value(at: pointer) else {
+        print("Failed to resolve internal reference '\(uri)' at \(self.context.location)")
+        return nil
+      }
+      return try? Schema(rawSchema: value, location: self.context.location, context: context)
     }
   }
 

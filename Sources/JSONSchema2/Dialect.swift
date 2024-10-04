@@ -1,15 +1,14 @@
-public enum Dialect: Hashable, Sendable {
-  case draft2020_12
+import Foundation
+
+public enum Dialect: String, Hashable, Sendable {
+  case draft2020_12 = "https://json-schema.org/draft/2020-12/schema"
   //  case draft2019_09
   //  case draft7
   //  case draft6
   //  case draft5
 
   init?(uri: String) {
-    switch uri {
-    case "https://json-schema.org/draft/2020-12/schema": self = .draft2020_12
-    default: return nil
-    }
+    self.init(rawValue: uri)
   }
 
   /// The supported keywords by dialect.
@@ -96,4 +95,39 @@ public enum Dialect: Hashable, Sendable {
       ]
     }
   }
+
+  func loadMetaSchema() throws -> Schema {
+    let jsonDecoder = JSONDecoder()
+    func jsonValue(from url: URL) throws -> JSONValue {
+      let data = try Data(contentsOf: url)
+      let value = try jsonDecoder.decode(JSONValue.self, from: data)
+      return value
+    }
+
+    guard let baseURI = URL(string: "https://json-schema.org/draft/2020-12/schema") else {
+      throw MetaSchemaError.invalidBaseURI
+    }
+    print(Bundle.module.bundleURL)
+    guard let schemaURL = Bundle.module.url(forResource: "schema", withExtension: "json", subdirectory: "Resources/draft2020-12") else {
+      throw MetaSchemaError.missingResource
+    }
+    let metaURLs = Bundle.module.urls(forResourcesWithExtension: "json", subdirectory: "Resources/draft2020-12/meta")
+    let metaDictionary: [String: JSONValue] = try metaURLs?.reduce(into: [:]) { result, url in
+      let value = try jsonValue(from: url)
+      let uriString = "meta/\(url.lastPathComponent.replacingOccurrences(of: ".json", with: ""))"
+      if let key = URL(string: uriString, relativeTo: baseURI)?.absoluteString {
+        result[key] = value
+      }
+    } ?? [:]
+    return try Schema(
+      rawSchema: try jsonValue(from: schemaURL),
+      context: .init(dialect: self, remoteSchema: metaDictionary),
+      baseURI: baseURI
+    )
+  }
+}
+
+enum MetaSchemaError: Error {
+  case invalidBaseURI
+  case missingResource
 }

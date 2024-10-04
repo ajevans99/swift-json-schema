@@ -79,10 +79,12 @@ extension JSONValue {
       switch path {
       case .index(let index):
         guard case .array(let array) = current else { return nil }
-        if array.indices.contains(index) { current = array[index] }
+        guard array.indices.contains(index) else { return nil }
+        current = array[index]
       case .key(let key):
         guard case .object(let dictionary) = current else { return nil }
-        if let value = dictionary[key] { current = value }
+        guard let value = dictionary[key] else { return nil }
+        current = value
       }
     }
 

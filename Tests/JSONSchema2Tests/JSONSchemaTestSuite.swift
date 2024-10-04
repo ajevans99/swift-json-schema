@@ -16,7 +16,7 @@ struct JSONSchemaTestSuite {
       .filter { unsupportedFilePaths.contains($0.fileName) == false }
       .sorted(by: { $0.fileName < $1.fileName })
 //      .filter { $0.fileName == "refRemote.json" }
-//      .filter { $0.fileName == "ref.json" }
+      .filter { $0.fileName == "ref.json" }
       .flatMap { path, schemaTests in
         schemaTests.map { ($0, path) }
       }

@@ -735,6 +735,7 @@ struct ValidationResultBuilder {
   private var errors: [ValidationError] = []
 
   mutating func merging(_ result: ValidationResult) {
+    // TODO: Merge annotations?
     if !result.valid {
       if let resultErrors = result.errors {
         errors.append(contentsOf: resultErrors)

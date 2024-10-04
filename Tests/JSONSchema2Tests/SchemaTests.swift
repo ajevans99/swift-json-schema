@@ -101,4 +101,11 @@ struct SchemaTests {
     #expect(result.errors?.count == 1)
     #expect(result.annotations == nil)
   }
+
+  @Test func metaSchema() throws {
+    let metaSchema = try #require(try Dialect.draft2020_12.loadMetaSchema())
+    let result = metaSchema.validate(.object(["minLength": 1]))
+    dump(result)
+    #expect(result.valid == true)
+  }
 }

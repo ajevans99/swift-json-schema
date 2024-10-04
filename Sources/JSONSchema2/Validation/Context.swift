@@ -27,16 +27,4 @@ public final class Context: Sendable {
   static func == (lhs: Context, rhs: Context) -> Bool {
     lhs.dialect == rhs.dialect && lhs.rootRawSchema == rhs.rootRawSchema
   }
-
-  func resolveInternalReference(_ uri: URL, location: JSONPointer) throws(ValidationIssue) -> Schema? {
-    guard let fragment = uri.fragment(percentEncoded: false) else {
-      return nil
-    }
-
-    let pointer = anchors[fragment]?.dropLast() ?? JSONPointer(from: fragment)
-    guard let value = rootRawSchema?.value(at: pointer) else {
-      return nil
-    }
-    return try? Schema(rawSchema: value, location: location, context: self)
-  }
 }
