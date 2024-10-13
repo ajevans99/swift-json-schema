@@ -16,7 +16,9 @@ struct JSONSchemaTestSuite {
       .filter { unsupportedFilePaths.contains($0.url.lastPathComponent) == false }
 //      .sorted(by: { $0.fileName < $1.fileName })
 //      .filter { $0.url.lastPathComponent == "refRemote.json" }
-      .filter { $0.url.lastPathComponent == "ref.json" }
+//      .filter { $0.url.lastPathComponent == "ref.json" }
+//      .filter { $0.url.lastPathComponent == "dynamicRef.json" }
+//      .filter { $0.url.lastPathComponent == "anchor.json" }
       .flatMap { path, schemaTests in
         schemaTests.map { ($0, path) }
       }
@@ -27,8 +29,6 @@ struct JSONSchemaTestSuite {
   @Test(arguments: flattenedArguments)
   func schemaTest(_ schemaTest: JSONSchemaTest, path: URL) throws {
     for testCase in schemaTest.tests {
-//      guard schemaTest.description != "order of evaluation: $id and $anchor and $ref" else { continue }
-
       let schema = try #require(try Schema(rawSchema: schemaTest.schema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
       let validationResult = schema.validate(testCase.data)
 
@@ -66,22 +66,25 @@ struct JSONSchemaTestSuite {
     let testSchema = """
       {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "properties": {
-            "foo": {"$ref": "#"}
-        },
-        "additionalProperties": false
+        "$ref": "#foo",
+        "$defs": {
+          "A": {
+            "$anchor": "foo",
+            "type": "integer"
+          }
+        }
       }
       """
 
     let testCase = """
-      {"foo": {"bar": false}}
+      1
       """
 
     let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
     let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
     let result = try #require(try schema.validate(instance: testCase))
     dump(result)
-    #expect((result.valid) == false, "\(result)")
+    #expect((result.valid) == true, "\(result)")
   }
 
   @Test func debugger1() throws {
@@ -140,169 +143,6 @@ struct JSONSchemaTestSuite {
           }
         ]
       }
-      """
-
-    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
-    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
-    let result = try #require(try schema.validate(instance: testCase))
-    dump(result)
-//    dump(schema.context)
-    #expect((result.valid) == true, "\(result)")
-  }
-
-  @Test func debugger2() throws {
-    let testSchema = """
-      {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "$id": "http://example.com/schema-relative-uri-defs1.json",
-        "properties": {
-            "foo": {
-                "$id": "schema-relative-uri-defs2.json",
-                "$defs": {
-                    "inner": {
-                        "properties": {
-                            "bar": { "type": "string" }
-                        }
-                    }
-                },
-                "$ref": "#/$defs/inner"
-            }
-        },
-        "$ref": "schema-relative-uri-defs2.json"
-      }
-      """
-
-    let testCase = """
-      {
-        "foo": {
-          "bar": "a"
-        },
-        "bar": "a"
-      }
-      """ // valid on both fields
-
-    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
-    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
-    let result = try #require(try schema.validate(instance: testCase))
-    dump(result)
-    //    dump(schema.context)
-    #expect((result.valid) == true, "\(result)")
-  }
-
-  @Test func debugger3() throws {
-    let testSchema = """
-      {
-        "$comment": "URIs do not have to have HTTP(s) schemes",
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "$id": "urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed",
-        "properties": {
-          "foo": {"$ref": "#/$defs/bar"}
-        },
-        "$defs": {
-          "bar": {"type": "string"}
-        }
-      }
-      """
-
-    let testCase = """
-      {"foo": "bar"}
-      """ //  "a string is valid"
-
-    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
-    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
-    let result = try #require(try schema.validate(instance: testCase))
-    dump(result)
-    //    dump(schema.context)
-    #expect((result.valid) == true, "\(result)")
-  }
-
-  @Test func debugger3_1() throws {
-    let testSchema = """
-      {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "$id": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed",
-            "properties": {
-                "foo": {"$ref": "urn:uuid:deadbeef-1234-ff00-00ff-4321feebdaed#something"}
-            },
-            "$defs": {
-                "bar": {
-                    "$anchor": "something",
-                    "type": "string"
-                }
-            }
-        }
-      """
-
-    let testCase1 = """
-      {"foo": 12}
-      """
-
-    let testCase2 = """
-      {"foo": "bar"}
-      """
-
-    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
-    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
-    let result1 = try #require(try schema.validate(instance: testCase1))
-    dump(result1)
-    #expect((result1.valid) == false, "\(result1)")
-
-    let result2 = try #require(try schema.validate(instance: testCase2))
-    dump(result2)
-    #expect((result2.valid) == true, "\(result2)")
-  }
-
-  @Test func debugger3_2() throws {
-    let testSchema = """
-      {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "$ref": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
-        "$defs": {
-          "foo": {
-            "$id": "urn:uuid:deadbeef-4321-ffff-ffff-1234feebdaed",
-            "$defs": {"bar": {"type": "string"}},
-            "$ref": "#/$defs/bar"
-          }
-        }
-      }
-      """
-
-    let testCase = """
-      "bar"
-      """
-
-    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
-    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
-    let result = try #require(try schema.validate(instance: testCase))
-    dump(result)
-    #expect((result.valid) == true, "\(result)")
-  }
-
-  @Test func debugger4() throws {
-    let testSchema = """
-      {
-        "$comment": "$id must be evaluated before $ref to get the proper $ref destination",
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "$id": "https://example.com/draft2020-12/ref-and-id2/base.json",
-        "$ref": "#bigint",
-        "$defs": {
-          "bigint": {
-              "$comment": "canonical uri: /ref-and-id2/base.json#/$defs/bigint; another valid uri for this location: /ref-and-id2/base.json#bigint",
-              "$anchor": "bigint",
-              "maximum": 10
-          },
-          "smallint": {
-              "$comment": "canonical uri: https://example.com/ref-and-id2#/$defs/smallint; another valid uri for this location: https://example.com/ref-and-id2/#bigint",
-              "$id": "https://example.com/draft2020-12/ref-and-id2/",
-              "$anchor": "bigint",
-              "maximum": 2
-          }
-        }
-      }
-      """
-
-    let testCase = """
-      5
       """
 
     let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)

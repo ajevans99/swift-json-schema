@@ -12,8 +12,8 @@ public final class Context: Sendable {
   var remoteSchemaStorage: [String: JSONValue] = [:]
   var schemaCache = [String: Schema]()
 
-  var anchors = [String: URL]()
-  var dynamicAnchors = [String: JSONPointer]()
+  var anchors = [URL: JSONPointer]()
+  var dynamicAnchors = [URL: JSONPointer]()
 
   // TODO: This probably needs to be scoped to location
   var minContainsIsZero: Bool = false

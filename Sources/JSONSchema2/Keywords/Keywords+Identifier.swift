@@ -47,14 +47,12 @@ extension Keywords {
 
     func processIdentifier() {
       guard let anchorName = value.string else { return }
-      guard let newURL = URL(string: context.location.description, relativeTo: context.uri) else { return }
-      if let oldURL = context.context.anchors[anchorName] {
-        if oldURL.absoluteString.count > newURL.absoluteString.count {
-          // If the newURL is more specific (shorter) than the old, replace
-          context.context.anchors[anchorName] = newURL
-        }
-      } else {
-        context.context.anchors[anchorName] = newURL
+      var components = URLComponents(url: context.uri, resolvingAgainstBaseURL: true)
+      components?.fragment = anchorName
+      guard let newURL = components?.url else { return }
+      let location = context.location.dropLast()
+      if !context.context.anchors.keys.contains(newURL) {
+        context.context.anchors[newURL] = location
       }
     }
   }
@@ -66,8 +64,8 @@ extension Keywords {
     let context: KeywordContext
 
     func processIdentifier() {
-      guard let anchorName = value.string else { return }
-      context.context.dynamicAnchors[anchorName] = context.location
+//      guard let anchorName = value.string else { return }
+//      context.context.dynamicAnchors[anchorName] = context.location
     }
   }
 }
@@ -135,9 +133,9 @@ extension Keywords {
 
       // If there's a fragment, resolve it within the base schema
       if let fragment, !fragment.isEmpty {
-        if let anchorURL = context.anchors[fragment], let anchorFragment = anchorURL.fragment(percentEncoded: false) {
-          let pointer = JSONPointer(from: anchorFragment).dropLast()
-          return try resolveSchemaFragment(pointer: pointer, in: baseSchema) ?? baseSchema
+        if let anchorLocation = context.anchors[refURL] {
+//          let pointer = JSONPointer(from: anchorFragment).dropLast()
+          return try resolveSchemaFragment(pointer: anchorLocation, in: baseSchema) ?? baseSchema
         }
 
         if let schemaAfterFragment = try resolveSchemaFragment(fragment: fragment, in: baseSchema) {
