@@ -15,7 +15,7 @@ struct JSONSchemaTestSuite {
     fileLoader.loadAllFiles()
       .filter { unsupportedFilePaths.contains($0.url.lastPathComponent) == false }
 //      .sorted(by: { $0.fileName < $1.fileName })
-//      .filter { $0.url.lastPathComponent == "refRemote.json" }
+      .filter { $0.url.lastPathComponent == "refRemote.json" }
 //      .filter { $0.url.lastPathComponent == "ref.json" }
 //      .filter { $0.url.lastPathComponent == "dynamicRef.json" }
 //      .filter { $0.url.lastPathComponent == "anchor.json" }
@@ -66,18 +66,12 @@ struct JSONSchemaTestSuite {
     let testSchema = """
       {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "$ref": "#foo",
-        "$defs": {
-          "A": {
-            "$anchor": "foo",
-            "type": "integer"
-          }
-        }
+        "$ref": "http://localhost:1234/different-id-ref-string.json"
       }
       """
 
     let testCase = """
-      1
+      "foo"
       """
 
     let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
@@ -90,59 +84,32 @@ struct JSONSchemaTestSuite {
   @Test func debugger1() throws {
     let testSchema = """
       {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "$id": "http://localhost:1234/draft2020-12/tree",
-        "description": "tree of nodes",
-        "type": "object",
-        "properties": {
-            "meta": {"type": "string"},
-            "nodes": {
-                "type": "array",
-                "items": {"$ref": "node"}
-            }
-        },
-        "required": ["meta", "nodes"],
-        "$defs": {
-            "node": {
-                "$id": "http://localhost:1234/draft2020-12/node",
-                "description": "node",
-                "type": "object",
-                "properties": {
-                    "value": {"type": "number"},
-                    "subtree": {"$ref": "tree"}
-                },
-                "required": ["value"]
-            }
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/nested-absolute-ref-to-string.json"
         }
-      }
       """
 
     let testCase = """
+      "foo"
+      """
+
+    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
+    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
+    let result = try #require(try schema.validate(instance: testCase))
+    dump(result)
+    #expect((result.valid) == true, "\(result)")
+  }
+
+  @Test func debugger3() throws {
+    let testSchema = """
       {
-        "meta": "root",
-        "nodes": [
-          {
-            "value": 1,
-            "subtree": {
-              "meta": "child",
-              "nodes": [
-                {"value": 1.1},
-                {"value": 1.2}
-              ]
-            }
-        },
-          {
-            "value": 2,
-            "subtree": {
-              "meta": "child",
-              "nodes": [
-                {"value": 2.1},
-                {"value": 2.2}
-              ]
-            }
-          }
-        ]
-      }
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "$ref": "http://localhost:1234/urn-ref-string.json"
+        }
+      """
+
+    let testCase = """
+      "foo"
       """
 
     let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)

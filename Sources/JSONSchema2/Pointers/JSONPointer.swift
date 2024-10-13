@@ -24,6 +24,10 @@ public struct JSONPointer: Sendable, Hashable {
     }
   }
 
+  init(path: [Component]) {
+    self.path = path
+  }
+
   mutating func append(_ component: Component) { path.append(component) }
 
   func appending(_ component: Component) -> JSONPointer {
@@ -41,6 +45,36 @@ public struct JSONPointer: Sendable, Hashable {
   }
 
   var isRoot: Bool { path.isEmpty }
+
+  /// Computes the relative JSONPointer from the current pointer to a base pointer.
+  ///
+  /// This function compares the current ``JSONPointer`` (`self`) to the given `base` pointer. If `base` is a prefix of `self`,
+  /// the function returns a new JSONPointer that represents the remaining part of `self` after `base`.
+  /// If `base` is not a prefix of `self`, the function returns the original pointer.
+  ///
+  /// - Parameter base: The base `JSONPointer` to compare against.
+  /// - Returns: A new `JSONPointer` representing the relative path from `base` to `self`. If `base` is not a prefix, `self` is returned.
+  ///
+  /// # Example:
+  /// ```swift
+  /// let basePointer: JSONPointer = "/$defs/A"
+  /// let fullPointer: JSONPointer = "/$defs/A/$defs/B"
+  /// let relativePointer = fullPointer.relative(toBase: basePointer)
+  /// print(relativePointer) // Output: "#/$defs/B"
+  /// ```
+  func relative(toBase base: JSONPointer) -> JSONPointer {
+    guard self.path.count >= base.path.count else {
+      return self
+    }
+
+    for (selfComponent, baseComponent) in zip(self.path, base.path) {
+      if selfComponent != baseComponent {
+        return self // Return the original if paths diverge
+      }
+    }
+
+    return JSONPointer(path: Array(path.dropFirst(base.path.count)))
+  }
 }
 
 extension JSONPointer: ExpressibleByStringLiteral {

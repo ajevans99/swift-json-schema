@@ -15,7 +15,7 @@ extension Keywords {
     func processSubschema(baseURI: URL) -> URL {
       if let string = value.string, let newURL = URL(string: string, relativeTo: baseURI) {
         if !context.context.identifierRegistry.keys.contains(newURL.absoluteURL) {
-          context.context.identifierRegistry[newURL.absoluteURL] = context.location
+          context.context.identifierRegistry[newURL.absoluteURL] = context.location.dropLast()
         }
         return newURL.absoluteURL
       }
@@ -131,13 +131,12 @@ extension Keywords {
       // Fetch the base schema using the abstracted method
       let baseSchema = try fetchSchema(for: referenceURL, context: context)
 
+      if let anchorLocation = context.anchors[refURL] {
+        return try resolveSchemaFragment(pointer: anchorLocation, in: baseSchema) ?? baseSchema
+      }
+
       // If there's a fragment, resolve it within the base schema
       if let fragment, !fragment.isEmpty {
-        if let anchorLocation = context.anchors[refURL] {
-//          let pointer = JSONPointer(from: anchorFragment).dropLast()
-          return try resolveSchemaFragment(pointer: anchorLocation, in: baseSchema) ?? baseSchema
-        }
-
         if let schemaAfterFragment = try resolveSchemaFragment(fragment: fragment, in: baseSchema) {
           return schemaAfterFragment
         }
@@ -164,7 +163,7 @@ extension Keywords {
 
       // Attempt to find the schema in the identifier registry
       if let schemaLocation = context.identifierRegistry[referenceURL] {
-        guard let value = context.rootRawSchema?.value(at: schemaLocation.dropLast()) else {
+        guard let value = context.rootRawSchema?.value(at: schemaLocation) else {
           throw ValidationIssue.invalidReference("Could not retrieve subschema from $id '\(referenceURL)'")
         }
         let schema = try Schema(rawSchema: value, location: schemaLocation, context: context, baseURI: self.context.uri)
@@ -175,7 +174,9 @@ extension Keywords {
       // Attempt to load remote schema
       if let rawSchema = context.remoteSchemaStorage[referenceURL.absoluteString] {
         let schema = try Schema(rawSchema: rawSchema, location: self.context.location, context: context, baseURI: referenceURL)
-        context.schemaCache[referenceURL.absoluteString] = schema
+        // Try to use calculated uri, this helps when remote id has a different $id, meaning referenceURL != uri
+        let uri = (schema.schema as? ObjectSchema)?.uri?.absoluteString ?? referenceURL.absoluteString
+        context.schemaCache[uri] = schema
         return schema
       }
 
@@ -183,7 +184,7 @@ extension Keywords {
       // For example, `urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed` relative to `#/$defs/bar`
       // becomes `urn://#/$defs/bar` in `refURL`
       if referenceURL.scheme == "urn" && (referenceURI.hasPrefix("#") || referenceURI.hasPrefix(self.context.uri.absoluteString)) {
-        guard let pointer = context.identifierRegistry[self.context.uri]?.dropLast() else {
+        guard let pointer = context.identifierRegistry[self.context.uri] else {
           throw ValidationIssue.invalidReference("Could not find identifier for URN workaround")
         }
         guard let value = context.rootRawSchema?.value(at: pointer) else {
@@ -206,8 +207,10 @@ extension Keywords {
     }
 
     private func resolveSchemaFragment(pointer: JSONPointer, in schema: Schema) throws -> Schema? {
+      let adjustedPointer = pointer.relative(toBase: schema.location)
+
       guard let objectSchema = schema.schema as? ObjectSchema else { return nil }
-      guard let subRawSchema = JSONValue.object(objectSchema.schemaValue).value(at: pointer) else {
+      guard let subRawSchema = JSONValue.object(objectSchema.schemaValue).value(at: adjustedPointer) else {
         return nil
       }
       return try Schema(rawSchema: subRawSchema, location: self.context.location, context: context.context, baseURI: refURL)
