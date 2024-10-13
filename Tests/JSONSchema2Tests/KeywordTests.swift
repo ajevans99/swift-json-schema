@@ -1,5 +1,6 @@
 @testable import JSONSchema2
 
+import Foundation
 import Testing
 
 struct KeywordTests {
@@ -706,6 +707,6 @@ extension AnnotationContainer {
 
 extension Keyword {
   init(value: JSONValue, location: JSONPointer = .init(), context: Context = .init(dialect: .draft2020_12)) {
-    self.init(value: value, context: .init(location: location, context: context, uri: nil))
+    self.init(value: value, context: .init(location: location, context: context, uri: URL(fileURLWithPath: #file)))
   }
 }

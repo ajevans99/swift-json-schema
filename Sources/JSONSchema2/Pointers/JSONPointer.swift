@@ -16,7 +16,11 @@ public struct JSONPointer: Sendable, Hashable {
       // https://datatracker.ietf.org/doc/html/rfc6901#section-4
       let unescaped = element.replacing("~1", with: "/").replacing("~0", with: "~")
 
-      if let int = Int(unescaped) { append(.index(int)) } else { append(.key(String(unescaped))) }
+      if let int = Int(unescaped) {
+        append(.index(int))
+      } else {
+        append(.key(String(unescaped)))
+      }
     }
   }
 
@@ -29,7 +33,7 @@ public struct JSONPointer: Sendable, Hashable {
   }
 
   func dropLast() -> JSONPointer {
-    guard path.count > 1 else { return self }
+    guard path.count > 0 else { return self }
 
     var pointer = self
     pointer.path.removeLast()
@@ -45,7 +49,7 @@ extension JSONPointer: ExpressibleByStringLiteral {
 
 extension JSONPointer: CustomStringConvertible, CustomDebugStringConvertible {
   public var description: String {
-    path.reduce(into: "") { partialResult, component in
+    path.reduce(into: "#") { partialResult, component in
       switch component {
       case .index(let int): partialResult += "/\(int)"
       case .key(let string): partialResult += "/\(string)"

@@ -10,7 +10,7 @@ public struct Schema: ValidatableSchema {
     rawSchema: JSONValue,
     location: JSONPointer = .init(),
     context: Context,
-    baseURI: URL? = nil
+    baseURI: URL = URL(fileURLWithPath: #file)
   ) throws(SchemaIssue) {
     self.location = location
     self.context = context
@@ -79,7 +79,7 @@ struct ObjectSchema: ValidatableSchema {
     schemaValue: [String: JSONValue],
     location: JSONPointer,
     context: Context,
-    baseURI: URL? = nil
+    baseURI: URL = URL(fileURLWithPath: #file)
   ) {
     self.schemaValue = schemaValue
     self.location = location
@@ -98,10 +98,14 @@ struct ObjectSchema: ValidatableSchema {
     from schemaValue: [String: JSONValue],
     location: JSONPointer,
     context: Context,
-    baseURI: URL?
+    baseURI: URL
   ) -> (processedURI: URL?, keywords: [any Keyword]) {
     var keywords = [any Keyword]()
     var processedURI = baseURI
+
+    if location.isRoot {
+      context.identifierRegistry[baseURI] = location
+    }
 
     for keywordType in context.dialect.keywords where schemaValue.keys.contains(keywordType.name) {
       let value = schemaValue[keywordType.name]!

@@ -15,5 +15,5 @@ protocol Keyword: Sendable {
 struct KeywordContext {
   let location: JSONPointer
   let context: Context
-  let uri: URL?
+  let uri: URL
 }

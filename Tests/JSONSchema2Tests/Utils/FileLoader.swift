@@ -38,15 +38,15 @@ struct FileLoader<T: Decodable> {
     }
   }
 
-  func loadAllFiles() -> [(fileName: String, decodedObject: T)] {
+  func loadAllFiles() -> [(url: URL, decodedObject: T)] {
     let fileURLs = listFiles()
-    var decodedObjects: [(fileName: String, decodedObject: T)] = []
+    var decodedObjects: [(url: URL, decodedObject: T)] = []
 
     for fileURL in fileURLs {
       if let data = readFile(at: fileURL),
         let decodedObject = decodeFile(from: data)
       {
-        decodedObjects.append((fileURL.lastPathComponent, decodedObject))
+        decodedObjects.append((fileURL, decodedObject))
       }
     }
 

@@ -5,14 +5,14 @@ public final class Context: Sendable {
   var dialect: Dialect
 
   var rootRawSchema: JSONValue?
-  var validationStack = Set<String>()
+  var validationStack = [String]()
 
   var identifierRegistry: [URL: JSONPointer] = [:]
 
   var remoteSchemaStorage: [String: JSONValue] = [:]
   var schemaCache = [String: Schema]()
 
-  var anchors = [String: JSONPointer]()
+  var anchors = [String: URL]()
   var dynamicAnchors = [String: JSONPointer]()
 
   // TODO: This probably needs to be scoped to location
