@@ -3,6 +3,25 @@ protocol AnnotationProducingKeyword: Keyword {
   associatedtype AnnotationValue: AnnotationValueConvertible
 }
 
-protocol AnnotationValueConvertible: Sendable, Equatable { var value: JSONValue { get } }
+protocol AnnotationValueConvertible: Sendable, Equatable {
+  var value: JSONValue { get }
 
-extension JSONValue: AnnotationValueConvertible { var value: JSONValue { self } }
+  func merged(with other: Self) -> Self
+}
+
+extension JSONValue: AnnotationValueConvertible {
+  var value: JSONValue {
+    self
+  }
+
+  func merged(with other: JSONValue) -> JSONValue {
+    switch (self, other) {
+    case (.array(let lhs), .array(let rhs)):
+      .array(lhs + rhs)
+    case (.object(let lhs), .object(let rhs)):
+      .object(lhs.merging(rhs, uniquingKeysWith: { $1 }))
+    default:
+      other
+    }
+  }
+}

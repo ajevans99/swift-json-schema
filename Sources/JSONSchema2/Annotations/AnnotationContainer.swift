@@ -40,10 +40,13 @@ struct AnnotationContainer {
   }
 
   mutating func merge(_ other: AnnotationContainer) {
-    for (key, annotation) in other.storage {
-      // Decide how to handle conflicts if the same key exists
-      // For now, we'll assume that annotations can be merged or overwritten
-      storage[key] = annotation
+    for (key, otherAnnotation) in other.storage {
+      if let existingAnnotation = storage[key] {
+        let mergedAnnotation = existingAnnotation.merged(with: otherAnnotation)
+        storage[key] = mergedAnnotation
+      } else {
+        storage[key] = otherAnnotation
+      }
     }
   }
 }

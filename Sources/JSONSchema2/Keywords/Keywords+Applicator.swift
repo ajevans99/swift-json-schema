@@ -36,6 +36,17 @@ extension Keywords {
           return true
         }
       }
+
+      func merged(with other: PrefixItemsAnnoationValue) -> PrefixItemsAnnoationValue {
+        switch (self, other) {
+        case (.everyIndex, _):
+          .everyIndex
+        case (_, .everyIndex):
+          .everyIndex
+        case let (.largestIndex(lhs), .largestIndex(rhs)):
+          .largestIndex(lhs > rhs ? lhs : rhs)
+        }
+      }
     }
 
     func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
@@ -132,6 +143,15 @@ extension Keywords {
           .array(array.map { .integer($0) })
         case .everyIndex:
           true
+        }
+      }
+
+      func merged(with other: ContainsAnnotationValue) -> ContainsAnnotationValue {
+        switch (self, other) {
+        case (.indicies(let lhs), .indicies(let rhs)):
+          .indicies(lhs + rhs)
+        case (.everyIndex, _), (_, .everyIndex):
+          .everyIndex
         }
       }
     }
@@ -346,7 +366,9 @@ extension Keywords {
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
       for subschema in subschemas {
-        let result = subschema.validate(input, at: instanceLocation)
+        var subAnnotations = AnnotationContainer()
+        let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+        annotations.merge(subAnnotations)
         builder.merging(result)
       }
 
@@ -376,11 +398,12 @@ extension Keywords {
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
       for subschema in subschemas {
-        let result = subschema.validate(input, at: instanceLocation)
+        var subAnnotations = AnnotationContainer()
+        let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
         if result.valid {
           isValid = true
-          break
         }
+        annotations.merge(subAnnotations)
         builder.merging(result)
       }
 
@@ -412,10 +435,12 @@ extension Keywords {
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
       for subschema in subschemas {
-        let result = subschema.validate(input, at: instanceLocation)
+        var subAnnotations = AnnotationContainer()
+        let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
         if result.valid {
           validCount += 1
         }
+        annotations.merge(subAnnotations)
         builder.merging(result)
       }
 
@@ -443,8 +468,10 @@ extension Keywords {
     typealias AnnotationValue = Never
 
     func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      let result = subschema.validate(input, at: instanceLocation)
+      var subAnnotations = AnnotationContainer()
+      let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
       if result.valid {
+        annotations.merge(subAnnotations)
         throw ValidationIssue.notFailed
       }
     }
@@ -691,16 +718,28 @@ extension Keywords {
 
 extension Never: AnnotationValueConvertible {
   var value: JSONValue { .null }
+
+  func merged(with other: Never) -> Never {
+    fatalError()
+  }
 }
 
 extension Set: AnnotationValueConvertible where Element == String {
   var value: JSONSchema.JSONValue {
     .array(self.map { .string($0) })
   }
+
+  func merged(with other: Set<String>) -> Set<String> {
+    self.union(other)
+  }
 }
 
 extension Bool: AnnotationValueConvertible {
   var value: JSONValue { .boolean(self) }
+
+  func merged(with other: Bool) -> Bool {
+    self || other
+  }
 }
 
 private extension Array where Element == JSONValue {
@@ -735,8 +774,9 @@ struct ValidationResultBuilder {
   private var errors: [ValidationError] = []
 
   mutating func merging(_ result: ValidationResult) {
-    // TODO: Merge annotations?
-    if !result.valid {
+    if result.valid {
+
+    } else {
       if let resultErrors = result.errors {
         errors.append(contentsOf: resultErrors)
       }

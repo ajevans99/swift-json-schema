@@ -47,6 +47,10 @@ public struct Schema: ValidatableSchema {
   public func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
     schema.validate(instance, at: location)
   }
+
+  func validate(_ instance: JSONValue, at location: JSONPointer, annotations: inout AnnotationContainer) -> ValidationResult {
+    (schema as? ObjectSchema)?.validate(instance, at: location, annotations: &annotations) ?? schema.validate(instance, at: location)
+  }
 }
 
 struct BooleanSchema: ValidatableSchema {
@@ -129,9 +133,12 @@ struct ObjectSchema: ValidatableSchema {
   }
 
   public func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
-    var errors: [ValidationError] = []
-
     var annotations = AnnotationContainer()
+    return validate(instance, at: location, annotations: &annotations)
+  }
+
+  public func validate(_ instance: JSONValue, at location: JSONPointer, annotations: inout AnnotationContainer) -> ValidationResult {
+    var errors: [ValidationError] = []
 
     for keyword in keywords {
       do throws(ValidationIssue) {

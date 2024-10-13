@@ -28,10 +28,29 @@ public protocol AnyAnnotation: Sendable {
   var schemaLocation: JSONPointer { get }
   var absoluteSchemaLocation: JSONPointer? { get }
   var jsonValue: JSONValue { get }
+
+  func merged(with other: AnyAnnotation) -> AnyAnnotation?
 }
 
 extension Annotation: AnyAnnotation where Keyword.AnnotationValue: AnnotationValueConvertible {
   var jsonValue: JSONValue {
     self.value.value
+  }
+}
+
+extension Annotation {
+  func merged(with other: AnyAnnotation) -> AnyAnnotation? {
+    guard let otherAnnotation = other as? Annotation<Keyword> else {
+      return nil
+    }
+
+    let mergedValue = self.value.merged(with: otherAnnotation.value)
+
+    return Annotation<Keyword>(
+      keyword: self.keyword,
+      instanceLocation: self.instanceLocation,
+      schemaLocation: self.schemaLocation,
+      value: mergedValue
+    )
   }
 }
