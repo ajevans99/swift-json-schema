@@ -66,8 +66,14 @@ extension Keywords {
     let context: KeywordContext
 
     func processIdentifier() {
-//      guard let anchorName = value.string else { return }
-//      context.context.dynamicAnchors[anchorName] = context.location
+      guard let anchorName = value.string else { return }
+      var components = URLComponents(url: context.uri, resolvingAgainstBaseURL: true)
+      components?.fragment = anchorName
+      guard let newURL = components?.url else { return }
+      let location = context.location.dropLast()
+      if !context.context.anchors.keys.contains(newURL) {
+        context.context.anchors[newURL] = location
+      }
     }
   }
 }
