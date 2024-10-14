@@ -60,9 +60,6 @@ public enum Dialect: String, Hashable, Sendable {
         Keywords.Else.self,
         Keywords.DependentSchemas.self,
 
-        Keywords.UnevaluatedItems.self,
-        Keywords.UnevaluatedProperties.self,
-
         Keywords.TypeKeyword.self,
         Keywords.Enum.self,
         Keywords.Constant.self,
@@ -87,6 +84,9 @@ public enum Dialect: String, Hashable, Sendable {
         Keywords.MinProperties.self,
         Keywords.Required.self,
         Keywords.DependentRequired.self,
+
+        Keywords.UnevaluatedItems.self,
+        Keywords.UnevaluatedProperties.self,
 
         Keywords.Defintions.self,
         Keywords.Dependencies.self,

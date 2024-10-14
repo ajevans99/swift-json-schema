@@ -114,10 +114,12 @@ extension Keywords {
       }
 
       // Validate using the resolved schema
-      let result = schema.validate(input, at: instanceLocation)
+      var refAnnotations = AnnotationContainer()
+      let result = schema.validate(input, at: instanceLocation, annotations: &refAnnotations)
       if !result.valid {
         throw ValidationIssue.referenceValidationFailure(ref: refURL.absoluteString, errors: result.errors ?? [])
       }
+      annotations.merge(refAnnotations)
     }
 
     private func resolveSchema(for refURL: URL, context: Context) throws -> Schema {

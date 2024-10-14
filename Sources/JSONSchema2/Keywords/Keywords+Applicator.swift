@@ -215,8 +215,10 @@ extension Keywords {
 
       for (key, value) in instanceObject where schemaMap.keys.contains(key) {
         let propertyLocation = instanceLocation.appending(.key(key))
-        let result = schemaMap[key]!.validate(value, at: propertyLocation)
+        var subAnnotations = AnnotationContainer()
+        let result = schemaMap[key]!.validate(value, at: propertyLocation, annotations: &subAnnotations)
         builder.merging(result)
+        annotations.merge(subAnnotations)
         instancePropertyNames.insert(key)
       }
 
@@ -439,8 +441,8 @@ extension Keywords {
         let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
         if result.valid {
           validCount += 1
+          annotations.merge(subAnnotations)
         }
-        annotations.merge(subAnnotations)
         builder.merging(result)
       }
 
@@ -499,7 +501,9 @@ extension Keywords {
     typealias AnnotationValue = Never
 
     func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      let result = subschema.validate(input, at: instanceLocation)
+      var subAnnotations = AnnotationContainer()
+      let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+      annotations.merge(subAnnotations)
       context.ifConditionalResult = result
     }
   }
@@ -523,10 +527,12 @@ extension Keywords {
 
     func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       if context.ifConditionalResult?.valid == true {
-        let result = subschema.validate(input, at: instanceLocation)
+        var subAnnotations = AnnotationContainer()
+        let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
         if !result.valid {
           throw .conditionalFailed
         }
+        annotations.merge(subAnnotations)
       }
     }
   }
@@ -550,10 +556,12 @@ extension Keywords {
 
     func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       if context.ifConditionalResult?.valid == false {
-        let result = subschema.validate(input, at: instanceLocation)
+        var subAnnotations = AnnotationContainer()
+        let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
         if !result.valid {
           throw .conditionalFailed
         }
+        annotations.merge(subAnnotations)
       }
     }
   }
@@ -585,9 +593,10 @@ extension Keywords {
 
       for (key, schema) in schemaMap {
         if instanceObject.keys.contains(key) {
-          let propertyLocation = instanceLocation.appending(.key(key))
-          let result = schema.validate(input, at: propertyLocation)
+          var subAnnotations = AnnotationContainer()
+          let result = schema.validate(input, at: instanceLocation, annotations: &subAnnotations)
           builder.merging(result)
+          annotations.merge(subAnnotations)
         }
       }
 
@@ -619,6 +628,10 @@ extension Keywords {
     func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
+      // Nested unevaluatedItems take precedence.
+      // See "unevaluatedItems with nested unevaluatedItems" from JSON schema test suite.
+      guard annotations.annotation(for: Self.self, at: instanceLocation) == nil else { return }
+
       var evaluatedIndices = Set<Int>()
 
       if let prefixItemsAnnotation = annotations.annotation(for: PrefixItems.self, at: instanceLocation)?.value {
@@ -649,8 +662,10 @@ extension Keywords {
       for index in unevaluatedIndices {
         let instance = instances[index]
         let itemLocation = instanceLocation.appending(.index(index))
-        let result = subschema.validate(instance, at: itemLocation)
+        var subAnnotations = AnnotationContainer()
+        let result = subschema.validate(instance, at: itemLocation, annotations: &subAnnotations)
         builder.merging(result)
+        annotations.merge(subAnnotations)
       }
 
       try builder.throwIfErrors()
@@ -681,6 +696,10 @@ extension Keywords {
     func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
       guard let instanceObject = input.object else  { return }
 
+      // Nested unevaluatedProperties take precedence.
+      // See "unevaluatedProperties with nested unevaluatedProperties" from JSON schema test suite.
+      guard annotations.annotation(for: Self.self, at: instanceLocation) == nil else { return }
+
       var evaluatedPropertyNames = Set<String>()
 
       if let propertiesAnnotation = annotations.annotation(for: Properties.self, at: instanceLocation)?.value {
@@ -701,9 +720,11 @@ extension Keywords {
 
       for propertyName in unevaluatedPropertyNames {
         guard let propertyValue = instanceObject[propertyName] else { continue }
+        var subAnnotations = AnnotationContainer()
         let propertyLocation = instanceLocation.appending(.key(propertyName))
-        let result = subschema.validate(propertyValue, at: propertyLocation)
+        let result = subschema.validate(propertyValue, at: propertyLocation, annotations: &subAnnotations)
         builder.merging(result)
+        annotations.merge(subAnnotations)
         validatedPropertyNames.insert(propertyName)
       }
 
@@ -719,9 +740,7 @@ extension Keywords {
 extension Never: AnnotationValueConvertible {
   var value: JSONValue { .null }
 
-  func merged(with other: Never) -> Never {
-    fatalError()
-  }
+  func merged(with other: Never) -> Never {}
 }
 
 extension Set: AnnotationValueConvertible where Element == String {

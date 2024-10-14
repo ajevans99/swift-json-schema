@@ -23,9 +23,13 @@ struct AnnotationContainer {
       keywordType: ObjectIdentifier(K.self),
       instanceLocation: annotation.instanceLocation
     )
-    storage[key] = annotation
+    if let existingAnnotation = storage[key] {
+      let mergedAnnotation = existingAnnotation.merged(with: annotation)
+      storage[key] = mergedAnnotation
+    } else {
+      storage[key] = annotation
+    }
   }
-
 
   func annotation<K: AnnotationProducingKeyword>(for keyword: K.Type, at instanceLocation: JSONPointer) -> Annotation<K>? {
     let key = AnnotationKey(

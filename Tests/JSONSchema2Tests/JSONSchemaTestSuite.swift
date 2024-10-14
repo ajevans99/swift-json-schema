@@ -20,7 +20,7 @@ struct JSONSchemaTestSuite {
 //      .filter { $0.url.lastPathComponent == "dynamicRef.json" }
 //      .filter { $0.url.lastPathComponent == "anchor.json" }
 //      .filter { $0.url.lastPathComponent == "not.json" }
-//      .filter { $0.url.lastPathComponent == "unevaluatedProperties.json" }
+//      .filter { $0.url.lastPathComponent == "unevaluatedItems.json" }
       .flatMap { path, schemaTests in
         schemaTests.map { ($0, path) }
       }
@@ -83,43 +83,43 @@ struct JSONSchemaTestSuite {
     #expect((result.valid) == true, "\(result)")
   }
 
-  @Test func debugger1() throws {
-    let testSchema = """
-      {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "$ref": "http://localhost:1234/nested-absolute-ref-to-string.json"
-        }
-      """
-
-    let testCase = """
-      "foo"
-      """
-
-    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
-    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
-    let result = try #require(try schema.validate(instance: testCase))
-    dump(result)
-    #expect((result.valid) == true, "\(result)")
-  }
-
-  @Test func debugger2() throws {
-    let testSchema = """
-      {
-            "$schema": "https://json-schema.org/draft/2020-12/schema",
-            "$ref": "http://localhost:1234/urn-ref-string.json"
-        }
-      """
-
-    let testCase = """
-      "foo"
-      """
-
-    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
-    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
-    let result = try #require(try schema.validate(instance: testCase))
-    dump(result)
-    #expect((result.valid) == true, "\(result)")
-  }
+//  @Test func debugger1() throws {
+//    let testSchema = """
+//      {
+//            "$schema": "https://json-schema.org/draft/2020-12/schema",
+//            "$ref": "http://localhost:1234/nested-absolute-ref-to-string.json"
+//        }
+//      """
+//
+//    let testCase = """
+//      "foo"
+//      """
+//
+//    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
+//    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
+//    let result = try #require(try schema.validate(instance: testCase))
+//    dump(result)
+//    #expect((result.valid) == true, "\(result)")
+//  }
+//
+//  @Test func debugger2() throws {
+//    let testSchema = """
+//      {
+//            "$schema": "https://json-schema.org/draft/2020-12/schema",
+//            "$ref": "http://localhost:1234/urn-ref-string.json"
+//        }
+//      """
+//
+//    let testCase = """
+//      "foo"
+//      """
+//
+//    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
+//    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
+//    let result = try #require(try schema.validate(instance: testCase))
+//    dump(result)
+//    #expect((result.valid) == true, "\(result)")
+//  }
 
   @Test func debugger3() throws {
     let testSchema = """
@@ -150,34 +150,40 @@ struct JSONSchemaTestSuite {
   @Test func debugger4() throws {
     let testSchema = """
       {
-          "$schema": "https://json-schema.org/draft/2020-12/schema",
-          "type": "object",
-          "properties": {
-              "foo": { "type": "string" }
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$defs": {
+          "one": {
+            "oneOf": [
+              { "$ref": "#/$defs/two" },
+              { "required": ["b"], "properties": { "b": true } },
+              { "required": ["xx"], "patternProperties": { "x": true } },
+              { "required": ["all"], "unevaluatedProperties": true }
+            ]
           },
-          "allOf": [
-              {
-                  "properties": {
-                      "bar": { "type": "string" }
-                  }
-              }
-          ],
-          "unevaluatedProperties": false
-        }
+          "two": {
+            "oneOf": [
+                { "required": ["c"], "properties": { "c": true } },
+                { "required": ["d"], "properties": { "d": true } }
+            ]
+          }
+        },
+        "oneOf": [
+          { "$ref": "#/$defs/one" },
+          { "required": ["a"], "properties": { "a": true } }
+        ],
+        "unevaluatedProperties": false
+      }
       """
 
     let testCase = """
-      {
-          "foo": "foo",
-          "bar": "bar"
-      }
+      { "xx": 1, "foo": 1 }
       """
 
     let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
     let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
     let result = try #require(try schema.validate(instance: testCase))
     dump(result)
-    #expect((result.valid) == true, "\(result)")
+    #expect((result.valid) == false, "\(result)")
   }
 }
 
