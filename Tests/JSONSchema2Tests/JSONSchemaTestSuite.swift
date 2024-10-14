@@ -21,6 +21,7 @@ struct JSONSchemaTestSuite {
 //      .filter { $0.url.lastPathComponent == "anchor.json" }
 //      .filter { $0.url.lastPathComponent == "not.json" }
 //      .filter { $0.url.lastPathComponent == "unevaluatedItems.json" }
+//      .filter { $0.url.lastPathComponent == "contains.json" }
       .flatMap { path, schemaTests in
         schemaTests.map { ($0, path) }
       }
@@ -64,24 +65,25 @@ struct JSONSchemaTestSuite {
     }
   }
 
-  @Test func debugger0() throws {
-    let testSchema = """
-      {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "$ref": "http://localhost:1234/different-id-ref-string.json"
-      }
-      """
-
-    let testCase = """
-      "foo"
-      """
-
-    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
-    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
-    let result = try #require(try schema.validate(instance: testCase))
-    dump(result)
-    #expect((result.valid) == true, "\(result)")
-  }
+  // This is dynamic ref related
+//  @Test func debugger0() throws {
+//    let testSchema = """
+//      {
+//          "$schema": "https://json-schema.org/draft/2020-12/schema",
+//          "$ref": "https://json-schema.org/draft/2020-12/schema"
+//      }
+//      """
+//
+//    let testCase = """
+//      {"$defs": {"foo": {"type": 1}}}
+//      """
+//
+//    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
+//    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
+//    let result = try #require(try schema.validate(instance: testCase))
+//    dump(result)
+//    #expect((result.valid) == false, "\(result)")
+//  }
 
 //  @Test func debugger1() throws {
 //    let testSchema = """
@@ -124,27 +126,36 @@ struct JSONSchemaTestSuite {
   @Test func debugger3() throws {
     let testSchema = """
       {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "not": {
-            "$comment": "this subschema must still produce annotations internally, even though the 'not' will ultimately discard them",
-            "anyOf": [
-                true,
-                { "properties": { "foo": true } }
-            ],
-            "unevaluatedProperties": false
-        }
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "allOf": [
+              {
+                  "if": {
+                      "exclusiveMaximum": 0
+                  }
+              },
+              {
+                  "then": {
+                      "minimum": -10
+                  }
+              },
+              {
+                  "else": {
+                      "multipleOf": 2
+                  }
+              }
+          ]
       }
       """
 
     let testCase = """
-      { "foo": 1 }
+      -100
       """
 
     let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
     let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
     let result = try #require(try schema.validate(instance: testCase))
     dump(result)
-    #expect((result.valid) == false, "\(result)")
+    #expect((result.valid) == true, "\(result)")
   }
 
   @Test func debugger4() throws {

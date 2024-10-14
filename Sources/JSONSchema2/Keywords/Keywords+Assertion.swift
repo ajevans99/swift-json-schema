@@ -397,7 +397,7 @@ extension Keywords {
       self.minContains = value.integer ?? 1
 
       if minContains == 0 {
-        context.context.minContainsIsZero = true
+        context.context.minContainsIsZero[context.location.dropLast()] = true
       }
     }
 

@@ -168,7 +168,7 @@ extension Keywords {
         }
       }
 
-      if validIndices.isEmpty && !context.minContainsIsZero {
+      if validIndices.isEmpty && !context.minContainsIsZero[self.context.location.dropLast(), default: false] {
         throw .containsInsufficientMatches
       }
 
@@ -504,7 +504,7 @@ extension Keywords {
       var subAnnotations = AnnotationContainer()
       let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
       annotations.merge(subAnnotations)
-      context.ifConditionalResult = result
+      context.ifConditionalResults[self.context.location.dropLast()] = result
     }
   }
 
@@ -526,14 +526,14 @@ extension Keywords {
     typealias AnnotationValue = Never
 
     func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      if context.ifConditionalResult?.valid == true {
-        var subAnnotations = AnnotationContainer()
-        let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
-        if !result.valid {
-          throw .conditionalFailed
-        }
-        annotations.merge(subAnnotations)
+      guard context.ifConditionalResults[self.context.location.dropLast()]?.valid == true else { return }
+
+      var subAnnotations = AnnotationContainer()
+      let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+      if !result.valid {
+        throw .conditionalFailed
       }
+      annotations.merge(subAnnotations)
     }
   }
 
@@ -555,14 +555,13 @@ extension Keywords {
     typealias AnnotationValue = Never
 
     func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      if context.ifConditionalResult?.valid == false {
-        var subAnnotations = AnnotationContainer()
-        let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
-        if !result.valid {
-          throw .conditionalFailed
-        }
-        annotations.merge(subAnnotations)
+      guard context.ifConditionalResults[self.context.location.dropLast()]?.valid == false else { return }
+      var subAnnotations = AnnotationContainer()
+      let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+      if !result.valid {
+        throw .conditionalFailed
       }
+      annotations.merge(subAnnotations)
     }
   }
 
