@@ -5,7 +5,6 @@ public final class Context: Sendable {
   var dialect: Dialect
 
   var rootRawSchema: JSONValue?
-  var validationStack = [String]()
 
   var identifierRegistry: [URL: JSONPointer] = [:]
 

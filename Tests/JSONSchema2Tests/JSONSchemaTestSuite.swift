@@ -3,7 +3,6 @@ import Testing
 
 @testable import JSONSchema2
 
-@Suite(.serialized)
 struct JSONSchemaTestSuite {
   static let fileLoader = FileLoader<[JSONSchemaTest]>(
     subdirectory: "JSON-Schema-Test-Suite/tests/draft2020-12"
@@ -48,13 +47,14 @@ struct JSONSchemaTestSuite {
       return
     }
 
-    for testCase in schemaTest.tests {
-      let schema = try #require(
-        try Schema(
-          rawSchema: schemaTest.schema,
-          context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)
-        )
+    let schema = try #require(
+      try Schema(
+        rawSchema: schemaTest.schema,
+        context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)
       )
+    )
+
+    for testCase in schemaTest.tests {
       let validationResult = schema.validate(testCase.data)
 
       let comment: () -> Testing.Comment = {

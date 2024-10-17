@@ -77,11 +77,6 @@ extension ObjectSchema: Codable {
   }
 }
 
-//extension CodingUserInfoKey {
-//  static let dialect = CodingUserInfoKey(rawValue: "dialect")!
-//  static let location = CodingUserInfoKey(rawValue: "location")!
-//}
-
 struct DynamicCodingKey: CodingKey {
   var stringValue: String
   var intValue: Int? { nil }
