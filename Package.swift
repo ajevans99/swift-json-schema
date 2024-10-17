@@ -19,6 +19,10 @@ let package = Package(
       targets: ["JSONSchema"]
     ),
     .library(
+      name: "JSONSchema2",
+      targets: ["JSONSchema2"]
+    ),
+    .library(
       name: "JSONSchemaBuilder",
       targets: ["JSONSchemaBuilder"]
     ),
@@ -39,6 +43,21 @@ let package = Package(
     .testTarget(
       name: "JSONSchemaTests",
       dependencies: ["JSONSchema"]
+    ),
+
+    .target(
+      name: "JSONSchema2",
+      dependencies: ["JSONSchema"],
+      resources: [
+        .copy("Resources")
+      ]
+    ),
+    .testTarget(
+      name: "JSONSchema2Tests",
+      dependencies: ["JSONSchema2"],
+      resources: [
+        .copy("JSON-Schema-Test-Suite")
+      ]
     ),
 
     // Library for building JSON schemas with Swift's result builders.

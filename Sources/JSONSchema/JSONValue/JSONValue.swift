@@ -16,11 +16,96 @@
 /// ```
 ///
 /// - SeeAlso: ``JSONType``
-public enum JSONValue: Hashable, Equatable, Sendable { case string(String)
+public enum JSONValue: Hashable, Equatable, Sendable {
+  case string(String)
   case number(Double)
   case integer(Int)
   case object([String: Self])
   case array([Self])
   case boolean(Bool)
   case null
+
+  public var primative: JSONType {
+    switch self {
+    case .string: return .string
+    case .number: return .number
+    case .integer: return .integer
+    case .object: return .object
+    case .array: return .array
+    case .boolean: return .boolean
+    case .null: return .null
+    }
+  }
+
+  public static func == (lhs: JSONValue, rhs: JSONValue) -> Bool {
+    switch (lhs, rhs) {
+    case (.string(let lhsValue), .string(let rhsValue)):
+      return lhsValue == rhsValue
+    case (.number(let lhsValue), .number(let rhsValue)):
+      return lhsValue == rhsValue
+    case (.integer(let lhsValue), .integer(let rhsValue)):
+      return lhsValue == rhsValue
+    case (.number(let lhsValue), .integer(let rhsValue)):
+      return lhsValue == Double(rhsValue)
+    case (.integer(let lhsValue), .number(let rhsValue)):
+      return Double(lhsValue) == rhsValue
+    case (.object(let lhsValue), .object(let rhsValue)):
+      return lhsValue == rhsValue
+    case (.array(let lhsValue), .array(let rhsValue)):
+      return lhsValue == rhsValue
+    case (.boolean(let lhsValue), .boolean(let rhsValue)):
+      return lhsValue == rhsValue
+    case (.null, .null):
+      return true
+    default:
+      return false
+    }
+  }
+}
+
+extension JSONValue {
+  public var string: String? {
+    if case .string(let value) = self { return value }
+    return nil
+  }
+
+  public var number: Double? {
+    if case .number(let value) = self { return value }
+    return nil
+  }
+
+  public var integer: Int? {
+    if case .integer(let value) = self { return value }
+    return nil
+  }
+
+  public var object: [String: JSONValue]? {
+    if case .object(let value) = self { return value }
+    return nil
+  }
+
+  public var array: [JSONValue]? {
+    if case .array(let value) = self { return value }
+    return nil
+  }
+
+  public var boolean: Bool? {
+    if case .boolean(let value) = self { return value }
+    return nil
+  }
+
+  public var isNull: Bool {
+    if case .null = self { return true }
+    return false
+  }
+}
+
+extension JSONValue {
+  public var numeric: Double? {
+    switch self {
+    case .integer(let integer): return Double(integer)
+    case .number(let double): return double
+    default: return nil
+    }
+  }
 }
