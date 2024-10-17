@@ -36,7 +36,12 @@ extension Keywords {
       for (key, value) in object {
         // It is important to process defs to update context
         let subschemaLocation = context.location.appending(.key(key))
-        _ = try? Schema(rawSchema: value, location: subschemaLocation, context: context.context, baseURI: context.uri)
+        _ = try? Schema(
+          rawSchema: value,
+          location: subschemaLocation,
+          context: context.context,
+          baseURI: context.uri
+        )
       }
     }
   }

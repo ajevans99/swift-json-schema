@@ -1,5 +1,10 @@
 protocol ApplicatorKeyword: AnnotationProducingKeyword {
-  func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue)
+  func validate(
+    _ input: JSONValue,
+    at instanceLocation: JSONPointer,
+    using annotations: inout AnnotationContainer,
+    with context: Context
+  ) throws(ValidationIssue)
 }
 
 // MARK: - Arrays
@@ -43,13 +48,18 @@ extension Keywords {
           .everyIndex
         case (_, .everyIndex):
           .everyIndex
-        case let (.largestIndex(lhs), .largestIndex(rhs)):
+        case (.largestIndex(let lhs), .largestIndex(let rhs)):
           .largestIndex(lhs > rhs ? lhs : rhs)
         }
       }
     }
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
       var largestIndex: Int = instances.startIndex
@@ -89,15 +99,24 @@ extension Keywords {
 
     typealias AnnotationValue = Bool
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
-      let prefixItemsAnnotation = annotations.annotation(for: PrefixItems.self, at: instanceLocation)
-      let relevantInstanceItems: ArraySlice<JSONValue> = switch prefixItemsAnnotation?.value {
-      case .everyIndex: .init()
-      case .largestIndex(let index): instances.dropFirst(index + 1)
-      case .none: instances[...]
-      }
+      let prefixItemsAnnotation = annotations.annotation(
+        for: PrefixItems.self,
+        at: instanceLocation
+      )
+      let relevantInstanceItems: ArraySlice<JSONValue> =
+        switch prefixItemsAnnotation?.value {
+        case .everyIndex: .init()
+        case .largestIndex(let index): instances.dropFirst(index + 1)
+        case .none: instances[...]
+        }
 
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
@@ -156,7 +175,12 @@ extension Keywords {
       }
     }
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
       var validIndices = [Int]()
@@ -168,11 +192,15 @@ extension Keywords {
         }
       }
 
-      if validIndices.isEmpty && !context.minContainsIsZero[self.context.location.dropLast(), default: false] {
+      if validIndices.isEmpty
+        && !context.minContainsIsZero[self.context.location.dropLast(), default: false]
+      {
         throw .containsInsufficientMatches
       }
 
-      let annotationValue = validIndices.count == instances.count ? ContainsAnnotationValue.everyIndex : .indicies(validIndices)
+      let annotationValue =
+        validIndices.count == instances.count
+        ? ContainsAnnotationValue.everyIndex : .indicies(validIndices)
       annotations.insert(keyword: self, at: instanceLocation, value: annotationValue)
     }
   }
@@ -194,18 +222,30 @@ extension Keywords {
       self.value = value
       self.context = context
 
-      self.schemaMap = value.object?.reduce(into: [:]) { result, keyValue in
-        let (key, rawSchema) = keyValue
-        let updatedLocation = context.location.appending(.key(key))
-        if let schema = try? Schema(rawSchema: rawSchema, location: updatedLocation, context: context.context, baseURI: context.uri) {
-          result[key] = schema
-        }
-      } ?? [:]
+      self.schemaMap =
+        value.object?
+        .reduce(into: [:]) { result, keyValue in
+          let (key, rawSchema) = keyValue
+          let updatedLocation = context.location.appending(.key(key))
+          if let schema = try? Schema(
+            rawSchema: rawSchema,
+            location: updatedLocation,
+            context: context.context,
+            baseURI: context.uri
+          ) {
+            result[key] = schema
+          }
+        } ?? [:]
     }
 
     typealias AnnotationValue = Set<String>
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
       guard let instanceObject = input.object else {
         return
       }
@@ -216,7 +256,8 @@ extension Keywords {
       for (key, value) in instanceObject where schemaMap.keys.contains(key) {
         let propertyLocation = instanceLocation.appending(.key(key))
         var subAnnotations = AnnotationContainer()
-        let result = schemaMap[key]!.validate(value, at: propertyLocation, annotations: &subAnnotations)
+        let result = schemaMap[key]!
+          .validate(value, at: propertyLocation, annotations: &subAnnotations)
         builder.merging(result)
         annotations.merge(subAnnotations)
         instancePropertyNames.insert(key)
@@ -240,29 +281,41 @@ extension Keywords {
       self.value = value
       self.context = context
 
-      self.patterns = value.object?.compactMap { key, rawSchema in
-        guard let regex = try? Regex(key) else { return nil }
-        guard let subschema = try? Schema(rawSchema: rawSchema, location: context.location.appending(.key(key)), context: context.context, baseURI: context.uri) else { return nil }
-        return (regex, subschema)
-      } ?? []
+      self.patterns =
+        value.object?
+        .compactMap { key, rawSchema in
+          guard let regex = try? Regex(key) else { return nil }
+          guard
+            let subschema = try? Schema(
+              rawSchema: rawSchema,
+              location: context.location.appending(.key(key)),
+              context: context.context,
+              baseURI: context.uri
+            )
+          else { return nil }
+          return (regex, subschema)
+        } ?? []
     }
 
     typealias AnnotationValue = Set<String>
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
       var matchedPropertyNames: Set<String> = []
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
       for (key, value) in instanceObject {
-        for (regex, schema) in patterns {
-          if key.firstMatch(of: regex) != nil {
-            let propertyLocation = instanceLocation.appending(.key(key))
-            let result = schema.validate(value, at: propertyLocation)
-            builder.merging(result)
-            matchedPropertyNames.insert(key)
-          }
+        for (regex, schema) in patterns where key.firstMatch(of: regex) != nil {
+          let propertyLocation = instanceLocation.appending(.key(key))
+          let result = schema.validate(value, at: propertyLocation)
+          builder.merging(result)
+          matchedPropertyNames.insert(key)
         }
       }
 
@@ -289,11 +342,19 @@ extension Keywords {
 
     typealias AnnotationValue = Set<String>
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
-      let previouslyValidatedKeys = (annotations.annotation(for: Properties.self, at: instanceLocation)?.value ?? [])
-        .union(annotations.annotation(for: PatternProperties.self, at: instanceLocation)?.value ?? [])
+      let previouslyValidatedKeys =
+        (annotations.annotation(for: Properties.self, at: instanceLocation)?.value ?? [])
+        .union(
+          annotations.annotation(for: PatternProperties.self, at: instanceLocation)?.value ?? []
+        )
 
       var validatedKeys: Set<String> = []
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
@@ -328,7 +389,12 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
@@ -364,7 +430,12 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
       for subschema in subschemas {
@@ -395,7 +466,12 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
       var isValid = false
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
@@ -432,7 +508,12 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
       var validCount = 0
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
@@ -469,7 +550,12 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
       var subAnnotations = AnnotationContainer()
       let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
       if result.valid {
@@ -500,7 +586,12 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
       var subAnnotations = AnnotationContainer()
       let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
       annotations.merge(subAnnotations)
@@ -525,8 +616,15 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      guard context.ifConditionalResults[self.context.location.dropLast()]?.valid == true else { return }
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
+      guard context.ifConditionalResults[self.context.location.dropLast()]?.valid == true else {
+        return
+      }
 
       var subAnnotations = AnnotationContainer()
       let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
@@ -554,8 +652,15 @@ extension Keywords {
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      guard context.ifConditionalResults[self.context.location.dropLast()]?.valid == false else { return }
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
+      guard context.ifConditionalResults[self.context.location.dropLast()]?.valid == false else {
+        return
+      }
       var subAnnotations = AnnotationContainer()
       let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
       if !result.valid {
@@ -578,25 +683,30 @@ extension Keywords {
       self.value = value
       self.context = context
 
-      self.schemaMap = value.object?.compactMapValues { rawSchema in
-        try? Schema(rawSchema: rawSchema, location: context.location, context: context.context)
-      } ?? [:]
+      self.schemaMap =
+        value.object?
+        .compactMapValues { rawSchema in
+          try? Schema(rawSchema: rawSchema, location: context.location, context: context.context)
+        } ?? [:]
     }
 
     typealias AnnotationValue = Never
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
-      for (key, schema) in schemaMap {
-        if instanceObject.keys.contains(key) {
-          var subAnnotations = AnnotationContainer()
-          let result = schema.validate(input, at: instanceLocation, annotations: &subAnnotations)
-          builder.merging(result)
-          annotations.merge(subAnnotations)
-        }
+      for (key, schema) in schemaMap where instanceObject.keys.contains(key) {
+        var subAnnotations = AnnotationContainer()
+        let result = schema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+        builder.merging(result)
+        annotations.merge(subAnnotations)
       }
 
       try builder.throwIfErrors()
@@ -624,7 +734,12 @@ extension Keywords {
 
     typealias AnnotationValue = Bool
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
       // Nested unevaluatedItems take precedence.
@@ -633,23 +748,31 @@ extension Keywords {
 
       var evaluatedIndices = Set<Int>()
 
-      if let prefixItemsAnnotation = annotations.annotation(for: PrefixItems.self, at: instanceLocation)?.value {
+      if let prefixItemsAnnotation = annotations.annotation(
+        for: PrefixItems.self,
+        at: instanceLocation
+      )?
+      .value {
         switch prefixItemsAnnotation {
         case .everyIndex:
           return
         case .largestIndex(let largestIndex):
-          evaluatedIndices.formUnion(0...largestIndex)
+          evaluatedIndices.formUnion(0 ... largestIndex)
         }
       }
 
-      if let itemsAnnotation = annotations.annotation(for: Items.self, at: instanceLocation)?.value, itemsAnnotation == true {
-        evaluatedIndices.formUnion(0..<instances.count)
+      if let itemsAnnotation = annotations.annotation(for: Items.self, at: instanceLocation)?.value,
+        itemsAnnotation == true
+      {
+        evaluatedIndices.formUnion(0 ..< instances.count)
       }
 
-      if let containsAnnotation = annotations.annotation(for: Contains.self, at: instanceLocation)?.value {
+      if let containsAnnotation = annotations.annotation(for: Contains.self, at: instanceLocation)?
+        .value
+      {
         switch containsAnnotation {
         case .everyIndex:
-          evaluatedIndices.formUnion(0..<instances.count)
+          evaluatedIndices.formUnion(0 ..< instances.count)
         case .indicies(let indicies):
           evaluatedIndices.formUnion(indicies)
         }
@@ -692,8 +815,13 @@ extension Keywords {
 
     typealias AnnotationValue = Set<String>
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context) throws(ValidationIssue) {
-      guard let instanceObject = input.object else  { return }
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context
+    ) throws(ValidationIssue) {
+      guard let instanceObject = input.object else { return }
 
       // Nested unevaluatedProperties take precedence.
       // See "unevaluatedProperties with nested unevaluatedProperties" from JSON schema test suite.
@@ -701,15 +829,27 @@ extension Keywords {
 
       var evaluatedPropertyNames = Set<String>()
 
-      if let propertiesAnnotation = annotations.annotation(for: Properties.self, at: instanceLocation)?.value {
+      if let propertiesAnnotation = annotations.annotation(
+        for: Properties.self,
+        at: instanceLocation
+      )?
+      .value {
         evaluatedPropertyNames.formUnion(propertiesAnnotation)
       }
 
-      if let patternPropertiesAnnotation = annotations.annotation(for: PatternProperties.self, at: instanceLocation)?.value {
+      if let patternPropertiesAnnotation = annotations.annotation(
+        for: PatternProperties.self,
+        at: instanceLocation
+      )?
+      .value {
         evaluatedPropertyNames.formUnion(patternPropertiesAnnotation)
       }
 
-      if let additionalPropertiesAnnotation = annotations.annotation(for: AdditionalProperties.self, at: instanceLocation)?.value {
+      if let additionalPropertiesAnnotation = annotations.annotation(
+        for: AdditionalProperties.self,
+        at: instanceLocation
+      )?
+      .value {
         evaluatedPropertyNames.formUnion(additionalPropertiesAnnotation)
       }
 
@@ -721,7 +861,11 @@ extension Keywords {
         guard let propertyValue = instanceObject[propertyName] else { continue }
         var subAnnotations = AnnotationContainer()
         let propertyLocation = instanceLocation.appending(.key(propertyName))
-        let result = subschema.validate(propertyValue, at: propertyLocation, annotations: &subAnnotations)
+        let result = subschema.validate(
+          propertyValue,
+          at: propertyLocation,
+          annotations: &subAnnotations
+        )
         builder.merging(result)
         annotations.merge(subAnnotations)
         validatedPropertyNames.insert(propertyName)
@@ -760,13 +904,18 @@ extension Bool: AnnotationValueConvertible {
   }
 }
 
-private extension Array where Element == JSONValue {
-  func extractSubschemas(using context: KeywordContext) -> [Schema] {
+extension Array where Element == JSONValue {
+  fileprivate func extractSubschemas(using context: KeywordContext) -> [Schema] {
     var subschemas = [Schema]()
     subschemas.reserveCapacity(self.count)
     for (index, rawSchema) in self.enumerated() {
       let pointer = context.location.appending(.index(index))
-      if let subschema = try? Schema(rawSchema: rawSchema, location: pointer, context: context.context, baseURI: context.uri) {
+      if let subschema = try? Schema(
+        rawSchema: rawSchema,
+        location: pointer,
+        context: context.context,
+        baseURI: context.uri
+      ) {
         subschemas.append(subschema)
       }
     }
@@ -774,9 +923,16 @@ private extension Array where Element == JSONValue {
   }
 }
 
-private extension JSONValue {
-  func extractSubschema(using context: KeywordContext) -> Schema {
-    (try? Schema(rawSchema: self, location: context.location, context: context.context, baseURI: context.uri)) ?? BooleanSchema(schemaValue: true, location: context.location, context: context.context).asSchema()
+extension JSONValue {
+  fileprivate func extractSubschema(using context: KeywordContext) -> Schema {
+    (try? Schema(
+      rawSchema: self,
+      location: context.location,
+      context: context.context,
+      baseURI: context.uri
+    ))
+      ?? BooleanSchema(schemaValue: true, location: context.location, context: context.context)
+      .asSchema()
   }
 }
 
@@ -797,8 +953,7 @@ struct ValidationResultBuilder {
     } else {
       if let resultErrors = result.errors {
         errors.append(contentsOf: resultErrors)
-      }
-      else {
+      } else {
         errors.append(
           .init(
             keyword: type(of: keyword).name,

@@ -1,22 +1,34 @@
 import Foundation
-@testable import JSONSchema2
 import Testing
+
+@testable import JSONSchema2
 
 @Suite(.serialized)
 struct JSONSchemaTestSuite {
-  static let fileLoader = FileLoader<[JSONSchemaTest]>(subdirectory: "JSON-Schema-Test-Suite/tests/draft2020-12")
+  static let fileLoader = FileLoader<[JSONSchemaTest]>(
+    subdirectory: "JSON-Schema-Test-Suite/tests/draft2020-12"
+  )
 
   static let unsupportedFilePaths: [String] = [
-    "dynamicRef.json",
+    "dynamicRef.json"
   ]
 
   static let unsupportedTests: [(path: String, description: String, reason: String)] = [
     ("defs.json", "validate definition against metaschema", "Metaschema uses dynamic references"),
-    ("unevaluatedItems.json", "unevaluatedItems with $dynamicRef", "Dynamic refs not fully supported"),
-    ("unevaluatedProperies.json", "unevaluatedProperties with $dynamicRef", "Dynamic refs not fully supported"),
+    (
+      "unevaluatedItems.json", "unevaluatedItems with $dynamicRef",
+      "Dynamic refs not fully supported"
+    ),
+    (
+      "unevaluatedProperies.json", "unevaluatedProperties with $dynamicRef",
+      "Dynamic refs not fully supported"
+    ),
     ("refRemote.json", "remote HTTP ref with different URN $id", "URN support incomplete"),
     ("refRemote.json", "remote HTTP ref with nested absolute ref", "URN support incomplete"),
-    ("vocabulary.json", "schema that uses custom metaschema with with no validation vocabulary", "Vocabulary not supported yet")
+    (
+      "vocabulary.json", "schema that uses custom metaschema with with no validation vocabulary",
+      "Vocabulary not supported yet"
+    ),
   ]
 
   static let flattenedArguments: [(schemaTest: JSONSchemaTest, path: URL)] = {
@@ -31,12 +43,18 @@ struct JSONSchemaTestSuite {
 
   @Test(arguments: flattenedArguments)
   func schemaTest(_ schemaTest: JSONSchemaTest, path: URL) throws {
-    guard !Self.unsupportedTests.contains(where: { $0.description == schemaTest.description }) else {
+    guard !Self.unsupportedTests.contains(where: { $0.description == schemaTest.description })
+    else {
       return
     }
 
     for testCase in schemaTest.tests {
-      let schema = try #require(try Schema(rawSchema: schemaTest.schema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
+      let schema = try #require(
+        try Schema(
+          rawSchema: schemaTest.schema,
+          context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)
+        )
+      )
       let validationResult = schema.validate(testCase.data)
 
       let comment: () -> Testing.Comment = {
@@ -69,25 +87,25 @@ struct JSONSchemaTestSuite {
     }
   }
 
-// This is dynamic ref related
-//  @Test func debugger() throws {
-//    let testSchema = """
-//      {
-//          "$schema": "https://json-schema.org/draft/2020-12/schema",
-//          "$ref": "https://json-schema.org/draft/2020-12/schema"
-//      }
-//      """
-//
-//    let testCase = """
-//      {"$defs": {"foo": {"type": 1}}}
-//      """
-//
-//    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
-//    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
-//    let result = try #require(try schema.validate(instance: testCase))
-//    dump(result)
-//    #expect((result.valid) == false, "\(result)")
-//  }
+  // This is dynamic ref related
+  //  @Test func debugger() throws {
+  //    let testSchema = """
+  //      {
+  //          "$schema": "https://json-schema.org/draft/2020-12/schema",
+  //          "$ref": "https://json-schema.org/draft/2020-12/schema"
+  //      }
+  //      """
+  //
+  //    let testCase = """
+  //      {"$defs": {"foo": {"type": 1}}}
+  //      """
+  //
+  //    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
+  //    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
+  //    let result = try #require(try schema.validate(instance: testCase))
+  //    dump(result)
+  //    #expect((result.valid) == false, "\(result)")
+  //  }
 }
 
 struct JSONSchemaTest: Sendable, Codable {

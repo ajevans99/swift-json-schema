@@ -1,7 +1,8 @@
 /// Configure composition of JSON schemas. Keywords correspond to boolean algebra concepts AND, OR, XOR, and NOT.
 ///
 /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/combining)
-public indirect enum CompositionOptions: Equatable, Sendable { /// To validate against `allOf`, the given data must be valid against all of the given subschemas.
+public indirect enum CompositionOptions: Equatable, Sendable {
+  /// To validate against `allOf`, the given data must be valid against all of the given subschemas.
   /// [JSON Schema Reference](https://json-schema.org/understanding-json-schema/reference/combining#allOf)
   case allOf([Schema])
 

@@ -37,7 +37,7 @@ public enum JSONValue: Hashable, Equatable, Sendable {
     }
   }
 
-  public static func ==(lhs: JSONValue, rhs: JSONValue) -> Bool {
+  public static func == (lhs: JSONValue, rhs: JSONValue) -> Bool {
     switch (lhs, rhs) {
     case (.string(let lhsValue), .string(let rhsValue)):
       return lhsValue == rhsValue

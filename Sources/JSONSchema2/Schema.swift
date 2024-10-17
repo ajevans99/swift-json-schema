@@ -1,5 +1,5 @@
-@_exported import JSONSchema
 import Foundation
+@_exported import JSONSchema
 
 public struct Schema: ValidatableSchema {
   let schema: any ValidatableSchema
@@ -48,8 +48,13 @@ public struct Schema: ValidatableSchema {
     schema.validate(instance, at: location)
   }
 
-  func validate(_ instance: JSONValue, at location: JSONPointer, annotations: inout AnnotationContainer) -> ValidationResult {
-    (schema as? ObjectSchema)?.validate(instance, at: location, annotations: &annotations) ?? schema.validate(instance, at: location)
+  func validate(
+    _ instance: JSONValue,
+    at location: JSONPointer,
+    annotations: inout AnnotationContainer
+  ) -> ValidationResult {
+    (schema as? ObjectSchema)?.validate(instance, at: location, annotations: &annotations)
+      ?? schema.validate(instance, at: location)
   }
 }
 
@@ -59,11 +64,20 @@ struct BooleanSchema: ValidatableSchema {
   let context: Context
 
   func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
-    return ValidationResult(
+    ValidationResult(
       valid: schemaValue,
       keywordLocation: self.location,
       instanceLocation: location,
-      errors: schemaValue ? [] : [.init(keyword: "boolean", message: "", keywordLocation: self.location, instanceLocation: location)]
+      errors: schemaValue
+        ? []
+        : [
+          .init(
+            keyword: "boolean",
+            message: "",
+            keywordLocation: self.location,
+            instanceLocation: location
+          )
+        ]
     )
   }
 
@@ -137,14 +151,24 @@ struct ObjectSchema: ValidatableSchema {
     return validate(instance, at: location, annotations: &annotations)
   }
 
-  public func validate(_ instance: JSONValue, at location: JSONPointer, annotations: inout AnnotationContainer) -> ValidationResult {
+  public func validate(
+    _ instance: JSONValue,
+    at location: JSONPointer,
+    annotations: inout AnnotationContainer
+  ) -> ValidationResult {
     var errors: [ValidationError] = []
 
     for keyword in keywords {
       do throws(ValidationIssue) {
         switch keyword {
         case let reference as any ReferenceKeyword:
-          try reference.validate(instance, at: location, using: &annotations, with: context, baseURI: uri)
+          try reference.validate(
+            instance,
+            at: location,
+            using: &annotations,
+            with: context,
+            baseURI: uri
+          )
         case let applicator as any ApplicatorKeyword:
           try applicator.validate(instance, at: location, using: &annotations, with: context)
         case let assertion as any AssertionKeyword:

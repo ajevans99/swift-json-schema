@@ -1,7 +1,7 @@
-@testable import JSONSchema2
-
 import Foundation
 import Testing
+
+@testable import JSONSchema2
 
 struct KeywordTests {
   struct AssertionKeywords {
@@ -9,7 +9,7 @@ struct KeywordTests {
       (JSONValue.string("hello"), true),
       (JSONValue.boolean(true), false),
       (JSONValue.number(1), false),
-      (JSONValue.null, false)
+      (JSONValue.null, false),
     ])
     func singleType(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = "string"
@@ -31,7 +31,7 @@ struct KeywordTests {
       (JSONValue.string("hello"), true),
       (JSONValue.boolean(true), true),
       (JSONValue.number(1), false),
-      (JSONValue.null, false)
+      (JSONValue.null, false),
     ])
     func arrayType(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = ["string", "boolean"]
@@ -54,7 +54,7 @@ struct KeywordTests {
       (JSONValue.string("world"), false),
       (JSONValue.boolean(true), false),
       (JSONValue.number(1), true),
-      (JSONValue.null, false)
+      (JSONValue.null, false),
     ])
     func enumKeyword(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = ["hello", 1]
@@ -77,7 +77,7 @@ struct KeywordTests {
       (JSONValue.string("world"), false),
       (JSONValue.boolean(true), false),
       (JSONValue.number(1), false),
-      (JSONValue.null, false)
+      (JSONValue.null, false),
     ])
     func const(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = "hello"
@@ -102,7 +102,7 @@ struct KeywordTests {
       (JSONValue.number(4), true),
       (JSONValue.number(5), false),
       (JSONValue.string("2"), true),
-      (JSONValue.null, true)
+      (JSONValue.null, true),
     ])
     func multipleOf(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 2
@@ -126,7 +126,7 @@ struct KeywordTests {
       (JSONValue.integer(5), true),
       (JSONValue.integer(10), false),
       (JSONValue.string("5"), true),
-      (JSONValue.null, true)
+      (JSONValue.null, true),
     ])
     func maximum(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 5
@@ -150,7 +150,7 @@ struct KeywordTests {
       (JSONValue.integer(4), true),
       (JSONValue.integer(5), false),
       (JSONValue.string("4"), true),
-      (JSONValue.null, true)
+      (JSONValue.null, true),
     ])
     func exclusiveMaximum(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 5
@@ -174,7 +174,7 @@ struct KeywordTests {
       (JSONValue.integer(5), true),
       (JSONValue.integer(0), false),
       (JSONValue.string("5"), true),
-      (JSONValue.null, true)
+      (JSONValue.null, true),
     ])
     func minimum(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 5
@@ -198,7 +198,7 @@ struct KeywordTests {
       (JSONValue.integer(6), true),
       (JSONValue.integer(5), false),
       (JSONValue.string("6"), true),
-      (JSONValue.null, true)
+      (JSONValue.null, true),
     ])
     func exclusiveMinimum(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 5
@@ -222,7 +222,7 @@ struct KeywordTests {
       (JSONValue.string("hello"), true),
       (JSONValue.string("hello world"), false),
       (JSONValue.number(123), true),
-      (JSONValue.null, true)
+      (JSONValue.null, true),
     ])
     func maxLength(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 5
@@ -244,7 +244,7 @@ struct KeywordTests {
       (JSONValue.string("hello"), true),
       (JSONValue.string("hi"), false),
       (JSONValue.number(123), true),
-      (JSONValue.null, true)
+      (JSONValue.null, true),
     ])
     func minLength(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 3
@@ -266,7 +266,7 @@ struct KeywordTests {
       (JSONValue.string("hello123"), true),
       (JSONValue.string("hello"), false),
       (JSONValue.number(123), true),
-      (JSONValue.null, true)
+      (JSONValue.null, true),
     ])
     func pattern(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = "\\d"
@@ -289,7 +289,7 @@ struct KeywordTests {
     @Test(arguments: [
       (JSONValue.array([1, 2, 3]), true),
       (JSONValue.array([1, 2, 3, 4, 5]), false),
-      (JSONValue.string("not an array"), true)
+      (JSONValue.string("not an array"), true),
     ])
     func maxItems(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 3
@@ -310,7 +310,7 @@ struct KeywordTests {
     @Test(arguments: [
       (JSONValue.array([1, 2, 3]), true),
       (JSONValue.array([1]), false),
-      (JSONValue.string("not an array"), true)
+      (JSONValue.string("not an array"), true),
     ])
     func minItems(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 2
@@ -331,7 +331,7 @@ struct KeywordTests {
     @Test(arguments: [
       (JSONValue.array([1, 2, 3]), true),
       (JSONValue.array([1, 1, 2]), false),
-      (JSONValue.string("not an array"), true)
+      (JSONValue.string("not an array"), true),
     ])
     func uniqueItems(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = true
@@ -355,9 +355,13 @@ struct KeywordTests {
       (JSONValue.string("not an array"), .everyIndex, true),
       (JSONValue.array([1, 2, 3]), .indicies([0, 2]), true),
       (JSONValue.array([1, 2, 3, 4, 5]), .indicies([0, 1, 2, 3]), false),
-      (JSONValue.string("not an array"), .indicies([0, 2]), true)
+      (JSONValue.string("not an array"), .indicies([0, 2]), true),
     ])
-    func maxContains(instance: JSONValue, containsAnnotation: Keywords.Contains.ContainsAnnotationValue, isValid: Bool) {
+    func maxContains(
+      instance: JSONValue,
+      containsAnnotation: Keywords.Contains.ContainsAnnotationValue,
+      isValid: Bool
+    ) {
       let schemaValue: JSONValue = 3
       let annotations = AnnotationContainer()
         .applying(containsAnnotation, to: Keywords.Contains.self)
@@ -381,9 +385,13 @@ struct KeywordTests {
       (JSONValue.array([1, 2, 3]), .indicies([0, 2]), true),
       (JSONValue.array([1, 2, 3, 4, 5]), .indicies([0, 1, 2, 3]), true),
       (JSONValue.array([1, 2, 3, 4, 5]), .indicies([3]), false),
-      (JSONValue.string("not an array"), .indicies([0, 2]), true)
+      (JSONValue.string("not an array"), .indicies([0, 2]), true),
     ])
-    func minContains(instance: JSONValue, containsAnnotation: Keywords.Contains.ContainsAnnotationValue, isValid: Bool) {
+    func minContains(
+      instance: JSONValue,
+      containsAnnotation: Keywords.Contains.ContainsAnnotationValue,
+      isValid: Bool
+    ) {
       let schemaValue: JSONValue = 2
       let annotations = AnnotationContainer()
         .applying(containsAnnotation, to: Keywords.Contains.self)
@@ -403,7 +411,7 @@ struct KeywordTests {
     @Test(arguments: [
       (JSONValue.object(["a": 1, "b": 2]), true),
       (JSONValue.object(["a": 1, "b": 2, "c": 3]), false),
-      (JSONValue.string("not an object"), true)
+      (JSONValue.string("not an object"), true),
     ])
     func maxProperties(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 2
@@ -424,7 +432,7 @@ struct KeywordTests {
     @Test(arguments: [
       (JSONValue.object(["a": 1, "b": 2]), true),
       (JSONValue.object(["a": 1]), false),
-      (JSONValue.string("not an object"), true)
+      (JSONValue.string("not an object"), true),
     ])
     func minProperties(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = 2
@@ -446,7 +454,7 @@ struct KeywordTests {
       (JSONValue.object(["a": 1, "b": 2]), true),
       (JSONValue.object(["a": 1]), false),
       (JSONValue.object(["a": 1, "b": 2, "c": 3]), true),
-      (JSONValue.string("not an object"), true)
+      (JSONValue.string("not an object"), true),
     ])
     func required(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = ["a", "b"]
@@ -468,7 +476,7 @@ struct KeywordTests {
       (JSONValue.object(["a": 1, "b": 2]), true),
       (JSONValue.object(["a": 1]), false),
       (JSONValue.object(["a": 1, "b": 2, "c": 3]), true),
-      (JSONValue.string("not an object"), true)
+      (JSONValue.string("not an object"), true),
     ])
     func dependentRequired(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = ["a": ["b"]]
@@ -492,21 +500,28 @@ struct KeywordTests {
     // MARK: - Arrays
 
     @Test(arguments: [
-      (JSONValue.array([1, "two", 3.0]), Keywords.PrefixItems.PrefixItemsAnnoationValue.everyIndex, true),
+      (
+        JSONValue.array([1, "two", 3.0]), Keywords.PrefixItems.PrefixItemsAnnoationValue.everyIndex,
+        true
+      ),
       (JSONValue.array([1, "two", 3.0, true]), .largestIndex(2), true),
       (JSONValue.array([1, 2, 3]), nil, false),
       (JSONValue.string("not an array"), nil, true),
     ])
-    func prefixItems(instance: JSONValue, expectedAnnotation: Keywords.PrefixItems.PrefixItemsAnnoationValue?, isValid: Bool) {
+    func prefixItems(
+      instance: JSONValue,
+      expectedAnnotation: Keywords.PrefixItems.PrefixItemsAnnoationValue?,
+      isValid: Bool
+    ) {
       let schemaValue: JSONValue = [
         ["type": "integer"],
         ["type": "string"],
-        ["type": "number"]
+        ["type": "number"],
       ]
       let context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
       let keyword = Keywords.PrefixItems(value: schemaValue)
-      
+
       if isValid {
         #expect(throws: Never.self, "\(instance)") {
           try keyword.validate(instance, at: .init(), using: &annotations, with: context)
@@ -516,24 +531,34 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: &annotations, with: context)
         }
       }
-      #expect(annotations.annotation(for: Keywords.PrefixItems.self, at: .init())?.value == expectedAnnotation)
+      #expect(
+        annotations.annotation(for: Keywords.PrefixItems.self, at: .init())?.value
+          == expectedAnnotation
+      )
     }
-    
+
     @Test(arguments: [
-      (JSONValue.array(["one", "two", 3]), Keywords.PrefixItems.PrefixItemsAnnoationValue.largestIndex(1), true),
+      (
+        JSONValue.array(["one", "two", 3]),
+        Keywords.PrefixItems.PrefixItemsAnnoationValue.largestIndex(1), true
+      ),
       (JSONValue.array(["one", "two", "three"]), .largestIndex(1), false),
       (JSONValue.array(["one", "two", "three"]), .everyIndex, true),
       (JSONValue.array([1, "two", 3.0]), nil, false),
       (JSONValue.array([1, 2, 3]), nil, true),
       (JSONValue.string("not an array"), nil, true),
     ])
-    func items(instance: JSONValue, prefixItemsAnnotaion: Keywords.PrefixItems.PrefixItemsAnnoationValue?, isValid: Bool) {
+    func items(
+      instance: JSONValue,
+      prefixItemsAnnotaion: Keywords.PrefixItems.PrefixItemsAnnoationValue?,
+      isValid: Bool
+    ) {
       let schemaValue: JSONValue = ["type": "integer"]
       let context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
         .applying(prefixItemsAnnotaion, to: Keywords.PrefixItems.self)
       let keyword = Keywords.Items(value: schemaValue)
-      
+
       if isValid {
         #expect(throws: Never.self, "\(instance)") {
           try keyword.validate(instance, at: .init(), using: &annotations, with: context)
@@ -546,19 +571,23 @@ struct KeywordTests {
       // Nil when invalid, true when valid
       #expect(annotations.annotation(for: Keywords.Items.self, at: .init())?.value != !isValid)
     }
-    
+
     @Test(arguments: [
       (JSONValue.array([1, 2, 3]), Keywords.Contains.ContainsAnnotationValue.everyIndex, true),
       (JSONValue.array([1, "two", 3]), .indicies([0, 2]), true),
       (JSONValue.array(["one", "two", "three"]), nil, false),
       (JSONValue.string("not an array"), nil, true),
     ])
-    func contains(instance: JSONValue, expectedAnnotation: Keywords.Contains.ContainsAnnotationValue?, isValid: Bool) {
+    func contains(
+      instance: JSONValue,
+      expectedAnnotation: Keywords.Contains.ContainsAnnotationValue?,
+      isValid: Bool
+    ) {
       let schemaValue: JSONValue = ["type": "integer"]
       let context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
       let keyword = Keywords.Contains(value: schemaValue)
-      
+
       if isValid {
         #expect(throws: Never.self) {
           try keyword.validate(instance, at: .init(), using: &annotations, with: context)
@@ -568,7 +597,10 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: &annotations, with: context)
         }
       }
-      #expect(annotations.annotation(for: Keywords.Contains.self, at: .init())?.value == expectedAnnotation)
+      #expect(
+        annotations.annotation(for: Keywords.Contains.self, at: .init())?.value
+          == expectedAnnotation
+      )
     }
 
     // MARK: - Objects
@@ -579,12 +611,12 @@ struct KeywordTests {
       (JSONValue.object(["a": 1]), Set(["a"]), true),
       (JSONValue.object(["b": 2]), Set(["b"]), true),
       (JSONValue.object(["c": 3]), Set([]), true),
-      (JSONValue.string("not an object"), nil, true)
+      (JSONValue.string("not an object"), nil, true),
     ])
     func properties(instance: JSONValue, expectedAnnotation: Set<String>?, isValid: Bool) {
       let schemaValue: JSONValue = [
         "a": ["type": "integer"],
-        "b": ["type": "integer"]
+        "b": ["type": "integer"],
       ]
       let context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
@@ -599,7 +631,10 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: &annotations, with: context)
         }
       }
-      #expect(annotations.annotation(for: Keywords.Properties.self, at: .init())?.value == expectedAnnotation)
+      #expect(
+        annotations.annotation(for: Keywords.Properties.self, at: .init())?.value
+          == expectedAnnotation
+      )
     }
 
     @Test(arguments: [
@@ -608,12 +643,12 @@ struct KeywordTests {
       (JSONValue.object(["a1": 1]), Set(["a1"]), true),
       (JSONValue.object(["b2": 2]), Set(["b2"]), true),
       (JSONValue.object(["c3": 3]), Set([]), true),
-      (JSONValue.string("not an object"), nil, true)
+      (JSONValue.string("not an object"), nil, true),
     ])
     func patternProperties(instance: JSONValue, expectedAnnotation: Set<String>?, isValid: Bool) {
       let schemaValue: JSONValue = [
         "a\\d": ["type": "integer"],
-        "b\\d": ["type": "integer"]
+        "b\\d": ["type": "integer"],
       ]
       let context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
@@ -628,7 +663,10 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: &annotations, with: context)
         }
       }
-      #expect(annotations.annotation(for: Keywords.PatternProperties.self, at: .init())?.value == expectedAnnotation)
+      #expect(
+        annotations.annotation(for: Keywords.PatternProperties.self, at: .init())?.value
+          == expectedAnnotation
+      )
     }
 
     @Test(arguments: [
@@ -636,9 +674,10 @@ struct KeywordTests {
       (JSONValue.object(["a": 1, "b": 2, "c": "string"]), nil, false),
       (JSONValue.object(["a": 1, "b": 2]), Set([]), true),
       (JSONValue.object(["c": 3]), Set(["c"]), true),
-      (JSONValue.string("not an object"), nil, true)
+      (JSONValue.string("not an object"), nil, true),
     ])
-    func additionalProperties(instance: JSONValue, expectedAnnotation: Set<String>?, isValid: Bool) {
+    func additionalProperties(instance: JSONValue, expectedAnnotation: Set<String>?, isValid: Bool)
+    {
       let schemaValue: JSONValue = ["type": "integer"]
       let context = Context(dialect: .draft2020_12)
       var annotations = AnnotationContainer()
@@ -655,7 +694,10 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: &annotations, with: context)
         }
       }
-      #expect(annotations.annotation(for: Keywords.AdditionalProperties.self, at: .init())?.value == expectedAnnotation)
+      #expect(
+        annotations.annotation(for: Keywords.AdditionalProperties.self, at: .init())?.value
+          == expectedAnnotation
+      )
     }
 
     @Test(arguments: [
@@ -663,7 +705,7 @@ struct KeywordTests {
       (JSONValue.object(["a": 1, "b": "invalid"]), true),
       (JSONValue.object(["a": 1, "b": 2, "c": 3]), true),
       (JSONValue.object(["a": 1, "0": 2]), false),
-      (JSONValue.string("not an object"), true)
+      (JSONValue.string("not an object"), true),
     ])
     func propertyNames(instance: JSONValue, isValid: Bool) {
       let schemaValue: JSONValue = ["pattern": "^[a-z]+$"]
@@ -685,7 +727,10 @@ struct KeywordTests {
 }
 
 extension AnnotationContainer {
-  func applying<K: AnnotationProducingKeyword>(_ value: K.AnnotationValue?, to keywordType: K.Type) -> Self {
+  func applying<K: AnnotationProducingKeyword>(
+    _ value: K.AnnotationValue?,
+    to keywordType: K.Type
+  ) -> Self {
     guard let value else { return self }
 
     var copy = self
@@ -693,7 +738,10 @@ extension AnnotationContainer {
     return copy
   }
 
-  mutating func apply<K: AnnotationProducingKeyword>(_ value: K.AnnotationValue, to keywordType: K.Type) {
+  mutating func apply<K: AnnotationProducingKeyword>(
+    _ value: K.AnnotationValue,
+    to keywordType: K.Type
+  ) {
     self.insert(
       Annotation<K>(
         keyword: keywordType.name,
@@ -706,7 +754,14 @@ extension AnnotationContainer {
 }
 
 extension Keyword {
-  init(value: JSONValue, location: JSONPointer = .init(), context: Context = .init(dialect: .draft2020_12)) {
-    self.init(value: value, context: .init(location: location, context: context, uri: URL(fileURLWithPath: #file)))
+  init(
+    value: JSONValue,
+    location: JSONPointer = .init(),
+    context: Context = .init(dialect: .draft2020_12)
+  ) {
+    self.init(
+      value: value,
+      context: .init(location: location, context: context, uri: URL(fileURLWithPath: #file))
+    )
   }
 }

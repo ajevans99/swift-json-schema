@@ -5,7 +5,13 @@ struct Annotation<Keyword: AnnotationProducingKeyword>: Sendable {
   let absoluteSchemaLocation: JSONPointer?
   let value: Keyword.AnnotationValue
 
-  init(keyword: KeywordIdentifier, instanceLocation: JSONPointer, schemaLocation: JSONPointer, absoluteSchemaLocation: JSONPointer? = nil, value: Keyword.AnnotationValue) {
+  init(
+    keyword: KeywordIdentifier,
+    instanceLocation: JSONPointer,
+    schemaLocation: JSONPointer,
+    absoluteSchemaLocation: JSONPointer? = nil,
+    value: Keyword.AnnotationValue
+  ) {
     self.keyword = keyword
     self.instanceLocation = instanceLocation
     self.schemaLocation = schemaLocation

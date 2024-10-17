@@ -55,7 +55,7 @@ extension ValidationIssue {
     instanceLocation: JSONPointer
   ) -> ValidationError {
     switch self {
-    case let .keywordFailure(keyword, errors):
+    case .keywordFailure(let keyword, let errors):
       .init(
         keyword: keyword,
         message: "Validation failed for keyword '\(keyword)'",
@@ -63,7 +63,7 @@ extension ValidationIssue {
         instanceLocation: instanceLocation,
         errors: errors
       )
-    case let .referenceValidationFailure(ref, errors):
+    case .referenceValidationFailure(let ref, let errors):
       .init(
         keyword: keyword,
         message: "Validation failed during reference validation '\(ref)'",
@@ -85,7 +85,7 @@ extension ValidationIssue {
 extension ValidationIssue: CustomStringConvertible {
   public var description: String {
     switch self {
-      // General
+    // General
     case .typeMismatch:
       return "Type mismatch: the instance does not match the expected type."
     case .notEnumCase:
@@ -93,7 +93,7 @@ extension ValidationIssue: CustomStringConvertible {
     case .constantMismatch:
       return "The instance does not match the constant value specified in 'const'."
 
-      // Number
+    // Number
     case .notMultipleOf:
       return "The number is not a multiple of the specified 'multipleOf' value."
     case .exceedsMaximum:
@@ -105,7 +105,7 @@ extension ValidationIssue: CustomStringConvertible {
     case .belowExclusiveMinimum:
       return "The number is below the specified 'exclusiveMinimum' value."
 
-      // String
+    // String
     case .exceedsMaxLength:
       return "The string length exceeds the specified 'maxLength'."
     case .belowMinLength:
@@ -113,7 +113,7 @@ extension ValidationIssue: CustomStringConvertible {
     case .patternMismatch:
       return "The string does not match the specified 'pattern'."
 
-      // Arrays
+    // Arrays
     case .exceedsMaxItems:
       return "The array has more items than the specified 'maxItems'."
     case .belowMinItems:
@@ -123,18 +123,19 @@ extension ValidationIssue: CustomStringConvertible {
     case .containsInsufficientMatches:
       return "The array does not contain enough items matching the 'contains' schema."
     case .containsExcessiveMatches:
-      return "The array contains more items matching the 'contains' schema than allowed by 'maxContains'."
+      return
+        "The array contains more items matching the 'contains' schema than allowed by 'maxContains'."
     case .invalidItem:
       return "An item in the array failed to validate against the schema."
 
-      // Objects
+    // Objects
     case .exceedsMaxProperties:
       return "The object has more properties than the specified 'maxProperties'."
     case .belowMinProperties:
       return "The object has fewer properties than the specified 'minProperties'."
-    case let .missingRequiredProperty(key):
+    case .missingRequiredProperty(let key):
       return "The required property '\(key)' is missing."
-    case let .missingDependentProperty(key, dependentOn):
+    case .missingDependentProperty(let key, let dependentOn):
       return "Property '\(key)' is missing, which is required when '\(dependentOn)' is present."
     case .invalidProperty:
       return "A property in the object failed to validate against the schema."
@@ -143,7 +144,7 @@ extension ValidationIssue: CustomStringConvertible {
     case .invalidAdditionalProperty:
       return "An additional property is not allowed by 'additionalProperties'."
 
-      // Logical
+    // Logical
     case .allOfFailed:
       return "The instance does not satisfy all of the schemas specified in 'allOf'."
     case .anyOfFailed:
@@ -153,24 +154,27 @@ extension ValidationIssue: CustomStringConvertible {
     case .notFailed:
       return "The instance should not match the schema specified in 'not'."
 
-      // Conditional
+    // Conditional
     case .conditionalFailed:
-      return "The instance failed to validate against the 'if' condition and corresponding 'then' or 'else' schemas."
+      return
+        "The instance failed to validate against the 'if' condition and corresponding 'then' or 'else' schemas."
     case .invalidDependentSchema:
-      return "The instance failed to validate against a dependent schema specified in 'dependentSchemas'."
+      return
+        "The instance failed to validate against a dependent schema specified in 'dependentSchemas'."
     case .unevaluatedItemsFailed:
       return "The unevaluated items in the array do not match the 'unevaluatedItems' schema."
     case .unevaluatedPropertyFailed:
-      return "The unevaluated properties in the object do not match the 'unevaluatedProperties' schema."
+      return
+        "The unevaluated properties in the object do not match the 'unevaluatedProperties' schema."
 
-      // Reference
-    case let .invalidReference(ref):
+    // Reference
+    case .invalidReference(let ref):
       return "Invalid reference: \(ref)"
-    case let .referenceValidationFailure(ref, _):
+    case .referenceValidationFailure(let ref, _):
       return "Validation failed for reference '\(ref)'."
 
-      // General
-    case let .keywordFailure(keyword, _):
+    // General
+    case .keywordFailure(let keyword, _):
       return "Validation failed for keyword '\(keyword)'."
     }
   }

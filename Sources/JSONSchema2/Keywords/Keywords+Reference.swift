@@ -1,7 +1,13 @@
 import Foundation
 
 protocol ReferenceKeyword: Keyword {
-  func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context, baseURI: URL?) throws(ValidationIssue)
+  func validate(
+    _ input: JSONValue,
+    at instanceLocation: JSONPointer,
+    using annotations: inout AnnotationContainer,
+    with context: Context,
+    baseURI: URL?
+  ) throws(ValidationIssue)
 }
 
 extension Keywords {
@@ -25,7 +31,13 @@ extension Keywords {
       )
     }
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context, baseURI: URL?) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context,
+      baseURI: URL?
+    ) throws(ValidationIssue) {
       let schema: Schema
       do {
         schema = try resolver.resolveSchema(for: referenceURI, isDynamic: false)
@@ -38,7 +50,10 @@ extension Keywords {
       var refAnnotations = AnnotationContainer()
       let result = schema.validate(input, at: instanceLocation, annotations: &refAnnotations)
       if !result.valid {
-        throw ValidationIssue.referenceValidationFailure(ref: referenceURI, errors: result.errors ?? [])
+        throw ValidationIssue.referenceValidationFailure(
+          ref: referenceURI,
+          errors: result.errors ?? []
+        )
       }
       annotations.merge(refAnnotations)
     }
@@ -64,7 +79,13 @@ extension Keywords {
       )
     }
 
-    func validate(_ input: JSONValue, at instanceLocation: JSONPointer, using annotations: inout AnnotationContainer, with context: Context, baseURI: URL?) throws(ValidationIssue) {
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      with context: Context,
+      baseURI: URL?
+    ) throws(ValidationIssue) {
       let schema: Schema
       do {
         schema = try resolver.resolveSchema(for: referenceURI, isDynamic: true)
@@ -77,7 +98,10 @@ extension Keywords {
       var refAnnotations = AnnotationContainer()
       let result = schema.validate(input, at: instanceLocation, annotations: &refAnnotations)
       if !result.valid {
-        throw ValidationIssue.referenceValidationFailure(ref: referenceURI, errors: result.errors ?? [])
+        throw ValidationIssue.referenceValidationFailure(
+          ref: referenceURI,
+          errors: result.errors ?? []
+        )
       }
       annotations.merge(refAnnotations)
     }
@@ -88,8 +112,8 @@ extension URL {
   /// Returns the URL without the fragment part (everything before the `#`)
   var withoutFragment: URL? {
     var components = URLComponents(url: self, resolvingAgainstBaseURL: true)
-    components?.fragment = nil // Remove the fragment part
-    return components?.url // Rebuild the URL without the fragment
+    components?.fragment = nil  // Remove the fragment part
+    return components?.url  // Rebuild the URL without the fragment
   }
 }
 
@@ -127,12 +151,17 @@ struct ReferenceResolver {
     let baseSchema = try fetchSchema(for: referenceURL, context: context)
 
     if let anchorLocation = context.anchors[refURL] {
-      return try resolveSchemaFragment(for: refURL, pointer: anchorLocation, in: baseSchema) ?? baseSchema
+      return try resolveSchemaFragment(for: refURL, pointer: anchorLocation, in: baseSchema)
+        ?? baseSchema
     }
 
     // If there's a fragment, resolve it within the base schema
     if let fragment, !fragment.isEmpty {
-      if let schemaAfterFragment = try resolveSchemaFragment(for: refURL, fragment: fragment, in: baseSchema) {
+      if let schemaAfterFragment = try resolveSchemaFragment(
+        for: refURL,
+        fragment: fragment,
+        in: baseSchema
+      ) {
         return schemaAfterFragment
       }
     }
@@ -159,16 +188,28 @@ struct ReferenceResolver {
     // Attempt to find the schema in the identifier registry
     if let schemaLocation = context.identifierRegistry[referenceURL] {
       guard let value = context.rootRawSchema?.value(at: schemaLocation) else {
-        throw ValidationIssue.invalidReference("Could not retrieve subschema from $id '\(referenceURL)'")
+        throw ValidationIssue.invalidReference(
+          "Could not retrieve subschema from $id '\(referenceURL)'"
+        )
       }
-      let schema = try Schema(rawSchema: value, location: schemaLocation, context: context, baseURI: baseURI)
+      let schema = try Schema(
+        rawSchema: value,
+        location: schemaLocation,
+        context: context,
+        baseURI: baseURI
+      )
       context.schemaCache[referenceURL.absoluteString] = schema
       return schema
     }
 
     // Attempt to load remote schema
     if let rawSchema = context.remoteSchemaStorage[referenceURL.absoluteString] {
-      let schema = try Schema(rawSchema: rawSchema, location: location, context: context, baseURI: referenceURL)
+      let schema = try Schema(
+        rawSchema: rawSchema,
+        location: location,
+        context: context,
+        baseURI: referenceURL
+      )
       // Try to use calculated uri, this helps when remote id has a different $id, meaning referenceURL != uri
       let uri = (schema.schema as? ObjectSchema)?.uri?.absoluteString ?? referenceURL.absoluteString
       context.schemaCache[uri] = schema
@@ -178,34 +219,59 @@ struct ReferenceResolver {
     // FIXME: This is a hack because Foundation URL and fragments do not play nice together.
     // For example, `urn:uuid:deadbeef-1234-00ff-ff00-4321feebdaed` relative to `#/$defs/bar`
     // becomes `urn://#/$defs/bar` in `refURL`
-    if referenceURL.scheme == "urn" && (referenceURI.hasPrefix("#") || referenceURI.hasPrefix(baseURI.absoluteString)) {
+    if referenceURL.scheme == "urn"
+      && (referenceURI.hasPrefix("#") || referenceURI.hasPrefix(baseURI.absoluteString))
+    {
       guard let pointer = context.identifierRegistry[baseURI] else {
         throw ValidationIssue.invalidReference("Could not find identifier for URN workaround")
       }
       guard let value = context.rootRawSchema?.value(at: pointer) else {
-        throw ValidationIssue.invalidReference("Could not retrieve subschema from $id '\(referenceURL)' (in URN workaround)")
+        throw ValidationIssue.invalidReference(
+          "Could not retrieve subschema from $id '\(referenceURL)' (in URN workaround)"
+        )
       }
-      let schema = try Schema(rawSchema: value, location: location, context: context, baseURI: baseURI)
+      let schema = try Schema(
+        rawSchema: value,
+        location: location,
+        context: context,
+        baseURI: baseURI
+      )
       context.schemaCache[referenceURL.absoluteString] = schema
       return schema
     }
 
     // If all else fails, throw an error
-    throw ValidationIssue.invalidReference("Unable to resolve $ref '\(referenceURL.absoluteString)'")
+    throw ValidationIssue.invalidReference(
+      "Unable to resolve $ref '\(referenceURL.absoluteString)'"
+    )
   }
 
-  private func resolveSchemaFragment(for referenceURL: URL, fragment: String, in schema: Schema) throws -> Schema? {
+  private func resolveSchemaFragment(
+    for referenceURL: URL,
+    fragment: String,
+    in schema: Schema
+  ) throws -> Schema? {
     let pointer = JSONPointer(from: fragment)
     return try resolveSchemaFragment(for: referenceURL, pointer: pointer, in: schema)
   }
 
-  private func resolveSchemaFragment(for referenceURL: URL, pointer: JSONPointer, in schema: Schema) throws -> Schema? {
+  private func resolveSchemaFragment(
+    for referenceURL: URL,
+    pointer: JSONPointer,
+    in schema: Schema
+  ) throws -> Schema? {
     let adjustedPointer = pointer.relative(toBase: schema.location)
 
     guard let objectSchema = schema.schema as? ObjectSchema else { return nil }
-    guard let subRawSchema = JSONValue.object(objectSchema.schemaValue).value(at: adjustedPointer) else {
+    guard let subRawSchema = JSONValue.object(objectSchema.schemaValue).value(at: adjustedPointer)
+    else {
       return nil
     }
-    return try Schema(rawSchema: subRawSchema, location: location, context: context, baseURI: referenceURL)
+    return try Schema(
+      rawSchema: subRawSchema,
+      location: location,
+      context: context,
+      baseURI: referenceURL
+    )
   }
 }

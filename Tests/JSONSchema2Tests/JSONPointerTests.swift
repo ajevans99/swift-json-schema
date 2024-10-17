@@ -45,7 +45,7 @@ struct JSONPointerTests {
 
   @Test(arguments: [
     (JSONPointer(from: ""), exampleDocument1),
-    (JSONPointer(from: "/foo"),JSONValue.array(["bar", "baz"])),
+    (JSONPointer(from: "/foo"), JSONValue.array(["bar", "baz"])),
     ("/foo/0", "bar"), ("/", 0),
     ("/a~1b", 1),
     ("/c%d", 2),

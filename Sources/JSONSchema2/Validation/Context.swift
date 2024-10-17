@@ -28,7 +28,7 @@ public final class Context: Sendable {
   var minContainsIsZero = [JSONPointer: Bool]()
 
   /// A dictionary that stores the results of conditional validations within a schema.
-  /// 
+  ///
   /// - Key: A string representing the schema location pointer, excluding the specific
   ///   path to the "if", "else", or "then" conditions.
   /// - Value: An optional `ValidationResult` that represents the outcome of the

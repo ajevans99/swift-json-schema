@@ -1,5 +1,6 @@
 import Foundation
 
+// swift-format-ignore: AlwaysUseLowerCamelCase
 public enum Dialect: String, Hashable, Sendable {
   case draft2020_12 = "https://json-schema.org/draft/2020-12/schema"
   //  case draft2019_09
@@ -107,18 +108,30 @@ public enum Dialect: String, Hashable, Sendable {
     guard let baseURI = URL(string: "https://json-schema.org/draft/2020-12/schema") else {
       throw MetaSchemaError.invalidBaseURI
     }
-    print(Bundle.module.bundleURL)
-    guard let schemaURL = Bundle.module.url(forResource: "schema", withExtension: "json", subdirectory: "Resources/draft2020-12") else {
+
+    guard
+      let schemaURL = Bundle.module.url(
+        forResource: "schema",
+        withExtension: "json",
+        subdirectory: "Resources/draft2020-12"
+      )
+    else {
       throw MetaSchemaError.missingResource
     }
-    let metaURLs = Bundle.module.urls(forResourcesWithExtension: "json", subdirectory: "Resources/draft2020-12/meta")
-    let metaDictionary: [String: JSONValue] = try metaURLs?.reduce(into: [:]) { result, url in
-      let value = try jsonValue(from: url)
-      let uriString = "meta/\(url.lastPathComponent.replacingOccurrences(of: ".json", with: ""))"
-      if let key = URL(string: uriString, relativeTo: baseURI)?.absoluteString {
-        result[key] = value
-      }
-    } ?? [:]
+
+    let metaURLs = Bundle.module.urls(
+      forResourcesWithExtension: "json",
+      subdirectory: "Resources/draft2020-12/meta"
+    )
+    let metaDictionary: [String: JSONValue] =
+      try metaURLs?
+      .reduce(into: [:]) { result, url in
+        let value = try jsonValue(from: url)
+        let uriString = "meta/\(url.lastPathComponent.replacingOccurrences(of: ".json", with: ""))"
+        if let key = URL(string: uriString, relativeTo: baseURI)?.absoluteString {
+          result[key] = value
+        }
+      } ?? [:]
     return try Schema(
       rawSchema: try jsonValue(from: schemaURL),
       context: .init(dialect: self, remoteSchema: metaDictionary),

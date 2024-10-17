@@ -56,11 +56,20 @@ struct FileLoader<T: Decodable> {
 
 struct RemoteLoader {
   private func fetchRemoteSchemas() throws -> [String: JSONValue] {
-    guard let binDirectory = Bundle.module.url(forResource: "jsonschema_suite", withExtension: nil, subdirectory: "JSON-Schema-Test-Suite/bin") else {
+    guard
+      let binDirectory = Bundle.module.url(
+        forResource: "jsonschema_suite",
+        withExtension: nil,
+        subdirectory: "JSON-Schema-Test-Suite/bin"
+      )
+    else {
       throw NSError(domain: "Invalid Path", code: 1, userInfo: nil)
     }
 
-    let outputData = try runCommand("./jsonschema_suite remotes", at: binDirectory.deletingLastPathComponent())
+    let outputData = try runCommand(
+      "./jsonschema_suite remotes",
+      at: binDirectory.deletingLastPathComponent()
+    )
 
     let decoder = JSONDecoder()
     let remoteSchemas = try decoder.decode([String: JSONValue].self, from: outputData)

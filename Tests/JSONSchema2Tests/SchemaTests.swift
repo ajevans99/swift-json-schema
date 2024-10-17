@@ -1,18 +1,22 @@
-import Testing
 import Foundation
+import Testing
 
 @testable import JSONSchema2
 
 struct SchemaTests {
   @Test func trueBooleanSchema() throws {
     let truthy: JSONValue = .boolean(true)
-    let schema = try #require(try Schema(rawSchema: truthy, context: Context(dialect: .draft2020_12)))
+    let schema = try #require(
+      try Schema(rawSchema: truthy, context: Context(dialect: .draft2020_12))
+    )
     #expect(schema.validate(.integer(4)).valid)
   }
 
   @Test func falseBooleanSchema() throws {
     let falsy: JSONValue = .boolean(false)
-    let schema = try #require(try Schema(rawSchema: falsy, context: Context(dialect: .draft2020_12)))
+    let schema = try #require(
+      try Schema(rawSchema: falsy, context: Context(dialect: .draft2020_12))
+    )
     #expect(schema.validate(.integer(4)).valid == false)
   }
 
@@ -56,7 +60,10 @@ struct SchemaTests {
       ],
       "required": ["name", "age"],
     ]
-    let schema = try #require(try Schema(rawSchema: rawSchema, context: Context(dialect: .draft2020_12)).schema as? ObjectSchema)
+    let schema = try #require(
+      try Schema(rawSchema: rawSchema, context: Context(dialect: .draft2020_12)).schema
+        as? ObjectSchema
+    )
 
     #expect(rawSchema.object?.keys.count == schema.keywords.count)
   }
@@ -66,19 +73,21 @@ struct SchemaTests {
       "$defs": [
         "positiveInteger": [
           "type": "integer",
-          "minimum": 1
+          "minimum": 1,
         ]
       ],
       "type": "object",
       "properties": [
         "age": ["$ref": "#/$defs/positiveInteger"]
-      ]
+      ],
     ]
 
     let validInstance: JSONValue = ["age": 1]
     let invalidInstance: JSONValue = ["age": 0]
 
-    let schema = try #require(try Schema(rawSchema: rawSchema, context: Context(dialect: .draft2020_12)))
+    let schema = try #require(
+      try Schema(rawSchema: rawSchema, context: Context(dialect: .draft2020_12))
+    )
     #expect(schema.validate(validInstance).valid)
     #expect(schema.validate(invalidInstance).valid == false)
   }
@@ -88,15 +97,17 @@ struct SchemaTests {
       "type": "object",
       "properties": [
         "name": ["type": "string"],
-        "age": ["type": "integer", "minimum": 0]
-      ]
+        "age": ["type": "integer", "minimum": 0],
+      ],
     ]
 
     let instance: JSONValue = ["name": 123, "age": -5]
 
-    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12)))
+    let schema = try #require(
+      try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12))
+    )
     let result = schema.validate(instance)
-//    dump(result)
+    //    dump(result)
     #expect(result.valid == false)
     #expect(result.errors?.count == 1)
     #expect(result.annotations == nil)

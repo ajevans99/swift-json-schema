@@ -8,7 +8,11 @@ struct AnnotationContainer {
 
   public init() {}
 
-  mutating func insert<K: AnnotationProducingKeyword>(keyword: K, at instanceLocation: JSONPointer, value: K.AnnotationValue) {
+  mutating func insert<K: AnnotationProducingKeyword>(
+    keyword: K,
+    at instanceLocation: JSONPointer,
+    value: K.AnnotationValue
+  ) {
     let annotation = Annotation<K>(
       keyword: type(of: keyword).name,
       instanceLocation: instanceLocation,
@@ -31,7 +35,10 @@ struct AnnotationContainer {
     }
   }
 
-  func annotation<K: AnnotationProducingKeyword>(for keyword: K.Type, at instanceLocation: JSONPointer) -> Annotation<K>? {
+  func annotation<K: AnnotationProducingKeyword>(
+    for keyword: K.Type,
+    at instanceLocation: JSONPointer
+  ) -> Annotation<K>? {
     let key = AnnotationKey(
       keywordType: ObjectIdentifier(keyword),
       instanceLocation: instanceLocation

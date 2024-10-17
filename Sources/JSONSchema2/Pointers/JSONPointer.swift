@@ -67,10 +67,9 @@ public struct JSONPointer: Sendable, Hashable {
       return self
     }
 
-    for (selfComponent, baseComponent) in zip(self.path, base.path) {
-      if selfComponent != baseComponent {
-        return self // Return the original if paths diverge
-      }
+    for (selfComponent, baseComponent) in zip(self.path, base.path)
+    where selfComponent != baseComponent {
+      return self
     }
 
     return JSONPointer(path: Array(path.dropFirst(base.path.count)))
