@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 
-@testable import JSONSchema2
+@testable import JSONSchema
 
 struct SchemaTests {
   @Test func trueBooleanSchema() throws {
@@ -107,7 +107,6 @@ struct SchemaTests {
       try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12))
     )
     let result = schema.validate(instance)
-    //    dump(result)
     #expect(result.valid == false)
     #expect(result.errors?.count == 1)
     #expect(result.annotations == nil)
@@ -116,7 +115,6 @@ struct SchemaTests {
   @Test func metaSchema() throws {
     let metaSchema = try #require(try Dialect.draft2020_12.loadMetaSchema())
     let result = metaSchema.validate(.object(["minLength": 1]))
-    dump(result)
     #expect(result.valid == true)
   }
 }

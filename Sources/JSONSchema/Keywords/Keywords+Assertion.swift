@@ -1,4 +1,4 @@
-protocol AssertionKeyword: Keyword {
+package protocol AssertionKeyword: Keyword {
   func validate(
     _ input: JSONValue,
     at location: JSONPointer,
@@ -7,15 +7,15 @@ protocol AssertionKeyword: Keyword {
 }
 
 extension Keywords {
-  struct TypeKeyword: AssertionKeyword {
-    static let name = "type"
+  package struct TypeKeyword: AssertionKeyword {
+    package static let name = "type"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let allowedPrimitives: [JSONType]
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
 
@@ -37,7 +37,7 @@ extension Keywords {
         }
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer

@@ -19,10 +19,6 @@ let package = Package(
       targets: ["JSONSchema"]
     ),
     .library(
-      name: "JSONSchema2",
-      targets: ["JSONSchema2"]
-    ),
-    .library(
       name: "JSONSchemaBuilder",
       targets: ["JSONSchemaBuilder"]
     ),
@@ -38,23 +34,14 @@ let package = Package(
   targets: [
     // Library that defines the JSON schema related types.
     .target(
-      name: "JSONSchema"
-    ),
-    .testTarget(
-      name: "JSONSchemaTests",
-      dependencies: ["JSONSchema"]
-    ),
-
-    .target(
-      name: "JSONSchema2",
-      dependencies: ["JSONSchema"],
+      name: "JSONSchema",
       resources: [
         .copy("Resources")
       ]
     ),
     .testTarget(
-      name: "JSONSchema2Tests",
-      dependencies: ["JSONSchema2"],
+      name: "JSONSchemaTests",
+      dependencies: ["JSONSchema"],
       resources: [
         .copy("JSON-Schema-Test-Suite")
       ]

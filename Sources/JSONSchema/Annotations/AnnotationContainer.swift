@@ -1,4 +1,4 @@
-struct AnnotationContainer {
+package struct AnnotationContainer {
   struct AnnotationKey: Hashable {
     let keywordType: ObjectIdentifier
     let instanceLocation: JSONPointer
@@ -6,7 +6,7 @@ struct AnnotationContainer {
 
   private var storage: [AnnotationKey: AnyAnnotation] = [:]
 
-  public init() {}
+  package init() {}
 
   mutating func insert<K: AnnotationProducingKeyword>(
     keyword: K,

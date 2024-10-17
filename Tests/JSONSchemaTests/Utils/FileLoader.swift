@@ -1,5 +1,5 @@
 import Foundation
-import JSONSchema2
+import JSONSchema
 
 struct FileLoader<T: Decodable> {
   let subdirectory: String

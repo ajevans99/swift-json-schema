@@ -1,6 +1,6 @@
 import Testing
 
-@testable import JSONSchema2
+@testable import JSONSchema
 
 struct JSONPointerTests {
   @Test func emptyInit() {

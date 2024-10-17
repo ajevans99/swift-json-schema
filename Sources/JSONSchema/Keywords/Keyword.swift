@@ -2,7 +2,7 @@ import Foundation
 
 public typealias KeywordIdentifier = String
 
-protocol Keyword: Sendable {
+package protocol Keyword: Sendable {
   /// The name of the keyword, such as `type` or `minLength`.
   static var name: KeywordIdentifier { get }
 
@@ -12,7 +12,7 @@ protocol Keyword: Sendable {
   init(value: JSONValue, context: KeywordContext)
 }
 
-struct KeywordContext {
+package struct KeywordContext {
   let location: JSONPointer
   let context: Context
   let uri: URL

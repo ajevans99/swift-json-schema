@@ -1,5 +1,5 @@
 /// Namespace for `Keyword` definitions.
-enum Keywords {
+package enum Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-the-schema-keyword
   struct SchemaKeyword: Keyword {
     static let name = "$schema"

@@ -1,1 +1,1 @@
-import JSONSchema  //import JSONSchema2
+import JSONSchema  //import JSONSchema
