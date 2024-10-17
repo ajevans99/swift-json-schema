@@ -13,7 +13,8 @@ public final class Context: Sendable {
   var schemaCache = [String: Schema]()
 
   var anchors = [URL: JSONPointer]()
-  var dynamicAnchors = [URL: JSONPointer]()
+
+  var dynamicScopes: [[String: JSONPointer]] = []
 
   /// A dictionary that tracks whether the `minContains` constraint is effectively zero
   /// for specific schema locations.

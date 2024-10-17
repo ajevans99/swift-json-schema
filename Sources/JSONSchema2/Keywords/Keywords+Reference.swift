@@ -105,17 +105,8 @@ struct ReferenceResolver {
       throw ValidationIssue.invalidReference("Invalid reference URI: \(refURI)")
     }
 
-    // If dynamic is true, attempt to resolve using dynamic anchors
     if isDynamic {
-      if let fragment = refURL.fragment {
-        // Remove fragment to get the base URI
-        let baseRefURL = refURL.withoutFragment
-        // Try to resolve dynamic anchor
-//        if let pointer = context.resolveDynamicAnchor(fragment) {
-//          // Fetch schema at the resolved pointer
-//          return try fetchSchema(at: pointer)
-//        }
-      }
+      // TODO: Resolve dynamic anchors
     }
 
     // Fallback to regular reference resolution
