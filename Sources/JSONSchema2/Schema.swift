@@ -121,9 +121,7 @@ struct ObjectSchema: ValidatableSchema {
     var keywords = [any Keyword]()
     var processedURI = baseURI
 
-    if location.isRoot {
-      context.identifierRegistry[baseURI] = location
-    }
+    var didProcessIdentiferKeyword = false
 
     for keywordType in context.dialect.keywords where schemaValue.keys.contains(keywordType.name) {
       let value = schemaValue[keywordType.name]!
@@ -139,8 +137,13 @@ struct ObjectSchema: ValidatableSchema {
 
         if let id = identifier as? Keywords.Identifier {
           processedURI = id.processSubschema(baseURI: baseURI)
+          didProcessIdentiferKeyword = true
         }
       }
+    }
+
+    if location.isRoot && !didProcessIdentiferKeyword {
+      context.identifierRegistry[baseURI] = location
     }
 
     return (processedURI, keywords)
@@ -170,7 +173,7 @@ struct ObjectSchema: ValidatableSchema {
             baseURI: uri
           )
         case let applicator as any ApplicatorKeyword:
-          try applicator.validate(instance, at: location, using: &annotations, with: context)
+          try applicator.validate(instance, at: location, using: &annotations)
         case let assertion as any AssertionKeyword:
           try assertion.validate(instance, at: location, using: annotations)
         default:

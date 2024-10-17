@@ -38,8 +38,4 @@ public final class Context: Sendable {
     self.dialect = dialect
     self.remoteSchemaStorage = remoteSchema
   }
-
-  static func == (lhs: Context, rhs: Context) -> Bool {
-    lhs.dialect == rhs.dialect && lhs.rootRawSchema == rhs.rootRawSchema
-  }
 }

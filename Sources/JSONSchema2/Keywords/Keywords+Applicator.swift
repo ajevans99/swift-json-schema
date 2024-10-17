@@ -2,8 +2,7 @@ protocol ApplicatorKeyword: AnnotationProducingKeyword {
   func validate(
     _ input: JSONValue,
     at instanceLocation: JSONPointer,
-    using annotations: inout AnnotationContainer,
-    with context: Context
+    using annotations: inout AnnotationContainer
   ) throws(ValidationIssue)
 }
 
@@ -57,8 +56,7 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
@@ -102,8 +100,7 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
@@ -178,8 +175,7 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
@@ -193,7 +189,7 @@ extension Keywords {
       }
 
       if validIndices.isEmpty
-        && !context.minContainsIsZero[self.context.location.dropLast(), default: false]
+          && !context.context.minContainsIsZero[self.context.location.dropLast(), default: false]
       {
         throw .containsInsufficientMatches
       }
@@ -243,8 +239,7 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       guard let instanceObject = input.object else {
         return
@@ -275,6 +270,8 @@ extension Keywords {
 
     let value: JSONValue
     let context: KeywordContext
+
+    nonisolated(unsafe)
     private let patterns: [(Regex<AnyRegexOutput>, Schema)]
 
     init(value: JSONValue, context: KeywordContext) {
@@ -302,8 +299,7 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
@@ -345,8 +341,7 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
@@ -392,8 +387,7 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
@@ -433,8 +427,7 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
@@ -469,8 +462,7 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       var isValid = false
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
@@ -511,8 +503,7 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       var validCount = 0
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
@@ -553,8 +544,7 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       var subAnnotations = AnnotationContainer()
       let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
@@ -589,13 +579,12 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       var subAnnotations = AnnotationContainer()
       let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
       annotations.merge(subAnnotations)
-      context.ifConditionalResults[self.context.location.dropLast()] = result
+      context.context.ifConditionalResults[self.context.location.dropLast()] = result
     }
   }
 
@@ -619,10 +608,9 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
-      guard context.ifConditionalResults[self.context.location.dropLast()]?.valid == true else {
+      guard context.context.ifConditionalResults[self.context.location.dropLast()]?.valid == true else {
         return
       }
 
@@ -655,10 +643,9 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
-      guard context.ifConditionalResults[self.context.location.dropLast()]?.valid == false else {
+      guard context.context.ifConditionalResults[self.context.location.dropLast()]?.valid == false else {
         return
       }
       var subAnnotations = AnnotationContainer()
@@ -695,8 +682,7 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 
@@ -737,8 +723,7 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
@@ -818,8 +803,7 @@ extension Keywords {
     func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
-      using annotations: inout AnnotationContainer,
-      with context: Context
+      using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
 

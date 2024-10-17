@@ -299,6 +299,7 @@ extension Keywords {
     let value: JSONValue
     let context: KeywordContext
 
+    nonisolated(unsafe)
     private let regex: Regex<AnyRegexOutput>?
 
     init(value: JSONValue, context: KeywordContext) {
