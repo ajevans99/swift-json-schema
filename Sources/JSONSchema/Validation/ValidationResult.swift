@@ -1,5 +1,5 @@
 public struct ValidationResult: Sendable, Encodable {
-  public let valid: Bool
+  public let isValid: Bool
   public let keywordLocation: JSONPointer
   public let instanceLocation: JSONPointer
   public let errors: [ValidationError]?
@@ -12,7 +12,7 @@ public struct ValidationResult: Sendable, Encodable {
     errors: [ValidationError]? = nil,
     annotations: [AnyAnnotation]? = nil
   ) {
-    self.valid = valid
+    self.isValid = valid
     self.keywordLocation = keywordLocation
     self.instanceLocation = instanceLocation
     self.errors = errors
@@ -20,7 +20,7 @@ public struct ValidationResult: Sendable, Encodable {
   }
 
   enum CodingKeys: String, CodingKey {
-    case valid
+    case isValid = "valid"
     case keywordLocation
     case instanceLocation
     case errors
@@ -29,7 +29,7 @@ public struct ValidationResult: Sendable, Encodable {
 
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encode(valid, forKey: .valid)
+    try container.encode(isValid, forKey: .isValid)
     try container.encode(instanceLocation, forKey: .instanceLocation)
     try container.encodeIfPresent(errors, forKey: .errors)
     try container.encodeIfPresent(

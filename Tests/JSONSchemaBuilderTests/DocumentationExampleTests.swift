@@ -55,12 +55,6 @@ struct DocumentationExampleTests {
     )
   }
 
-  //  @Schemable
-  //  enum Status {
-  //    case active
-  //    case inactive
-  //  }
-
   @Test func doccExample1() {
     let shouldIncludeAge = true
 

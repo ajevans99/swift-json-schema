@@ -183,7 +183,7 @@ extension Keywords {
       for (index, instance) in instances.enumerated() {
         let pointer = instanceLocation.appending(.index(index))
         let result = subschema.validate(instance, at: pointer)
-        if result.valid {
+        if result.isValid {
           validIndices.append(index)
         }
       }
@@ -470,7 +470,7 @@ extension Keywords {
       for subschema in subschemas {
         var subAnnotations = AnnotationContainer()
         let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
-        if result.valid {
+        if result.isValid {
           isValid = true
         }
         annotations.merge(subAnnotations)
@@ -511,7 +511,7 @@ extension Keywords {
       for subschema in subschemas {
         var subAnnotations = AnnotationContainer()
         let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
-        if result.valid {
+        if result.isValid {
           validCount += 1
           annotations.merge(subAnnotations)
         }
@@ -548,7 +548,7 @@ extension Keywords {
     ) throws(ValidationIssue) {
       var subAnnotations = AnnotationContainer()
       let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
-      if result.valid {
+      if result.isValid {
         annotations.merge(subAnnotations)
         throw ValidationIssue.notFailed
       }
@@ -610,13 +610,13 @@ extension Keywords {
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
-      guard context.context.ifConditionalResults[self.context.location.dropLast()]?.valid == true else {
+      guard context.context.ifConditionalResults[self.context.location.dropLast()]?.isValid == true else {
         return
       }
 
       var subAnnotations = AnnotationContainer()
       let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
-      if !result.valid {
+      if !result.isValid {
         throw .conditionalFailed
       }
       annotations.merge(subAnnotations)
@@ -645,12 +645,12 @@ extension Keywords {
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
-      guard context.context.ifConditionalResults[self.context.location.dropLast()]?.valid == false else {
+      guard context.context.ifConditionalResults[self.context.location.dropLast()]?.isValid == false else {
         return
       }
       var subAnnotations = AnnotationContainer()
       let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
-      if !result.valid {
+      if !result.isValid {
         throw .conditionalFailed
       }
       annotations.merge(subAnnotations)
@@ -932,7 +932,7 @@ struct ValidationResultBuilder {
   private var errors: [ValidationError] = []
 
   mutating func merging(_ result: ValidationResult) {
-    if result.valid {
+    if result.isValid {
 
     } else {
       if let resultErrors = result.errors {

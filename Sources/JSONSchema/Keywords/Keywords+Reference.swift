@@ -49,7 +49,7 @@ extension Keywords {
 
       var refAnnotations = AnnotationContainer()
       let result = schema.validate(input, at: instanceLocation, annotations: &refAnnotations)
-      if !result.valid {
+      if !result.isValid {
         throw ValidationIssue.referenceValidationFailure(
           ref: referenceURI,
           errors: result.errors ?? []
@@ -97,7 +97,7 @@ extension Keywords {
 
       var refAnnotations = AnnotationContainer()
       let result = schema.validate(input, at: instanceLocation, annotations: &refAnnotations)
-      if !result.valid {
+      if !result.isValid {
         throw ValidationIssue.referenceValidationFailure(
           ref: referenceURI,
           errors: result.errors ?? []

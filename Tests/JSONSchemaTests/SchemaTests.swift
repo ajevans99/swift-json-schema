@@ -9,7 +9,7 @@ struct SchemaTests {
     let schema = try #require(
       try Schema(rawSchema: truthy, context: Context(dialect: .draft2020_12))
     )
-    #expect(schema.validate(.integer(4)).valid)
+    #expect(schema.validate(.integer(4)).isValid)
   }
 
   @Test func falseBooleanSchema() throws {
@@ -17,7 +17,7 @@ struct SchemaTests {
     let schema = try #require(
       try Schema(rawSchema: falsy, context: Context(dialect: .draft2020_12))
     )
-    #expect(schema.validate(.integer(4)).valid == false)
+    #expect(schema.validate(.integer(4)).isValid == false)
   }
 
   @Test func invalidSchema() {
@@ -88,8 +88,8 @@ struct SchemaTests {
     let schema = try #require(
       try Schema(rawSchema: rawSchema, context: Context(dialect: .draft2020_12))
     )
-    #expect(schema.validate(validInstance).valid)
-    #expect(schema.validate(invalidInstance).valid == false)
+    #expect(schema.validate(validInstance).isValid)
+    #expect(schema.validate(invalidInstance).isValid == false)
   }
 
   @Test func validationResult() throws {
@@ -107,7 +107,7 @@ struct SchemaTests {
       try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12))
     )
     let result = schema.validate(instance)
-    #expect(result.valid == false)
+    #expect(result.isValid == false)
     #expect(result.errors?.count == 1)
     #expect(result.annotations == nil)
   }
@@ -115,6 +115,6 @@ struct SchemaTests {
   @Test func metaSchema() throws {
     let metaSchema = try #require(try Dialect.draft2020_12.loadMetaSchema())
     let result = metaSchema.validate(.object(["minLength": 1]))
-    #expect(result.valid == true)
+    #expect(result.isValid == true)
   }
 }

@@ -71,7 +71,7 @@ struct JSONSchemaTestSuite {
 
         Valid?:
         - Expected: \(testCase.valid)
-        - Recieved: \(validationResult.valid)
+        - Recieved: \(validationResult.isValid)
 
         Full result:
         ```json
@@ -81,7 +81,7 @@ struct JSONSchemaTestSuite {
       }
 
       #expect(
-        testCase.valid == validationResult.valid,
+        testCase.valid == validationResult.isValid,
         comment()
       )
     }
@@ -104,7 +104,7 @@ struct JSONSchemaTestSuite {
   //    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
   //    let result = try #require(try schema.validate(instance: testCase))
   //    dump(result)
-  //    #expect((result.valid) == false, "\(result)")
+  //    #expect((result.isValid) == false, "\(result)")
   //  }
 }
 
