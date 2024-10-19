@@ -1,50 +1,87 @@
-extension RootSchema: Codable {
-  enum CodingKeys: String, CodingKey {
-    case schema = "$schema"
-    case id = "$id"
-    case vocabulary = "$vocabulary"
-  }
-
+extension Schema: Codable {
   public init(from decoder: any Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    self.id = try container.decodeIfPresent(String.self, forKey: .id)
-    self.schema = try container.decodeIfPresent(String.self, forKey: .schema)
-    self.vocabulary = try container.decodeIfPresent([String: JSONValue].self, forKey: .vocabulary)
-    self.subschema = try Schema(from: decoder)
-  }
+    let container = try decoder.singleValueContainer()
 
+    if let bool = try? container.decode(BooleanSchema.self) {
+      self.init(schema: bool, location: .init(), context: Context(dialect: .draft2020_12))
+    } else if let schema = try? container.decode(ObjectSchema.self) {
+      self.init(schema: schema, location: .init(), context: Context(dialect: .draft2020_12))
+    } else {
+      throw DecodingError.dataCorruptedError(
+        in: container,
+        debugDescription: "Expected either a boolean or an object representing a schema."
+      )
+    }
+  }
   public func encode(to encoder: any Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encodeIfPresent(schema, forKey: .schema)
-    try container.encodeIfPresent(id, forKey: .id)
-    try container.encodeIfPresent(vocabulary, forKey: .vocabulary)
-    try subschema?.encode(to: encoder)
+    var container = encoder.singleValueContainer()
+
+    switch schema {
+    case let boolSchema as BooleanSchema: try container.encode(boolSchema)
+    case let objectSchema as ObjectSchema: try container.encode(objectSchema)
+    default:
+      throw EncodingError.invalidValue(
+        schema,
+        .init(
+          codingPath: [],
+          debugDescription: "Expected either a boolean or an object representing a schema."
+        )
+      )
+    }
   }
 }
 
-extension Schema: Codable {
-  enum CodingKeys: String, CodingKey {
-    case type, const
-    case enumValues = "enum"
-  }
-
+extension BooleanSchema: Codable {
   public init(from decoder: any Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    self.type = try container.decodeIfPresent(JSONType.self, forKey: .type)
-    self.enumValues = try container.decodeIfPresent([JSONValue].self, forKey: .enumValues)
-    self.annotations = try AnnotationOptions(from: decoder)
-    self.options = if let type { try AnySchemaOptions(from: decoder, typeHint: type) } else { nil }
-    self.composition = try? CompositionOptions(from: decoder)
-    self.const = try container.decodeIfPresent(JSONValue.self, forKey: .const)
+    let container = try decoder.singleValueContainer()
+    let bool = try container.decode(Bool.self)
+    self.init(schemaValue: bool, location: .init(), context: Context(dialect: .draft2020_12))
   }
 
   public func encode(to encoder: any Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encodeIfPresent(type, forKey: .type)
-    try container.encodeIfPresent(enumValues, forKey: .enumValues)
-    try annotations.encode(to: encoder)
-    try options?.encode(to: encoder)
-    try composition?.encode(to: encoder)
-    try container.encodeIfPresent(const, forKey: .const)
+    var container = encoder.singleValueContainer()
+    try container.encode(schemaValue)
   }
+}
+
+extension ObjectSchema: Codable {
+  public init(from decoder: any Decoder) throws {
+    let container = try decoder.container(keyedBy: DynamicCodingKey.self)
+
+    var schemaValue = [String: JSONValue]()
+
+    let dialect = Dialect.draft2020_12
+    let context = Context(dialect: dialect)
+
+    for keywordType in dialect.keywords {
+      let key = keywordType.name
+      let keyValue = DynamicCodingKey(stringValue: key)!
+
+      if let value = try? container.decode(JSONValue.self, forKey: keyValue) {
+        schemaValue[key] = value
+      } else if container.contains(keyValue) {
+        // Handle the case where the value is explicitly null
+        schemaValue[key] = .null
+      }
+    }
+
+    self.init(schemaValue: schemaValue, location: .init(), context: context)
+  }
+
+  public func encode(to encoder: any Encoder) throws {
+    var container = encoder.container(keyedBy: DynamicCodingKey.self)
+    for keyword in keywords {
+      let key = DynamicCodingKey(stringValue: type(of: keyword).name)!
+      try container.encode(keyword.value, forKey: key)
+    }
+  }
+}
+
+struct DynamicCodingKey: CodingKey {
+  var stringValue: String
+  var intValue: Int? { nil }
+
+  init?(stringValue: String) { self.stringValue = stringValue }
+
+  init?(intValue: Int) { return nil }
 }

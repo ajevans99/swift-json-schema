@@ -1,15 +1,18 @@
 import JSONSchema
 
-public protocol JSONNumberType: JSONSchemaComponent { var options: NumberSchemaOptions { get set } }
+public protocol JSONNumberType: JSONSchemaComponent {}
 
 /// A JSON integer schema component for use in ``JSONSchemaBuilder``.
 public struct JSONInteger: JSONNumberType {
-  public var annotations: AnnotationOptions = .annotations()
+  public var schemaValue = [KeywordIdentifier: JSONValue]()
 
-  public var options: NumberSchemaOptions = .options()
-  public var definition: Schema { .integer(annotations, options) }
+  public init() {
+    schemaValue[Keywords.TypeKeyword.name] = .string(JSONType.integer.rawValue)
+  }
 
-  public init() {}
+  public func schema() -> Schema {
+    ObjectSchema(schemaValue: schemaValue, location: .init(), context: .init(dialect: .draft2020_12)).asSchema()
+  }
 
   public func validate(_ value: JSONValue) -> Validated<Int, String> {
     if case .integer(let int) = value { return .valid(int) }
@@ -19,12 +22,15 @@ public struct JSONInteger: JSONNumberType {
 
 /// A JSON number schema component for use in ``JSONSchemaBuilder``.
 public struct JSONNumber: JSONNumberType {
-  public var annotations: AnnotationOptions = .annotations()
+  public var schemaValue = [KeywordIdentifier: JSONValue]()
 
-  public var options: NumberSchemaOptions = .options()
-  public var definition: Schema { .number(annotations, options) }
+  public init() {
+    schemaValue[Keywords.TypeKeyword.name] = .string(JSONType.number.rawValue)
+  }
 
-  public init() {}
+  public func schema() -> Schema {
+    ObjectSchema(schemaValue: schemaValue, location: .init(), context: .init(dialect: .draft2020_12)).asSchema()
+  }
 
   public func validate(_ value: JSONValue) -> Validated<Double, String> {
     if case .number(let double) = value { return .valid(double) }
@@ -36,55 +42,45 @@ extension JSONNumberType {
   /// Restrictes value to a multiple of this number.
   /// - Parameter multipleOf: The number that the value must be a multiple of.
   /// - Returns: A new `JSONNumber` with the multiple of constraint set.
-  public func multipleOf(_ multipleOf: Double?) -> Self {
+  public func multipleOf(_ multipleOf: Double) -> Self {
     var copy = self
-    copy.options.multipleOf = multipleOf
-    return copy
-  }
-
-  /// Adds a minimum constraint to the schema.
-  /// - Parameter boundary: The minimum value that the number must be greater than or equal to.
-  /// - Returns: A new `JSONNumber` with the minimum constraint set.
-  public func minimum(boundary: NumberSchemaOptions.BoundaryValue?) -> Self {
-    var copy = self
-    copy.options.minimum = boundary
+    copy.schemaValue[Keywords.MultipleOf.name] = .number(multipleOf)
     return copy
   }
 
   /// Adds a minimum constraint to the schema.
   /// - Parameter minimum: The minimum value that the number must be greater than or equal to.
   /// - Returns: A new `JSONNumber` with the minimum constraint set.
-  public func minimum(_ minimum: Double?) -> Self {
-    self.minimum(boundary: minimum == nil ? nil : .inclusive(minimum!))
+  public func minimum(_ minimum: Double) -> Self {
+    var copy = self
+    copy.schemaValue[Keywords.Minimum.name] = .number(minimum)
+    return copy
   }
-
+  
   /// Adds an exclusive minimum constraint to the schema.
   /// - Parameter minimum: The minimum value that the number must be greater than.
   /// - Returns: A new `JSONNumber` with the exclusive minimum constraint set.
-  public func exclusiveMinimum(_ minimum: Double?) -> Self {
-    self.minimum(boundary: minimum == nil ? nil : .exclusive(minimum!))
-  }
-
-  /// Adds a maximum constraint to the schema.
-  /// - Parameter boundary: The maximum value that the number must be less than or equal to.
-  /// - Returns: A new `JSONNumber` with the maximum constraint set.
-  public func maximum(boundary: NumberSchemaOptions.BoundaryValue?) -> Self {
+  public func exclusiveMinimum(_ minimum: Double) -> Self {
     var copy = self
-    copy.options.maximum = boundary
+    copy.schemaValue[Keywords.ExclusiveMinimum.name] = .number(minimum)
     return copy
   }
 
   /// Adds a maximum constraint to the schema.
   /// - Parameter maximum: The maximum value that the number must be less than or equal to.
   /// - Returns: A new `JSONNumber` with the maximum constraint set.
-  public func maximum(_ maximum: Double?) -> Self {
-    self.maximum(boundary: maximum == nil ? nil : .inclusive(maximum!))
+  public func maximum(_ maximum: Double) -> Self {
+    var copy = self
+    copy.schemaValue[Keywords.Maximum.name] = .number(maximum)
+    return copy
   }
 
   /// Adds an exclusive maximum constraint to the schema.
   /// - Parameter maximum: The maximum value that the number must be less than.
   /// - Returns: A new `JSONNumber` with the exclusive maximum constraint set.
-  public func exclusiveMaximum(_ maximum: Double?) -> Self {
-    self.maximum(boundary: maximum == nil ? nil : .exclusive(maximum!))
+  public func exclusiveMaximum(_ maximum: Double) -> Self {
+    var copy = self
+    copy.schemaValue[Keywords.ExclusiveMaximum.name] = .number(maximum)
+    return copy
   }
 }

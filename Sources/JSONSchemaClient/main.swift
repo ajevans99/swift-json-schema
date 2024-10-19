@@ -14,7 +14,7 @@ func printInstance<T: Codable>(_ instance: T) {
 }
 
 func printSchema<T: Schemable>(_ schema: T.Type) {
-  let schemaData = try? encoder.encode(T.schema.definition)
+  let schemaData = try? encoder.encode(T.schema.schemaValue)
   if let schemaData {
     print("\(T.self) Schema")
     print(String(decoding: schemaData, as: UTF8.self))
@@ -31,7 +31,9 @@ func printSchema<T: Schemable>(_ schema: T.Type) {
     writeOnly: false,
     deprecated: true,
     comment: "This is a comment about temperature"
-  ) @NumberOptions(multipleOf: 5, minimum: 0, maximum: 100) let temperature: Double
+  )
+  @NumberOptions(multipleOf: 5, minimum: 0, maximum: 100)
+  let temperature: Double
 
   @SchemaOptions(
     title: "Humidity",
@@ -42,15 +44,16 @@ func printSchema<T: Schemable>(_ schema: T.Type) {
     writeOnly: true,
     deprecated: false,
     comment: "This is a comment about humidity"
-  ) let humidity: Int
+  )
+  let humidity: Int
 
   @SchemaOptions(title: "Temperature Readings")
   @ArrayOptions(minContains: 1, maxContains: 5, minItems: 2, maxItems: 10, uniqueItems: true)
   let temperatureReadings: [Double]
 
   @SchemaOptions(title: "Location")
-  @StringOptions(minLength: 5, maxLength: 100, pattern: "^[a-zA-Z]+$", format: nil) let cityName:
-    String
+  @StringOptions(minLength: 5, maxLength: 100, pattern: "^[a-zA-Z]+$", format: "city")
+  let cityName: String
 }
 
 let now = Weather(
@@ -200,6 +203,9 @@ enum Airline: String, CaseIterable, Schemable {
 
   static var schema: some JSONSchemaComponent<Airline> {
     JSONString()
+      .enumValues {
+        Airline.allCases.map(\.rawValue)
+      }
       .compactMap { string in
         switch string {
         case "delta": return Airline.delta
@@ -231,13 +237,16 @@ extension Flight: Schemable {
         JSONProperty(key: "airline") { Airline.schema }.required()
 
         JSONProperty(key: "duration") {
-          JSONNumber().description("The duration of the flight in seconds").minimum(0)
+          JSONNumber()
+            .description("The duration of the flight in seconds")
+            .minimum(0)
         }
         .required()
 
         JSONProperty(key: "metadata")
       }
-      .title("Flight").minProperties(2)
+      .title("Flight")
+      .minProperties(2)
       .patternProperties { JSONProperty(key: "regular-expression") { JSONString() } }
     }
   }
@@ -268,7 +277,7 @@ let anyOf = JSONComposition.AnyOf(into: JSONValue.self) {
   JSONString()
   JSONNumber().minimum(0)
 }
-print("anyOf", anyOf.definition)
+print("anyOf", anyOf.schemaValue)
 
 print("anyOf", anyOf.validate(.string("Hello")))
 print("anyOf", anyOf.validate(.number(1)))
@@ -386,7 +395,12 @@ struct Weathery {
     JSONSchema(Weathery.init) {
       JSONObject {
         JSONProperty(key: "metadata") {
-          JSONObject().propertyNames(.options(pattern: "^[A-Za-z_][A-Za-z0-9_]*$")).minProperties(2)
+          JSONObject()
+            .propertyNames {
+              JSONString()
+                .pattern("^[A-Za-z_][A-Za-z0-9_]*$")
+            }
+            .minProperties(2)
             .maxProperties(5).additionalProperties { JSONString() }.map { $1 }
         }
         .required()
@@ -400,8 +414,14 @@ struct WeatherFoo {
 
   static var schema: some JSONSchemaComponent<WeatherFoo> {
     JSONSchema(WeatherFoo.init) {
-      JSONObject { JSONProperty(key: "cityName") { JSONString() }.required() }.minProperties(2)
-        .maxProperties(5)
+      JSONObject {
+        JSONProperty(key: "cityName") {
+          JSONString()
+        }
+        .required()
+      }
+      .minProperties(2)
+      .maxProperties(5)
     }
   }
 }
@@ -415,7 +435,13 @@ enum FlightInfo { case flightNumber(_ value: Int = 0)
     JSONComposition.AnyOf(into: FlightInfo.self) {
       JSONObject {
         JSONProperty(key: "flightNumber") {
-          JSONObject { JSONProperty(key: "_") { JSONInteger().default(0) }.required() }
+          JSONObject {
+            JSONProperty(key: "_") {
+              JSONInteger()
+                .default(0)
+            }
+            .required()
+          }
         }
         .required()
       }
@@ -451,7 +477,9 @@ enum FlightInfo { case flightNumber(_ value: Int = 0)
   }
 }
 
-@Schemable struct ItemDetails { let thing: String }
+@Schemable struct ItemDetails {
+  let thing: String
+}
 
 // Oddly, this macro is crashing compiler for Swift 5.10
 //@Schemable

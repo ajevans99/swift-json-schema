@@ -30,13 +30,13 @@ import JSONSchema
 public protocol PropertyCollection: Sendable {
   associatedtype Output
 
-  var schema: [String: Schema] { get }
+  var schemaValue: [String: JSONValue] { get }
   var requiredKeys: [String] { get }
   func validate(_ dictionary: [String: JSONValue]) -> Validated<Output, String>
 }
 
 public struct EmptyPropertyCollection: PropertyCollection {
-  public let schema: [String: Schema] = [:]
+  public let schemaValue: [String: JSONValue] = [:]
   public let requiredKeys: [String] = []
 
   public func validate(_ dictionary: [String: JSONValue]) -> Validated<Void, String> { .valid(()) }
@@ -45,17 +45,17 @@ public struct EmptyPropertyCollection: PropertyCollection {
 public struct PropertyTuple<each Property: JSONPropertyComponent>: PropertyCollection {
   let property: (repeat each Property)
 
-  public var schema: [String: Schema] {
-    var output = [String: Schema]()
+  public var schemaValue: [String: JSONValue] {
+    var output = [String: JSONValue]()
     #if swift(>=6)
       for property in repeat each property where !property.key.isEmpty {
 
-        output[property.key] = property.value.definition
+        output[property.key] = .object(property.value.schemaValue)
       }
     #else
       func schemaForProperty<Prop: JSONPropertyComponent>(_ property: Prop) {
         guard !property.key.isEmpty else { return }
-        output[property.key] = property.value.definition
+        output[property.key] = .object(property.value.schemaValue)
       }
       repeat schemaForProperty(each property)
     #endif

@@ -11,15 +11,12 @@ extension JSONSchemaComponent {
 
 extension JSONComponents {
   public struct Enum<Upstream: JSONSchemaComponent>: JSONSchemaComponent {
-    public var definition: Schema {
-      var copy = upstream.definition
-      copy.enumValues = cases
-      return copy
-    }
-
-    public var annotations: AnnotationOptions {
-      get { upstream.annotations }
-      set { upstream.annotations = newValue }
+    public var schemaValue: [KeywordIdentifier: JSONValue] {
+      get {
+        upstream.schemaValue
+          .merging([Keywords.Enum.name: .array(cases)], uniquingKeysWith: { $1 })
+      }
+      set { upstream.schemaValue = newValue }
     }
 
     var upstream: Upstream
@@ -28,6 +25,7 @@ extension JSONComponents {
     public init(upstream: Upstream, cases: [JSONValue]) {
       self.upstream = upstream
       self.cases = cases
+
     }
 
     public func validate(_ value: JSONValue) -> Validated<Upstream.Output, String> {

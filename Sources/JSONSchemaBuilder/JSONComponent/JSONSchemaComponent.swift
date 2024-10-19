@@ -4,13 +4,18 @@ import JSONSchema
 public protocol JSONSchemaComponent<Output>: Sendable {
   associatedtype Output
 
-  /// The schema that this component represents.
-  var definition: Schema { get }
+  var schemaValue: [KeywordIdentifier: JSONValue] { get set }
 
-  /// The annotations for this component.
-  var annotations: AnnotationOptions { get set }
+  func schema() -> Schema
+
   /// Validates a JSON value against the schema.
   /// - Parameter value: The value (aka instance, document, etc.) to validate.
   /// - Returns: A validated output or error messages.
   @Sendable func validate(_ value: JSONValue) -> Validated<Output, String>
+}
+
+extension JSONSchemaComponent {
+  public func schema() -> Schema {
+    ObjectSchema(schemaValue: schemaValue, location: .init(), context: .init(dialect: .draft2020_12)).asSchema()
+  }
 }

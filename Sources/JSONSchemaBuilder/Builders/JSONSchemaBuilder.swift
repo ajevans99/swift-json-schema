@@ -18,6 +18,10 @@ import JSONSchema
   public static func buildBlock<Component: JSONSchemaComponent>(_ component: Component) -> Component
   { component }
 
+  public static func buildBlock(_ expression: Bool) -> JSONBooleanSchema {
+    .init(value: expression)
+  }
+
   // MARK: Advanced builers
 
   public static func buildOptional<Component: JSONSchemaComponent>(
