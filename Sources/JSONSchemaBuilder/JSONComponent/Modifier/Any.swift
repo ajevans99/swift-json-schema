@@ -16,10 +16,6 @@ extension JSONComponents {
       self.validate = component.validate
     }
 
-    public func schema() -> Schema {
-      fatalError("TODO: Implement")
-    }
-
     public func validate(_ value: JSONValue) -> Validated<Output, String> { validate(value) }
   }
 }

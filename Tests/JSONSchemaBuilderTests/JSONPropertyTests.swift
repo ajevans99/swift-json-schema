@@ -83,7 +83,7 @@ struct JSONPropertySchemaTests {
     }
 
     try #require(sample.schemaValue.values.count == 4)
-    for (key, value) in sample.schemaValue {
+    for value in sample.schemaValue.values {
       #expect(value.object?["type"] == "string")
     }
   }

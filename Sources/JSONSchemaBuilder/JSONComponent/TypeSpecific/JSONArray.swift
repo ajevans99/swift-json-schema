@@ -24,10 +24,6 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
     }
   }
 
-  public func schema() -> Schema {
-    fatalError("TODO: Implement")
-  }
-
   public func validate(_ value: JSONValue) -> Validated<[T.Output], String> {
     if case .array(let array) = value {
       var outputs: [T.Output] = []

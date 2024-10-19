@@ -17,10 +17,6 @@ extension JSONComponents {
       schemaValue[Keywords.AdditionalProperties.name] = .object(additionalProperties.schemaValue)
     }
 
-    public func schema() -> Schema {
-      fatalError("TODO: Implement")
-    }
-
     public func validate(
       _ input: JSONValue
     ) -> Validated<(Props.Output, [String: AdditionalProps.Output]), String> {
