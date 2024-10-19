@@ -5,24 +5,17 @@ extension JSONComponents {
   public enum Conditional<First: JSONSchemaComponent, Second: JSONSchemaComponent>:
     JSONSchemaComponent
   where First.Output == Second.Output {
-    public var definition: Schema {
-      switch self {
-      case .first(let first): first.definition
-      case .second(let second): second.definition
-      }
-    }
-
-    public var annotations: AnnotationOptions {
+    public var schemaValue: [KeywordIdentifier: JSONValue] {
       get {
         switch self {
-        case .first(let first): first.annotations
-        case .second(let second): second.annotations
+        case .first(let first): first.schemaValue
+        case .second(let second): second.schemaValue
         }
       }
       set {
         switch self {
-        case .first(var first): first.annotations = newValue
-        case .second(var second): second.annotations = newValue
+        case .first(var first): first.schemaValue = newValue
+        case .second(var second): second.schemaValue = newValue
         }
       }
     }

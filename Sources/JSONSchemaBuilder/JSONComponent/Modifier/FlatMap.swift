@@ -13,11 +13,9 @@ extension JSONComponents {
   public struct FlatMap<NewSchemaComponent: JSONSchemaComponent, Upstream: JSONSchemaComponent>:
     JSONSchemaComponent
   {
-    public var definition: Schema { upstream.definition }
-
-    public var annotations: AnnotationOptions {
-      get { upstream.annotations }
-      set { upstream.annotations = newValue }
+    public var schemaValue: [KeywordIdentifier : JSONValue] {
+      get { upstream.schemaValue }
+      set { upstream.schemaValue = newValue }
     }
 
     var upstream: Upstream

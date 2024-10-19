@@ -3,6 +3,11 @@ import JSONSchema
 /// Analogous to `Group` in SwiftUI, this component can be used to group other components together.
 /// It can also be used to transform the output of the grouped components.
 public struct JSONSchema<Components: JSONSchemaComponent, NewOutput>: JSONSchemaComponent {
+  public var schemaValue: [KeywordIdentifier : JSONValue] {
+    get { components.schemaValue }
+    set { components.schemaValue = newValue }
+  }
+
   let transform: @Sendable (Components.Output) -> NewOutput
 
   var components: Components
@@ -24,14 +29,6 @@ public struct JSONSchema<Components: JSONSchemaComponent, NewOutput>: JSONSchema
   public init(@JSONSchemaBuilder component: () -> Components) where Components.Output == NewOutput {
     self.transform = { $0 }
     self.components = component()
-  }
-
-  public var definition: Schema { components.definition }
-
-  /// The annotations for this component.
-  public var annotations: AnnotationOptions {
-    get { components.annotations }
-    set { components.annotations = newValue }
   }
 
   public func validate(_ value: JSONValue) -> Validated<NewOutput, String> {

@@ -1,4 +1,4 @@
-protocol ApplicatorKeyword: AnnotationProducingKeyword {
+package protocol ApplicatorKeyword: AnnotationProducingKeyword {
   func validate(
     _ input: JSONValue,
     at instanceLocation: JSONPointer,
@@ -10,29 +10,29 @@ protocol ApplicatorKeyword: AnnotationProducingKeyword {
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-prefixitems
-  struct PrefixItems: ApplicatorKeyword {
-    static let name = "prefixItems"
+  package struct PrefixItems: ApplicatorKeyword {
+    package static let name = "prefixItems"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let subschemas: [Schema]
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.subschemas = value.array?.extractSubschemas(using: context) ?? []
     }
 
-    typealias AnnotationValue = PrefixItemsAnnoationValue
+    package typealias AnnotationValue = PrefixItemsAnnoationValue
 
-    enum PrefixItemsAnnoationValue: AnnotationValueConvertible {
+    package enum PrefixItemsAnnoationValue: AnnotationValueConvertible {
       /// The largest index to which this keyword applied a subschema
       case largestIndex(Int)
       /// Applied when subschema applies to every index of the instance
       case everyIndex
 
-      var value: JSONValue {
+      package var value: JSONValue {
         switch self {
         case .largestIndex(let int):
           return .integer(int)
@@ -41,7 +41,7 @@ extension Keywords {
         }
       }
 
-      func merged(with other: PrefixItemsAnnoationValue) -> PrefixItemsAnnoationValue {
+      package func merged(with other: PrefixItemsAnnoationValue) -> PrefixItemsAnnoationValue {
         switch (self, other) {
         case (.everyIndex, _):
           .everyIndex
@@ -53,7 +53,7 @@ extension Keywords {
       }
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -81,23 +81,23 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-items
-  struct Items: ApplicatorKeyword {
-    static let name = "items"
+  package struct Items: ApplicatorKeyword {
+    package static let name = "items"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let subschema: Schema
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.subschema = value.extractSubschema(using: context)
     }
 
-    typealias AnnotationValue = Bool
+    package typealias AnnotationValue = Bool
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -131,29 +131,29 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-contains
-  struct Contains: ApplicatorKeyword {
-    static let name = "contains"
+  package struct Contains: ApplicatorKeyword {
+    package static let name = "contains"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let subschema: Schema
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.subschema = value.extractSubschema(using: context)
     }
 
-    typealias AnnotationValue = ContainsAnnotationValue
+    package typealias AnnotationValue = ContainsAnnotationValue
 
-    enum ContainsAnnotationValue: AnnotationValueConvertible {
+    package enum ContainsAnnotationValue: AnnotationValueConvertible {
       /// Array of indicies to which the keyword validates
       case indicies([Int])
       /// Applied when subschema validates successfully when applied to every index of the instance
       case everyIndex
 
-      var value: JSONValue {
+      package var value: JSONValue {
         switch self {
         case .indicies(let array):
           .array(array.map { .integer($0) })
@@ -162,7 +162,7 @@ extension Keywords {
         }
       }
 
-      func merged(with other: ContainsAnnotationValue) -> ContainsAnnotationValue {
+      package func merged(with other: ContainsAnnotationValue) -> ContainsAnnotationValue {
         switch (self, other) {
         case (.indicies(let lhs), .indicies(let rhs)):
           .indicies(lhs + rhs)
@@ -172,7 +172,7 @@ extension Keywords {
       }
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -206,15 +206,15 @@ extension Keywords {
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-properties
-  struct Properties: ApplicatorKeyword {
-    static let name = "properties"
+  package struct Properties: ApplicatorKeyword {
+    package static let name = "properties"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let schemaMap: [String: Schema]
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
 
@@ -234,9 +234,9 @@ extension Keywords {
         } ?? [:]
     }
 
-    typealias AnnotationValue = Set<String>
+    package typealias AnnotationValue = Set<String>
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -265,16 +265,16 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-patternproperties
-  struct PatternProperties: ApplicatorKeyword {
-    static let name = "patternProperties"
+  package struct PatternProperties: ApplicatorKeyword {
+    package static let name = "patternProperties"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     nonisolated(unsafe)
     private let patterns: [(Regex<AnyRegexOutput>, Schema)]
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
 
@@ -294,9 +294,9 @@ extension Keywords {
         } ?? []
     }
 
-    typealias AnnotationValue = Set<String>
+    package typealias AnnotationValue = Set<String>
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -322,23 +322,23 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-additionalproperties
-  struct AdditionalProperties: ApplicatorKeyword {
-    static let name = "additionalProperties"
+  package struct AdditionalProperties: ApplicatorKeyword {
+    package static let name = "additionalProperties"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let subschema: Schema
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.subschema = value.extractSubschema(using: context)
     }
 
-    typealias AnnotationValue = Set<String>
+    package typealias AnnotationValue = Set<String>
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -368,23 +368,23 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-propertynames
-  struct PropertyNames: ApplicatorKeyword {
-    static let name = "propertyNames"
+  package struct PropertyNames: ApplicatorKeyword {
+    package static let name = "propertyNames"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let subschema: Schema
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.subschema = value.extractSubschema(using: context)
     }
 
-    typealias AnnotationValue = Never
+    package typealias AnnotationValue = Never
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -408,23 +408,23 @@ extension Keywords {
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-allof
-  struct AllOf: ApplicatorKeyword {
-    static let name = "allOf"
+  package struct AllOf: ApplicatorKeyword {
+    package static let name = "allOf"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let subschemas: [Schema]
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.subschemas = value.array?.extractSubschemas(using: context) ?? []
     }
 
-    typealias AnnotationValue = Never
+    package typealias AnnotationValue = Never
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -443,23 +443,23 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-anyof
-  struct AnyOf: ApplicatorKeyword {
-    static let name = "anyOf"
+  package struct AnyOf: ApplicatorKeyword {
+    package static let name = "anyOf"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let subschemas: [Schema]
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.subschemas = value.array?.extractSubschemas(using: context) ?? []
     }
 
-    typealias AnnotationValue = Never
+    package typealias AnnotationValue = Never
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -484,23 +484,23 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-oneof
-  struct OneOf: ApplicatorKeyword {
-    static let name = "oneOf"
+  package struct OneOf: ApplicatorKeyword {
+    package static let name = "oneOf"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let subschemas: [Schema]
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.subschemas = value.array?.extractSubschemas(using: context) ?? []
     }
 
-    typealias AnnotationValue = Never
+    package typealias AnnotationValue = Never
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -525,23 +525,23 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#section-10.2.1.4
-  struct Not: ApplicatorKeyword {
-    static let name = "not"
+  package struct Not: ApplicatorKeyword {
+    package static let name = "not"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let subschema: Schema
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.subschema = value.extractSubschema(using: context)
     }
 
-    typealias AnnotationValue = Never
+    package typealias AnnotationValue = Never
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -560,23 +560,23 @@ extension Keywords {
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-if
-  struct If: ApplicatorKeyword {
-    static let name = "if"
+  package struct If: ApplicatorKeyword {
+    package static let name = "if"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let subschema: Schema
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.subschema = value.extractSubschema(using: context)
     }
 
-    typealias AnnotationValue = Never
+    package typealias AnnotationValue = Never
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -589,23 +589,23 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-then
-  struct Then: ApplicatorKeyword {
-    static let name = "then"
+  package struct Then: ApplicatorKeyword {
+    package static let name = "then"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let subschema: Schema
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.subschema = value.extractSubschema(using: context)
     }
 
-    typealias AnnotationValue = Never
+    package typealias AnnotationValue = Never
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -624,23 +624,23 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-else
-  struct Else: ApplicatorKeyword {
-    static let name = "else"
+  package struct Else: ApplicatorKeyword {
+    package static let name = "else"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let subschema: Schema
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.subschema = value.extractSubschema(using: context)
     }
 
-    typealias AnnotationValue = Never
+    package typealias AnnotationValue = Never
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -658,15 +658,15 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-dependentschemas
-  struct DependentSchemas: ApplicatorKeyword {
-    static let name = "dependentSchemas"
+  package struct DependentSchemas: ApplicatorKeyword {
+    package static let name = "dependentSchemas"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let schemaMap: [String: Schema]
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
 
@@ -677,9 +677,9 @@ extension Keywords {
         } ?? [:]
     }
 
-    typealias AnnotationValue = Never
+    package typealias AnnotationValue = Never
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -704,23 +704,23 @@ extension Keywords {
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-unevaluateditems
-  struct UnevaluatedItems: ApplicatorKeyword {
-    static let name = "unevaluatedItems"
+  package struct UnevaluatedItems: ApplicatorKeyword {
+    package static let name = "unevaluatedItems"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let subschema: Schema
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.subschema = value.extractSubschema(using: context)
     }
 
-    typealias AnnotationValue = Bool
+    package typealias AnnotationValue = Bool
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -784,23 +784,23 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-unevaluatedproperties
-  struct UnevaluatedProperties: ApplicatorKeyword {
-    static let name = "unevaluatedProperties"
+  package struct UnevaluatedProperties: ApplicatorKeyword {
+    package static let name = "unevaluatedProperties"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let subschema: Schema
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.subschema = value.extractSubschema(using: context)
     }
 
-    typealias AnnotationValue = Set<String>
+    package typealias AnnotationValue = Set<String>
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
@@ -865,25 +865,25 @@ extension Keywords {
 // MARK: - Helpers
 
 extension Never: AnnotationValueConvertible {
-  var value: JSONValue { .null }
+  package var value: JSONValue { .null }
 
-  func merged(with other: Never) -> Never {}
+  package func merged(with other: Never) -> Never {}
 }
 
 extension Set: AnnotationValueConvertible where Element == String {
-  var value: JSONSchema.JSONValue {
+  package var value: JSONSchema.JSONValue {
     .array(self.map { .string($0) })
   }
 
-  func merged(with other: Set<String>) -> Set<String> {
+  package func merged(with other: Set<String>) -> Set<String> {
     self.union(other)
   }
 }
 
 extension Bool: AnnotationValueConvertible {
-  var value: JSONValue { .boolean(self) }
+  package var value: JSONValue { .boolean(self) }
 
-  func merged(with other: Bool) -> Bool {
+  package func merged(with other: Bool) -> Bool {
     self || other
   }
 }
@@ -942,7 +942,7 @@ struct ValidationResultBuilder {
           .init(
             keyword: type(of: keyword).name,
             message: "Validation failed",
-            keywordLocation: keyword.context.location,
+            keywordLocation: keyword.context.location,  
             instanceLocation: instanceLocation
           )
         )

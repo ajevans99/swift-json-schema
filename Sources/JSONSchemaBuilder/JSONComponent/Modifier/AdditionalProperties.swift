@@ -5,19 +5,20 @@ extension JSONComponents {
     Props: PropertyCollection,
     AdditionalProps: JSONSchemaComponent
   >: JSONSchemaComponent {
-    public var annotations: AnnotationOptions {
-      get { base.annotations }
-      set { base.annotations = newValue }
-    }
-
-    public var definition: Schema { base.definition }
+    public var schemaValue: [KeywordIdentifier: JSONValue]
 
     var base: JSONObject<Props>
     let additionalPropertiesSchema: AdditionalProps
 
     public init(base: JSONObject<Props>, additionalProperties: AdditionalProps) {
-      self.base = base.additionalProperties(.schema(additionalProperties.definition))
+      self.base = base
       self.additionalPropertiesSchema = additionalProperties
+      schemaValue = base.schemaValue
+      schemaValue[Keywords.AdditionalProperties.name] = .object(additionalProperties.schemaValue)
+    }
+
+    public func schema() -> Schema {
+      fatalError("TODO: Implement")
     }
 
     public func validate(
@@ -30,7 +31,7 @@ extension JSONComponents {
 
       // Validate the additional properties
       var additionalProperties: [String: AdditionalProps.Output] = [:]
-      for (key, value) in dictionary where !base.properties.schema.keys.contains(key) {
+      for (key, value) in dictionary where !base.schemaValue.keys.contains(key) {
         switch additionalPropertiesSchema.validate(value) {
         case .valid(let output): additionalProperties[key] = output
         case .invalid(let errors): return .invalid(errors)

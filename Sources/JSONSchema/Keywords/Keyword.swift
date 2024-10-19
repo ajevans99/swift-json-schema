@@ -16,4 +16,10 @@ package struct KeywordContext {
   let location: JSONPointer
   let context: Context
   let uri: URL
+
+  package init(location: JSONPointer = .init(), context: Context = .init(dialect: .draft2020_12), uri: URL = .init(fileURLWithPath: #file)) {
+    self.location = location
+    self.context = context
+    self.uri = uri
+  }
 }

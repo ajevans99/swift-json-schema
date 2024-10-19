@@ -74,6 +74,7 @@ public enum Dialect: String, Hashable, Sendable {
         Keywords.MaxLength.self,
         Keywords.MinLength.self,
         Keywords.Pattern.self,
+        Keywords.Format.self,
 
         Keywords.MaxItems.self,
         Keywords.MinItems.self,

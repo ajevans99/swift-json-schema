@@ -52,21 +52,21 @@ extension Keywords {
     }
   }
 
-  struct Enum: AssertionKeyword {
-    static let name = "enum"
+  package struct Enum: AssertionKeyword {
+    package static let name = "enum"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let enumCases: [JSONValue]
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.enumCases = value.array ?? []
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -77,13 +77,18 @@ extension Keywords {
     }
   }
 
-  struct Constant: AssertionKeyword {
-    static let name = "const"
+  package struct Constant: AssertionKeyword {
+    package static let name = "const"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
-    func validate(
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
+
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -99,22 +104,22 @@ extension Keywords {
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-multipleof
-  struct MultipleOf: AssertionKeyword {
-    static let name = "multipleOf"
+  package struct MultipleOf: AssertionKeyword {
+    package static let name = "multipleOf"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let divisor: Double
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
 
       divisor = value.numeric ?? 1.0
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -135,21 +140,21 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-maximum
-  struct Maximum: AssertionKeyword {
-    static let name = "maximum"
+  package struct Maximum: AssertionKeyword {
+    package static let name = "maximum"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let maxValue: Double
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.maxValue = value.numeric ?? .infinity
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -160,21 +165,21 @@ extension Keywords {
     }
   }
 
-  struct ExclusiveMaximum: AssertionKeyword {
-    static let name = "exclusiveMaximum"
+  package struct ExclusiveMaximum: AssertionKeyword {
+    package static let name = "exclusiveMaximum"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let exclusiveMaxValue: Double
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.exclusiveMaxValue = value.numeric ?? .infinity
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -186,21 +191,21 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-minimum
-  struct Minimum: AssertionKeyword {
-    static let name = "minimum"
+  package struct Minimum: AssertionKeyword {
+    package static let name = "minimum"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let minValue: Double
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.minValue = value.numeric ?? -.infinity
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -211,21 +216,21 @@ extension Keywords {
     }
   }
 
-  struct ExclusiveMinimum: AssertionKeyword {
-    static let name = "exclusiveMinimum"
+  package struct ExclusiveMinimum: AssertionKeyword {
+    package static let name = "exclusiveMinimum"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let exclusiveMinValue: Double
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.exclusiveMinValue = value.numeric ?? -.infinity
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -241,21 +246,21 @@ extension Keywords {
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-maxlength
-  struct MaxLength: AssertionKeyword {
-    static let name = "maxLength"
+  package struct MaxLength: AssertionKeyword {
+    package static let name = "maxLength"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let maxLength: Int
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.maxLength = value.integer ?? Int.max
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -267,21 +272,21 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-minlength
-  struct MinLength: AssertionKeyword {
-    static let name = "minLength"
+  package struct MinLength: AssertionKeyword {
+    package static let name = "minLength"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let minLength: Int
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.minLength = value.integer ?? 0
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -293,16 +298,16 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-pattern
-  struct Pattern: AssertionKeyword {
-    static let name = "pattern"
+  package struct Pattern: AssertionKeyword {
+    package static let name = "pattern"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     nonisolated(unsafe)
     private let regex: Regex<AnyRegexOutput>?
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
 
@@ -313,7 +318,7 @@ extension Keywords {
       }
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -325,27 +330,43 @@ extension Keywords {
       }
     }
   }
+
+  package struct Format: AssertionKeyword {
+    package static let name = "format"
+
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
+
+    package func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
+      // TODO: Support format keyword
+    }
+  }
 }
 
 // MARK: - Arrays
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-maxitems
-  struct MaxItems: AssertionKeyword {
-    static let name = "maxItems"
+  package struct MaxItems: AssertionKeyword {
+    package static let name = "maxItems"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let maxItems: Int
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.maxItems = value.integer ?? Int.max
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -357,21 +378,21 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-minitems
-  struct MinItems: AssertionKeyword {
-    static let name = "minItems"
+  package struct MinItems: AssertionKeyword {
+    package static let name = "minItems"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let minItems: Int
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.minItems = value.integer ?? 0
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -383,21 +404,21 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-uniqueitems
-  struct UniqueItems: AssertionKeyword {
-    static let name = "uniqueItems"
+  package struct UniqueItems: AssertionKeyword {
+    package static let name = "uniqueItems"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let uniqueItemsRequired: Bool
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.uniqueItemsRequired = value.boolean ?? false
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -412,21 +433,21 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-maxcontains
-  struct MaxContains: AssertionKeyword {
-    static let name = "maxContains"
+  package struct MaxContains: AssertionKeyword {
+    package static let name = "maxContains"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let maxContains: Int
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.maxContains = value.integer ?? Int.max
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -451,15 +472,15 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-mincontains
-  struct MinContains: AssertionKeyword {
-    static let name = "minContains"
+  package struct MinContains: AssertionKeyword {
+    package static let name = "minContains"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let minContains: Int
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.minContains = value.integer ?? 1
@@ -469,7 +490,7 @@ extension Keywords {
       }
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -498,21 +519,21 @@ extension Keywords {
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-maxproperties
-  struct MaxProperties: AssertionKeyword {
-    static let name = "maxProperties"
+  package struct MaxProperties: AssertionKeyword {
+    package static let name = "maxProperties"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let maxProperties: Int
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.maxProperties = value.integer ?? Int.max
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -526,21 +547,21 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-minproperties
-  struct MinProperties: AssertionKeyword {
-    static let name = "minProperties"
+  package struct MinProperties: AssertionKeyword {
+    package static let name = "minProperties"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let minProperties: Int
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.minProperties = value.integer ?? 0
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -554,21 +575,21 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-required
-  struct Required: AssertionKeyword {
-    static let name = "required"
+  package struct Required: AssertionKeyword {
+    package static let name = "required"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let requiredKeys: [String]
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.requiredKeys = value.array?.compactMap { $0.string } ?? []
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer
@@ -582,22 +603,22 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-dependentrequired
-  struct DependentRequired: AssertionKeyword {
-    static let name = "dependentRequired"
+  package struct DependentRequired: AssertionKeyword {
+    package static let name = "dependentRequired"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
 
     private let dependencies: [String: [String]]
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.dependencies =
         value.object?.compactMapValues { $0.array?.compactMap { $0.string } } ?? [:]
     }
 
-    func validate(
+    package func validate(
       _ input: JSONValue,
       at location: JSONPointer,
       using annotations: AnnotationContainer

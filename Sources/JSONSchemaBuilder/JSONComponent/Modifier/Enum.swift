@@ -11,15 +11,10 @@ extension JSONSchemaComponent {
 
 extension JSONComponents {
   public struct Enum<Upstream: JSONSchemaComponent>: JSONSchemaComponent {
-    public var definition: Schema {
-      var copy = upstream.definition
-      copy.enumValues = cases
-      return copy
-    }
-
-    public var annotations: AnnotationOptions {
-      get { upstream.annotations }
-      set { upstream.annotations = newValue }
+    // TODO: I don't think this is correct. Need to fix
+    public var schemaValue: [KeywordIdentifier : JSONValue] {
+      get { upstream.schemaValue }
+      set { upstream.schemaValue = newValue }
     }
 
     var upstream: Upstream

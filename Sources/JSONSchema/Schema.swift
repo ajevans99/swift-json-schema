@@ -85,14 +85,14 @@ struct BooleanSchema: ValidatableSchema {
   }
 }
 
-struct ObjectSchema: ValidatableSchema {
+package struct ObjectSchema: ValidatableSchema {
   let schemaValue: [String: JSONValue]
   let location: JSONPointer
   let context: Context
   let keywords: [any Keyword]
   let uri: URL?
 
-  init(
+  package init(
     schemaValue: [String: JSONValue],
     location: JSONPointer,
     context: Context,
@@ -111,7 +111,7 @@ struct ObjectSchema: ValidatableSchema {
     self.uri = processedURI
   }
 
-  static func collectKeywords(
+  private static func collectKeywords(
     from schemaValue: [String: JSONValue],
     location: JSONPointer,
     context: Context,
@@ -148,12 +148,12 @@ struct ObjectSchema: ValidatableSchema {
     return (processedURI, keywords)
   }
 
-  public func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
+  package func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
     var annotations = AnnotationContainer()
     return validate(instance, at: location, annotations: &annotations)
   }
 
-  public func validate(
+  package func validate(
     _ instance: JSONValue,
     at location: JSONPointer,
     annotations: inout AnnotationContainer
@@ -200,7 +200,7 @@ struct ObjectSchema: ValidatableSchema {
     )
   }
 
-  func asSchema() -> Schema {
+  package func asSchema() -> Schema {
     .init(schema: self, location: location, context: context)
   }
 }

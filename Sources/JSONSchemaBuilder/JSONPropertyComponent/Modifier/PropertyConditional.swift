@@ -4,10 +4,10 @@ extension JSONPropertyComponents {
   /// A component that conditionally applies one of two property collections.
   public enum Conditional<First: PropertyCollection, Second: PropertyCollection>: PropertyCollection
   where First.Output == Second.Output {
-    public var schema: [String: Schema] {
+    public var schemaValue: [String: JSONValue] {
       switch self {
-      case .first(let first): first.schema
-      case .second(let second): second.schema
+      case .first(let first): first.schemaValue
+      case .second(let second): second.schemaValue
       }
     }
 

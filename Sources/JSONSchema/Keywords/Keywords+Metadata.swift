@@ -2,75 +2,125 @@
 protocol MetadataKeyword: Keyword {}
 
 extension Keywords {
-  struct Title: MetadataKeyword {
-    static let name = "title"
+  package struct Title: MetadataKeyword {
+    package static let name = "title"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
   }
 
-  struct Description: MetadataKeyword {
-    static let name = "description"
+  package struct Description: MetadataKeyword {
+    package static let name = "description"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
   }
 
-  struct Default: MetadataKeyword {
-    static let name = "default"
+  package struct Default: MetadataKeyword {
+    package static let name = "default"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
   }
 
-  struct Deprecated: MetadataKeyword {
-    static let name = "deprecated"
+  package struct Deprecated: MetadataKeyword {
+    package static let name = "deprecated"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
   }
 
-  struct ReadOnly: MetadataKeyword {
-    static let name = "readOnly"
+  package struct ReadOnly: MetadataKeyword {
+    package static let name = "readOnly"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
   }
 
-  struct WriteOnly: MetadataKeyword {
-    static let name = "writeOnly"
+  package struct WriteOnly: MetadataKeyword {
+    package static let name = "writeOnly"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
   }
 
-  struct Examples: MetadataKeyword {
-    static let name = "examples"
+  package struct Examples: MetadataKeyword {
+    package static let name = "examples"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
   }
 }
 
 extension Keywords {
-  struct ContentEncoding: MetadataKeyword {
-    static let name = "contentEncoding"
+  package struct ContentEncoding: MetadataKeyword {
+    package static let name = "contentEncoding"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
   }
 
-  struct ContentMediaType: MetadataKeyword {
-    static let name = "contentMediaType"
+  package struct ContentMediaType: MetadataKeyword {
+    package static let name = "contentMediaType"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
   }
 
-  struct ContentSchema: MetadataKeyword {
-    static let name = "contentSchema"
+  package struct ContentSchema: MetadataKeyword {
+    package static let name = "contentSchema"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
   }
 }
