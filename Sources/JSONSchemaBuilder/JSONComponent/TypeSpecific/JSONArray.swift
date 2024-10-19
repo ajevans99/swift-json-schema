@@ -9,14 +9,16 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
   /// Creates a new JSON array schema component.
   /// - Parameter items: A JSON schema component for validating each item in the array.
   public init(@JSONSchemaBuilder items: () -> T) {
-    self.items = items()
+    let items = items()
+    self.items = items
     schemaValue[Keywords.TypeKeyword.name] = .string(JSONType.array.rawValue)
-    schemaValue[Keywords.Items.name] = .object(self.items.schemaValue)
+    if !items.schemaValue.isEmpty {
+      schemaValue[Keywords.Items.name] = .object(self.items.schemaValue)
+    }
   }
 
   /// Creates a new JSON array schema component.
-  /// - Parameter disableItems: A boolean value that disallows items in the array.
-  public init(disableItems: Bool = false) where T == JSONAnyValue {
+  public init() where T == JSONAnyValue {
     self.init {
       JSONAnyValue()
     }

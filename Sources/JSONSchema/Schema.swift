@@ -57,12 +57,18 @@ public struct Schema: ValidatableSchema {
   }
 }
 
-struct BooleanSchema: ValidatableSchema {
+package struct BooleanSchema: ValidatableSchema {
   let schemaValue: Bool
   let location: JSONPointer
   let context: Context
 
-  func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
+  package init(schemaValue: Bool, location: JSONPointer, context: Context) {
+    self.schemaValue = schemaValue
+    self.location = location
+    self.context = context
+  }
+
+  package func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
     ValidationResult(
       valid: schemaValue,
       keywordLocation: self.location,
@@ -80,7 +86,7 @@ struct BooleanSchema: ValidatableSchema {
     )
   }
 
-  func asSchema() -> Schema {
+  package func asSchema() -> Schema {
     .init(schema: self, location: location, context: context)
   }
 }

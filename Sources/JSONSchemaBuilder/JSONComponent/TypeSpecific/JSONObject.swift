@@ -28,11 +28,16 @@ public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
   /// ```
   /// - Parameter build: A closure that returns an collection of `JSONProperty` instances.
   public init(@JSONPropertySchemaBuilder with properties: () -> Props) {
-    self.properties = properties()
+    let properties = properties()
+    self.properties = properties
 
     schemaValue[Keywords.TypeKeyword.name] = .string(JSONType.object.rawValue)
-    schemaValue[Keywords.Required.name] = .array(self.properties.requiredKeys.map { .string($0) })
-    schemaValue[Keywords.Properties.name] = .object(self.properties.schemaValue)
+    if !properties.requiredKeys.isEmpty {
+      schemaValue[Keywords.Required.name] = .array(properties.requiredKeys.map { .string($0) })
+    }
+    if !properties.schemaValue.isEmpty {
+      schemaValue[Keywords.Properties.name] = .object(properties.schemaValue)
+    }
   }
 
   /// Creates a new `JSONObject` with no property requirements.

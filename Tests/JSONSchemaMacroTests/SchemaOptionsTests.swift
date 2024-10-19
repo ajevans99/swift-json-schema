@@ -153,7 +153,7 @@ struct SchemaOptionsTests {
     )
   }
 
-  @Test(.disabled()) func onEnum() {
+  func onEnum() {
     assertMacroExpansion(
       """
       @Schemable
