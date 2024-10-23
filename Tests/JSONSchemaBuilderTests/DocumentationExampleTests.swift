@@ -72,7 +72,7 @@ struct DocumentationExampleTests {
       .title("Person")
     }
 
-    #expect(schemaRepresentation.validate(.object(["age": .integer(20)])) == .valid(20))
+    #expect(schemaRepresentation.parse(.object(["age": .integer(20)])) == .valid(20))
   }
 
   @Schemable struct Book {
@@ -122,5 +122,15 @@ struct DocumentationExampleTests {
     #expect(
       Weather2.schema.schemaValue["properties"]?.object?["secret"] == nil
     )
+  }
+
+  @Schemable enum Status {
+    case active
+    case inactive
+  }
+
+  @Test func readMeEnumMacro() {
+    let expected: [String: JSONValue] = ["type": "string", "enum": ["active", "inactive"]]
+    #expect(Status.schema.schemaValue == expected)
   }
 }

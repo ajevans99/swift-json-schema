@@ -14,7 +14,7 @@ public struct JSONInteger: JSONNumberType {
     ObjectSchema(schemaValue: schemaValue, location: .init(), context: .init(dialect: .draft2020_12)).asSchema()
   }
 
-  public func validate(_ value: JSONValue) -> Validated<Int, String> {
+  public func parse(_ value: JSONValue) -> Validated<Int, String> {
     if case .integer(let int) = value { return .valid(int) }
     return .error("Expected integer value.")
   }
@@ -32,7 +32,7 @@ public struct JSONNumber: JSONNumberType {
     ObjectSchema(schemaValue: schemaValue, location: .init(), context: .init(dialect: .draft2020_12)).asSchema()
   }
 
-  public func validate(_ value: JSONValue) -> Validated<Double, String> {
+  public func parse(_ value: JSONValue) -> Validated<Double, String> {
     if case .number(let double) = value { return .valid(double) }
     return .error("Expected a number.")
   }

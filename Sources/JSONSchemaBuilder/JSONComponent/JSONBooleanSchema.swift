@@ -13,8 +13,8 @@ public struct JSONBooleanSchema: JSONSchemaComponent {
     BooleanSchema(schemaValue: value, location: .init(), context: .init(dialect: .draft2020_12)).asSchema()
   }
 
-  public func validate(_ value: JSONValue) -> Validated<Bool, String> {
-    .valid(self.value) // TODO: Fix this
+  public func parse(_ value: JSONValue) -> Validated<Bool, String> {
+    self.value ? .valid(true) : .error("boolean schema false")
   }
 }
 

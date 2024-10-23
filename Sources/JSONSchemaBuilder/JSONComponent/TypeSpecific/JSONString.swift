@@ -12,7 +12,7 @@ public struct JSONString: JSONSchemaComponent {
     ObjectSchema(schemaValue: schemaValue, location: .init(), context: .init(dialect: .draft2020_12)).asSchema()
   }
 
-  public func validate(_ value: JSONValue) -> Validated<String, String> {
+  public func parse(_ value: JSONValue) -> Validated<String, String> {
     if case .string(let string) = value { return .valid(string) }
     return .error("Expected a string value.")
   }

@@ -36,11 +36,11 @@ public enum JSONComposition {
       schemaValue[Keywords.AnyOf.name] = .array(components.map { .object($0.schemaValue) })
     }
 
-    public func validate(_ value: JSONValue) -> Validated<Output, String> {
+    public func parse(_ value: JSONValue) -> Validated<Output, String> {
       var allErrors: [String] = []
 
       for component in components {
-        switch component.validate(value) {
+        switch component.parse(value) {
         case .valid(let output): return .valid(output)
         case .invalid(let errors): allErrors.append(contentsOf: errors)
         }
@@ -63,7 +63,7 @@ public enum JSONComposition {
       schemaValue[Keywords.AllOf.name] = .array(components.map { .object($0.schemaValue) })
     }
 
-    public func validate(_ value: JSONValue) -> Validated<Output, String> {
+    public func parse(_ value: JSONValue) -> Validated<Output, String> {
       guard !components.isEmpty else {
         return .error("AllOf validation requires at least one schema component")
       }
@@ -72,7 +72,7 @@ public enum JSONComposition {
       var validResult: Output?
 
       for component in components {
-        switch component.validate(value) {
+        switch component.parse(value) {
         case .valid(let result): if validResult == nil { validResult = result }
         case .invalid(let errors): combinedErrors.append(contentsOf: errors)
         }
@@ -99,12 +99,12 @@ public enum JSONComposition {
       schemaValue[Keywords.OneOf.name] = .array(components.map { .object($0.schemaValue) })
     }
 
-    public func validate(_ value: JSONValue) -> Validated<Output, String> {
+    public func parse(_ value: JSONValue) -> Validated<Output, String> {
       var validResults: [Output] = []
       var combinedErrors: [String] = []
 
       for component in components {
-        switch component.validate(value) {
+        switch component.parse(value) {
         case .valid(let result): validResults.append(result)
         case .invalid(let errors): combinedErrors.append(contentsOf: errors)
         }
@@ -136,8 +136,8 @@ public enum JSONComposition {
       schemaValue[Keywords.Not.name] = .object(component.schemaValue)
     }
 
-    public func validate(_ value: JSONValue) -> Validated<JSONValue, String> {
-      switch component.validate(value) {
+    public func parse(_ value: JSONValue) -> Validated<JSONValue, String> {
+      switch component.parse(value) {
       case .valid: return .error("\(value) is valid against the not schema.")
       case .invalid: return .valid(value)
       }

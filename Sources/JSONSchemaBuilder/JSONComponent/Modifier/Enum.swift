@@ -28,8 +28,8 @@ extension JSONComponents {
 
     }
 
-    public func validate(_ value: JSONValue) -> Validated<Upstream.Output, String> {
-      for `case` in cases where `case` == value { return upstream.validate(value) }
+    public func parse(_ value: JSONValue) -> Validated<Upstream.Output, String> {
+      for `case` in cases where `case` == value { return upstream.parse(value) }
       return .error("\(value) does not match any enum case.")
     }
   }

@@ -1,17 +1,5 @@
 import JSONSchema
 
-//struct KeywordTypeWrapper: Hashable {
-//  let type: any Keyword.Type
-//
-//  static func == (lhs: KeywordTypeWrapper, rhs: KeywordTypeWrapper) -> Bool {
-//    return lhs.type.name == rhs.type.name
-//  }
-//
-//  func hash(into hasher: inout Hasher) {
-//    hasher.combine(type.name)
-//  }
-//}
-
 /// A JSON object schema component for use in ``JSONSchemaBuilder``.
 public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
   public var schemaValue = [KeywordIdentifier: JSONValue]()
@@ -47,7 +35,7 @@ public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
     ObjectSchema(schemaValue: schemaValue, location: .init(), context: .init(dialect: .draft2020_12)).asSchema()
   }
 
-  public func validate(_ input: JSONValue) -> Validated<Props.Output, String> {
+  public func parse(_ input: JSONValue) -> Validated<Props.Output, String> {
     if case .object(let dictionary) = input { return properties.validate(dictionary) }
     return .error("Not an object")
   }

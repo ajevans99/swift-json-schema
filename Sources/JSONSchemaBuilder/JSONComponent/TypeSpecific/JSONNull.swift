@@ -17,7 +17,7 @@ public struct JSONNull: JSONSchemaComponent {
     .asSchema()
   }
 
-  public func validate(_ value: JSONValue) -> Validated<Void, String> {
+  public func parse(_ value: JSONValue) -> Validated<Void, String> {
     if case .null = value { return .valid(()) }
     return .error("Expected null value, but got \(value)")
   }

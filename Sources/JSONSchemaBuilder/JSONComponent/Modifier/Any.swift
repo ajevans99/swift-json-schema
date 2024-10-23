@@ -13,9 +13,9 @@ extension JSONComponents {
     public init<Component: JSONSchemaComponent>(_ component: Component)
     where Component.Output == Output {
       self.schemaValue = component.schemaValue
-      self.validate = component.validate
+      self.validate = component.parse
     }
 
-    public func validate(_ value: JSONValue) -> Validated<Output, String> { validate(value) }
+    public func parse(_ value: JSONValue) -> Validated<Output, String> { validate(value) }
   }
 }
