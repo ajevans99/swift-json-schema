@@ -51,7 +51,7 @@ let data: JSONValue = [
   "origin": "DTW",
   "destination": "SFO",
   "airline": "delta",
-  "duration": 4.3
+  "duration": 4.3,
 ]
 let flight = Flight.schema.parse(data)
 dump(flight, name: "Flight")

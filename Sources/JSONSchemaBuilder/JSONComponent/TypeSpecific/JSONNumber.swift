@@ -11,7 +11,12 @@ public struct JSONInteger: JSONNumberType {
   }
 
   public func schema() -> Schema {
-    ObjectSchema(schemaValue: schemaValue, location: .init(), context: .init(dialect: .draft2020_12)).asSchema()
+    ObjectSchema(
+      schemaValue: schemaValue,
+      location: .init(),
+      context: .init(dialect: .draft2020_12)
+    )
+    .asSchema()
   }
 
   public func parse(_ value: JSONValue) -> Validated<Int, String> {
@@ -29,7 +34,12 @@ public struct JSONNumber: JSONNumberType {
   }
 
   public func schema() -> Schema {
-    ObjectSchema(schemaValue: schemaValue, location: .init(), context: .init(dialect: .draft2020_12)).asSchema()
+    ObjectSchema(
+      schemaValue: schemaValue,
+      location: .init(),
+      context: .init(dialect: .draft2020_12)
+    )
+    .asSchema()
   }
 
   public func parse(_ value: JSONValue) -> Validated<Double, String> {
@@ -56,7 +66,7 @@ extension JSONNumberType {
     copy.schemaValue[Keywords.Minimum.name] = .number(minimum)
     return copy
   }
-  
+
   /// Adds an exclusive minimum constraint to the schema.
   /// - Parameter minimum: The minimum value that the number must be greater than.
   /// - Returns: A new `JSONNumber` with the exclusive minimum constraint set.

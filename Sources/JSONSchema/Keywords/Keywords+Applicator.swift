@@ -189,7 +189,7 @@ extension Keywords {
       }
 
       if validIndices.isEmpty
-          && !context.context.minContainsIsZero[self.context.location.dropLast(), default: false]
+        && !context.context.minContainsIsZero[self.context.location.dropLast(), default: false]
       {
         throw .containsInsufficientMatches
       }
@@ -272,7 +272,7 @@ extension Keywords {
     package let context: KeywordContext
 
     nonisolated(unsafe)
-    private let patterns: [(Regex<AnyRegexOutput>, Schema)]
+      private let patterns: [(Regex<AnyRegexOutput>, Schema)]
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
@@ -610,7 +610,8 @@ extension Keywords {
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
-      guard context.context.ifConditionalResults[self.context.location.dropLast()]?.isValid == true else {
+      guard context.context.ifConditionalResults[self.context.location.dropLast()]?.isValid == true
+      else {
         return
       }
 
@@ -645,7 +646,8 @@ extension Keywords {
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
-      guard context.context.ifConditionalResults[self.context.location.dropLast()]?.isValid == false else {
+      guard context.context.ifConditionalResults[self.context.location.dropLast()]?.isValid == false
+      else {
         return
       }
       var subAnnotations = AnnotationContainer()
@@ -942,7 +944,7 @@ struct ValidationResultBuilder {
           .init(
             keyword: type(of: keyword).name,
             message: "Validation failed",
-            keywordLocation: keyword.context.location,  
+            keywordLocation: keyword.context.location,
             instanceLocation: instanceLocation
           )
         )

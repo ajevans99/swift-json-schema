@@ -15,7 +15,7 @@ struct JSONCompositionTests {
     let expected: [String: JSONValue] = [
       "anyOf": [
         ["type": "string"],
-        ["type": "number", "minimum": 0]
+        ["type": "number", "minimum": 0],
       ]
     ]
 
@@ -33,7 +33,7 @@ struct JSONCompositionTests {
     let expected: [String: JSONValue] = [
       "allOf": [
         ["type": "string"],
-        ["type": "number", "maximum": 10]
+        ["type": "number", "maximum": 10],
       ]
     ]
 
@@ -51,7 +51,7 @@ struct JSONCompositionTests {
     let expected: [String: JSONValue] = [
       "oneOf": [
         ["type": "string", "pattern": "^[a-zA-Z]+$"],
-        ["type": "boolean"]
+        ["type": "boolean"],
       ]
     ]
 
@@ -85,8 +85,8 @@ struct JSONCompositionTests {
       "description": "This is the description",
       "allOf": [
         ["type": "string"],
-        ["type": "number", "maximum": 10]
-      ]
+        ["type": "number", "maximum": 10],
+      ],
     ]
 
     #expect(sample.schemaValue == expected)

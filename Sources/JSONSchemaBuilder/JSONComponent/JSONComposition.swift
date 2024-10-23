@@ -51,7 +51,7 @@ public enum JSONComposition {
 
   /// A component that requires all of the schemas to be valid.
   public struct AllOf<Output>: JSONComposableCollectionComponent {
-     public var schemaValue = [KeywordIdentifier: JSONValue]()
+    public var schemaValue = [KeywordIdentifier: JSONValue]()
 
     public let components: [any JSONSchemaComponent<Output>]
 

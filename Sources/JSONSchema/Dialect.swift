@@ -127,13 +127,15 @@ public enum Dialect: String, Hashable, Sendable {
     let metaDictionary: [String: JSONValue] =
       try metaURLs?
       .reduce(into: [:]) { result, url in
-#if os(Linux)
-        let value = try jsonValue(from: url as URL)
-        let uriString = "meta/\(url.lastPathComponent?.replacingOccurrences(of: ".json", with: "") ?? "")"
-#else
-        let value = try jsonValue(from: url)
-        let uriString = "meta/\(url.lastPathComponent.replacingOccurrences(of: ".json", with: ""))"
-#endif
+        #if os(Linux)
+          let value = try jsonValue(from: url as URL)
+          let uriString =
+            "meta/\(url.lastPathComponent?.replacingOccurrences(of: ".json", with: "") ?? "")"
+        #else
+          let value = try jsonValue(from: url)
+          let uriString =
+            "meta/\(url.lastPathComponent.replacingOccurrences(of: ".json", with: ""))"
+        #endif
         if let key = URL(string: uriString, relativeTo: baseURI)?.absoluteString {
           result[key] = value
         }

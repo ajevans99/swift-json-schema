@@ -9,8 +9,9 @@ struct DocumentationExampleTests {
       JSONObject {
         JSONProperty(key: "firstName") {
           JSONString()
-            .description("The person's first name.") }
-            .required()
+            .description("The person's first name.")
+        }
+        .required()
 
         JSONProperty(key: "lastName") {
           JSONString()
@@ -35,8 +36,12 @@ struct DocumentationExampleTests {
       "properties": [
         "firstName": ["type": "string", "description": "The person's first name."],
         "lastName": ["type": "string", "description": "The person's last name."],
-        "age": ["type": "integer", "description": "Age in years which must be equal to or greater than zero.", "minimum": 0.0, "maximum": 120.0]
-      ]
+        "age": [
+          "type": "integer",
+          "description": "Age in years which must be equal to or greater than zero.",
+          "minimum": 0.0, "maximum": 120.0,
+        ],
+      ],
     ]
 
     #expect(jsonSchema.schemaValue == expected)

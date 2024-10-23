@@ -6,7 +6,7 @@ import Testing
 struct JSONSchemaOptionBuilderTests {
   @Test func objectOptions() throws {
     @JSONSchemaBuilder var sample:
-    some JSONSchemaComponent<((String?, String, Bool?, Double), [String: Bool])>
+      some JSONSchemaComponent<((String?, String, Bool?, Double), [String: Bool])>
     {
       JSONObject {
         JSONProperty(key: "property0") { JSONString() }
@@ -35,7 +35,7 @@ struct JSONSchemaOptionBuilderTests {
         ],
         "property3": [
           "type": "number"
-        ]
+        ],
       ],
       "additionalProperties": [
         "type": "boolean"
@@ -51,9 +51,9 @@ struct JSONSchemaOptionBuilderTests {
       "maxProperties": 10,
       "propertyNames": [
         "type": "string",
-        "pattern": "^property[0-9]$"
+        "pattern": "^property[0-9]$",
       ],
-      "unevaluatedProperties": [:] // TODO: Should be false
+      "unevaluatedProperties": [:],  // TODO: Should be false
     ]
 
     #expect(sample.schemaValue == expected)
@@ -75,13 +75,13 @@ struct JSONSchemaOptionBuilderTests {
         ],
         "key2": [
           "type": "number"
-        ]
-      ]
+        ],
+      ],
     ]
 
     #expect(
       sample.schemaValue
-      == expected
+        == expected
     )
   }
 
@@ -94,10 +94,10 @@ struct JSONSchemaOptionBuilderTests {
 
     let expected: [String: JSONValue] = [
       "type": "object",
-      "additionalProperties": [:], // TODO: Should be false
+      "additionalProperties": [:],  // TODO: Should be false
       "unevaluatedProperties": [
         "type": "integer"
-      ]
+      ],
     ]
 
     #expect(sample.schemaValue == expected)
@@ -117,7 +117,7 @@ struct JSONSchemaOptionBuilderTests {
       "minLength": 12,
       "maxLength": 36,
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
-      "format": "uuid"
+      "format": "uuid",
     ]
 
     #expect(sample.schemaValue == expected)
@@ -135,7 +135,7 @@ struct JSONSchemaOptionBuilderTests {
       "type": "integer",
       "multipleOf": 2,
       "minimum": 1,
-      "exclusiveMaximum": 100
+      "exclusiveMaximum": 100,
     ]
 
     #expect(sample.schemaValue == expected)
@@ -153,7 +153,7 @@ struct JSONSchemaOptionBuilderTests {
       "type": "number",
       "multipleOf": 1,
       "exclusiveMinimum": 0.99,
-      "maximum": 5000
+      "maximum": 5000,
     ]
 
     #expect(sample.schemaValue == expected)
@@ -169,7 +169,7 @@ struct JSONSchemaOptionBuilderTests {
       "type": "array",
       "unevaluatedItems": [
         "type": "number"
-      ]
+      ],
     ]
 
     #expect(sample.schemaValue == expected)
@@ -200,9 +200,9 @@ struct JSONSchemaOptionBuilderTests {
         ["type": "number"],
         ["type": "string"],
         ["type": "boolean"],
-        ["type": "integer"]
+        ["type": "integer"],
       ],
-      "unevaluatedItems": [:], // TODO: Should be false
+      "unevaluatedItems": [:],  // TODO: Should be false
       "contains": [
         "type": "number"
       ],
@@ -210,7 +210,7 @@ struct JSONSchemaOptionBuilderTests {
       "maxContains": 25,
       "minItems": 1,
       "maxItems": 50,
-      "uniqueItems": true
+      "uniqueItems": true,
     ]
 
     #expect(sample.schemaValue == expected)
@@ -262,7 +262,7 @@ struct JSONSchemaAnnotationsBuilderTests {
     let expected: [String: JSONValue] = [
       "type": "null",
       "default": "1",
-      "examples": ["1", nil, false, [1, 2, 3], ["hello": "world"]]
+      "examples": ["1", nil, false, [1, 2, 3], ["hello": "world"]],
     ]
 
     #expect(sample.schemaValue == expected)
@@ -283,9 +283,9 @@ struct JSONSchemaAnnotationsBuilderTests {
       "type": "object",
       "properties": [
         "productId": ["type": "integer", "description": "The unique identifier for a product"],
-        "productName": ["type": "string", "description": "Name of the product"]
+        "productName": ["type": "string", "description": "Name of the product"],
       ],
-      "description": "A product from Acme's catalog"
+      "description": "A product from Acme's catalog",
     ]
 
     #expect(sample.schemaValue == expected)

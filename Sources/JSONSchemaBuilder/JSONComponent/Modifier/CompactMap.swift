@@ -11,7 +11,7 @@ extension JSONSchemaComponent {
 
 extension JSONComponents {
   public struct CompactMap<Upstream: JSONSchemaComponent, Output>: JSONSchemaComponent {
-    public var schemaValue: [KeywordIdentifier : JSONValue] {
+    public var schemaValue: [KeywordIdentifier: JSONValue] {
       get { upstream.schemaValue }
       set { upstream.schemaValue = newValue }
     }

@@ -10,7 +10,8 @@ public struct JSONBooleanSchema: JSONSchemaComponent {
   let value: Bool
 
   public func schema() -> Schema {
-    BooleanSchema(schemaValue: value, location: .init(), context: .init(dialect: .draft2020_12)).asSchema()
+    BooleanSchema(schemaValue: value, location: .init(), context: .init(dialect: .draft2020_12))
+      .asSchema()
   }
 
   public func parse(_ value: JSONValue) -> Validated<Bool, String> {

@@ -14,11 +14,11 @@ struct FileLoader<T: Decodable> {
       print("Failed to find JSON files")
       return []
     }
-#if os(Linux)
-    return fileURLs.map { $0 as URL }
-#else
-    return fileURLs
-#endif
+    #if os(Linux)
+      return fileURLs.map { $0 as URL }
+    #else
+      return fileURLs
+    #endif
   }
 
   func readFile(at url: URL) -> Data? {

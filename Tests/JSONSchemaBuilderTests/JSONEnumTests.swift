@@ -12,7 +12,7 @@ struct JSONEnumTests {
 
     let expected: [String: JSONValue] = [
       "type": "string",
-      "enum": ["red"]
+      "enum": ["red"],
     ]
 
     #expect(sample.schemaValue == expected)
@@ -30,7 +30,7 @@ struct JSONEnumTests {
 
     let expected: [String: JSONValue] = [
       "type": "string",
-      "enum": ["red", "amber", "green"]
+      "enum": ["red", "amber", "green"],
     ]
 
     #expect(sample.schemaValue == expected)
@@ -69,7 +69,7 @@ struct JSONEnumTests {
     let expected: [String: JSONValue] = [
       "title": "Color",
       "type": "string",
-      "enum": ["red", "amber", "green"]
+      "enum": ["red", "amber", "green"],
     ]
 
     #expect(sample.schemaValue == expected)

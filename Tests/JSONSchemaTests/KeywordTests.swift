@@ -533,7 +533,7 @@ struct KeywordTests {
       }
       #expect(
         annotations.annotation(for: Keywords.PrefixItems.self, at: .init())?.value
-        == expectedAnnotation
+          == expectedAnnotation
       )
     }
 
@@ -599,7 +599,7 @@ struct KeywordTests {
       }
       #expect(
         annotations.annotation(for: Keywords.Contains.self, at: .init())?.value
-        == expectedAnnotation
+          == expectedAnnotation
       )
     }
 
@@ -633,7 +633,7 @@ struct KeywordTests {
       }
       #expect(
         annotations.annotation(for: Keywords.Properties.self, at: .init())?.value
-        == expectedAnnotation
+          == expectedAnnotation
       )
     }
 
@@ -665,7 +665,7 @@ struct KeywordTests {
       }
       #expect(
         annotations.annotation(for: Keywords.PatternProperties.self, at: .init())?.value
-        == expectedAnnotation
+          == expectedAnnotation
       )
     }
 
@@ -696,7 +696,7 @@ struct KeywordTests {
       }
       #expect(
         annotations.annotation(for: Keywords.AdditionalProperties.self, at: .init())?.value
-        == expectedAnnotation
+          == expectedAnnotation
       )
     }
 

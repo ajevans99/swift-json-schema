@@ -9,7 +9,12 @@ public struct JSONString: JSONSchemaComponent {
   }
 
   public func schema() -> Schema {
-    ObjectSchema(schemaValue: schemaValue, location: .init(), context: .init(dialect: .draft2020_12)).asSchema()
+    ObjectSchema(
+      schemaValue: schemaValue,
+      location: .init(),
+      context: .init(dialect: .draft2020_12)
+    )
+    .asSchema()
   }
 
   public func parse(_ value: JSONValue) -> Validated<String, String> {

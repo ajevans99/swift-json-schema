@@ -14,7 +14,7 @@ public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
   ///   JSONProperty(key: "name", value: JSONString())
   /// }
   /// ```
-  /// - Parameter build: A closure that returns an collection of `JSONProperty` instances.
+  /// - Parameter properties: A closure that returns an collection of `JSONProperty` instances.
   public init(@JSONPropertySchemaBuilder with properties: () -> Props) {
     let properties = properties()
     self.properties = properties
@@ -32,7 +32,12 @@ public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
   public init() where Props == EmptyPropertyCollection { self.init(with: {}) }
 
   public func schema() -> Schema {
-    ObjectSchema(schemaValue: schemaValue, location: .init(), context: .init(dialect: .draft2020_12)).asSchema()
+    ObjectSchema(
+      schemaValue: schemaValue,
+      location: .init(),
+      context: .init(dialect: .draft2020_12)
+    )
+    .asSchema()
   }
 
   public func parse(_ input: JSONValue) -> Validated<Props.Output, String> {

@@ -305,7 +305,7 @@ extension Keywords {
     package let context: KeywordContext
 
     nonisolated(unsafe)
-    private let regex: Regex<AnyRegexOutput>?
+      private let regex: Regex<AnyRegexOutput>?
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
@@ -342,7 +342,11 @@ extension Keywords {
       self.context = context
     }
 
-    package func validate(_ input: JSONValue, at location: JSONPointer, using annotations: AnnotationContainer) throws(ValidationIssue) {
+    package func validate(
+      _ input: JSONValue,
+      at location: JSONPointer,
+      using annotations: AnnotationContainer
+    ) throws(ValidationIssue) {
       // TODO: Support format keyword
     }
   }

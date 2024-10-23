@@ -51,7 +51,9 @@ extension JSONArray {
     >]
   ) -> Self {
     var copy = self
-    copy.schemaValue[Keywords.PrefixItems.name] = .array(prefixItems().map { .object($0.schemaValue) })
+    copy.schemaValue[Keywords.PrefixItems.name] = .array(
+      prefixItems().map { .object($0.schemaValue) }
+    )
     return copy
   }
 
