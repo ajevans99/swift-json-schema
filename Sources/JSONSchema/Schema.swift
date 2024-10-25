@@ -37,6 +37,11 @@ public struct Schema: ValidatableSchema {
     }
   }
 
+  public init(instance: String, dialect: Dialect = .draft2020_12, decoder: JSONDecoder = .init(), remoteSchemas: [String: JSONValue] = [:]) throws {
+    let value = try decoder.decode(JSONValue.self, from: Data(instance.utf8))
+    try self.init(rawSchema: value, context: .init(dialect: dialect, remoteSchema: remoteSchemas))
+  }
+
   init(schema: any ValidatableSchema, location: JSONPointer, context: Context) {
     self.schema = schema
     self.location = location

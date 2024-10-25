@@ -31,15 +31,6 @@ public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
   /// Creates a new `JSONObject` with no property requirements.
   public init() where Props == EmptyPropertyCollection { self.init(with: {}) }
 
-  public func schema() -> Schema {
-    ObjectSchema(
-      schemaValue: schemaValue,
-      location: .init(),
-      context: .init(dialect: .draft2020_12)
-    )
-    .asSchema()
-  }
-
   public func parse(_ input: JSONValue) -> Validated<Props.Output, String> {
     if case .object(let dictionary) = input { return properties.validate(dictionary) }
     return .error("Not an object")

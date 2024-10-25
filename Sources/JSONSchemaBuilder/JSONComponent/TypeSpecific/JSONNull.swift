@@ -8,15 +8,6 @@ public struct JSONNull: JSONSchemaComponent {
 
   public init() {}
 
-  public func schema() -> Schema {
-    ObjectSchema(
-      schemaValue: schemaValue,
-      location: .init(),
-      context: .init(dialect: .draft2020_12)
-    )
-    .asSchema()
-  }
-
   public func parse(_ value: JSONValue) -> Validated<Void, String> {
     if case .null = value { return .valid(()) }
     return .error("Expected null value, but got \(value)")

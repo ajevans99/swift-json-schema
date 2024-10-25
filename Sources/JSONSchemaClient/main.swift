@@ -55,6 +55,37 @@ let data: JSONValue = [
 ]
 let flight = Flight.schema.parse(data)
 dump(flight, name: "Flight")
-let schema = Flight.schema.schema()
-let validationResult = schema.validate(data)
+let flightSchema = Flight.schema.definition()
+let validationResult = flightSchema.validate(data)
 dump(validationResult, name: "Flight Validation Result")
+
+let nameBuilder = JSONObject {
+  JSONProperty(key: "name") {
+    JSONString()
+      .minLength(1)
+  }
+}
+let schema = nameBuilder.definition()
+
+let instance1: JSONValue = ["name": "Alice"]
+let instance2: JSONValue = ["name": ""]
+
+let result1 = schema.validate(instance1)
+dump(result1, name: "Instance 1 Validation Result")
+let result2 = schema.validate(instance2)
+dump(result2, name: "Instance 2 Validation Result")
+
+let schemaString = """
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
+"""
+let schema1 = try Schema(instance: schemaString, dialect: .draft2020_12)
+let result = try schema1.validate(instance: #"{"name": "Alice"}"#)
+schema1

@@ -8,6 +8,8 @@ The Swift JSON Schema library provides a type-safe way to generate and validate 
 
 * [Schema Generation](#schema-generation)
 * [Macros](#macros)
+* [Validation](#validation)
+* [Parsing](#parsing)
 * [Documentation](#documentation)
 * [Installation](#installation)
 * [Next Steps](#next-steps)
@@ -162,9 +164,154 @@ enum Status {
 
 Enums with associated values are also supported using `anyOf` schema composition. See the [JSONSchemaBuilder documentation](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder) for more information.
 
-## Parsing and Validation
+## Validation
 
+Using the `Schema` type, you can validate JSON data against a schema.
 
+```swift
+let schemaString = """
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
+"""
+let schema1 = try Schema(instance: schemaString)
+let result = try schema1.validate(instance: #"{"name": "Alice"}"#)
+```
+
+Alternatively, you can use the `JSONSchemaBuilder` builders (or [macros](#macros)) to create a schema and validate instances.
+
+```swift
+let nameBuilder = JSONObject {
+  JSONProperty(key: "name") {
+    JSONString()
+      .minLength(1)
+  }
+}
+let schema = nameBuilder.defintion()
+
+let instance1: JSONValue = ["name": "Alice"]
+let instance2: JSONValue = ["name": ""]
+
+let result1 = schema.validate(instance1)
+dump(result1, name: "Instance 1 Validation Result")
+let result2 = schema.validate(instance2)
+dump(result2, name: "Instance 2 Validation Result")
+```
+
+<details>
+  <summary>Instance 1 Validation Result</summary>
+
+  ```
+  ▿ Instance 1 Validation Result: JSONSchema.ValidationResult
+  - isValid: true
+  ▿ keywordLocation: #
+    - path: 0 elements
+  ▿ instanceLocation: #
+    - path: 0 elements
+  - errors: nil
+  ▿ annotations: Optional([JSONSchema.Annotation<JSONSchema.Keywords.Properties>(keyword: "properties", instanceLocation: #, schemaLocation: #/properties, absoluteSchemaLocation: nil, value: Set(["name"]))])
+    ▿ some: 1 element
+      ▿ JSONSchema.Annotation<JSONSchema.Keywords.Properties>
+        - keyword: "properties"
+        ▿ instanceLocation: #
+          - path: 0 elements
+        ▿ schemaLocation: #/properties
+          ▿ path: 1 element
+            ▿ JSONSchema.JSONPointer.Component.key
+              - key: "properties"
+        - absoluteSchemaLocation: nil
+        ▿ value: 1 member
+          - "name"
+  ```
+</details>
+
+<details>
+  <summary>Instance 2 Validation Result</summary>
+
+  ```
+  ▿ Instance 2 Validation Result: JSONSchema.ValidationResult
+  - isValid: false
+  ▿ keywordLocation: #
+    - path: 0 elements
+  ▿ instanceLocation: #
+    - path: 0 elements
+  ▿ errors: Optional([JSONSchema.ValidationError(keyword: "properties", message: "Validation failed for keyword \'properties\'", keywordLocation: #/properties, instanceLocation: #, errors: Optional([JSONSchema.ValidationError(keyword: "minLength", message: "The string length is less than the specified \'minLength\'.", keywordLocation: #/properties/name/minLength, instanceLocation: #/name, errors: nil)]))])
+    ▿ some: 1 element
+      ▿ JSONSchema.ValidationError
+        - keyword: "properties"
+        - message: "Validation failed for keyword \'properties\'"
+        ▿ keywordLocation: #/properties
+          ▿ path: 1 element
+            ▿ JSONSchema.JSONPointer.Component.key
+              - key: "properties"
+        ▿ instanceLocation: #
+          - path: 0 elements
+        ▿ errors: Optional([JSONSchema.ValidationError(keyword: "minLength", message: "The string length is less than the specified \'minLength\'.", keywordLocation: #/properties/name/minLength, instanceLocation: #/name, errors: nil)])
+          ▿ some: 1 element
+            ▿ JSONSchema.ValidationError
+              - keyword: "minLength"
+              - message: "The string length is less than the specified \'minLength\'."
+              ▿ keywordLocation: #/properties/name/minLength
+                ▿ path: 3 elements
+                  ▿ JSONSchema.JSONPointer.Component.key
+                    - key: "properties"
+                  ▿ JSONSchema.JSONPointer.Component.key
+                    - key: "name"
+                  ▿ JSONSchema.JSONPointer.Component.key
+                    - key: "minLength"
+              ▿ instanceLocation: #/name
+                ▿ path: 1 element
+                  ▿ JSONSchema.JSONPointer.Component.key
+                    - key: "name"
+              - errors: nil
+  - annotations: nil
+  ```
+</details>
+<br/>
+
+> **Note:** Dynamic references, vocabulary, and other advanced features are not yet supported. The library is still in development, and more features will be added in the future. See current [unsupported tests](Tests/JSONSchemaTests/JSONSchemaTestSuite.swift) from the [JSON Schema Test Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite).
+
+## Parsing
+
+When using [builders](#schema-generation) or [macros](#macros), you can also parse JSON instances into Swift types.
+
+```swift
+@Schemable
+enum TemperatureUnit {
+  case celsius
+  case fahrenheit
+}
+
+@Schemable
+struct Weather {
+  let temperature: Double
+  let unit: TemperatureUnit
+  let conditions: String
+}
+
+let data = """
+{
+  "temperature": 20,
+  "unit": "celsius",
+  "conditions": "Sunny"
+}
+"""
+let weather: Validated<Weather, String> = Weather.schema.parse(data)
+```
+
+**Comming soon** Optionally combine parsing and validation in a single step.
+
+```swift
+let weather: Weather = try Weather.schema.parseAndValidate(data)
+```
+
+> Shoutout to the [swift-parsing](https://github.com/pointfreeco/swift-parsing) library and the [Point-Free Parsing series](https://www.pointfree.co/collections/parsing) for the inspiration behind the parsing API and implementation.
 
 ## Documentation
 

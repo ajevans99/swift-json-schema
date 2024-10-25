@@ -10,15 +10,6 @@ public struct JSONInteger: JSONNumberType {
     schemaValue[Keywords.TypeKeyword.name] = .string(JSONType.integer.rawValue)
   }
 
-  public func schema() -> Schema {
-    ObjectSchema(
-      schemaValue: schemaValue,
-      location: .init(),
-      context: .init(dialect: .draft2020_12)
-    )
-    .asSchema()
-  }
-
   public func parse(_ value: JSONValue) -> Validated<Int, String> {
     if case .integer(let int) = value { return .valid(int) }
     return .error("Expected integer value.")
@@ -31,15 +22,6 @@ public struct JSONNumber: JSONNumberType {
 
   public init() {
     schemaValue[Keywords.TypeKeyword.name] = .string(JSONType.number.rawValue)
-  }
-
-  public func schema() -> Schema {
-    ObjectSchema(
-      schemaValue: schemaValue,
-      location: .init(),
-      context: .init(dialect: .draft2020_12)
-    )
-    .asSchema()
   }
 
   public func parse(_ value: JSONValue) -> Validated<Double, String> {
