@@ -1,12 +1,6 @@
 import JSONSchema
 
-public protocol JSONComposableComponent: JSONSchemaComponent {
-  var compositionOptions: CompositionOptions { get }
-}
-
-extension JSONComposableComponent {
-  public var definition: Schema { .noType(annotations, composition: compositionOptions) }
-}
+public protocol JSONComposableComponent: JSONSchemaComponent {}
 
 public protocol JSONComposableCollectionComponent: JSONComposableComponent {
   associatedtype Output
@@ -30,24 +24,23 @@ extension JSONComposableCollectionComponent where Output == JSONValue {
 public enum JSONComposition {
   /// A component that accepts any of the given schemas.
   public struct AnyOf<Output>: JSONComposableCollectionComponent {
-    public var annotations: AnnotationOptions = .annotations()
+    public var schemaValue = [KeywordIdentifier: JSONValue]()
 
     public let components: [any JSONSchemaComponent<Output>]
-    public let compositionOptions: CompositionOptions
 
     public init(
       into output: Output.Type,
       @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnyComponent<Output>]
     ) {
       components = builder()
-      compositionOptions = .anyOf(components.map(\.definition))
+      schemaValue[Keywords.AnyOf.name] = .array(components.map { .object($0.schemaValue) })
     }
 
-    public func validate(_ value: JSONValue) -> Validated<Output, String> {
+    public func parse(_ value: JSONValue) -> Validated<Output, String> {
       var allErrors: [String] = []
 
       for component in components {
-        switch component.validate(value) {
+        switch component.parse(value) {
         case .valid(let output): return .valid(output)
         case .invalid(let errors): allErrors.append(contentsOf: errors)
         }
@@ -58,20 +51,19 @@ public enum JSONComposition {
 
   /// A component that requires all of the schemas to be valid.
   public struct AllOf<Output>: JSONComposableCollectionComponent {
-    public var annotations: AnnotationOptions = .annotations()
+    public var schemaValue = [KeywordIdentifier: JSONValue]()
 
     public let components: [any JSONSchemaComponent<Output>]
-    public let compositionOptions: CompositionOptions
 
     public init(
       into output: Output.Type,
       @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnyComponent<Output>]
     ) {
       components = builder()
-      compositionOptions = .allOf(components.map(\.definition))
+      schemaValue[Keywords.AllOf.name] = .array(components.map { .object($0.schemaValue) })
     }
 
-    public func validate(_ value: JSONValue) -> Validated<Output, String> {
+    public func parse(_ value: JSONValue) -> Validated<Output, String> {
       guard !components.isEmpty else {
         return .error("AllOf validation requires at least one schema component")
       }
@@ -80,7 +72,7 @@ public enum JSONComposition {
       var validResult: Output?
 
       for component in components {
-        switch component.validate(value) {
+        switch component.parse(value) {
         case .valid(let result): if validResult == nil { validResult = result }
         case .invalid(let errors): combinedErrors.append(contentsOf: errors)
         }
@@ -95,25 +87,24 @@ public enum JSONComposition {
 
   /// A component that requires exactly one of the schemas to be valid.
   public struct OneOf<Output>: JSONComposableCollectionComponent {
-    public var annotations: AnnotationOptions = .annotations()
+    public var schemaValue = [KeywordIdentifier: JSONValue]()
 
     public let components: [any JSONSchemaComponent<Output>]
-    public let compositionOptions: CompositionOptions
 
     public init(
       into output: Output.Type,
       @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnyComponent<Output>]
     ) {
       components = builder()
-      compositionOptions = .oneOf(components.map(\.definition))
+      schemaValue[Keywords.OneOf.name] = .array(components.map { .object($0.schemaValue) })
     }
 
-    public func validate(_ value: JSONValue) -> Validated<Output, String> {
+    public func parse(_ value: JSONValue) -> Validated<Output, String> {
       var validResults: [Output] = []
       var combinedErrors: [String] = []
 
       for component in components {
-        switch component.validate(value) {
+        switch component.parse(value) {
         case .valid(let result): validResults.append(result)
         case .invalid(let errors): combinedErrors.append(contentsOf: errors)
         }
@@ -136,18 +127,17 @@ public enum JSONComposition {
 
   /// A component that requires the value to not match the given schema.
   public struct Not<Component: JSONSchemaComponent>: JSONComposableComponent {
-    public var annotations: AnnotationOptions = .annotations()
+    public var schemaValue = [KeywordIdentifier: JSONValue]()
 
     public let component: Component
-    public let compositionOptions: CompositionOptions
 
     public init(@JSONSchemaBuilder _ builder: () -> Component) {
       component = builder()
-      compositionOptions = .not(component.definition)
+      schemaValue[Keywords.Not.name] = .object(component.schemaValue)
     }
 
-    public func validate(_ value: JSONValue) -> Validated<JSONValue, String> {
-      switch component.validate(value) {
+    public func parse(_ value: JSONValue) -> Validated<JSONValue, String> {
+      switch component.parse(value) {
       case .valid: return .error("\(value) is valid against the not schema.")
       case .invalid: return .valid(value)
       }

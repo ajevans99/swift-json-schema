@@ -11,11 +11,9 @@ extension JSONSchemaComponent {
 
 extension JSONComponents {
   public struct CompactMap<Upstream: JSONSchemaComponent, Output>: JSONSchemaComponent {
-    public var definition: Schema { upstream.definition }
-
-    public var annotations: AnnotationOptions {
-      get { upstream.annotations }
-      set { upstream.annotations = newValue }
+    public var schemaValue: [KeywordIdentifier: JSONValue] {
+      get { upstream.schemaValue }
+      set { upstream.schemaValue = newValue }
     }
 
     var upstream: Upstream
@@ -26,8 +24,8 @@ extension JSONComponents {
       self.transform = transform
     }
 
-    public func validate(_ value: JSONValue) -> Validated<Output, String> {
-      let output = upstream.validate(value)
+    public func parse(_ value: JSONValue) -> Validated<Output, String> {
+      let output = upstream.parse(value)
       switch output {
       case .valid(let a):
         guard let newOutput = transform(a) else { return .error("failed to process from \(value)") }

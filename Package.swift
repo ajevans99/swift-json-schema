@@ -34,11 +34,17 @@ let package = Package(
   targets: [
     // Library that defines the JSON schema related types.
     .target(
-      name: "JSONSchema"
+      name: "JSONSchema",
+      resources: [
+        .copy("Resources")
+      ]
     ),
     .testTarget(
       name: "JSONSchemaTests",
-      dependencies: ["JSONSchema"]
+      dependencies: ["JSONSchema"],
+      resources: [
+        .copy("JSON-Schema-Test-Suite")
+      ]
     ),
 
     // Library for building JSON schemas with Swift's result builders.

@@ -71,7 +71,7 @@ struct JSONPropertySchemaTests {
     let property = JSONProperty(key: "prop0", value: JSONString())
 
     #expect(property.key == "prop0")
-    #expect(property.value.definition == .string())
+    #expect(property.value.schemaValue["type"] == "string")
   }
 
   @Test func multiple() throws {
@@ -82,16 +82,20 @@ struct JSONPropertySchemaTests {
       JSONProperty(key: "prop3", value: JSONString())
     }
 
-    try #require(sample.schema.count == 4)
-    for key in sample.schema.keys { #expect(sample.schema[key] == .string()) }
+    try #require(sample.schemaValue.values.count == 4)
+    for value in sample.schemaValue.values {
+      #expect(value.object?["type"] == "string")
+    }
   }
 
   @Test(arguments: [true, false]) func optional(_ bool: Bool) {
     @JSONPropertySchemaBuilder var sample: some PropertyCollection {
-      if bool { JSONProperty(key: "prop1", value: JSONString()) }
+      if bool {
+        JSONProperty(key: "prop1", value: JSONString())
+      }
     }
 
-    #expect(sample.schema.count == (bool ? 1 : 0))
+    #expect(sample.schemaValue.count == (bool ? 1 : 0))
   }
 
   @Test(arguments: [true, false]) func either(_ bool: Bool) throws {
@@ -103,7 +107,7 @@ struct JSONPropertySchemaTests {
       }
     }
 
-    let firstProperty = try #require(sample.schema.first)
+    let firstProperty = try #require(sample.schemaValue.first)
     #expect(firstProperty.key == (bool ? "prop0" : "prop1"))
   }
 }

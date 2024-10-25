@@ -4,10 +4,12 @@
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fajevans99%2Fswift-json-schema%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/ajevans99/swift-json-schema)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fajevans99%2Fswift-json-schema%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/ajevans99/swift-json-schema)
 
-JSON Schema is a powerful tool for defining the structure of JSON documents. Swift JSON Schema aims to make it easier to generate JSON schema documents directly in Swift.
+The Swift JSON Schema library provides a type-safe way to generate and validate JSON schema documents directly in Swift.
 
 * [Schema Generation](#schema-generation)
 * [Macros](#macros)
+* [Validation](#validation)
+* [Parsing](#parsing)
 * [Documentation](#documentation)
 * [Installation](#installation)
 * [Next Steps](#next-steps)
@@ -15,83 +17,10 @@ JSON Schema is a powerful tool for defining the structure of JSON documents. Swi
 
 ## Schema Generation
 
-Swift JSON Schema enables type-safe JSON schema generation directly in Swift.
-
-Here's a simple example of a person schema.
-
-```json
-{
-  "$id": "https://example.com/person.schema.json",
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Person",
-  "type": "object",
-  "properties": {
-    "firstName": {
-      "type": "string",
-      "description": "The person's first name."
-    },
-    "lastName": {
-      "type": "string",
-      "description": "The person's last name."
-    },
-    "age": {
-      "description": "Age in years which must be equal to or greater than zero.",
-      "type": "integer",
-      "minimum": 0
-    }
-  }
-}
-```
-
-Let's create this schema directly in Swift. `RootSchema` and `Schema` types are used to define the schema structure. The `RootSchema` type represents the root of the schema document, and the `Schema` type represents a JSON schema object.
+Use the power of Swift result builders to generate JSON schema documents.
 
 ```swift
-let schema = RootSchema(
-  id: "https://example.com/person.schema.json",
-  schema: "https://json-schema.org/draft/2020-12/schema",
-  subschema: .object(
-    .annotations(title: "Person"),
-    .options(
-      properties: [
-        "firstName": .string(
-          .annotations(description: "The person's first name.")
-        ),
-        "lastName": .string(
-          .annotations(description: "The person's last name.")
-        ),
-        "age": .integer(
-          .annotations(description: "Age in years which must be equal to or greater than zero."),
-          .options(minimum: 0)
-        )
-      ]
-    )
-  )
-)
-```
-
-Both `Schema` and `RootSchema` conform to `Codable` for easy serialization
-
-```swift
-let encoder = JSONEncoder()
-encoder.outputFormatting = .prettyPrinted
-let data = try encoder.encode(self)
-let string = String(decoding: data, as: UTF8.self)
-```
-
-or deserialization
-
-```swift
-let decoder = JSONDecoder()
-let data = Data(json.utf8)
-let schema = try decoder.decode(Schema.self, from: data)
-```
-
-### Result Builers
-
-Import the `JSONSchemaBuilder` target and improve schema generation ergonomics with Swift's result builders.
-
-```swift
-@JSONSchemaBuilder var jsonSchema: JSONSchemaComponent {
+@JSONSchemaBuilder var personSchema: some JSONSchemaComponent {
   JSONObject {
     JSONProperty(key: "firstName") {
       JSONString()
@@ -111,13 +40,39 @@ Import the `JSONSchemaBuilder` target and improve schema generation ergonomics w
   }
   .title("Person")
 }
-
-let schema: Schema = jsonSchema.defintion
 ```
+
+<details>
+  <summary>Generated JSON Schema</summary>
+  
+  ```json
+  {
+    "$id": "https://example.com/person.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Person",
+    "type": "object",
+    "properties": {
+      "firstName": {
+        "type": "string",
+        "description": "The person's first name."
+      },
+      "lastName": {
+        "type": "string",
+        "description": "The person's last name."
+      },
+      "age": {
+        "description": "Age in years which must be equal to or greater than zero.",
+        "type": "integer",
+        "minimum": 0
+      }
+    }
+  }
+  ```
+</details>
 
 ## Macros
 
-Use the `@Schemable` macro from `JSONSchemaBuilder` to automatically expand Swift types into JSON schema components.
+Use the `@Schemable` macro from `JSONSchemaBuilder` to automatically generate the result builders.
 
 ```swift
 @Schemable
@@ -129,57 +84,234 @@ struct Person {
 }
 ```
 
-The `@Schemable` attribute automatically expands the `Person` type into a JSON schema component.
+<details>
+  <summary>Expanded Macro</summary>
 
-```swift
-struct Person {
-  let firstName: String
-  let lastName: String?
-  let age: Int
+  ```swift
+  struct Person {
+    let firstName: String
+    let lastName: String?
+    let age: Int
 
-  // Auto-generated schema ↴
-  static var schema: some JSONSchemaComponent<Person> {
-    JSONSchema(Person.init) {
-      JSONObject {
-        JSONProperty(key: "firstName") {
-          JSONString()
+    // Auto-generated schema ↴
+    static var schema: some JSONSchemaComponent<Person> {
+      JSONSchema(Person.init) {
+        JSONObject {
+          JSONProperty(key: "firstName") {
+            JSONString()
+          }
+          .required()
+          JSONProperty(key: "lastName") {
+            JSONString()
+          }
+          JSONProperty(key: "age") {
+            JSONInteger()
+            .minimum(0)
+            .maximum(120)
+          }
+          .required()
         }
-        .required()
-        JSONProperty(key: "lastName") {
-          JSONString()
-        }
-        JSONProperty(key: "age") {
-          JSONInteger()
-          .minimum(0)
-          .maximum(120)
-        }
-        .required()
       }
     }
   }
-}
-extension Person: Schemable {}
-```
+  extension Person: Schemable {}
+  ```
 
-Additionally, `@Schemable` can be applied to Swift enums.
+</details>
+<br/>
+
+`@Schemable` can be applied to enums.
 
 ```swift
 @Schemable
 enum Status {
   case active
   case inactive
-
-  // Auto-generated schema ↴
-  static var schema: JSONSchemaComponent {
-    JSONEnum {
-      "active"
-      "inactive"
-    }
-  }
 }
 ```
 
+<details>
+  <summary>Expanded Macro</summary>
+
+  ```swift
+  enum Status {
+    case active
+    case inactive
+    
+    static var schema: some JSONSchemaComponent<Status> {
+      JSONString()
+        .enumValues {
+          "active"
+          "inactive"
+        }
+        .compactMap {
+          switch $0 {
+          case "active":
+            return Self.active
+          case "inactive":
+            return Self.inactive
+          default:
+              return nil
+          }
+        }
+      }
+  }
+  extension Status: Schemable {}
+  ```
+
+</details>
+<br/>
+
 Enums with associated values are also supported using `anyOf` schema composition. See the [JSONSchemaBuilder documentation](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder) for more information.
+
+## Validation
+
+Using the `Schema` type, you can validate JSON data against a schema.
+
+```swift
+let schemaString = """
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
+"""
+let schema1 = try Schema(instance: schemaString)
+let result = try schema1.validate(instance: #"{"name": "Alice"}"#)
+```
+
+Alternatively, you can use the `JSONSchemaBuilder` builders (or [macros](#macros)) to create a schema and validate instances.
+
+```swift
+let nameBuilder = JSONObject {
+  JSONProperty(key: "name") {
+    JSONString()
+      .minLength(1)
+  }
+}
+let schema = nameBuilder.defintion()
+
+let instance1: JSONValue = ["name": "Alice"]
+let instance2: JSONValue = ["name": ""]
+
+let result1 = schema.validate(instance1)
+dump(result1, name: "Instance 1 Validation Result")
+let result2 = schema.validate(instance2)
+dump(result2, name: "Instance 2 Validation Result")
+```
+
+<details>
+  <summary>Instance 1 Validation Result</summary>
+
+  ```
+  ▿ Instance 1 Validation Result: JSONSchema.ValidationResult
+  - isValid: true
+  ▿ keywordLocation: #
+    - path: 0 elements
+  ▿ instanceLocation: #
+    - path: 0 elements
+  - errors: nil
+  ▿ annotations: Optional([JSONSchema.Annotation<JSONSchema.Keywords.Properties>(keyword: "properties", instanceLocation: #, schemaLocation: #/properties, absoluteSchemaLocation: nil, value: Set(["name"]))])
+    ▿ some: 1 element
+      ▿ JSONSchema.Annotation<JSONSchema.Keywords.Properties>
+        - keyword: "properties"
+        ▿ instanceLocation: #
+          - path: 0 elements
+        ▿ schemaLocation: #/properties
+          ▿ path: 1 element
+            ▿ JSONSchema.JSONPointer.Component.key
+              - key: "properties"
+        - absoluteSchemaLocation: nil
+        ▿ value: 1 member
+          - "name"
+  ```
+</details>
+
+<details>
+  <summary>Instance 2 Validation Result</summary>
+
+  ```
+  ▿ Instance 2 Validation Result: JSONSchema.ValidationResult
+  - isValid: false
+  ▿ keywordLocation: #
+    - path: 0 elements
+  ▿ instanceLocation: #
+    - path: 0 elements
+  ▿ errors: Optional([JSONSchema.ValidationError(keyword: "properties", message: "Validation failed for keyword \'properties\'", keywordLocation: #/properties, instanceLocation: #, errors: Optional([JSONSchema.ValidationError(keyword: "minLength", message: "The string length is less than the specified \'minLength\'.", keywordLocation: #/properties/name/minLength, instanceLocation: #/name, errors: nil)]))])
+    ▿ some: 1 element
+      ▿ JSONSchema.ValidationError
+        - keyword: "properties"
+        - message: "Validation failed for keyword \'properties\'"
+        ▿ keywordLocation: #/properties
+          ▿ path: 1 element
+            ▿ JSONSchema.JSONPointer.Component.key
+              - key: "properties"
+        ▿ instanceLocation: #
+          - path: 0 elements
+        ▿ errors: Optional([JSONSchema.ValidationError(keyword: "minLength", message: "The string length is less than the specified \'minLength\'.", keywordLocation: #/properties/name/minLength, instanceLocation: #/name, errors: nil)])
+          ▿ some: 1 element
+            ▿ JSONSchema.ValidationError
+              - keyword: "minLength"
+              - message: "The string length is less than the specified \'minLength\'."
+              ▿ keywordLocation: #/properties/name/minLength
+                ▿ path: 3 elements
+                  ▿ JSONSchema.JSONPointer.Component.key
+                    - key: "properties"
+                  ▿ JSONSchema.JSONPointer.Component.key
+                    - key: "name"
+                  ▿ JSONSchema.JSONPointer.Component.key
+                    - key: "minLength"
+              ▿ instanceLocation: #/name
+                ▿ path: 1 element
+                  ▿ JSONSchema.JSONPointer.Component.key
+                    - key: "name"
+              - errors: nil
+  - annotations: nil
+  ```
+</details>
+<br/>
+
+> **Note:** Dynamic references, vocabulary, and other advanced features are not yet supported. The library is still in development, and more features will be added in the future. See current [unsupported tests](Tests/JSONSchemaTests/JSONSchemaTestSuite.swift) from the [JSON Schema Test Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite).
+
+## Parsing
+
+When using [builders](#schema-generation) or [macros](#macros), you can also parse JSON instances into Swift types.
+
+```swift
+@Schemable
+enum TemperatureUnit {
+  case celsius
+  case fahrenheit
+}
+
+@Schemable
+struct Weather {
+  let temperature: Double
+  let unit: TemperatureUnit
+  let conditions: String
+}
+
+let data = """
+{
+  "temperature": 20,
+  "unit": "celsius",
+  "conditions": "Sunny"
+}
+"""
+let weather: Validated<Weather, String> = Weather.schema.parse(data)
+```
+
+**Comming soon** Optionally combine parsing and validation in a single step.
+
+```swift
+let weather: Weather = try Weather.schema.parseAndValidate(data)
+```
+
+> Shoutout to the [swift-parsing](https://github.com/pointfreeco/swift-parsing) library and the [Point-Free Parsing series](https://www.pointfree.co/collections/parsing) for the inspiration behind the parsing API and implementation.
 
 ## Documentation
 
@@ -224,18 +356,6 @@ targets: [
 4. Follow the prompts to add the package to your project.
 
 Once added, you can import `JSONSchema` in your Swift files and start using it in your project.
-
-## Next Steps
-
-This library is in active development. If you have any feedback or suggestions, please open an issue or pull request.
-
-Goals for future releases include:
-- [ ] [Support applying subschemas conditionally](https://json-schema.org/understanding-json-schema/reference/conditionals)
-- [ ] Support `$ref` and `$defs` keywords
-- [ ] Root schema in result builders
-- [ ] Support multiple types like `{ "type": ["number", "string"] }`
-- [ ] Validate JSON instances against schemas
-- [ ] Parse JSON instances into Swift types and functions
 
 ## License
 

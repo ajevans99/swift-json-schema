@@ -11,11 +11,9 @@ extension JSONSchemaComponent {
 
 extension JSONComponents {
   public struct Map<Upstream: JSONSchemaComponent, NewOutput>: JSONSchemaComponent {
-    public var definition: Schema { upstream.definition }
-
-    public var annotations: AnnotationOptions {
-      get { upstream.annotations }
-      set { upstream.annotations = newValue }
+    public var schemaValue: [KeywordIdentifier: JSONValue] {
+      get { upstream.schemaValue }
+      set { upstream.schemaValue = newValue }
     }
 
     var upstream: Upstream
@@ -26,8 +24,8 @@ extension JSONComponents {
       self.transform = transform
     }
 
-    public func validate(_ value: JSONValue) -> Validated<NewOutput, String> {
-      upstream.validate(value).map(transform)
+    public func parse(_ value: JSONValue) -> Validated<NewOutput, String> {
+      upstream.parse(value).map(transform)
     }
   }
 }

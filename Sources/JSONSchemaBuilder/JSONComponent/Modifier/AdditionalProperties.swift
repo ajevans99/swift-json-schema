@@ -5,33 +5,30 @@ extension JSONComponents {
     Props: PropertyCollection,
     AdditionalProps: JSONSchemaComponent
   >: JSONSchemaComponent {
-    public var annotations: AnnotationOptions {
-      get { base.annotations }
-      set { base.annotations = newValue }
-    }
-
-    public var definition: Schema { base.definition }
+    public var schemaValue: [KeywordIdentifier: JSONValue]
 
     var base: JSONObject<Props>
     let additionalPropertiesSchema: AdditionalProps
 
     public init(base: JSONObject<Props>, additionalProperties: AdditionalProps) {
-      self.base = base.additionalProperties(.schema(additionalProperties.definition))
+      self.base = base
       self.additionalPropertiesSchema = additionalProperties
+      schemaValue = base.schemaValue
+      schemaValue[Keywords.AdditionalProperties.name] = .object(additionalProperties.schemaValue)
     }
 
-    public func validate(
+    public func parse(
       _ input: JSONValue
     ) -> Validated<(Props.Output, [String: AdditionalProps.Output]), String> {
       guard case .object(let dictionary) = input else { return .error("Not an object") }
 
       // Validate the base properties
-      let baseValidation = base.validate(input)
+      let baseValidation = base.parse(input)
 
       // Validate the additional properties
       var additionalProperties: [String: AdditionalProps.Output] = [:]
-      for (key, value) in dictionary where !base.properties.schema.keys.contains(key) {
-        switch additionalPropertiesSchema.validate(value) {
+      for (key, value) in dictionary where !base.schemaValue.keys.contains(key) {
+        switch additionalPropertiesSchema.parse(value) {
         case .valid(let output): additionalProperties[key] = output
         case .invalid(let errors): return .invalid(errors)
         }

@@ -5,8 +5,17 @@ import Testing
 
 struct JSONEnumTests {
   @Test func singleValue() {
-    @JSONSchemaBuilder var sample: some JSONSchemaComponent { JSONString().enumValues { "red" } }
-    #expect(sample.definition.enumValues == ["red"])
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
+      JSONString()
+        .enumValues { "red" }
+    }
+
+    let expected: [String: JSONValue] = [
+      "type": "string",
+      "enum": ["red"],
+    ]
+
+    #expect(sample.schemaValue == expected)
   }
 
   @Test func sameType() {
@@ -18,7 +27,13 @@ struct JSONEnumTests {
           "green"
         }
     }
-    #expect(sample.definition.enumValues == ["red", "amber", "green"])
+
+    let expected: [String: JSONValue] = [
+      "type": "string",
+      "enum": ["red", "amber", "green"],
+    ]
+
+    #expect(sample.schemaValue == expected)
   }
 
   @Test func differentType() {
@@ -33,7 +48,11 @@ struct JSONEnumTests {
         }
     }
 
-    #expect(sample.definition.enumValues == ["red", "amber", "green", nil, 42])
+    let expected: [String: JSONValue] = [
+      "enum": ["red", "amber", "green", nil, 42]
+    ]
+
+    #expect(sample.schemaValue == expected)
   }
 
   @Test func annotations() {
@@ -46,7 +65,13 @@ struct JSONEnumTests {
         }
         .title("Color")
     }
-    print(sample.annotations)
-    #expect(sample.annotations.title == "Color")
+
+    let expected: [String: JSONValue] = [
+      "title": "Color",
+      "type": "string",
+      "enum": ["red", "amber", "green"],
+    ]
+
+    #expect(sample.schemaValue == expected)
   }
 }

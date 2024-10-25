@@ -18,7 +18,7 @@
     "allowedFunctions" : []
   },
   "prioritizeKeepingFunctionOutputTogether" : true,
-  "respectsExistingLineBreaks" : false,
+  "respectsExistingLineBreaks" : true,
   "rules" : {
     "AllPublicDeclarationsHaveDocumentation" : false,
     "AlwaysUseLiteralForEmptyCollectionInit" : false,

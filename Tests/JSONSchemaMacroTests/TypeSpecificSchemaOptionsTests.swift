@@ -260,7 +260,7 @@ struct StringOptionsTests {
           minLength: 5,
           maxLength: 100,
           pattern: "^[a-zA-Z]+$",
-          format: nil
+          format: "city"
         )
         let cityName: String
       }
@@ -277,7 +277,7 @@ struct StringOptionsTests {
                   .minLength(5)
                   .maxLength(100)
                   .pattern("^[a-zA-Z]+$")
-                  .format(nil)
+                  .format("city")
                 }
                 .required()
               }

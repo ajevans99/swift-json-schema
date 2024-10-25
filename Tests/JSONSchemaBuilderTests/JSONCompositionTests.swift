@@ -12,11 +12,14 @@ struct JSONCompositionTests {
       }
     }
 
-    let expectedSchema = Schema.noType(
-      composition: .anyOf([.string(), .number(.annotations(), .options(minimum: 0))])
-    )
+    let expected: [String: JSONValue] = [
+      "anyOf": [
+        ["type": "string"],
+        ["type": "number", "minimum": 0],
+      ]
+    ]
 
-    #expect(sample.definition == expectedSchema)
+    #expect(sample.schemaValue == expected)
   }
 
   @Test func allOfComposition() {
@@ -27,11 +30,14 @@ struct JSONCompositionTests {
       }
     }
 
-    let expectedSchema = Schema.noType(
-      composition: .allOf([.string(), .number(.annotations(), .options(maximum: 10))])
-    )
+    let expected: [String: JSONValue] = [
+      "allOf": [
+        ["type": "string"],
+        ["type": "number", "maximum": 10],
+      ]
+    ]
 
-    #expect(sample.definition == expectedSchema)
+    #expect(sample.schemaValue == expected)
   }
 
   @Test func oneOfComposition() {
@@ -42,19 +48,26 @@ struct JSONCompositionTests {
       }
     }
 
-    let expectedSchema = Schema.noType(
-      composition: .oneOf([.string(.annotations(), .options(pattern: "^[a-zA-Z]+$")), .boolean()])
-    )
+    let expected: [String: JSONValue] = [
+      "oneOf": [
+        ["type": "string", "pattern": "^[a-zA-Z]+$"],
+        ["type": "boolean"],
+      ]
+    ]
 
-    #expect(sample.definition == expectedSchema)
+    #expect(sample.schemaValue == expected)
   }
 
   @Test func notComposition() {
-    @JSONSchemaBuilder var sample: some JSONSchemaComponent { JSONComposition.Not { JSONString() } }
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
+      JSONComposition.Not { JSONString() }
+    }
 
-    let expectedSchema = Schema.noType(composition: .not(.string()))
+    let expected: [String: JSONValue] = [
+      "not": ["type": "string"]
+    ]
 
-    #expect(sample.definition == expectedSchema)
+    #expect(sample.schemaValue == expected)
   }
 
   @Test func annotations() {
@@ -63,10 +76,19 @@ struct JSONCompositionTests {
         JSONString()
         JSONNumber().maximum(10)
       }
-      .title("Item").description("This is the description")
+      .title("Item")
+      .description("This is the description")
     }
 
-    #expect(sample.annotations.title == "Item")
-    #expect(sample.annotations.description == "This is the description")
+    let expected: [String: JSONValue] = [
+      "title": "Item",
+      "description": "This is the description",
+      "allOf": [
+        ["type": "string"],
+        ["type": "number", "maximum": 10],
+      ],
+    ]
+
+    #expect(sample.schemaValue == expected)
   }
 }

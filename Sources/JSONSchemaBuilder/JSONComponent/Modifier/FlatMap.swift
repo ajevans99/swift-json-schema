@@ -13,11 +13,9 @@ extension JSONComponents {
   public struct FlatMap<NewSchemaComponent: JSONSchemaComponent, Upstream: JSONSchemaComponent>:
     JSONSchemaComponent
   {
-    public var definition: Schema { upstream.definition }
-
-    public var annotations: AnnotationOptions {
-      get { upstream.annotations }
-      set { upstream.annotations = newValue }
+    public var schemaValue: [KeywordIdentifier: JSONValue] {
+      get { upstream.schemaValue }
+      set { upstream.schemaValue = newValue }
     }
 
     var upstream: Upstream
@@ -29,11 +27,11 @@ extension JSONComponents {
       self.transform = transform
     }
 
-    public func validate(_ value: JSONValue) -> Validated<NewSchemaComponent.Output, String> {
-      switch upstream.validate(value) {
+    public func parse(_ value: JSONValue) -> Validated<NewSchemaComponent.Output, String> {
+      switch upstream.parse(value) {
       case .valid(let upstreamOutput):
         let newSchemaComponent = transform(upstreamOutput)
-        return newSchemaComponent.validate(value)
+        return newSchemaComponent.parse(value)
       case .invalid(let error): return .invalid(error)
       }
     }
