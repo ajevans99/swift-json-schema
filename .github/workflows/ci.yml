@@ -30,7 +30,7 @@ jobs:
       run: swift build -v
     - name: Run tests
       run: swift test --enable-experimental-swift-testing
-
+  
   build_linux:
     name: Build on Linux
     runs-on: ubuntu-latest
@@ -49,7 +49,7 @@ jobs:
     strategy:
         fail-fast: false
         matrix:
-            platform: [iOS, watchOS, tvOS, visionOS]
+            platform: [macOS, iOS, watchOS, tvOS, visionOS]
     steps:
     - uses: actions/checkout@v4
     - name: Xcode setup
@@ -59,4 +59,9 @@ jobs:
     - name: Get Xcode version
       run: xcodebuild -version
     - name: Build ${{ matrix.platform }}
-      run: xcodebuild build -destination generic/platform=${{ matrix.platform }} -scheme swift-json-schema-Package
+      run: |
+        if [ "${{ matrix.platform }}" == "macOS" ]; then
+          set -o pipefail && xcodebuild build -destination generic/platform=${{ matrix.platform }} -scheme swift-json-schema-Package | xcbeautify --renderer github-actions
+        else
+          set -o pipefail && xcodebuild build -destination generic/platform=${{ matrix.platform }} -scheme swift-json-schema-Package | xcbeautify
+        fi
