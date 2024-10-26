@@ -17,12 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Xcode setup
-      run: |
-        if [ -d "/Applications/Xcode_16.0.app" ]; then
-          sudo xcode-select -s /Applications/Xcode_16.0.app
-        else
-          sudo xcode-select -s /Applications/Xcode_16.1.app
-        fi
+      uses: ./.github/actions/xcode-setup
     - name: Xcode version
       run: xcodebuild -version
       if: ${{ always() }}
@@ -35,8 +30,8 @@ jobs:
       run: swift build -v
     - name: Run tests
       run: swift test --enable-experimental-swift-testing
-
-  build:
+  
+  build_linux:
     name: Build on Linux
     runs-on: ubuntu-latest
     steps:
@@ -47,3 +42,21 @@ jobs:
       run: rm -f Package.resolved
     - name: Build
       run: swift build -v
+
+  build_apple_platforms:
+    name: Build on Apple Platforms
+    runs-on: macos-15
+    strategy:
+        fail-fast: false
+        matrix:
+            platform: [macOS, iOS, watchOS, tvOS, visionOS]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Xcode setup
+      uses: ./.github/actions/xcode-setup
+    - name: Get swift version
+      run: swift --version
+    - name: Get Xcode version
+      run: xcodebuild -version
+    - name: Build ${{ matrix.platform }}
+      run: set -o pipefail && xcodebuild build -destination generic/platform=${{ matrix.platform }} -scheme swift-json-schema-Package | xcbeautify --renderer github-actions
