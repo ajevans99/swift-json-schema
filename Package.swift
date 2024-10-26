@@ -7,7 +7,7 @@ let package = Package(
   name: "swift-json-schema",
   platforms: [
     .macOS(.v14),
-    .iOS(.v13),
+    .iOS(.v17),
     .watchOS(.v6),
     .tvOS(.v13),
     .macCatalyst(.v14),

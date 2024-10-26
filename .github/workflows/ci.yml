@@ -36,7 +36,7 @@ jobs:
     - name: Run tests
       run: swift test --enable-experimental-swift-testing
 
-  build:
+  build_linux:
     name: Build on Linux
     runs-on: ubuntu-latest
     steps:
@@ -47,3 +47,18 @@ jobs:
       run: rm -f Package.resolved
     - name: Build
       run: swift build -v
+
+  build_apple_platforms:
+    name: Build on Apple Platforms
+    runs-on: macos-latest
+    strategy:
+        matrix:
+            platform: [iOS, watchOS, tvOS, visionOS]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Get swift version
+      run: swift --version
+    - name: Get Xcode version
+      run: xcodebuild -version
+    - name: Build ${{ matrix.platform }}
+      run: xcodebuild build -destination generic/platform=${{ matrix.platform }} -scheme swift-json-schema-Package
