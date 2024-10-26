@@ -59,9 +59,4 @@ jobs:
     - name: Get Xcode version
       run: xcodebuild -version
     - name: Build ${{ matrix.platform }}
-      run: |
-        if [ "${{ matrix.platform }}" == "macOS" ]; then
-          set -o pipefail && xcodebuild build -destination generic/platform=${{ matrix.platform }} -scheme swift-json-schema-Package | xcbeautify --renderer github-actions
-        else
-          set -o pipefail && xcodebuild build -destination generic/platform=${{ matrix.platform }} -scheme swift-json-schema-Package | xcbeautify
-        fi
+      run: set -o pipefail && xcodebuild build -destination generic/platform=${{ matrix.platform }} -scheme swift-json-schema-Package | xcbeautify --renderer github-actions
