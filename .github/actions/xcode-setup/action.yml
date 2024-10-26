@@ -4,6 +4,7 @@ runs:
   using: 'composite'
   steps:
     - name: Xcode setup
+      shell: bash
       run: |
         if [ -d "/Applications/Xcode_16.0.app" ]; then
           sudo xcode-select -s /Applications/Xcode_16.0.app
