@@ -45,7 +45,7 @@ jobs:
 
   build_apple_platforms:
     name: Build on Apple Platforms
-    runs-on: macos-latest
+    runs-on: macos-15
     strategy:
         fail-fast: false
         matrix:
