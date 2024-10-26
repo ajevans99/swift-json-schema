@@ -17,12 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Xcode setup
-      run: |
-        if [ -d "/Applications/Xcode_16.0.app" ]; then
-          sudo xcode-select -s /Applications/Xcode_16.0.app
-        else
-          sudo xcode-select -s /Applications/Xcode_16.1.app
-        fi
+      uses: ./.github/actions/xcode-setup
     - name: Xcode version
       run: xcodebuild -version
       if: ${{ always() }}
@@ -56,6 +51,8 @@ jobs:
             platform: [iOS, watchOS, tvOS, visionOS]
     steps:
     - uses: actions/checkout@v4
+    - name: Xcode setup
+      uses: ./.github/actions/xcode-setup
     - name: Get swift version
       run: swift --version
     - name: Get Xcode version
