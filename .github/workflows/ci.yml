@@ -47,6 +47,7 @@ jobs:
     name: Build on Apple Platforms
     runs-on: macos-latest
     strategy:
+        fail-fast: false
         matrix:
             platform: [iOS, watchOS, tvOS, visionOS]
     steps:
