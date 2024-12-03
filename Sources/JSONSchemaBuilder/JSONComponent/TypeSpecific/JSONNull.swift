@@ -8,7 +8,7 @@ public struct JSONNull: JSONSchemaComponent {
 
   public init() {}
 
-  public func parse(_ value: JSONValue) -> Validated<Void, String> {
+  public func parse(_ value: JSONValue) -> Parsed<Void, String> {
     if case .null = value { return .valid(()) }
     return .error("Expected null value, but got \(value)")
   }

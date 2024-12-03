@@ -1,6 +1,6 @@
 /// Similar to `Result` from Swift but `invalid` case has an array of errors.
 /// Adapted from [Point-Free](https://github.com/pointfreeco/swift-validated) to use variadic parameters.
-public enum Validated<Value, Error> {
+public enum Parsed<Value, Error> {
   case valid(Value)
   case invalid([Error])
 
@@ -8,7 +8,7 @@ public enum Validated<Value, Error> {
 
   public func map<ValueOfResult>(
     _ transform: (Value) -> ValueOfResult
-  ) -> Validated<ValueOfResult, Error> {
+  ) -> Parsed<ValueOfResult, Error> {
     switch self {
     case .valid(let value): return .valid(transform(value))
     case .invalid(let errors): return .invalid(errors)
@@ -16,8 +16,8 @@ public enum Validated<Value, Error> {
   }
 
   public func flatMap<ValueOfResult>(
-    _ transform: (Value) -> Validated<ValueOfResult, Error>
-  ) -> Validated<ValueOfResult, Error> {
+    _ transform: (Value) -> Parsed<ValueOfResult, Error>
+  ) -> Parsed<ValueOfResult, Error> {
     switch self {
     case .valid(let value): return transform(value)
     case .invalid(let errors): return .invalid(errors)
@@ -39,7 +39,7 @@ public enum Validated<Value, Error> {
   }
 }
 
-extension Validated: Equatable where Value: Equatable, Error: Equatable {}
+extension Parsed: Equatable where Value: Equatable, Error: Equatable {}
 
 struct Invalid: Error {}
 
@@ -47,9 +47,9 @@ struct Invalid: Error {}
 /// Example:
 /// `zip(Validated<A, E>, Validated<B, E>, Validated<C, E>)` -> `Validated<(A, B, C), E>`
 public func zip<each Value, Error>(
-  _ validated: repeat Validated<each Value, Error>
-) -> Validated<(repeat each Value), Error> {
-  func valid<V>(_ v: Validated<V, Error>) throws -> V {
+  _ validated: repeat Parsed<each Value, Error>
+) -> Parsed<(repeat each Value), Error> {
+  func valid<V>(_ v: Parsed<V, Error>) throws -> V {
     switch v {
     case .valid(let x): return x
     case .invalid:
@@ -74,7 +74,7 @@ public func zip<each Value, Error>(
         }
       }
     #else
-      func collectErrors<Val>(_ v: Validated<Val, Error>) {
+      func collectErrors<Val>(_ v: Parsed<Val, Error>) {
         switch v {
         case .valid: break
         case .invalid(let array): errors.append(contentsOf: array)

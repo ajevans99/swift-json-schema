@@ -23,7 +23,7 @@ extension JSONComponents {
     case first(First)
     case second(Second)
 
-    public func parse(_ value: JSONValue) -> Validated<First.Output, String> {
+    public func parse(_ value: JSONValue) -> Parsed<First.Output, String> {
       switch self {
       case .first(let first): return first.parse(value)
       case .second(let second): return second.parse(value)

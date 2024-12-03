@@ -10,5 +10,5 @@ public protocol JSONPropertyComponent: Sendable {
   var isRequired: Bool { get }
   var value: Value { get }
 
-  func validate(_ input: [String: JSONValue]) -> Validated<Output, String>
+  func parse(_ input: [String: JSONValue]) -> Parsed<Output, String>
 }

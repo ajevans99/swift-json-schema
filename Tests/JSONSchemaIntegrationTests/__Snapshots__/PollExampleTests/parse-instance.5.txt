@@ -1,4 +1,4 @@
-▿ Validated<Poll, String>
+▿ Parsed<Poll, String>
   ▿ invalid: 5 elements
     - "No valid component matched for value: object([\"food\": JSONSchema.JSONValue.object([\"_0\": JSONSchema.JSONValue.object([\"customDescription\": JSONSchema.JSONValue.string(\"What\\\'s your favorite?\")])])])"
     - "Transformation failed for key: technology"

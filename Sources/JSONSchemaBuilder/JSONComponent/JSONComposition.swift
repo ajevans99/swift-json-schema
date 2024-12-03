@@ -36,7 +36,7 @@ public enum JSONComposition {
       schemaValue[Keywords.AnyOf.name] = .array(components.map { .object($0.schemaValue) })
     }
 
-    public func parse(_ value: JSONValue) -> Validated<Output, String> {
+    public func parse(_ value: JSONValue) -> Parsed<Output, String> {
       var allErrors: [String] = []
 
       for component in components {
@@ -63,7 +63,7 @@ public enum JSONComposition {
       schemaValue[Keywords.AllOf.name] = .array(components.map { .object($0.schemaValue) })
     }
 
-    public func parse(_ value: JSONValue) -> Validated<Output, String> {
+    public func parse(_ value: JSONValue) -> Parsed<Output, String> {
       guard !components.isEmpty else {
         return .error("AllOf validation requires at least one schema component")
       }
@@ -99,7 +99,7 @@ public enum JSONComposition {
       schemaValue[Keywords.OneOf.name] = .array(components.map { .object($0.schemaValue) })
     }
 
-    public func parse(_ value: JSONValue) -> Validated<Output, String> {
+    public func parse(_ value: JSONValue) -> Parsed<Output, String> {
       var validResults: [Output] = []
       var combinedErrors: [String] = []
 
@@ -136,7 +136,7 @@ public enum JSONComposition {
       schemaValue[Keywords.Not.name] = .object(component.schemaValue)
     }
 
-    public func parse(_ value: JSONValue) -> Validated<JSONValue, String> {
+    public func parse(_ value: JSONValue) -> Parsed<JSONValue, String> {
       switch component.parse(value) {
       case .valid: return .error("\(value) is valid against the not schema.")
       case .invalid: return .valid(value)

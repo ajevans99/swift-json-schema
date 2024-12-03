@@ -24,7 +24,7 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
     }
   }
 
-  public func parse(_ value: JSONValue) -> Validated<[T.Output], String> {
+  public func parse(_ value: JSONValue) -> Parsed<[T.Output], String> {
     if case .array(let array) = value {
       var outputs: [T.Output] = []
       var errors: [String] = []

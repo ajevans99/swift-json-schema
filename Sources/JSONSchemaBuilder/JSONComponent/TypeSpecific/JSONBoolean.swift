@@ -8,7 +8,7 @@ public struct JSONBoolean: JSONSchemaComponent {
 
   public init() {}
 
-  public func parse(_ value: JSONValue) -> Validated<Bool, String> {
+  public func parse(_ value: JSONValue) -> Parsed<Bool, String> {
     if case .boolean(let bool) = value { return .valid(bool) }
     return .error("Expected a boolean value.")
   }

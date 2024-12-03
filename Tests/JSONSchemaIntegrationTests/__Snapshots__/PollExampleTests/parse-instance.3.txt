@@ -1,4 +1,4 @@
-▿ Validated<Poll, String>
+▿ Parsed<Poll, String>
   ▿ valid: Poll
     - category: Category.sports
     - createdAt: "2024-10-25T15:00:00Z"

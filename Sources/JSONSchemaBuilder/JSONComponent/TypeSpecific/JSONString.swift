@@ -8,7 +8,7 @@ public struct JSONString: JSONSchemaComponent {
     schemaValue[Keywords.TypeKeyword.name] = .string(JSONType.string.rawValue)
   }
 
-  public func parse(_ value: JSONValue) -> Validated<String, String> {
+  public func parse(_ value: JSONValue) -> Parsed<String, String> {
     if case .string(let string) = value { return .valid(string) }
     return .error("Expected a string value.")
   }

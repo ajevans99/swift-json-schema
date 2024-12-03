@@ -32,14 +32,14 @@ public protocol PropertyCollection: Sendable {
 
   var schemaValue: [String: JSONValue] { get }
   var requiredKeys: [String] { get }
-  func validate(_ dictionary: [String: JSONValue]) -> Validated<Output, String>
+  func validate(_ dictionary: [String: JSONValue]) -> Parsed<Output, String>
 }
 
 public struct EmptyPropertyCollection: PropertyCollection {
   public let schemaValue: [String: JSONValue] = [:]
   public let requiredKeys: [String] = []
 
-  public func validate(_ dictionary: [String: JSONValue]) -> Validated<Void, String> { .valid(()) }
+  public func validate(_ dictionary: [String: JSONValue]) -> Parsed<Void, String> { .valid(()) }
 }
 
 public struct PropertyTuple<each Property: JSONPropertyComponent>: PropertyCollection {
@@ -77,7 +77,7 @@ public struct PropertyTuple<each Property: JSONPropertyComponent>: PropertyColle
 
   public func validate(
     _ dictionary: [String: JSONValue]
-  ) -> Validated<(repeat (each Property).Output), String> {
-    zip(repeat (each property).validate(dictionary))
+  ) -> Parsed<(repeat (each Property).Output), String> {
+    zip(repeat (each property).parse(dictionary))
   }
 }

@@ -23,8 +23,8 @@ extension JSONPropertyComponents {
 
     public var value: Upstream.Value { upstream.value }
 
-    public func validate(_ input: [String: JSONValue]) -> Validated<NewOutput, String> {
-      switch upstream.validate(input) {
+    public func parse(_ input: [String: JSONValue]) -> Parsed<NewOutput, String> {
+      switch upstream.parse(input) {
       case .valid(let output):
         guard let newOutput = transform(output) else {
           return .error("Transformation failed for key: \(key)")

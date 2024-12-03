@@ -19,7 +19,7 @@ extension JSONComponents {
 
     public func parse(
       _ input: JSONValue
-    ) -> Validated<(Props.Output, [String: AdditionalProps.Output]), String> {
+    ) -> Parsed<(Props.Output, [String: AdditionalProps.Output]), String> {
       guard case .object(let dictionary) = input else { return .error("Not an object") }
 
       // Validate the base properties
