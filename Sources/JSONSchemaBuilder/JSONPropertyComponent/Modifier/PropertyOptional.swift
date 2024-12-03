@@ -11,7 +11,7 @@ extension JSONPropertyComponents {
 
     public init(wrapped: Wrapped?) { self.wrapped = wrapped }
 
-    public func validate(_ input: [String: JSONValue]) -> Parsed<Wrapped.Output?, String> {
+    public func validate(_ input: [String: JSONValue]) -> Parsed<Wrapped.Output?, ParseIssue> {
       wrapped?.validate(input).map(Optional.some) ?? .valid(nil)
     }
   }

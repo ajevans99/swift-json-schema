@@ -1,4 +1,4 @@
-▿ Parsed<Poll, String>
+▿ Parsed<Poll, ParseIssue>
   ▿ valid: Poll
     ▿ category: Category
       ▿ entertainment: Entertainment

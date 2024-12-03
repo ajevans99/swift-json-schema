@@ -31,7 +31,7 @@ public struct JSONSchema<Components: JSONSchemaComponent, NewOutput>: JSONSchema
     self.components = component()
   }
 
-  public func parse(_ value: JSONValue) -> Parsed<NewOutput, String> {
+  public func parse(_ value: JSONValue) -> Parsed<NewOutput, ParseIssue> {
     components.parse(value).map(transform)
   }
 }

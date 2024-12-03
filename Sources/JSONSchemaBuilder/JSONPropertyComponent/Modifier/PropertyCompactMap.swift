@@ -23,11 +23,13 @@ extension JSONPropertyComponents {
 
     public var value: Upstream.Value { upstream.value }
 
-    public func parse(_ input: [String: JSONValue]) -> Parsed<NewOutput, String> {
+    public func parse(_ input: [String: JSONValue]) -> Parsed<NewOutput, ParseIssue> {
       switch upstream.parse(input) {
       case .valid(let output):
         guard let newOutput = transform(output) else {
-          return .error("Transformation failed for key: \(key)")
+          // TODO: This isn't as generic as `compactMap` concept and leaks usage.
+          // Would be better to use a closure for ParseIssue or change transform closure?
+          return .error(.missingRequiredProperty(property: key))
         }
         return .valid(newOutput)
       case .invalid(let error): return .invalid(error)

@@ -13,7 +13,7 @@ extension JSONComponents {
 
     public init(wrapped: Component) { self.wrapped = wrapped }
 
-    public func parse(_ value: JSONValue) -> Parsed<JSONValue, String> {
+    public func parse(_ value: JSONValue) -> Parsed<JSONValue, ParseIssue> {
       wrapped.parse(value)
         .flatMap { _ in .valid(value)  // Ignore valid associated type and pass original string
         }

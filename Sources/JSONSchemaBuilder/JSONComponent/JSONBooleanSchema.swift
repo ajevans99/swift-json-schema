@@ -14,8 +14,8 @@ public struct JSONBooleanSchema: JSONSchemaComponent {
       .asSchema()
   }
 
-  public func parse(_ value: JSONValue) -> Parsed<Bool, String> {
-    self.value ? .valid(true) : .error("boolean schema false")
+  public func parse(_ value: JSONValue) -> Parsed<Bool, ParseIssue> {
+    self.value ? .valid(true) : .error(.typeMismatch(expected: .boolean, actual: value))
   }
 }
 

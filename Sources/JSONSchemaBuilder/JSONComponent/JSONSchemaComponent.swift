@@ -10,7 +10,7 @@ public protocol JSONSchemaComponent<Output>: Sendable {
   /// Parse a JSON instance into a Swift type using the schema.
   /// - Parameter value: The value (aka instance or document) to validate.
   /// - Returns: A validated output or error messages.
-  @Sendable func parse(_ value: JSONValue) -> Parsed<Output, String>
+  @Sendable func parse(_ value: JSONValue) -> Parsed<Output, ParseIssue>
 }
 
 extension JSONSchemaComponent {
@@ -26,7 +26,7 @@ extension JSONSchemaComponent {
   public func parse(
     instance: String,
     decoder: JSONDecoder = JSONDecoder()
-  ) throws -> Parsed<Output, String> {
+  ) throws -> Parsed<Output, ParseIssue> {
     let value = try decoder.decode(JSONValue.self, from: Data(instance.utf8))
     return parse(value)
   }
