@@ -27,7 +27,7 @@ extension JSONComponents {
       self.transform = transform
     }
 
-    public func parse(_ value: JSONValue) -> Validated<NewSchemaComponent.Output, String> {
+    public func parse(_ value: JSONValue) -> Parsed<NewSchemaComponent.Output, ParseIssue> {
       switch upstream.parse(value) {
       case .valid(let upstreamOutput):
         let newSchemaComponent = transform(upstreamOutput)

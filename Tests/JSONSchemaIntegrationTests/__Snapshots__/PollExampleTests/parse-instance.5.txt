@@ -1,7 +1,32 @@
-▿ Validated<Poll, String>
-  ▿ invalid: 5 elements
-    - "No valid component matched for value: object([\"food\": JSONSchema.JSONValue.object([\"_0\": JSONSchema.JSONValue.object([\"customDescription\": JSONSchema.JSONValue.string(\"What\\\'s your favorite?\")])])])"
-    - "Transformation failed for key: technology"
-    - "Transformation failed for key: entertainment"
-    - "Transformation failed for key: education"
-    - "object([\"food\": JSONSchema.JSONValue.object([\"_0\": JSONSchema.JSONValue.object([\"customDescription\": JSONSchema.JSONValue.string(\"What\\\'s your favorite?\")])])]) does not match any enum case."
+▿ Parsed<Poll, ParseIssue>
+  ▿ invalid: 1 element
+    ▿ ParseIssue
+      ▿ compositionFailure: (3 elements)
+        - type: JSONComposition.anyOf
+        - reason: "did not match any"
+        ▿ nestedErrors: 4 elements
+          ▿ ParseIssue
+            ▿ missingRequiredProperty: (1 element)
+              - property: "technology"
+          ▿ ParseIssue
+            ▿ missingRequiredProperty: (1 element)
+              - property: "entertainment"
+          ▿ ParseIssue
+            ▿ missingRequiredProperty: (1 element)
+              - property: "education"
+          ▿ ParseIssue
+            ▿ noEnumCaseMatch: (1 element)
+              ▿ value: JSONValue
+                ▿ object: 1 key/value pair
+                  ▿ (2 elements)
+                    - key: "food"
+                    ▿ value: JSONValue
+                      ▿ object: 1 key/value pair
+                        ▿ (2 elements)
+                          - key: "_0"
+                          ▿ value: JSONValue
+                            ▿ object: 1 key/value pair
+                              ▿ (2 elements)
+                                - key: "customDescription"
+                                ▿ value: JSONValue
+                                  - string: "What\'s your favorite?"

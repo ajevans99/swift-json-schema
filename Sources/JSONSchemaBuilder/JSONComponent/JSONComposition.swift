@@ -21,7 +21,12 @@ extension JSONComposableCollectionComponent where Output == JSONValue {
   ) { self.init(into: JSONValue.self, builder) }
 }
 
-public enum JSONComposition {
+public enum JSONComposition: Sendable {
+  case anyOf
+  case allOf
+  case oneOf
+  case not
+
   /// A component that accepts any of the given schemas.
   public struct AnyOf<Output>: JSONComposableCollectionComponent {
     public var schemaValue = [KeywordIdentifier: JSONValue]()
@@ -36,8 +41,8 @@ public enum JSONComposition {
       schemaValue[Keywords.AnyOf.name] = .array(components.map { .object($0.schemaValue) })
     }
 
-    public func parse(_ value: JSONValue) -> Validated<Output, String> {
-      var allErrors: [String] = []
+    public func parse(_ value: JSONValue) -> Parsed<Output, ParseIssue> {
+      var allErrors: [ParseIssue] = []
 
       for component in components {
         switch component.parse(value) {
@@ -45,7 +50,9 @@ public enum JSONComposition {
         case .invalid(let errors): allErrors.append(contentsOf: errors)
         }
       }
-      return .invalid(["No valid component matched for value: \(value)"] + allErrors)
+      return .error(
+        .compositionFailure(type: .anyOf, reason: "did not match any", nestedErrors: allErrors)
+      )
     }
   }
 
@@ -63,12 +70,8 @@ public enum JSONComposition {
       schemaValue[Keywords.AllOf.name] = .array(components.map { .object($0.schemaValue) })
     }
 
-    public func parse(_ value: JSONValue) -> Validated<Output, String> {
-      guard !components.isEmpty else {
-        return .error("AllOf validation requires at least one schema component")
-      }
-
-      var combinedErrors: [String] = []
+    public func parse(_ value: JSONValue) -> Parsed<Output, ParseIssue> {
+      var combinedErrors: [ParseIssue] = []
       var validResult: Output?
 
       for component in components {
@@ -78,8 +81,14 @@ public enum JSONComposition {
         }
       }
 
-      guard let validResult = validResult, combinedErrors.isEmpty else {
-        return .invalid(["Failed AllOf validation"] + combinedErrors)
+      guard let validResult, combinedErrors.isEmpty else {
+        return .error(
+          .compositionFailure(
+            type: .allOf,
+            reason: "did not match all",
+            nestedErrors: combinedErrors
+          )
+        )
       }
       return .valid(validResult)
     }
@@ -99,9 +108,9 @@ public enum JSONComposition {
       schemaValue[Keywords.OneOf.name] = .array(components.map { .object($0.schemaValue) })
     }
 
-    public func parse(_ value: JSONValue) -> Validated<Output, String> {
+    public func parse(_ value: JSONValue) -> Parsed<Output, ParseIssue> {
       var validResults: [Output] = []
-      var combinedErrors: [String] = []
+      var combinedErrors: [ParseIssue] = []
 
       for component in components {
         switch component.parse(value) {
@@ -115,12 +124,14 @@ public enum JSONComposition {
         return .valid(validResults.first!)
       } else if validResults.isEmpty {
         // No component validated successfully
-        return .invalid(["Failed OneOf validation. No valid component matched."] + combinedErrors)
+        return .error(
+          .compositionFailure(type: .oneOf, reason: "no match found", nestedErrors: combinedErrors)
+        )
       } else {
         // More than one component validated successfully
-        return .invalid([
-          "Failed OneOf validation. Multiple components matched, but exactly one is required."
-        ])
+        return .error(
+          .compositionFailure(type: .oneOf, reason: "multiple matches found", nestedErrors: [])
+        )
       }
     }
   }
@@ -136,9 +147,12 @@ public enum JSONComposition {
       schemaValue[Keywords.Not.name] = .object(component.schemaValue)
     }
 
-    public func parse(_ value: JSONValue) -> Validated<JSONValue, String> {
+    public func parse(_ value: JSONValue) -> Parsed<JSONValue, ParseIssue> {
       switch component.parse(value) {
-      case .valid: return .error("\(value) is valid against the not schema.")
+      case .valid:
+        return .error(
+          .compositionFailure(type: .not, reason: "valid against not schema", nestedErrors: [])
+        )
       case .invalid: return .valid(value)
       }
     }

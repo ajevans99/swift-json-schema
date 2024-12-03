@@ -74,18 +74,3 @@ let result1 = schema.validate(instance1)
 dump(result1, name: "Instance 1 Validation Result")
 let result2 = schema.validate(instance2)
 dump(result2, name: "Instance 2 Validation Result")
-
-let schemaString = """
-  {
-    "type": "object",
-    "properties": {
-      "name": {
-        "type": "string",
-        "minLength": 1
-      }
-    }
-  }
-  """
-let schema1 = try Schema(instance: schemaString, dialect: .draft2020_12)
-let result = try schema1.validate(instance: #"{"name": "Alice"}"#)
-schema1

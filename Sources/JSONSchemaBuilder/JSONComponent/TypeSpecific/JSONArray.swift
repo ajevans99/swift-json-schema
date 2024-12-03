@@ -24,10 +24,10 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
     }
   }
 
-  public func parse(_ value: JSONValue) -> Validated<[T.Output], String> {
+  public func parse(_ value: JSONValue) -> Parsed<[T.Output], ParseIssue> {
     if case .array(let array) = value {
       var outputs: [T.Output] = []
-      var errors: [String] = []
+      var errors: [ParseIssue] = []
       for item in array {
         switch items.parse(item) {
         case .valid(let value): outputs.append(value)
@@ -37,7 +37,7 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
       guard !errors.isEmpty else { return .valid(outputs) }
       return .invalid(errors)
     }
-    return .error("Expected array value")
+    return .error(.typeMismatch(expected: .array, actual: value))
   }
 }
 

@@ -1,3 +1,5 @@
-▿ Validated<Poll, String>
+▿ Parsed<Poll, ParseIssue>
   ▿ invalid: 1 element
-    - "Transformation failed for key: title"
+    ▿ ParseIssue
+      ▿ missingRequiredProperty: (1 element)
+        - property: "title"

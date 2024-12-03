@@ -24,11 +24,11 @@ extension JSONComponents {
       self.transform = transform
     }
 
-    public func parse(_ value: JSONValue) -> Validated<Output, String> {
+    public func parse(_ value: JSONValue) -> Parsed<Output, ParseIssue> {
       let output = upstream.parse(value)
       switch output {
       case .valid(let a):
-        guard let newOutput = transform(a) else { return .error("failed to process from \(value)") }
+        guard let newOutput = transform(a) else { return .error(.compactMapValueNil(value: value)) }
         return .valid(newOutput)
       case .invalid(let errors): return .invalid(errors)
       }

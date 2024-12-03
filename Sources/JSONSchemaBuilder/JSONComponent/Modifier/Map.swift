@@ -24,7 +24,7 @@ extension JSONComponents {
       self.transform = transform
     }
 
-    public func parse(_ value: JSONValue) -> Validated<NewOutput, String> {
+    public func parse(_ value: JSONValue) -> Parsed<NewOutput, ParseIssue> {
       upstream.parse(value).map(transform)
     }
   }

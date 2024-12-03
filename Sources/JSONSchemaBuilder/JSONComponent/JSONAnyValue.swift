@@ -6,5 +6,5 @@ public struct JSONAnyValue: JSONSchemaComponent {
 
   public init() {}
 
-  public func parse(_ value: JSONValue) -> Validated<JSONValue, String> { .valid(value) }
+  public func parse(_ value: JSONValue) -> Parsed<JSONValue, ParseIssue> { .valid(value) }
 }
