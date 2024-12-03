@@ -302,13 +302,13 @@ let data = """
   "conditions": "Sunny"
 }
 """
-let weather: Validated<Weather, String> = Weather.schema.parse(data)
+let weather: Validated<Weather, String> = Weather.schema.parse(instance: data)
 ```
 
 **Comming soon** Optionally combine parsing and validation in a single step.
 
 ```swift
-let weather: Weather = try Weather.schema.parseAndValidate(data)
+let weather: Weather = try Weather.schema.parseAndValidate(instance: data)
 ```
 
 > Shoutout to the [swift-parsing](https://github.com/pointfreeco/swift-parsing) library and the [Point-Free Parsing series](https://www.pointfree.co/collections/parsing) for the inspiration behind the parsing API and implementation.

@@ -1,0 +1,10 @@
+▿ Validated<Poll, String>
+  ▿ invalid: 8 elements
+    - "Transformation failed for key: createdAt"
+    - "Transformation failed for key: isActive"
+    - "Transformation failed for key: visibility"
+    - "No valid component matched for value: object([\"type\": JSONSchema.JSONValue.string(\"sports\"), \"isTeamSport\": JSONSchema.JSONValue.boolean(true), \"sportType\": JSONSchema.JSONValue.string(\"soccer\")])"
+    - "Transformation failed for key: technology"
+    - "Transformation failed for key: entertainment"
+    - "Transformation failed for key: education"
+    - "object([\"type\": JSONSchema.JSONValue.string(\"sports\"), \"isTeamSport\": JSONSchema.JSONValue.boolean(true), \"sportType\": JSONSchema.JSONValue.string(\"soccer\")]) does not match any enum case."

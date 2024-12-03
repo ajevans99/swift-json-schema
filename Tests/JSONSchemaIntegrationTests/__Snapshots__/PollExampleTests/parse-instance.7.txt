@@ -1,0 +1,4 @@
+▿ Validated<Poll, String>
+  ▿ invalid: 2 elements
+    - "Transformation failed for key: isActive"
+    - "string(\"public\") does not match any enum case."

@@ -1,0 +1,54 @@
+{
+  "errors" : [
+    {
+      "errors" : [
+        {
+          "errors" : [
+            {
+              "errors" : [
+                {
+                  "instanceLocation" : "#\/options\/0\/id",
+                  "keyword" : "minimum",
+                  "keywordLocation" : "#\/properties\/options\/items\/properties\/id\/minimum",
+                  "message" : "The number is below the specified 'minimum' value."
+                }
+              ],
+              "instanceLocation" : "#\/options\/0",
+              "keyword" : "properties",
+              "keywordLocation" : "#\/properties\/options\/items\/properties",
+              "message" : "Validation failed for keyword 'properties'"
+            }
+          ],
+          "instanceLocation" : "#\/options",
+          "keyword" : "items",
+          "keywordLocation" : "#\/properties\/options\/items",
+          "message" : "Validation failed for keyword 'items'"
+        },
+        {
+          "instanceLocation" : "#\/options",
+          "keyword" : "minItems",
+          "keywordLocation" : "#\/properties\/options\/minItems",
+          "message" : "The array has fewer items than the specified 'minItems'."
+        },
+        {
+          "instanceLocation" : "#\/visibility",
+          "keyword" : "enum",
+          "keywordLocation" : "#\/properties\/visibility\/enum",
+          "message" : "The instance is not one of the allowed enum values."
+        }
+      ],
+      "instanceLocation" : "#",
+      "keyword" : "properties",
+      "keywordLocation" : "#\/properties",
+      "message" : "Validation failed for keyword 'properties'"
+    },
+    {
+      "instanceLocation" : "#",
+      "keyword" : "required",
+      "keywordLocation" : "#\/required",
+      "message" : "The required property 'isActive' is missing."
+    }
+  ],
+  "instanceLocation" : "#",
+  "valid" : false
+}

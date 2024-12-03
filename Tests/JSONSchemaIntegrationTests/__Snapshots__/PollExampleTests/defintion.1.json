@@ -1,0 +1,230 @@
+{
+  "description" : "A schema for representing a poll with options and metadata.",
+  "properties" : {
+    "category" : {
+      "anyOf" : [
+        {
+          "properties" : {
+            "technology" : {
+              "properties" : {
+                "_0" : {
+                  "properties" : {
+                    "hasDemo" : {
+                      "type" : "boolean"
+                    },
+                    "subTopic" : {
+                      "type" : "string"
+                    }
+                  },
+                  "required" : [
+                    "subTopic",
+                    "hasDemo"
+                  ],
+                  "type" : "object"
+                }
+              },
+              "required" : [
+                "_0"
+              ],
+              "type" : "object"
+            }
+          },
+          "required" : [
+            "technology"
+          ],
+          "type" : "object"
+        },
+        {
+          "properties" : {
+            "entertainment" : {
+              "properties" : {
+                "_0" : {
+                  "properties" : {
+                    "ageRating" : {
+                      "enum" : [
+                        "g",
+                        "pg",
+                        "pg13",
+                        "r"
+                      ],
+                      "type" : "string"
+                    },
+                    "genre" : {
+                      "enum" : [
+                        "movies",
+                        "music",
+                        "games",
+                        "television"
+                      ],
+                      "type" : "string"
+                    }
+                  },
+                  "required" : [
+                    "genre",
+                    "ageRating"
+                  ],
+                  "type" : "object"
+                }
+              },
+              "required" : [
+                "_0"
+              ],
+              "type" : "object"
+            }
+          },
+          "required" : [
+            "entertainment"
+          ],
+          "type" : "object"
+        },
+        {
+          "properties" : {
+            "education" : {
+              "properties" : {
+                "_0" : {
+                  "properties" : {
+                    "level" : {
+                      "type" : "string"
+                    },
+                    "subject" : {
+                      "enum" : [
+                        "math",
+                        "science",
+                        "history",
+                        "english",
+                        "art",
+                        "music",
+                        "foreignLanguage"
+                      ],
+                      "type" : "string"
+                    }
+                  },
+                  "required" : [
+                    "subject",
+                    "level"
+                  ],
+                  "type" : "object"
+                }
+              },
+              "required" : [
+                "_0"
+              ],
+              "type" : "object"
+            }
+          },
+          "required" : [
+            "education"
+          ],
+          "type" : "object"
+        },
+        {
+          "enum" : [
+            "sports",
+            "other"
+          ],
+          "type" : "string"
+        }
+      ],
+      "description" : "Category of the poll, limited to specific types"
+    },
+    "createdAt" : {
+      "format" : "date-time",
+      "type" : "string"
+    },
+    "description" : {
+      "description" : "Optional description of the poll",
+      "maxLength" : 500,
+      "type" : "string"
+    },
+    "expiresAt" : {
+      "description" : "Optional expiration timestamp for the poll",
+      "format" : "date-time",
+      "type" : "string"
+    },
+    "id" : {
+      "description" : "Unique identifier for the poll",
+      "minimum" : 1,
+      "type" : "integer"
+    },
+    "isActive" : {
+      "default" : true,
+      "description" : "Whether the poll is currently active",
+      "type" : "boolean"
+    },
+    "options" : {
+      "description" : "List of options available in the poll",
+      "items" : {
+        "properties" : {
+          "id" : {
+            "description" : "Unique identifier for the poll",
+            "minimum" : 1,
+            "type" : "integer"
+          },
+          "text" : {
+            "description" : "Option text",
+            "maxLength" : 100,
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "voteCount" : {
+            "default" : 0,
+            "description" : "Number of votes received",
+            "minimum" : 0,
+            "type" : "integer"
+          }
+        },
+        "required" : [
+          "id",
+          "text",
+          "voteCount"
+        ],
+        "type" : "object"
+      },
+      "minItems" : 2,
+      "type" : "array",
+      "uniqueItems" : true
+    },
+    "settings" : {
+      "properties" : {
+        "allowMulipleVotes" : {
+          "default" : true,
+          "type" : "boolean"
+        },
+        "requireAuthentication" : {
+          "default" : false,
+          "type" : "boolean"
+        }
+      },
+      "required" : [
+        "allowMulipleVotes",
+        "requireAuthentication"
+      ],
+      "type" : "object"
+    },
+    "title" : {
+      "description" : "The title of the poll",
+      "maxLength" : 200,
+      "minLength" : 1,
+      "type" : "string"
+    },
+    "visibility" : {
+      "description" : "Visibility of the poll",
+      "enum" : [
+        "`public`",
+        "`private`"
+      ],
+      "type" : "string"
+    }
+  },
+  "required" : [
+    "id",
+    "title",
+    "createdAt",
+    "isActive",
+    "options",
+    "visibility",
+    "category"
+  ],
+  "title" : "Poll",
+  "type" : "object"
+}

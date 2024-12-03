@@ -1,0 +1,85 @@
+{
+  "annotations" : [
+    {
+      "annotation" : true,
+      "instanceLocation" : "#\/options",
+      "keywordLocation" : "#\/properties\/options\/items"
+    },
+    {
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "#\/category",
+      "keywordLocation" : "#\/properties\/category\/anyOf\/0\/properties"
+    },
+    {
+      "annotation" : [
+        "requireAuthentication"
+      ],
+      "instanceLocation" : "#\/settings",
+      "keywordLocation" : "#\/properties\/settings\/properties"
+    }
+  ],
+  "errors" : [
+    {
+      "errors" : [
+        {
+          "instanceLocation" : "#\/visibility",
+          "keyword" : "enum",
+          "keywordLocation" : "#\/properties\/visibility\/enum",
+          "message" : "The instance is not one of the allowed enum values."
+        },
+        {
+          "errors" : [
+            {
+              "instanceLocation" : "#\/category",
+              "keyword" : "required",
+              "keywordLocation" : "#\/properties\/category\/anyOf\/0\/required",
+              "message" : "The required property 'technology' is missing."
+            },
+            {
+              "instanceLocation" : "#\/category",
+              "keyword" : "required",
+              "keywordLocation" : "#\/properties\/category\/anyOf\/1\/required",
+              "message" : "The required property 'entertainment' is missing."
+            },
+            {
+              "instanceLocation" : "#\/category",
+              "keyword" : "required",
+              "keywordLocation" : "#\/properties\/category\/anyOf\/2\/required",
+              "message" : "The required property 'education' is missing."
+            },
+            {
+              "instanceLocation" : "#\/category",
+              "keyword" : "type",
+              "keywordLocation" : "#\/properties\/category\/anyOf\/3\/type",
+              "message" : "Type mismatch: the instance does not match the expected type."
+            },
+            {
+              "instanceLocation" : "#\/category",
+              "keyword" : "enum",
+              "keywordLocation" : "#\/properties\/category\/anyOf\/3\/enum",
+              "message" : "The instance is not one of the allowed enum values."
+            }
+          ],
+          "instanceLocation" : "#\/category",
+          "keyword" : "anyOf",
+          "keywordLocation" : "#\/properties\/category\/anyOf",
+          "message" : "Validation failed for keyword 'anyOf'"
+        },
+        {
+          "instanceLocation" : "#\/settings",
+          "keyword" : "required",
+          "keywordLocation" : "#\/properties\/settings\/required",
+          "message" : "The required property 'allowMulipleVotes' is missing."
+        }
+      ],
+      "instanceLocation" : "#",
+      "keyword" : "properties",
+      "keywordLocation" : "#\/properties",
+      "message" : "Validation failed for keyword 'properties'"
+    }
+  ],
+  "instanceLocation" : "#",
+  "valid" : false
+}
