@@ -4,7 +4,10 @@ import SnapshotTesting
 import Testing
 
 @Schemable
-@SchemaOptions(title: "Poll", description: "A schema for representing a poll with options and metadata.")
+@SchemaOptions(
+  title: "Poll",
+  description: "A schema for representing a poll with options and metadata."
+)
 struct Poll {
   @SchemaOptions(description: "Unique identifier for the poll")
   @NumberOptions(minimum: 1)
@@ -38,7 +41,7 @@ struct Poll {
   let settings: Settings?
 
   @Schemable
-  @ObjectOptions() // TODO: Additional properties to false
+  @ObjectOptions()  // TODO: Additional properties to false
   struct Option {
     @SchemaOptions(description: "Unique identifier for the poll")
     @NumberOptions(minimum: 1)
@@ -91,7 +94,8 @@ extension Poll.Category {
 
     @Schemable
     enum AgeRating: String {
-      case g = "General Audience", pg = "Parental Guidance Suggested", pg13 = "Parental Guidance Suggested 13+", r = "Restricted"
+      case g = "General Audience", pg = "Parental Guidance Suggested", pg13 =
+        "Parental Guidance Suggested 13+", r = "Restricted"
     }
 
     let genre: Genre
@@ -282,7 +286,8 @@ struct PollExampleTests {
           "category": "other"
         }
         """,
-      description: "Multiple validation errors: empty title, empty option text, negative vote count, invalid date format",
+      description:
+        "Multiple validation errors: empty title, empty option text, negative vote count, invalid date format",
       shouldParse: true,
       isValid: false
     ),

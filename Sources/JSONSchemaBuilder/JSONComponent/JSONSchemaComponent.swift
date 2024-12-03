@@ -23,7 +23,10 @@ extension JSONSchemaComponent {
     .asSchema()
   }
 
-  public func parse(instance: String, decoder: JSONDecoder = JSONDecoder()) throws -> Validated<Output, String> {
+  public func parse(
+    instance: String,
+    decoder: JSONDecoder = JSONDecoder()
+  ) throws -> Validated<Output, String> {
     let value = try decoder.decode(JSONValue.self, from: Data(instance.utf8))
     return parse(value)
   }
