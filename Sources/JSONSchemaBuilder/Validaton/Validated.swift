@@ -23,6 +23,20 @@ public enum Validated<Value, Error> {
     case .invalid(let errors): return .invalid(errors)
     }
   }
+
+  public var value: Value? {
+    switch self {
+    case .valid(let value): return value
+    case .invalid: return nil
+    }
+  }
+
+  public var errors: [Error]? {
+    switch self {
+    case .valid: return nil
+    case .invalid(let array): return array
+    }
+  }
 }
 
 extension Validated: Equatable where Value: Equatable, Error: Equatable {}

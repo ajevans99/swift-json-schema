@@ -1,0 +1,27 @@
+▿ Validated<Poll, String>
+  ▿ valid: Poll
+    ▿ category: Category
+      ▿ technology: Technology
+        - hasDemo: true
+        - subTopic: "software"
+    - createdAt: "2024-10-25T12:00:00Z"
+    ▿ description: Optional<String>
+      - some: "Vote for your favorite language."
+    ▿ expiresAt: Optional<String>
+      - some: "2024-12-31T23:59:59Z"
+    - id: 1
+    - isActive: true
+    ▿ options: 2 elements
+      ▿ Option
+        - id: 1
+        - text: "Swift"
+        - voteCount: 10
+      ▿ Option
+        - id: 2
+        - text: "Python"
+        - voteCount: 20
+    ▿ settings: Optional<Settings>
+      ▿ some: Settings
+        - allowMultipleVotes: false
+        - requireAuthentication: true
+    - title: "Favorite Programming Language?"

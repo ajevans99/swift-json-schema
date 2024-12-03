@@ -1,0 +1,19 @@
+▿ Validated<Poll, String>
+  ▿ valid: Poll
+    - category: Category.other
+    - createdAt: "invalid-date"
+    - description: Optional<String>.none
+    - expiresAt: Optional<String>.none
+    - id: 7
+    - isActive: true
+    ▿ options: 2 elements
+      ▿ Option
+        - id: 1
+        - text: ""
+        - voteCount: -5
+      ▿ Option
+        - id: 2
+        - text: "Valid Option"
+        - voteCount: 0
+    - settings: Optional<Settings>.none
+    - title: ""

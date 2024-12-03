@@ -1,3 +1,4 @@
+import Foundation
 import JSONSchema
 
 /// A component for use in ``JSONSchemaBuilder`` to build, annotate, and validate schemas.
@@ -20,5 +21,13 @@ extension JSONSchemaComponent {
       context: .init(dialect: .draft2020_12)
     )
     .asSchema()
+  }
+
+  public func parse(
+    instance: String,
+    decoder: JSONDecoder = JSONDecoder()
+  ) throws -> Validated<Output, String> {
+    let value = try decoder.decode(JSONValue.self, from: Data(instance.utf8))
+    return parse(value)
   }
 }
