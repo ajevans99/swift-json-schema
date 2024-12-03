@@ -305,7 +305,7 @@ let data = """
 let weather: Parsed<Weather, ParseIssue> = Weather.schema.parse(instance: data)
 ```
 
-**Comming soon** Optionally combine parsing and validation in a single step.
+Optionally, combine parsing and validation in a single step.
 
 ```swift
 let weather: Weather = try Weather.schema.parseAndValidate(instance: data)

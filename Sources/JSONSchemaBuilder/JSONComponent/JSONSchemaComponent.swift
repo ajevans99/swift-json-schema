@@ -30,4 +30,36 @@ extension JSONSchemaComponent {
     let value = try decoder.decode(JSONValue.self, from: Data(instance.utf8))
     return parse(value)
   }
+
+  public func parseAndValidate(
+    instance: String,
+    decoder: JSONDecoder = JSONDecoder()
+  ) throws(ParseAndValidateIssue) -> Output {
+    let value: JSONValue
+    do {
+      value = try decoder.decode(JSONValue.self, from: Data(instance.utf8))
+    } catch {
+      throw .decodingFailed(error)
+    }
+    let parsingResult = parse(value)
+    let validationResult = definition().validate(value)
+    switch (parsingResult, validationResult.isValid) {
+    case (.valid(let output), true):
+      return output
+    case (.valid, false):
+      throw .validationFailed(validationResult)
+    case (.invalid(let errors), false):
+      throw .parsingAndValidationFailed(errors, validationResult)
+    case (.invalid(let errors), true):
+      // This case should really not be possible
+      throw .parsingFailed(errors)
+    }
+  }
+}
+
+public enum ParseAndValidateIssue: Error {
+  case decodingFailed(Error)
+  case parsingFailed([ParseIssue])
+  case validationFailed(ValidationResult)
+  case parsingAndValidationFailed([ParseIssue], ValidationResult)
 }

@@ -308,4 +308,17 @@ struct PollExampleTests {
     // assertSnapshot(of: validationResult.sorted(), as: .json)
     #expect(instance.isValid == validationResult.isValid)
   }
+
+  @Test(arguments: instances)
+  func parseAndValidate(instance: TestInstance) throws {
+    if instance.isValid && instance.shouldParse {
+      #expect(throws: Never.self) {
+        _ = try Poll.schema.parseAndValidate(instance: instance.data)
+      }
+    } else {
+      #expect(throws: ParseAndValidateIssue.self) {
+        _ = try Poll.schema.parseAndValidate(instance: instance.data)
+      }
+    }
+  }
 }

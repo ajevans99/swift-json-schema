@@ -21,7 +21,7 @@ extension JSONComposableCollectionComponent where Output == JSONValue {
   ) { self.init(into: JSONValue.self, builder) }
 }
 
-public enum JSONComposition {
+public enum JSONComposition: Sendable {
   case anyOf
   case allOf
   case oneOf
