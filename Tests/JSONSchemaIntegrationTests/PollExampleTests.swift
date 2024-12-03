@@ -32,9 +32,6 @@ struct Poll {
   @ArrayOptions(minItems: 2, uniqueItems: true)
   let options: [Option]
 
-  @SchemaOptions(description: "Visibility of the poll")
-  let visibility: Visibility
-
   @SchemaOptions(description: "Category of the poll, limited to specific types")
   let category: Category
 
@@ -73,7 +70,7 @@ struct Poll {
 
   @Schemable
   struct Settings {
-    var allowMulipleVotes: Bool = true
+    var allowMultipleVotes: Bool = true
     var requireAuthentication: Bool = false
   }
 }
@@ -114,14 +111,20 @@ extension Poll.Category {
 }
 
 struct PollExampleTests {
+  /// Toggle to true to re-record snapshots, then run.
+  /// Don't forget to set it back to false.
+  private static let shouldRecord: SnapshotTestingConfiguration.Record = false
+
   struct TestInstance {
     let data: String
     let description: String
 
     let shouldParse: Bool
+    let isValid: Bool
   }
 
-  @Test func defintion() {
+  @Test(.snapshots(record: shouldRecord))
+  func defintion() {
     assertSnapshot(of: Poll.schema.definition(), as: .json)
   }
 
@@ -139,12 +142,12 @@ struct PollExampleTests {
           "createdAt": "2024-10-25T12:00:00Z",
           "expiresAt": "2024-12-31T23:59:59Z",
           "isActive": true,
-          "visibility": "public",
           "category": {
-            "type": "technology",
-            "_0": {
-              "subTopic": "software",
-              "hasDemo": true
+            "technology": {
+              "_0": {
+                "subTopic": "software",
+                "hasDemo": true
+              }
             }
           },
           "settings": {
@@ -154,7 +157,8 @@ struct PollExampleTests {
         }
         """,
       description: "Technology category with settings",
-      shouldParse: true
+      shouldParse: true,
+      isValid: true
     ),
     TestInstance(
       data: """
@@ -165,18 +169,21 @@ struct PollExampleTests {
             {"id": 1, "text": "Action", "voteCount": 5},
             {"id": 2, "text": "Drama", "voteCount": 8}
           ],
-          "created_at": "2024-10-26T08:30:00Z",
+          "createdAt": "2024-10-26T08:30:00Z",
+          "isActive": false,
           "category": {
-            "type": "entertainment",
-            "_0": {
-              "genre": "movies",
-              "ageRating": "PG-13"
+            "entertainment": {
+              "_0": {
+                "genre": "movies",
+                "ageRating": "pg13"
+              }
             }
           }
         }
         """,
       description: "Entertainment category",
-      shouldParse: true
+      shouldParse: true,
+      isValid: true
     ),
     TestInstance(
       data: """
@@ -187,16 +194,14 @@ struct PollExampleTests {
             {"id": 1, "text": "Soccer", "voteCount": 25},
             {"id": 2, "text": "Basketball", "voteCount": 30}
           ],
-          "created_at": "2024-10-25T15:00:00Z",
-          "category": {
-            "type": "sports",
-            "sportType": "soccer",
-            "isTeamSport": true
-          }
+          "createdAt": "2024-10-25T15:00:00Z",
+          "isActive": false,
+          "category": "sports"
         }
         """,
       description: "Sports category",
-      shouldParse: true
+      shouldParse: true,
+      isValid: true
     ),
     TestInstance(
       data: """
@@ -206,82 +211,96 @@ struct PollExampleTests {
             {"id": 1, "text": "Option A", "voteCount": 2},
             {"id": 2, "text": "Option B", "voteCount": 4}
           ],
-          "created_at": "2024-10-25T18:00:00Z",
+          "createdAt": "2024-10-25T18:00:00Z",
+          "isActive": true,
           "category": {
-            "type": "education",
-            "_0": {
-              "subject": "science"
+            "education": {
+              "_0": {
+                "subject": "science",
+                "level": "second"
+              }
             }
           }
         }
         """,
       description: "Mising required title",
-      shouldParse: false
+      shouldParse: false,
+      isValid: false
     ),
     TestInstance(
       data: """
         {
-          "id": 7,
+          "id": 5,
           "title": "Favorite Food?",
           "options": [
             {"id": 1, "text": "Pizza", "voteCount": 5},
             {"id": 2, "text": "Burger", "voteCount": 3}
           ],
-          "created_at": "2024-10-25T12:00:00Z",
+          "createdAt": "2024-10-25T12:00:00Z",
+          "isActive": false,
           "category": {
-            "type": "food",
-            "customDescription": "What's your favorite?"
+            "food": {
+              "_0": {
+                "customDescription": "What's your favorite?"
+              }
+            },
           }
         }
         """,
       description: "Invalid category type",
-      shouldParse: true
+      shouldParse: false,
+      isValid: false
     ),
     TestInstance(
       data: """
         {
-          "id": 8,
+          "id": 6,
           "title": "Invalid Poll",
           "options": [
             {"id": -1, "text": "Option A", "voteCount": 5}
           ],
           "createdAt": "2024-10-25T12:00:00Z",
-          "category": "other",
-          "visibility": "public"
+          "isActive": true,
+          "category": "other"
         }
         """,
       description: "Invalid option ID (negative) and insufficient options count",
-      shouldParse: true
+      shouldParse: true,
+      isValid: false
     ),
     TestInstance(
       data: """
         {
-          "id": 9,
+          "id": 7,
           "title": "",
           "options": [
             {"id": 1, "text": "", "voteCount": -5},
             {"id": 2, "text": "Valid Option", "voteCount": 0}
           ],
           "createdAt": "invalid-date",
-          "category": "other",
-          "visibility": "public"
+          "isActive": true,
+          "category": "other"
         }
         """,
       description: "Multiple validation errors: empty title, empty option text, negative vote count, invalid date format",
-      shouldParse: true
+      shouldParse: true,
+      isValid: false
     ),
   ]
 
-  @Test(arguments: instances)
+  @Test(.snapshots(record: shouldRecord), .serialized, arguments: instances)
   func parse(instance: TestInstance) throws {
     let pollResult = try Poll.schema.parse(instance: instance.data)
     assertSnapshot(of: pollResult, as: .dump)
+    #expect(instance.shouldParse ? pollResult.value != nil : pollResult.errors?.isEmpty == false)
   }
 
   @Test(arguments: instances)
   func validate(instance: TestInstance) throws {
     let schema = Poll.schema.definition()
     let validationResult = try schema.validate(instance: instance.data)
-    assertSnapshot(of: validationResult, as: .json)
+    // TODO: The order of errors and annotations arrays are not deterministic so standard JSON comparison does not work here, need a custom `Snapshotting` strategy I think
+    // assertSnapshot(of: validationResult.sorted(), as: .json)
+    #expect(instance.isValid == validationResult.isValid)
   }
 }

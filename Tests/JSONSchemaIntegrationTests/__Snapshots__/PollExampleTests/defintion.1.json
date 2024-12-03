@@ -186,7 +186,7 @@
     },
     "settings" : {
       "properties" : {
-        "allowMulipleVotes" : {
+        "allowMultipleVotes" : {
           "default" : true,
           "type" : "boolean"
         },
@@ -196,7 +196,7 @@
         }
       },
       "required" : [
-        "allowMulipleVotes",
+        "allowMultipleVotes",
         "requireAuthentication"
       ],
       "type" : "object"
@@ -206,14 +206,6 @@
       "maxLength" : 200,
       "minLength" : 1,
       "type" : "string"
-    },
-    "visibility" : {
-      "description" : "Visibility of the poll",
-      "enum" : [
-        "`public`",
-        "`private`"
-      ],
-      "type" : "string"
     }
   },
   "required" : [
@@ -222,7 +214,6 @@
     "createdAt",
     "isActive",
     "options",
-    "visibility",
     "category"
   ],
   "title" : "Poll",

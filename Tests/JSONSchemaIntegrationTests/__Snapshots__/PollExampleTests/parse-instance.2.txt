@@ -1,10 +1,22 @@
 ▿ Validated<Poll, String>
-  ▿ invalid: 8 elements
-    - "Transformation failed for key: createdAt"
-    - "Transformation failed for key: isActive"
-    - "Transformation failed for key: visibility"
-    - "No valid component matched for value: object([\"type\": JSONSchema.JSONValue.string(\"sports\"), \"isTeamSport\": JSONSchema.JSONValue.boolean(true), \"sportType\": JSONSchema.JSONValue.string(\"soccer\")])"
-    - "Transformation failed for key: technology"
-    - "Transformation failed for key: entertainment"
-    - "Transformation failed for key: education"
-    - "object([\"type\": JSONSchema.JSONValue.string(\"sports\"), \"isTeamSport\": JSONSchema.JSONValue.boolean(true), \"sportType\": JSONSchema.JSONValue.string(\"soccer\")]) does not match any enum case."
+  ▿ valid: Poll
+    ▿ category: Category
+      ▿ entertainment: Entertainment
+        - ageRating: AgeRating.pg13
+        - genre: Genre.movies
+    - createdAt: "2024-10-26T08:30:00Z"
+    - description: Optional<String>.none
+    - expiresAt: Optional<String>.none
+    - id: 2
+    - isActive: false
+    ▿ options: 2 elements
+      ▿ Option
+        - id: 1
+        - text: "Action"
+        - voteCount: 5
+      ▿ Option
+        - id: 2
+        - text: "Drama"
+        - voteCount: 8
+    - settings: Optional<Settings>.none
+    - title: "Favorite Movie Genre?"
