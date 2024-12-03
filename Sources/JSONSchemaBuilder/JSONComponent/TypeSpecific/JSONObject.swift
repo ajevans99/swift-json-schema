@@ -58,7 +58,7 @@ extension JSONObject {
   ///     JSONString()
   ///   }
   /// ```
-  /// `myObj.validate(/* some input */)` will have a type of `Validated<(Void, String), String>`
+  /// `myObj.validate(/* some input */)` will have a type of `Parsed<(Void, String), String>`
   ///
   /// For now, to drop the `Void`, you can add a map, like `.map { $1 }`.
   /// TODO: Drop `Void` values from tuple with builder.

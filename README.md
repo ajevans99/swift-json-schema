@@ -302,7 +302,7 @@ let data = """
   "conditions": "Sunny"
 }
 """
-let weather: Validated<Weather, String> = Weather.schema.parse(instance: data)
+let weather: Parsed<Weather, ParseIssue> = Weather.schema.parse(instance: data)
 ```
 
 **Comming soon** Optionally combine parsing and validation in a single step.
