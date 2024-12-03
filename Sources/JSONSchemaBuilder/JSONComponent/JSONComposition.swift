@@ -50,7 +50,9 @@ public enum JSONComposition {
         case .invalid(let errors): allErrors.append(contentsOf: errors)
         }
       }
-      return .error(.compositionFailure(type: .anyOf, reason: "did not match any", nestedErrors: allErrors))
+      return .error(
+        .compositionFailure(type: .anyOf, reason: "did not match any", nestedErrors: allErrors)
+      )
     }
   }
 
@@ -80,7 +82,13 @@ public enum JSONComposition {
       }
 
       guard let validResult, combinedErrors.isEmpty else {
-        return .error(.compositionFailure(type: .allOf, reason: "did not match all", nestedErrors: combinedErrors))
+        return .error(
+          .compositionFailure(
+            type: .allOf,
+            reason: "did not match all",
+            nestedErrors: combinedErrors
+          )
+        )
       }
       return .valid(validResult)
     }
@@ -116,10 +124,14 @@ public enum JSONComposition {
         return .valid(validResults.first!)
       } else if validResults.isEmpty {
         // No component validated successfully
-        return .error(.compositionFailure(type: .oneOf, reason: "no match found", nestedErrors: combinedErrors))
+        return .error(
+          .compositionFailure(type: .oneOf, reason: "no match found", nestedErrors: combinedErrors)
+        )
       } else {
         // More than one component validated successfully
-        return .error(.compositionFailure(type: .oneOf, reason: "multiple matches found", nestedErrors: []))
+        return .error(
+          .compositionFailure(type: .oneOf, reason: "multiple matches found", nestedErrors: [])
+        )
       }
     }
   }
@@ -137,7 +149,10 @@ public enum JSONComposition {
 
     public func parse(_ value: JSONValue) -> Parsed<JSONValue, ParseIssue> {
       switch component.parse(value) {
-      case .valid: return .error(.compositionFailure(type: .not, reason: "valid against not schema", nestedErrors: []))
+      case .valid:
+        return .error(
+          .compositionFailure(type: .not, reason: "valid against not schema", nestedErrors: [])
+        )
       case .invalid: return .valid(value)
       }
     }

@@ -20,7 +20,9 @@ extension JSONComponents {
     public func parse(
       _ input: JSONValue
     ) -> Parsed<(Props.Output, [String: AdditionalProps.Output]), ParseIssue> {
-      guard case .object(let dictionary) = input else { return .error(.typeMismatch(expected: .object, actual: input)) }
+      guard case .object(let dictionary) = input else {
+        return .error(.typeMismatch(expected: .object, actual: input))
+      }
 
       // Validate the base properties
       let baseValidation = base.parse(input)
