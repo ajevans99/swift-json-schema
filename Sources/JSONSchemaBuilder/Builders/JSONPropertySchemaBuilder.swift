@@ -25,6 +25,12 @@ import JSONSchema
   public static func buildEither<TrueComponent, FalseComponent>(
     second component: FalseComponent
   ) -> JSONPropertyComponents.Conditional<TrueComponent, FalseComponent> { .second(component) }
+
+  public static func buildArray<Component: PropertyCollection>(
+    _ components: [Component]
+  ) -> JSONPropertyComponents.PropertyArray<Component> {
+    .init(components: components)
+  }
 }
 
 public protocol PropertyCollection: Sendable {

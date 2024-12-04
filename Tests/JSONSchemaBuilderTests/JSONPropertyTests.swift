@@ -88,6 +88,20 @@ struct JSONPropertySchemaTests {
     }
   }
 
+  @Test func multipleArray() throws {
+    let props = ["prop0", "prop1", "prop2", "prop3"]
+    @JSONPropertySchemaBuilder var sample: some PropertyCollection {
+      for prop in props {
+        JSONProperty(key: prop, value: JSONString())
+      }
+    }
+
+    try #require(sample.schemaValue.values.count == 4)
+    for value in sample.schemaValue.values {
+      #expect(value.object?["type"] == "string")
+    }
+  }
+
   @Test(arguments: [true, false]) func optional(_ bool: Bool) {
     @JSONPropertySchemaBuilder var sample: some PropertyCollection {
       if bool {
