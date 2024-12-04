@@ -14,7 +14,9 @@ extension JSONPropertyComponents {
       }
     }
 
-    public func validate(_ dictionary: [String: JSONValue]) -> Parsed<[Component.Output], ParseIssue> {
+    public func validate(
+      _ dictionary: [String: JSONValue]
+    ) -> Parsed<[Component.Output], ParseIssue> {
       var outputs: [Component.Output] = []
       var issues: [ParseIssue] = []
 
@@ -28,11 +30,10 @@ extension JSONPropertyComponents {
         }
       }
 
-      if issues.isEmpty {
-        return .valid(outputs)
-      } else {
+      guard issues.isEmpty else {
         return .invalid(issues)
       }
+      return .valid(outputs)
     }
   }
 }

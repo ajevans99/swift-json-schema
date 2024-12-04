@@ -331,7 +331,7 @@ struct JSONAdvancedBuilderTests {
         "foo": ["type": "string"],
         "bar": ["type": "string"],
         "baz": ["type": "string"],
-      ]
+      ],
     ]
 
     #expect(sample.schemaValue == expected)
