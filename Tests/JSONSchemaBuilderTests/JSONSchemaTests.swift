@@ -311,7 +311,7 @@ struct JSONAdvancedBuilderTests {
     #expect(sample.schemaValue == (bool ? ["type": "number", "maximum": 100] : ["type": "number"]))
   }
 
-  func array(_ bool: Bool) {
+  @Test func array() {
     let properties = ["foo", "bar", "baz"]
 
     @JSONSchemaBuilder var sample: some JSONSchemaComponent {
@@ -323,7 +323,17 @@ struct JSONAdvancedBuilderTests {
         }
       }
     }
+    print("\(sample.schemaValue)")
 
-    #expect(sample.schemaValue == (bool ? ["type": "number", "maximum": 100] : ["type": "number"]))
+    let expected: [String: JSONValue] = [
+      "type": "object",
+      "properties": [
+        "foo": ["type": "string"],
+        "bar": ["type": "string"],
+        "baz": ["type": "string"],
+      ]
+    ]
+
+    #expect(sample.schemaValue == expected)
   }
 }
