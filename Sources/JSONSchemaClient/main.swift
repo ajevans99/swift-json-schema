@@ -74,3 +74,104 @@ let result1 = schema.validate(instance1)
 dump(result1, name: "Instance 1 Validation Result")
 let result2 = schema.validate(instance2)
 dump(result2, name: "Instance 2 Validation Result")
+
+
+//
+//// Option 2
+//
+//func getSchema2() -> MyAnyComponent {
+//  if 1 + 1 == 2 {
+//    return JSONObject().title("bar").eraseToMyAnyComponent()
+//  }
+//
+//  return JSONObject().title("foo").eraseToMyAnyComponent()
+//}
+//
+//let obj2 = JSONObject {
+//  JSONProperty(key: "baz") {
+//    getSchema2()
+//  }
+//}
+//
+//dump(obj2.definition(), name: "obj2")
+//
+//struct AnyComponent: JSONSchemaComponent {
+//  typealias Output = Void
+//
+//  var schemaValue: [KeywordIdentifier: JSONValue]
+//
+//  func parse(_ value: JSONValue) -> Parsed<Void, ParseIssue> {
+//    fatalError()
+//  }
+//}
+//
+//extension JSONSchemaComponent {
+//  func eraseToMyAnyComponent() -> MyAnyComponent {
+//    .init(schemaValue: self.schemaValue)
+//  }
+//}
+//
+//// Option 3
+//
+//func getSchema3() -> some JSONSchemaComponent {
+//  if 1 + 1 == 2 {
+//    return JSONObject().title("bar").eraseToAnyValue()
+//  }
+//
+//  return JSONObject {
+//    JSONProperty(key: "Hi")
+//  }
+//  .eraseToAnyValue()
+//}
+//
+//let obj3 = JSONObject {
+//  JSONProperty(key: "baz") {
+//    getSchema3()
+//  }
+//}
+//
+//dump(obj3.definition(), name: "obj3")
+
+
+import SwiftUI
+
+func myView() -> any View {
+  Text("Hello, World!")
+}
+
+struct ContentView: View {
+  var body: some View {
+    VStack {
+      AnyView(myView())
+    }
+    .padding()
+  }
+}
+// Option 1
+
+extension JSONAnyValue {
+  public init<Component: JSONSchemaComponent>(_ component: Component) {
+    self.init()
+    self.schemaValue = component.schemaValue
+  }
+}
+
+
+func getSchema() -> any JSONSchemaComponent {
+  if 1 + 1 == 2 {
+    return JSONObject().title("bar")
+  }
+
+  return JSONObject {
+    JSONProperty(key: "prop0")
+  }
+  .title("foo")
+}
+
+let obj = JSONObject {
+  JSONProperty(key: "baz") {
+    JSONAnyValue(getSchema())
+  }
+}
+
+dump(obj.definition(), name: "obj1")

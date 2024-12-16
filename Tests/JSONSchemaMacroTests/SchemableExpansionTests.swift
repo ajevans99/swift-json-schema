@@ -358,4 +358,47 @@ struct SchemableExpansionTests {
       macros: testMacros
     )
   }
+
+  @Test func commentDescriptions() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct Weather {
+        /// The city.
+        let location: String
+        /// The temperature in Fahrenheit.
+        let temperature: Double
+      }
+      """,
+      expandedSource: """
+        struct Weather {
+          /// The city.
+          let location: String
+          /// The temperature in Fahrenheit.
+          let temperature: Double
+        
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "location") {
+                  JSONString()
+                  .description("The city.")
+                }
+                .required()
+                JSONProperty(key: "temperature") {
+                  JSONNumber()
+                  .description("The temperature in Fahrenheit.")
+                }
+                .required()
+              }
+            }
+          }
+        }
+        
+        extension Weather: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
 }
