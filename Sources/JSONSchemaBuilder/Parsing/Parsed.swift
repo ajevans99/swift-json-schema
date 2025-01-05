@@ -1,6 +1,6 @@
 /// Similar to `Result` from Swift but `invalid` case has an array of errors.
 /// Adapted from [Point-Free](https://github.com/pointfreeco/swift-validated) to use variadic parameters.
-public enum Parsed<Value, Error> {
+public enum Parsed<Value, Error: Swift.Error> {
   case valid(Value)
   case invalid([Error])
 

@@ -1,6 +1,6 @@
 import JSONSchema
 
-public enum ParseIssue: Equatable, Sendable {
+public enum ParseIssue: Error, Equatable, Sendable {
   case typeMismatch(expected: JSONType, actual: JSONValue)
   case noEnumCaseMatch(value: JSONValue)
   case missingRequiredProperty(property: String)
