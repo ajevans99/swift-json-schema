@@ -18,7 +18,7 @@ extension ParseIssue: CustomStringConvertible {
     case .missingRequiredProperty(let property):
       "Missing required property `\(property)`."
     case .compactMapValueNil(let value):
-      "The instance `\(value)` returned nil when evulated against compact map."
+      "The instance `\(value)` returned nil when evaluated against compact map."
     case .compositionFailure(let type, let reason, _):
       "Componsition (`\(type)`) failure: the instance \(reason)."
     }
