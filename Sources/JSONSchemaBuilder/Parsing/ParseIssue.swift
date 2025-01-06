@@ -12,15 +12,15 @@ extension ParseIssue: CustomStringConvertible {
   public var description: String {
     switch self {
     case .typeMismatch(let expected, let actual):
-      "Type mismatch: the instance `\(actual)` is not of type `\(expected)`."
+      "Type mismatch: the instance of type `\(actual.primative)` does not match the expected type `\(expected)`."
     case .noEnumCaseMatch(let value):
       "The instance `\(value)` does not match any enum case."
     case .missingRequiredProperty(let property):
       "Missing required property `\(property)`."
     case .compactMapValueNil(let value):
       "The instance `\(value)` returned nil when evulated against compact map."
-    case .compositionFailure(let type, let reason, let nestedErrors):
-      "Componsition (`\(type)`) failure: the instance \(reason). \(nestedErrors.map(\.description).joined(separator: "\n"))"
+    case .compositionFailure(let type, let reason, _):
+      "Componsition (`\(type)`) failure: the instance \(reason)."
     }
   }
 }

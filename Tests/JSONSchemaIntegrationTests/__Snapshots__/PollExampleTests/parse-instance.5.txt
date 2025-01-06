@@ -1,20 +1,20 @@
 ▿ Parsed<Poll, ParseIssue>
   ▿ invalid: 1 element
-    ▿ ParseIssue
+    ▿ Componsition (`anyOf`) failure: the instance did not match any.
       ▿ compositionFailure: (3 elements)
         - type: JSONComposition.anyOf
         - reason: "did not match any"
         ▿ nestedErrors: 4 elements
-          ▿ ParseIssue
+          ▿ Missing required property `technology`.
             ▿ missingRequiredProperty: (1 element)
               - property: "technology"
-          ▿ ParseIssue
+          ▿ Missing required property `entertainment`.
             ▿ missingRequiredProperty: (1 element)
               - property: "entertainment"
-          ▿ ParseIssue
+          ▿ Missing required property `education`.
             ▿ missingRequiredProperty: (1 element)
               - property: "education"
-          ▿ ParseIssue
+          ▿ The instance `object(["food": JSONSchema.JSONValue.object(["_0": JSONSchema.JSONValue.object(["customDescription": JSONSchema.JSONValue.string("What\'s your favorite?")])])])` does not match any enum case.
             ▿ noEnumCaseMatch: (1 element)
               ▿ value: JSONValue
                 ▿ object: 1 key/value pair

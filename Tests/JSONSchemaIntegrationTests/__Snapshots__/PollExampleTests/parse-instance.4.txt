@@ -1,5 +1,5 @@
 ▿ Parsed<Poll, ParseIssue>
   ▿ invalid: 1 element
-    ▿ ParseIssue
+    ▿ Missing required property `title`.
       ▿ missingRequiredProperty: (1 element)
         - property: "title"
