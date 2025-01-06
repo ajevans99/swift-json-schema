@@ -1,6 +1,6 @@
 ▿ Parsed<Poll, ParseIssue>
   ▿ invalid: 1 element
-    ▿ Componsition (`anyOf`) failure: the instance did not match any.
+    ▿ Composition (`anyOf`) failure: the instance did not match any.
       ▿ compositionFailure: (3 elements)
         - type: JSONComposition.anyOf
         - reason: "did not match any"
