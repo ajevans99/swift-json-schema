@@ -20,7 +20,7 @@ extension ParseIssue: CustomStringConvertible {
     case .compactMapValueNil(let value):
       "The instance `\(value)` returned nil when evaluated against compact map."
     case .compositionFailure(let type, let reason, _):
-      "Componsition (`\(type)`) failure: the instance \(reason)."
+      "Composition (`\(type)`) failure: the instance \(reason)."
     }
   }
 }
