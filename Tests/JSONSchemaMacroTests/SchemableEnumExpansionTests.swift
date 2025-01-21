@@ -564,4 +564,45 @@ import Testing
       macros: testMacros
     )
   }
+
+  @Test(arguments: ["public", "internal", "fileprivate", "package", "private"])
+  func accessModifiers(_ modifier: String) {
+    assertMacroExpansion(
+      """
+      @Schemable
+      \(modifier) enum TemperatureKind {
+        case celsius
+        case fahrenheit
+      }
+      """,
+      expandedSource: """
+        \(modifier) enum TemperatureKind {
+          case celsius
+          case fahrenheit
+
+          \(modifier) static var schema: some JSONSchemaComponent<TemperatureKind> {
+            JSONString()
+              .enumValues {
+                "celsius"
+                "fahrenheit"
+              }
+              .compactMap {
+                switch $0 {
+                case "celsius":
+                  return Self.celsius
+                case "fahrenheit":
+                  return Self.fahrenheit
+                default:
+                  return nil
+                }
+              }
+          }
+        }
+
+        extension TemperatureKind: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
 }

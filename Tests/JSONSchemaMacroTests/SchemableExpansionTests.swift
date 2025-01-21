@@ -358,4 +358,36 @@ struct SchemableExpansionTests {
       macros: testMacros
     )
   }
+
+  @Test(arguments: ["public", "internal", "fileprivate", "package", "private"])
+  func accessModifiers(_ modifier: String) {
+    assertMacroExpansion(
+      """
+      @Schemable
+      \(modifier) struct Weather {
+        let temperature: Double
+      }
+      """,
+      expandedSource: """
+        \(modifier) struct Weather {
+          let temperature: Double
+
+          \(modifier) static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperature") {
+                  JSONNumber()
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension Weather: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
 }
