@@ -74,3 +74,8 @@ let result1 = schema.validate(instance1)
 dump(result1, name: "Instance 1 Validation Result")
 let result2 = schema.validate(instance2)
 dump(result2, name: "Instance 2 Validation Result")
+
+@Schemable
+public struct Weather {
+  let temperature: Double
+}
