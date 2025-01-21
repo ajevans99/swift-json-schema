@@ -371,7 +371,7 @@ struct SchemableExpansionTests {
       expandedSource: """
         \(modifier) struct Weather {
           let temperature: Double
-        
+
           \(modifier) static var schema: some JSONSchemaComponent<Weather> {
             JSONSchema(Weather.init) {
               JSONObject {
@@ -383,7 +383,7 @@ struct SchemableExpansionTests {
             }
           }
         }
-        
+
         extension Weather: Schemable {
         }
         """,

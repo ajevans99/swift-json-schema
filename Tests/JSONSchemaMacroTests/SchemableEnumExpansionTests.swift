@@ -579,7 +579,7 @@ import Testing
         \(modifier) enum TemperatureKind {
           case celsius
           case fahrenheit
-        
+
           \(modifier) static var schema: some JSONSchemaComponent<TemperatureKind> {
             JSONString()
               .enumValues {
@@ -598,7 +598,7 @@ import Testing
               }
           }
         }
-        
+
         extension TemperatureKind: Schemable {
         }
         """,
