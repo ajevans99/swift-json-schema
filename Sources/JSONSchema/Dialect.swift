@@ -110,11 +110,13 @@ public enum Dialect: String, Hashable, Sendable {
       throw MetaSchemaError.invalidBaseURI
     }
 
+    print(Bundle.module.bundlePath)
+    print(Bundle.main.bundlePath)
+
     guard
       let schemaURL = Bundle.module.url(
         forResource: "schema",
-        withExtension: "json",
-        subdirectory: "Resources/draft2020-12"
+        withExtension: "json"
       )
     else {
       throw MetaSchemaError.missingResource
@@ -122,11 +124,13 @@ public enum Dialect: String, Hashable, Sendable {
 
     let metaURLs = Bundle.module.urls(
       forResourcesWithExtension: "json",
-      subdirectory: "Resources/draft2020-12/meta"
+      subdirectory: nil
     )
     let metaDictionary: [String: JSONValue] =
       try metaURLs?
       .reduce(into: [:]) { result, url in
+        guard !url.lastPathComponent.hasPrefix("schema") else { return }
+
         #if os(Linux)
           let value = try jsonValue(from: url as URL)
           let uriString =
