@@ -6,6 +6,8 @@
 
 The Swift JSON Schema library provides a type-safe way to generate and validate JSON schema documents directly in Swift.
 
+Checkout [this example repo](https://github.com/ajevans99/SwiftFunctionToolsExperiment) which uses `swift-json-schema` to create type-safe [OpenAI API function tool calls](https://platform.openai.com/docs/guides/function-calling).
+
 * [Schema Generation](#schema-generation)
 * [Macros](#macros)
 * [Validation](#validation)
