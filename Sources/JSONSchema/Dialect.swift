@@ -110,9 +110,6 @@ public enum Dialect: String, Hashable, Sendable {
       throw MetaSchemaError.invalidBaseURI
     }
 
-    print(Bundle.module.bundlePath)
-    print(Bundle.main.bundlePath)
-
     guard
       let schemaURL = Bundle.module.url(
         forResource: "schema",
