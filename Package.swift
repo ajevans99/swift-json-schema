@@ -37,7 +37,7 @@ let package = Package(
     .target(
       name: "JSONSchema",
       resources: [
-        .copy("Resources")
+        .process("Resources")
       ]
     ),
     .testTarget(

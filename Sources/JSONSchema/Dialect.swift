@@ -113,8 +113,7 @@ public enum Dialect: String, Hashable, Sendable {
     guard
       let schemaURL = Bundle.module.url(
         forResource: "schema",
-        withExtension: "json",
-        subdirectory: "Resources/draft2020-12"
+        withExtension: "json"
       )
     else {
       throw MetaSchemaError.missingResource
@@ -122,16 +121,18 @@ public enum Dialect: String, Hashable, Sendable {
 
     let metaURLs = Bundle.module.urls(
       forResourcesWithExtension: "json",
-      subdirectory: "Resources/draft2020-12/meta"
+      subdirectory: nil
     )
     let metaDictionary: [String: JSONValue] =
       try metaURLs?
       .reduce(into: [:]) { result, url in
         #if os(Linux)
+          guard url.lastPathComponent?.hasPrefix("schema") == false else { return }
           let value = try jsonValue(from: url as URL)
           let uriString =
             "meta/\(url.lastPathComponent?.replacingOccurrences(of: ".json", with: "") ?? "")"
         #else
+          guard !url.lastPathComponent.hasPrefix("schema") else { return }
           let value = try jsonValue(from: url)
           let uriString =
             "meta/\(url.lastPathComponent.replacingOccurrences(of: ".json", with: ""))"

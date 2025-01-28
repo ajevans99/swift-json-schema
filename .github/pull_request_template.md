@@ -12,7 +12,3 @@ Please include a summary of the changes and the related issue. Please also inclu
 ## Additional Notes
 
 Add any other context or screenshots about the pull request here.
-
----
-
-**Note:** You can add the `auto-format` label to this pull request to enable automatic Swift formatting.
