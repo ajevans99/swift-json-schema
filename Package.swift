@@ -22,6 +22,10 @@ let package = Package(
       name: "JSONSchemaBuilder",
       targets: ["JSONSchemaBuilder"]
     ),
+    .library(
+    name: "JSONSchemaMacro",  
+    targets: ["JSONSchemaMacro"]
+    ),
     .executable(
       name: "JSONSchemaClient",
       targets: ["JSONSchemaClient"]
