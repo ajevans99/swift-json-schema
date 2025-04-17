@@ -26,6 +26,7 @@ public struct JSONNumber: JSONNumberType {
 
   public func parse(_ value: JSONValue) -> Parsed<Double, ParseIssue> {
     if case .number(let double) = value { return .valid(double) }
+    if case .integer(let int) = value { return .valid(Double(int)) }
     return .error(.typeMismatch(expected: .number, actual: value))
   }
 }
