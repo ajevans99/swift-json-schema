@@ -13,7 +13,7 @@ extension JSONComponents {
   public struct FlatMap<NewSchemaComponent: JSONSchemaComponent, Upstream: JSONSchemaComponent>:
     JSONSchemaComponent
   {
-    public var schemaValue: [KeywordIdentifier: JSONValue] {
+    public var schemaValue: SchemaValue {
       get { upstream.schemaValue }
       set { upstream.schemaValue = newValue }
     }

@@ -29,7 +29,7 @@ public enum JSONComposition: Sendable {
 
   /// A component that accepts any of the given schemas.
   public struct AnyOf<Output>: JSONComposableCollectionComponent {
-    public var schemaValue = [KeywordIdentifier: JSONValue]()
+    public var schemaValue = SchemaValue.object([:])
 
     public let components: [any JSONSchemaComponent<Output>]
 
@@ -38,7 +38,7 @@ public enum JSONComposition: Sendable {
       @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnyComponent<Output>]
     ) {
       components = builder()
-      schemaValue[Keywords.AnyOf.name] = .array(components.map { .object($0.schemaValue) })
+      schemaValue[Keywords.AnyOf.name] = .array(components.map(\.schemaValue.value))
     }
 
     public func parse(_ value: JSONValue) -> Parsed<Output, ParseIssue> {
@@ -58,7 +58,7 @@ public enum JSONComposition: Sendable {
 
   /// A component that requires all of the schemas to be valid.
   public struct AllOf<Output>: JSONComposableCollectionComponent {
-    public var schemaValue = [KeywordIdentifier: JSONValue]()
+    public var schemaValue = SchemaValue.object([:])
 
     public let components: [any JSONSchemaComponent<Output>]
 
@@ -67,7 +67,7 @@ public enum JSONComposition: Sendable {
       @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnyComponent<Output>]
     ) {
       components = builder()
-      schemaValue[Keywords.AllOf.name] = .array(components.map { .object($0.schemaValue) })
+      schemaValue[Keywords.AllOf.name] = .array(components.map(\.schemaValue.value))
     }
 
     public func parse(_ value: JSONValue) -> Parsed<Output, ParseIssue> {
@@ -96,7 +96,7 @@ public enum JSONComposition: Sendable {
 
   /// A component that requires exactly one of the schemas to be valid.
   public struct OneOf<Output>: JSONComposableCollectionComponent {
-    public var schemaValue = [KeywordIdentifier: JSONValue]()
+    public var schemaValue = SchemaValue.object([:])
 
     public let components: [any JSONSchemaComponent<Output>]
 
@@ -105,7 +105,7 @@ public enum JSONComposition: Sendable {
       @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnyComponent<Output>]
     ) {
       components = builder()
-      schemaValue[Keywords.OneOf.name] = .array(components.map { .object($0.schemaValue) })
+      schemaValue[Keywords.OneOf.name] = .array(components.map(\.schemaValue.value))
     }
 
     public func parse(_ value: JSONValue) -> Parsed<Output, ParseIssue> {
@@ -138,13 +138,13 @@ public enum JSONComposition: Sendable {
 
   /// A component that requires the value to not match the given schema.
   public struct Not<Component: JSONSchemaComponent>: JSONComposableComponent {
-    public var schemaValue = [KeywordIdentifier: JSONValue]()
+    public var schemaValue = SchemaValue.object([:])
 
     public let component: Component
 
     public init(@JSONSchemaBuilder _ builder: () -> Component) {
       component = builder()
-      schemaValue[Keywords.Not.name] = .object(component.schemaValue)
+      schemaValue[Keywords.Not.name] = component.schemaValue.value
     }
 
     public func parse(_ value: JSONValue) -> Parsed<JSONValue, ParseIssue> {

@@ -2,7 +2,7 @@ import JSONSchema
 
 /// A JSON string schema component for use in ``JSONSchemaBuilder``.
 public struct JSONString: JSONSchemaComponent {
-  public var schemaValue = [KeywordIdentifier: JSONValue]()
+  public var schemaValue = SchemaValue.object([:])
 
   public init() {
     schemaValue[Keywords.TypeKeyword.name] = .string(JSONType.string.rawValue)

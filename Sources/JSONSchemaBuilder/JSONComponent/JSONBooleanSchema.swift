@@ -1,9 +1,8 @@
 import JSONSchema
 
 public struct JSONBooleanSchema: JSONSchemaComponent {
-  // TODO: Need to change JSONSchemaComponent to support `false`/`true` schemas
-  public var schemaValue: [KeywordIdentifier: JSONValue] {
-    get { [:] }
+  public var schemaValue: SchemaValue {
+    get { .boolean(value) }
     set { fatalError("Cannot set schemaValue on JSONBooleanSchema") }
   }
 

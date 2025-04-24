@@ -2,9 +2,9 @@ import JSONSchema
 
 /// A JSON boolean schema component for use in ``JSONSchemaBuilder``.
 public struct JSONBoolean: JSONSchemaComponent {
-  public var schemaValue: [KeywordIdentifier: JSONValue] = [
+  public var schemaValue: SchemaValue = .object([
     Keywords.TypeKeyword.name: .string(JSONType.boolean.rawValue)
-  ]
+  ])
 
   public init() {}
 

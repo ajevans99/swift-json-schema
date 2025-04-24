@@ -2,9 +2,9 @@ import JSONSchema
 
 /// A JSON null schema component for use in ``JSONSchemaBuilder``.
 public struct JSONNull: JSONSchemaComponent {
-  public var schemaValue: [KeywordIdentifier: JSONValue] = [
+  public var schemaValue: SchemaValue = .object([
     Keywords.TypeKeyword.name: .string(JSONType.null.rawValue)
-  ]
+  ])
 
   public init() {}
 

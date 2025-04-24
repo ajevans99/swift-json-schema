@@ -2,7 +2,7 @@ import JSONSchema
 
 /// A JSON object schema component for use in ``JSONSchemaBuilder``.
 public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
-  public var schemaValue = [KeywordIdentifier: JSONValue]()
+  public var schemaValue = SchemaValue.object([:])
 
   let properties: Props
 
@@ -23,8 +23,8 @@ public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
     if !properties.requiredKeys.isEmpty {
       schemaValue[Keywords.Required.name] = .array(properties.requiredKeys.map { .string($0) })
     }
-    if !properties.schemaValue.isEmpty {
-      schemaValue[Keywords.Properties.name] = .object(properties.schemaValue)
+    if properties.schemaValue.object?.isEmpty == false {
+      schemaValue[Keywords.Properties.name] = properties.schemaValue.value
     }
   }
 
@@ -45,7 +45,7 @@ extension JSONObject {
     @JSONPropertySchemaBuilder _ patternProperties: () -> Pattern
   ) -> Self {
     var copy = self
-    copy.schemaValue[Keywords.PatternProperties.name] = .object(patternProperties().schemaValue)
+    copy.schemaValue[Keywords.PatternProperties.name] = patternProperties().schemaValue.value
     return copy
   }
 
@@ -81,7 +81,7 @@ extension JSONObject {
     @JSONSchemaBuilder _ content: () -> C
   ) -> Self {
     var copy = self
-    copy.schemaValue[Keywords.UnevaluatedProperties.name] = .object(content().schemaValue)
+    copy.schemaValue[Keywords.UnevaluatedProperties.name] = content().schemaValue.value
     return copy
   }
 
@@ -93,7 +93,7 @@ extension JSONObject {
     @JSONSchemaBuilder _ content: () -> C
   ) -> Self {
     var copy = self
-    copy.schemaValue[Keywords.PropertyNames.name] = .object(content().schemaValue)
+    copy.schemaValue[Keywords.PropertyNames.name] = content().schemaValue.value
     return copy
   }
 

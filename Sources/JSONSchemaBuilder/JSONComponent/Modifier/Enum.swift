@@ -11,10 +11,11 @@ extension JSONSchemaComponent {
 
 extension JSONComponents {
   public struct Enum<Upstream: JSONSchemaComponent>: JSONSchemaComponent {
-    public var schemaValue: [KeywordIdentifier: JSONValue] {
+    public var schemaValue: SchemaValue {
       get {
-        upstream.schemaValue
-          .merging([Keywords.Enum.name: .array(cases)], uniquingKeysWith: { $1 })
+        var schema = upstream.schemaValue
+        schema[Keywords.Enum.name] = .array(cases)
+        return schema
       }
       set { upstream.schemaValue = newValue }
     }

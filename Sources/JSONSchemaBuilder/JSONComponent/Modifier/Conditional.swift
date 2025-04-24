@@ -5,7 +5,7 @@ extension JSONComponents {
   public enum Conditional<First: JSONSchemaComponent, Second: JSONSchemaComponent>:
     JSONSchemaComponent
   where First.Output == Second.Output {
-    public var schemaValue: [KeywordIdentifier: JSONValue] {
+    public var schemaValue: SchemaValue {
       get {
         switch self {
         case .first(let first): first.schemaValue

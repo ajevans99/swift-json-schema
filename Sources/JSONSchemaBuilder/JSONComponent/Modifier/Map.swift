@@ -11,7 +11,7 @@ extension JSONSchemaComponent {
 
 extension JSONComponents {
   public struct Map<Upstream: JSONSchemaComponent, NewOutput>: JSONSchemaComponent {
-    public var schemaValue: [KeywordIdentifier: JSONValue] {
+    public var schemaValue: SchemaValue {
       get { upstream.schemaValue }
       set { upstream.schemaValue = newValue }
     }

@@ -53,10 +53,10 @@ struct JSONSchemaOptionBuilderTests {
         "type": "string",
         "pattern": "^property[0-9]$",
       ],
-      "unevaluatedProperties": [:],  // TODO: Should be false
+      "unevaluatedProperties": false,
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func objectOptionsProperty() throws {
@@ -79,10 +79,7 @@ struct JSONSchemaOptionBuilderTests {
       ],
     ]
 
-    #expect(
-      sample.schemaValue
-        == expected
-    )
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func supplementalObjectOptions() throws {
@@ -94,13 +91,13 @@ struct JSONSchemaOptionBuilderTests {
 
     let expected: [String: JSONValue] = [
       "type": "object",
-      "additionalProperties": [:],  // TODO: Should be false
+      "additionalProperties": false,
       "unevaluatedProperties": [
         "type": "integer"
       ],
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func stringOptions() throws {
@@ -120,7 +117,7 @@ struct JSONSchemaOptionBuilderTests {
       "format": "uuid",
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func numberOptions() throws {
@@ -138,7 +135,7 @@ struct JSONSchemaOptionBuilderTests {
       "exclusiveMaximum": 100,
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func supplementalNumberOptions() throws {
@@ -156,7 +153,7 @@ struct JSONSchemaOptionBuilderTests {
       "maximum": 5000,
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func arrayOptions() throws {
@@ -172,7 +169,7 @@ struct JSONSchemaOptionBuilderTests {
       ],
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func supplementalArrayOptions() throws {
@@ -202,7 +199,7 @@ struct JSONSchemaOptionBuilderTests {
         ["type": "boolean"],
         ["type": "integer"],
       ],
-      "unevaluatedItems": [:],  // TODO: Should be false
+      "unevaluatedItems": false,
       "contains": [
         "type": "number"
       ],
@@ -213,7 +210,7 @@ struct JSONSchemaOptionBuilderTests {
       "uniqueItems": true,
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 }
 
@@ -249,7 +246,7 @@ struct JSONSchemaAnnotationsBuilderTests {
       "$comment": "Comment",
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func nonValueBuilderAnnotations() throws {
@@ -265,7 +262,7 @@ struct JSONSchemaAnnotationsBuilderTests {
       "examples": ["1", nil, false, [1, 2, 3], ["hello": "world"]],
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func description() {
@@ -288,7 +285,7 @@ struct JSONSchemaAnnotationsBuilderTests {
       "description": "A product from Acme's catalog",
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 }
 
@@ -300,7 +297,7 @@ struct JSONAdvancedBuilderTests {
       }
     }
 
-    #expect(sample.schemaValue == (bool ? ["type": "string"] : [:]))
+    #expect(sample.schemaValue == (bool ? .object(["type": "string"]) : .object([:])))
   }
 
   @Test(arguments: [true, false]) func either(_ bool: Bool) {
@@ -308,7 +305,10 @@ struct JSONAdvancedBuilderTests {
       if bool { JSONNumber().maximum(100) } else { JSONNumber() }
     }
 
-    #expect(sample.schemaValue == (bool ? ["type": "number", "maximum": 100] : ["type": "number"]))
+    #expect(
+      sample.schemaValue
+        == .object((bool ? ["type": "number", "maximum": 100] : ["type": "number"]))
+    )
   }
 
   @Test func array() {
@@ -323,7 +323,6 @@ struct JSONAdvancedBuilderTests {
         }
       }
     }
-    print("\(sample.schemaValue)")
 
     let expected: [String: JSONValue] = [
       "type": "object",
@@ -334,6 +333,6 @@ struct JSONAdvancedBuilderTests {
       ],
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 }
