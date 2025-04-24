@@ -384,7 +384,7 @@ struct SchemableExpansionTests {
           }
         }
 
-        extension Weather: Schemable {
+        \(modifier) extension Weather: Schemable {
         }
         """,
       macros: testMacros

@@ -20,7 +20,7 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     conformingTo protocols: [TypeSyntax],
     in context: some MacroExpansionContext
   ) throws -> [ExtensionDeclSyntax] {
-    let schemableExtension = try ExtensionDeclSyntax("extension \(type.trimmed): Schemable {}")
+    let schemableExtension = try ExtensionDeclSyntax("\(declaration.modifiers.trimmed) extension \(type.trimmed): Schemable {}")
 
     return [schemableExtension]
   }
