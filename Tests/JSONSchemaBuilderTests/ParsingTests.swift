@@ -4,7 +4,9 @@ import Testing
 
 struct ParsingTests {
   @Test func patternProperties() throws {
-    @JSONSchemaBuilder var sample: some JSONSchemaComponent<((), PatternPropertiesParseResult<String?>)> {
+    @JSONSchemaBuilder var sample:
+      some JSONSchemaComponent<((), PatternPropertiesParseResult<String?>)>
+    {
       JSONObject()
         .patternProperties {
           JSONProperty(key: "^x-") { JSONString() }
@@ -14,7 +16,7 @@ struct ParsingTests {
     let input: JSONValue = [
       "x-custom": "abc",
       "x-extra": "def",
-      "other": 123
+      "other": 123,
     ]
 
     let result = sample.parse(input)
@@ -23,7 +25,9 @@ struct ParsingTests {
   }
 
   @Test func additionalPropertiesValidation() throws {
-    @JSONSchemaBuilder var sample: some JSONSchemaComponent<((), AdditionalPropertiesParseResult<Bool>)> {
+    @JSONSchemaBuilder var sample:
+      some JSONSchemaComponent<((), AdditionalPropertiesParseResult<Bool>)>
+    {
       JSONObject()
         .additionalProperties { JSONBoolean() }
     }
@@ -31,7 +35,7 @@ struct ParsingTests {
     let input: JSONValue = [
       "extra1": true,
       "extra2": false,
-      "extra3": true
+      "extra3": true,
     ]
 
     let result = sample.parse(input)
@@ -40,7 +44,11 @@ struct ParsingTests {
   }
 
   @Test func patternAndAdditionalProperties() throws {
-    @JSONSchemaBuilder var sample: some JSONSchemaComponent<(((), PatternPropertiesParseResult<String?>), AdditionalPropertiesParseResult<Bool>)> {
+    @JSONSchemaBuilder var sample:
+      some JSONSchemaComponent<
+        (((), PatternPropertiesParseResult<String?>), AdditionalPropertiesParseResult<Bool>)
+      >
+    {
       JSONObject()
         .patternProperties {
           JSONProperty(key: "^x-") { JSONString() }
@@ -51,7 +59,7 @@ struct ParsingTests {
     let input: JSONValue = [
       "x-custom": "abc",
       "x-extra": "def",
-      "other": true
+      "other": true,
     ]
 
     let result = sample.parse(input)
@@ -61,8 +69,10 @@ struct ParsingTests {
       #expect(patternResult.matches["^x-"]?.count == 2)
       #expect(additionalResult.matches.count == 1)
     default:
-      #expect(Bool(false), "Expected valid parse result with both patternProperties and additionalProperties")
+      #expect(
+        Bool(false),
+        "Expected valid parse result with both patternProperties and additionalProperties"
+      )
     }
   }
 }
-
