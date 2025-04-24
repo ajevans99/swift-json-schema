@@ -1,10 +1,18 @@
 import JSONSchema
 
-/// The result of validating patternProperties against an input object.
-/// Stores all matches as a mapping from the pattern string to an array of outputs,
-/// since multiple patterns may match the same key.
+/// The result of validating `patternProperties` against an input object.
 public struct PatternPropertiesParseResult<PatternOut> {
-  public let matches: [String: [PatternOut]]
+  public typealias MatchingKey = String
+
+  public struct Match {
+    /// The instance value for the match.
+    public let value: PatternOut
+    /// The regex that caused the match, from the schema.
+    public let regex: String
+  }
+
+  /// The key is the instance string that matches the regex.
+  public let matches: [MatchingKey: [Match]]
 }
 
 extension JSONComponents {
@@ -36,7 +44,7 @@ extension JSONComponents {
 
       let baseResult = base.parse(input)
 
-      var matches = [String: [PatternProps.Output]]()
+      var matches = [String: [PatternPropertiesParseResult<PatternProps.Output>.Match]]()
       for (patternString, _) in patternPropertiesSchema.schemaValue.object ?? [:] {
         let regex: Regex<AnyRegexOutput>
         do {
@@ -49,7 +57,7 @@ extension JSONComponents {
           let singleKeyDict = [patternString: value]
           switch patternPropertiesSchema.validate(singleKeyDict) {
           case .valid(let out):
-            matches[patternString, default: []].append(out)
+            matches[key, default: []].append(.init(value: out, regex: patternString))
           case .invalid:
             continue
           }
