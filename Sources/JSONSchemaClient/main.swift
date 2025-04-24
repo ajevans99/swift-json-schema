@@ -13,10 +13,10 @@ func printInstance<T: Codable>(_ instance: T) {
   }
 }
 
-func printSchema<T: Schemable>(_ schema: T.Type) {
-  let schemaData = try? encoder.encode(T.schema.schemaValue)
+func printSchema<C: JSONSchemaComponent>(_ schema: C) {
+  let schemaData = try? encoder.encode(schema.schemaValue)
   if let schemaData {
-    print("\(T.self) Schema")
+    print("\(C.self) Schema")
     print(String(decoding: schemaData, as: UTF8.self))
   }
 }
@@ -79,3 +79,69 @@ dump(result2, name: "Instance 2 Validation Result")
 public struct Weather {
   let temperature: Double
 }
+
+//{
+//  "properties" : {
+//    "field1" : {
+//      "patternProperties" : {
+//        "^(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$" : {
+//          "items" : {
+//            "pattern" : "^[^\\\/]+$",
+//            "type" : "string"
+//          },
+//          "type" : "array"
+//        }
+//      },
+//      "type" : "object",
+//      "unevaluatedProperties" : false
+//    }
+//  }
+//}
+
+let abc = JSONArray {
+  JSONString().pattern(#"^[^\\\/]+$"#)
+}
+
+let patternSchema = JSONObject {
+  JSONProperty(key: "field1") {
+    JSONObject()
+      .patternProperties {
+        JSONProperty(key: "^(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$") {
+          abc
+        }
+      }
+  }
+  .required()
+}
+.eraseToAnyComponent()
+
+let patternSchemaExampleInput = """
+  {
+    "field1": {
+      "example.com": [
+        "homepage",
+        "about-us",
+        "about/us"
+      ],
+      "foo.bar-baz.co.uk": [
+        "index",
+        "contact123"
+      ]
+    }
+  }
+  """
+
+printSchema(patternSchema)
+let patternSchemaExampleInstance = try! patternSchema.parse(instance: patternSchemaExampleInput)
+dump(patternSchemaExampleInstance.value)
+
+let patternSchemaExampleInstance1 = try? patternSchema.parseAndValidate(instance: patternSchemaExampleInput)
+dump(patternSchemaExampleInstance1)
+let zc = """
+  [
+        "homepage",
+        "about-us",
+        "about/us"
+      ]
+  """
+print(abc.definition().validate(["about/us"]))

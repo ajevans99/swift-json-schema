@@ -37,16 +37,17 @@ public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
   }
 }
 
-extension JSONObject {
+extension JSONSchemaComponent {
   /// Adds a pattern properties schema to the object schema.
   /// - Parameter patternProperties: A closure that returns an array of JSON properties representing the pattern properties.
   /// - Returns: A new `JSONObject` with the pattern properties set.
   public func patternProperties<Pattern: PropertyCollection>(
     @JSONPropertySchemaBuilder _ patternProperties: () -> Pattern
-  ) -> Self {
-    var copy = self
-    copy.schemaValue[Keywords.PatternProperties.name] = patternProperties().schemaValue.value
-    return copy
+  ) -> JSONComponents.PatternProperties<Self, Pattern> {
+    JSONComponents.PatternProperties(
+      base: self,
+      patternPropertiesSchema: patternProperties()
+    )
   }
 
   /// Adds additional properties to the schema and modifies validation output to include any additional properties as part of the tuple.
@@ -67,7 +68,7 @@ extension JSONObject {
   /// - Returns: A new compoment with the additional properties set and validation modified.
   public func additionalProperties<C: JSONSchemaComponent>(
     @JSONSchemaBuilder _ additionalProperties: () -> C
-  ) -> JSONComponents.AdditionalProperties<Props, C> {
+  ) -> JSONComponents.AdditionalProperties<Self, C> {
     JSONComponents.AdditionalProperties(
       base: self,
       additionalProperties: additionalProperties()

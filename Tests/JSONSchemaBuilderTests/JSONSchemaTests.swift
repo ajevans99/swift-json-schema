@@ -6,7 +6,7 @@ import Testing
 struct JSONSchemaOptionBuilderTests {
   @Test func objectOptions() throws {
     @JSONSchemaBuilder var sample:
-      some JSONSchemaComponent<((String?, String, Bool?, Double), [String: Bool])>
+      some JSONSchemaComponent<(((String?, String, Bool?, Double), PatternPropertiesParseResult<String?>), AdditionalPropertiesParseResult<Bool>)>
     {
       JSONObject {
         JSONProperty(key: "property0") { JSONString() }
