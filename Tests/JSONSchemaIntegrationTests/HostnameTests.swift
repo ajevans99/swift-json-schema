@@ -1,6 +1,6 @@
+import InlineSnapshotTesting
 import JSONSchema
 import JSONSchemaBuilder
-import InlineSnapshotTesting
 import Testing
 
 @Schemable
@@ -74,19 +74,21 @@ struct HostnameTests {
     let json: JSONValue = [
       "field1": [
         "example.com": ["html", "css"],
-        "api.test.io": ["json"]
+        "api.test.io": ["json"],
       ]
     ]
     let parsed = FieldnameSchema.schema.parse(json)
-    let expected = FieldnameSchema(field1: FieldnameSchema.Field(value: [
-      "example.com": [
-        FieldnameSchema.FileExtension(value: "html"),
-        FieldnameSchema.FileExtension(value: "css")
-      ],
-      "api.test.io": [
-        FieldnameSchema.FileExtension(value: "json")
-      ]
-    ]))
+    let expected = FieldnameSchema(
+      field1: FieldnameSchema.Field(value: [
+        "example.com": [
+          FieldnameSchema.FileExtension(value: "html"),
+          FieldnameSchema.FileExtension(value: "css"),
+        ],
+        "api.test.io": [
+          FieldnameSchema.FileExtension(value: "json")
+        ],
+      ])
+    )
     #expect(parsed.value == expected)
   }
 
@@ -95,7 +97,7 @@ struct HostnameTests {
     let instance: JSONValue = [
       "field1": [
         "example.com": ["html", "css"],
-        "api.test.io": ["json"]
+        "api.test.io": ["json"],
       ]
     ]
     let validationResult = schema.validate(instance)
@@ -103,11 +105,14 @@ struct HostnameTests {
 
     let annotations = validationResult.annotations ?? []
     // Expect exactly three annotations with the correct keywords
-    #expect(Set(annotations.map { $0.keyword }) == Set([
-      Keywords.Properties.name,
-      Keywords.PatternProperties.name,
-      Keywords.UnevaluatedProperties.name
-    ]))
+    #expect(
+      Set(annotations.map { $0.keyword })
+        == Set([
+          Keywords.Properties.name,
+          Keywords.PatternProperties.name,
+          Keywords.UnevaluatedProperties.name,
+        ])
+    )
 
     // Check the "properties" annotation value
     if let propAnn = annotations.first(where: { $0.keyword == Keywords.Properties.name }) {
@@ -117,14 +122,17 @@ struct HostnameTests {
     }
 
     // Check the "patternProperties" annotation value
-    if let patternAnn = annotations.first(where: { $0.keyword == Keywords.PatternProperties.name }) {
+    if let patternAnn = annotations.first(where: { $0.keyword == Keywords.PatternProperties.name })
+    {
       #expect(Set(patternAnn.jsonValue.array ?? []) == Set(["example.com", "api.test.io"]))
     } else {
       #expect(Bool(false), "Missing patternProperties annotation")
     }
 
     // Check the "unevaluatedProperties" annotation value
-    if let unevalAnn = annotations.first(where: { $0.keyword == Keywords.UnevaluatedProperties.name }) {
+    if let unevalAnn = annotations.first(where: {
+      $0.keyword == Keywords.UnevaluatedProperties.name
+    }) {
       #expect((unevalAnn.jsonValue.array ?? []).isEmpty)
     } else {
       #expect(Bool(false), "Missing unevaluatedProperties annotation")
