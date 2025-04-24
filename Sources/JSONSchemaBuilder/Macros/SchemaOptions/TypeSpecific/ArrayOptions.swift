@@ -1,6 +1,7 @@
 import JSONSchema
 
-@attached(peer) public macro ArrayOptions(
+@attached(peer)
+public macro ArrayOptions(
   minContains: Int? = nil,
   maxContains: Int? = nil,
   minItems: Int? = nil,

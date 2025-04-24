@@ -27,8 +27,6 @@ jobs:
     - name: Checkout for external PR
       if: ${{ github.event.pull_request.head.repo.owner.login != github.repository_owner }}
       uses: actions/checkout@v4
-      with:
-        ref: ${{ github.head_ref }}
     
     - name: Install swift-format
       run: brew install swift-format
