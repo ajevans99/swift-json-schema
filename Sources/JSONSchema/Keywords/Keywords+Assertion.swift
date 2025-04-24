@@ -47,7 +47,7 @@ extension Keywords {
         allowedType.matches(instanceType: instanceType)
       }
       if !isValid {
-        throw ValidationIssue.typeMismatch(expected: allowedPrimitives.map { $0.rawValue }.joined(separator: ", "), actual: instanceType.rawValue)
+        throw ValidationIssue.typeMismatch(expected: allowedPrimitives, actual: instanceType)
       }
     }
   }
@@ -72,7 +72,7 @@ extension Keywords {
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
       if !enumCases.contains(input) {
-        throw ValidationIssue.notEnumCase(value: input.string ?? "", allowedValues: enumCases.compactMap { $0.string })
+        throw ValidationIssue.notEnumCase(value: input, allowedValues: enumCases)
       }
     }
   }
@@ -94,7 +94,7 @@ extension Keywords {
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
       if input != value {
-        throw ValidationIssue.constantMismatch(expected: value.string ?? "", actual: input.string ?? "")
+        throw ValidationIssue.constantMismatch(expected: value, actual: input)
       }
     }
   }

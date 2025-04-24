@@ -1,7 +1,7 @@
 public enum ValidationIssue: Error, Codable, Equatable {
-  case typeMismatch(expected: String, actual: String)
-  case notEnumCase(value: String, allowedValues: [String])
-  case constantMismatch(expected: String, actual: String)
+  case typeMismatch(expected: [JSONType], actual: JSONType)
+  case notEnumCase(value: JSONValue, allowedValues: [JSONValue])
+  case constantMismatch(expected: JSONValue, actual: JSONValue)
 
   // Number
   case notMultipleOf(number: Double, multiple: Double)
@@ -92,7 +92,7 @@ extension ValidationIssue: CustomStringConvertible {
     case .typeMismatch(let expected, let actual):
       return "Expected type '\(expected)' but found '\(actual)'"
     case .notEnumCase(let value, let allowedValues):
-      return "'\(value)' is not one of the allowed values: \(allowedValues.joined(separator: ", "))"
+      return "'\(value)' is not one of the allowed values: \(allowedValues.map(\.description).joined(separator: ", "))"
     case .constantMismatch(let expected, let actual):
       return "Expected constant value '\(expected)' but found '\(actual)'"
 
