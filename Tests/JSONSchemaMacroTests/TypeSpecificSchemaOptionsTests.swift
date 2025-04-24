@@ -283,6 +283,104 @@ struct ObjectOptionsTests {
       macros: testMacros
     )
   }
+
+  @Test func patternProperties() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      @ObjectOptions(.patternProperties {
+        JSONProperty(key: "^[A-Za-z_][A-Za-z0-9_]*$") {
+          JSONString()
+        }
+        .required()
+      })
+      struct Weather {
+        let cityName: String
+      }
+      """,
+      expandedSource: """
+        struct Weather {
+          let cityName: String
+
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "cityName") {
+                  JSONString()
+                }
+                .required()
+              }
+              .patternProperties {
+                JSONProperty(key: "^[A-Za-z_][A-Za-z0-9_]*$") {
+                  JSONString()
+                }
+                .required()
+              }
+              // Drop the `PatternPropertiesParseResult` parse information. Use custom builder if needed.
+              .map {
+                $0.0
+              }
+            }
+          }
+        }
+
+        extension Weather: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func allObjectOptions() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      @ObjectOptions(
+        .minProperties(2),
+        .maxProperties(5),
+        .propertyNames {
+          JSONString()
+            .pattern("^[A-Za-z_][A-Za-z0-9_]*$")
+        },
+        .unevaluatedProperties {
+          JSONString()
+        }
+      )
+      struct Weather {
+        let cityName: String
+      }
+      """,
+      expandedSource: """
+        struct Weather {
+          let cityName: String
+
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "cityName") {
+                  JSONString()
+                }
+                .required()
+              }
+              .minProperties(2)
+              .maxProperties(5)
+              .propertyNames {
+                  JSONString()
+                    .pattern("^[A-Za-z_][A-Za-z0-9_]*$")
+              }
+              .unevaluatedProperties {
+                  JSONString()
+              }
+            }
+          }
+        }
+
+        extension Weather: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
 }
 
 struct StringOptionsTests {

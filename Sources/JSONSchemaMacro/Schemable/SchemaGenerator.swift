@@ -115,21 +115,7 @@ struct SchemaGenerator {
     }
 
     if let objectArguemnts = attributes.arguments(for: "ObjectOptions") {
-      for argument in objectArguemnts {
-        if let functionCall = argument.expression.as(FunctionCallExprSyntax.self),
-           let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self),
-           memberAccess.declName.baseName.text == "additionalProperties",
-           let closure = functionCall.trailingClosure {
-          codeBlockItem = """
-            \(codeBlockItem)
-            .additionalProperties { \(closure.statements) }
-            // Drop the `AdditionalPropertiesParseResult` parse information. Use custom builder if needed.
-            .map { $0.0 }
-            """
-        } else {
-          codeBlockItem.applyArguments([argument])
-        }
-      }
+      codeBlockItem = applyObjectOptions(objectArguemnts, to: codeBlockItem)
     }
 
     let variableDecl: DeclSyntax = """
@@ -139,5 +125,80 @@ struct SchemaGenerator {
       """
 
     return variableDecl
+  }
+
+  private func applyObjectOptions(_ arguments: LabeledExprListSyntax, to codeBlockItem: CodeBlockItemSyntax) -> CodeBlockItemSyntax {
+    var result = codeBlockItem
+    for argument in arguments {
+      result = applyObjectOption(argument, to: result)
+    }
+    return result
+  }
+
+  private func applyObjectOption(_ argument: LabeledExprSyntax, to codeBlockItem: CodeBlockItemSyntax) -> CodeBlockItemSyntax {
+    guard let functionCall = argument.expression.as(FunctionCallExprSyntax.self),
+          let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self) else {
+      var result = codeBlockItem
+      result.applyArguments([argument])
+      return result
+    }
+
+    if let closure = functionCall.trailingClosure {
+      return applyClosureBasedOption(memberAccess.declName.baseName.text, closure: closure, to: codeBlockItem)
+    } else {
+      return applyValueBasedOption(memberAccess.declName.baseName.text, functionCall: functionCall, to: codeBlockItem)
+    }
+  }
+
+  private func applyClosureBasedOption(_ optionName: String, closure: ClosureExprSyntax, to codeBlockItem: CodeBlockItemSyntax) -> CodeBlockItemSyntax {
+    switch optionName {
+    case "additionalProperties":
+      return """
+        \(codeBlockItem)
+        .additionalProperties { \(closure.statements) }
+        // Drop the `AdditionalPropertiesParseResult` parse information. Use custom builder if needed.
+        .map { $0.0 }
+        """
+    case "patternProperties":
+      return """
+        \(codeBlockItem)
+        .patternProperties { \(closure.statements) }
+        // Drop the `PatternPropertiesParseResult` parse information. Use custom builder if needed.
+        .map { $0.0 }
+        """
+    case "unevaluatedProperties":
+      return """
+        \(codeBlockItem)
+        .unevaluatedProperties { \(closure.statements) }
+        """
+    case "propertyNames":
+      return """
+        \(codeBlockItem)
+        .propertyNames { \(closure.statements) }
+        """
+    default:
+      return codeBlockItem
+    }
+  }
+
+  private func applyValueBasedOption(_ optionName: String, functionCall: FunctionCallExprSyntax, to codeBlockItem: CodeBlockItemSyntax) -> CodeBlockItemSyntax {
+    guard let value = functionCall.arguments.first else {
+      return codeBlockItem
+    }
+
+    switch optionName {
+    case "minProperties":
+      return """
+        \(codeBlockItem)
+        .minProperties(\(value))
+        """
+    case "maxProperties":
+      return """
+        \(codeBlockItem)
+        .maxProperties(\(value))
+        """
+    default:
+      return codeBlockItem
+    }
   }
 }

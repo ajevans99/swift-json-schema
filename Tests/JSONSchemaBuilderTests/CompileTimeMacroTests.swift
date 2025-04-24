@@ -31,8 +31,29 @@ struct Weather1 {
   .additionalProperties {
     JSONString()
       .pattern("^[a-zA-Z]+$")
+  },
+  .patternProperties {
+    JSONProperty(key: "^[A-Za-z_][A-Za-z0-9_]*$") {
+      JSONBoolean()
+    }
   }
 )
 public struct Weather2 {
   let temperature: Double
+}
+
+@Schemable
+@ObjectOptions(
+  .minProperties(2),
+  .maxProperties(5),
+  .propertyNames {
+    JSONString()
+      .pattern("^[A-Za-z_][A-Za-z0-9_]*$")
+  },
+  .unevaluatedProperties {
+    JSONString()
+  }
+)
+struct Weather3 {
+  let cityName: String
 }

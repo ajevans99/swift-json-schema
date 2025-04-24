@@ -7,40 +7,34 @@ public macro ObjectOptions(
 
 public protocol ObjectTrait {}
 
-public struct MinProperties: ObjectTrait {
-  let value: Int
+public struct ObjectSchemaTrait: ObjectTrait {
+  fileprivate init() {}
+  
+  fileprivate static let errorMessage = "This method should only be used within @ObjectOptions macro"
 }
 
-public struct MaxProperties: ObjectTrait {
-  let value: Int
-}
-
-public struct PropertyNames<C: JSONSchemaComponent>: ObjectTrait {
-  @JSONSchemaBuilder let content: () -> C
-}
-
-public struct UnevaluatedProperties<C: JSONSchemaComponent>: ObjectTrait {
-  @JSONSchemaBuilder let content: () -> C
-}
-
-public struct AdditionalProperties: ObjectTrait {
-  @JSONSchemaBuilder let content: () -> any JSONSchemaComponent
-}
-
-public struct PatternProperties<P: PropertyCollection>: ObjectTrait {
-  @JSONPropertySchemaBuilder let patternProperties: () -> P
-}
-
-public struct EmptyObjectTrait: ObjectTrait {}
-
-extension ObjectTrait {
-  public static func minProperties(_ value: Int) -> MinProperties {
-    MinProperties(value: value)
+extension ObjectTrait where Self == ObjectSchemaTrait {
+  public static func additionalProperties(@JSONSchemaBuilder _ content: @escaping () -> some JSONSchemaComponent) -> ObjectSchemaTrait {
+    fatalError(ObjectSchemaTrait.errorMessage)
   }
-}
 
-extension ObjectTrait where Self == EmptyObjectTrait {
-  public static func additionalProperties(@JSONSchemaBuilder _ content: @escaping () -> some JSONSchemaComponent) -> EmptyObjectTrait {
-    .init()
+  public static func patternProperties(@JSONPropertySchemaBuilder _ patternProperties: @escaping () -> some PropertyCollection) -> ObjectSchemaTrait {
+    fatalError(ObjectSchemaTrait.errorMessage)
+  }
+
+  public static func unevaluatedProperties(@JSONSchemaBuilder _ content: @escaping () -> some JSONSchemaComponent) -> ObjectSchemaTrait {
+    fatalError(ObjectSchemaTrait.errorMessage)
+  }
+
+  public static func minProperties(_ value: Int) -> ObjectSchemaTrait {
+    fatalError(ObjectSchemaTrait.errorMessage)
+  }
+
+  public static func maxProperties(_ value: Int) -> ObjectSchemaTrait {
+    fatalError(ObjectSchemaTrait.errorMessage)
+  }
+
+  public static func propertyNames(@JSONSchemaBuilder _ content: @escaping () -> some JSONSchemaComponent) -> ObjectSchemaTrait {
+    fatalError(ObjectSchemaTrait.errorMessage)
   }
 }
