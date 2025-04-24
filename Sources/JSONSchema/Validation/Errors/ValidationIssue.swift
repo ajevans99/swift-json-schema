@@ -92,7 +92,8 @@ extension ValidationIssue: CustomStringConvertible {
     case .typeMismatch(let expected, let actual):
       return "Expected type '\(expected)' but found '\(actual)'"
     case .notEnumCase(let value, let allowedValues):
-      return "'\(value)' is not one of the allowed values: \(allowedValues.map(\.description).joined(separator: ", "))"
+      return
+        "'\(value)' is not one of the allowed values: \(allowedValues.map(\.description).joined(separator: ", "))"
     case .constantMismatch(let expected, let actual):
       return "Expected constant value '\(expected)' but found '\(actual)'"
 
@@ -152,29 +153,36 @@ extension ValidationIssue: CustomStringConvertible {
     case .anyOfFailed(let errors):
       return "Failed to satisfy any schema: \(errors.map { $0.message }.joined(separator: "; "))"
     case .oneOfFailed(let errors):
-      return "Failed to satisfy exactly one schema: \(errors.map { $0.message }.joined(separator: "; "))"
+      return
+        "Failed to satisfy exactly one schema: \(errors.map { $0.message }.joined(separator: "; "))"
     case .notFailed:
       return "Instance should not match the schema"
 
     // Conditional
     case .conditionalFailed(let condition, let errors):
-      return "Failed conditional validation for '\(condition)': \(errors.map { $0.message }.joined(separator: "; "))"
+      return
+        "Failed conditional validation for '\(condition)': \(errors.map { $0.message }.joined(separator: "; "))"
     case .invalidDependentSchema(let key, let errors):
-      return "Failed dependent schema validation for '\(key)': \(errors.map { $0.message }.joined(separator: "; "))"
+      return
+        "Failed dependent schema validation for '\(key)': \(errors.map { $0.message }.joined(separator: "; "))"
     case .unevaluatedItemsFailed(let errors):
-      return "Failed unevaluated items validation: \(errors.map { $0.message }.joined(separator: "; "))"
+      return
+        "Failed unevaluated items validation: \(errors.map { $0.message }.joined(separator: "; "))"
     case .unevaluatedPropertyFailed(let errors):
-      return "Failed unevaluated properties validation: \(errors.map { $0.message }.joined(separator: "; "))"
+      return
+        "Failed unevaluated properties validation: \(errors.map { $0.message }.joined(separator: "; "))"
 
     // Reference
     case .invalidReference(let ref):
       return "Invalid reference: \(ref)"
     case .referenceValidationFailure(let ref, let errors):
-      return "Validation failed for reference '\(ref)': \(errors.map { $0.message }.joined(separator: "; "))"
+      return
+        "Validation failed for reference '\(ref)': \(errors.map { $0.message }.joined(separator: "; "))"
 
     // General
     case .keywordFailure(let keyword, let errors):
-      return "Validation failed for keyword '\(keyword)': \(errors.map { $0.message }.joined(separator: "; "))"
+      return
+        "Validation failed for keyword '\(keyword)': \(errors.map { $0.message }.joined(separator: "; "))"
     }
   }
 }

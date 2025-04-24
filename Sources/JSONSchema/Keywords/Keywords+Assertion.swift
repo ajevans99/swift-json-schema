@@ -465,11 +465,17 @@ extension Keywords {
       switch containsAnnotation.value {
       case .everyIndex:
         if array.count > maxContains {
-          throw ValidationIssue.containsExcessiveMatches(count: array.count, maxAllowed: maxContains)
+          throw ValidationIssue.containsExcessiveMatches(
+            count: array.count,
+            maxAllowed: maxContains
+          )
         }
       case .indicies(let indicies):
         if indicies.count > maxContains {
-          throw ValidationIssue.containsExcessiveMatches(count: indicies.count, maxAllowed: maxContains)
+          throw ValidationIssue.containsExcessiveMatches(
+            count: indicies.count,
+            maxAllowed: maxContains
+          )
         }
       }
     }
@@ -508,11 +514,17 @@ extension Keywords {
       switch containsAnnotation.value {
       case .everyIndex:
         if array.count < minContains {
-          throw ValidationIssue.containsInsufficientMatches(count: array.count, required: minContains)
+          throw ValidationIssue.containsInsufficientMatches(
+            count: array.count,
+            required: minContains
+          )
         }
       case .indicies(let indicies):
         if indicies.count < minContains {
-          throw ValidationIssue.containsInsufficientMatches(count: indicies.count, required: minContains)
+          throw ValidationIssue.containsInsufficientMatches(
+            count: indicies.count,
+            required: minContains
+          )
         }
       }
     }
@@ -545,7 +557,10 @@ extension Keywords {
       guard let object = input.object else { return }
 
       if object.count > maxProperties {
-        throw ValidationIssue.exceedsMaxProperties(count: object.count, maxProperties: maxProperties)
+        throw ValidationIssue.exceedsMaxProperties(
+          count: object.count,
+          maxProperties: maxProperties
+        )
       }
     }
   }
