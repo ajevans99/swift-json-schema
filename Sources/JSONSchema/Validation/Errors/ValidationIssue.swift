@@ -1,47 +1,50 @@
 public enum ValidationIssue: Error, Codable, Equatable {
-  case typeMismatch
-  case notEnumCase
-  case constantMismatch
+  case typeMismatch(expected: String, actual: String)
+  case notEnumCase(value: String, allowedValues: [String])
+  case constantMismatch(expected: String, actual: String)
 
   // Number
-  case notMultipleOf
-  case exceedsMaximum
-  case exceedsExclusiveMaximum
-  case belowMinimum
-  case belowExclusiveMinimum
+  case notMultipleOf(number: Double, multiple: Double)
+  case exceedsMaximum(number: Double, maximum: Double)
+  case exceedsExclusiveMaximum(number: Double, maximum: Double)
+  case belowMinimum(number: Double, minimum: Double)
+  case belowExclusiveMinimum(number: Double, minimum: Double)
 
   // String
-  case exceedsMaxLength
-  case belowMinLength
-  case patternMismatch
+  case exceedsMaxLength(string: String, maxLength: Int)
+  case belowMinLength(string: String, minLength: Int)
+  case patternMismatch(string: String, pattern: String)
 
   // Arrays
-  case exceedsMaxItems
-  case belowMinItems
+  case exceedsMaxItems(count: Int, maxItems: Int)
+  case belowMinItems(count: Int, minItems: Int)
   case itemsNotUnique
-  case containsInsufficientMatches
-  case containsExcessiveMatches
-  case invalidItem
+  case containsInsufficientMatches(count: Int, required: Int)
+  case containsExcessiveMatches(count: Int, maxAllowed: Int)
+  case invalidItem(index: Int, error: ValidationError)
 
   // Objects
-  case exceedsMaxProperties
-  case belowMinProperties
+  case exceedsMaxProperties(count: Int, maxProperties: Int)
+  case belowMinProperties(count: Int, minProperties: Int)
   case missingRequiredProperty(key: String)
   case missingDependentProperty(key: String, dependentOn: String)
-  case invalidProperty
-  case invalidPatternProperty
-  case invalidAdditionalProperty
+  case invalidProperty(key: String, error: ValidationError)
+  case invalidPatternProperty(key: String, pattern: String)
+  case invalidAdditionalProperty(key: String)
 
-  case allOfFailed
-  case anyOfFailed
-  case oneOfFailed
+  // Logical
+  case allOfFailed(errors: [ValidationError])
+  case anyOfFailed(errors: [ValidationError])
+  case oneOfFailed(errors: [ValidationError])
   case notFailed
 
-  case conditionalFailed
-  case invalidDependentSchema
-  case unevaluatedItemsFailed
-  case unevaluatedPropertyFailed
+  // Conditional
+  case conditionalFailed(condition: String, errors: [ValidationError])
+  case invalidDependentSchema(key: String, errors: [ValidationError])
+  case unevaluatedItemsFailed(errors: [ValidationError])
+  case unevaluatedPropertyFailed(errors: [ValidationError])
 
+  // Reference
   case invalidReference(String)
   case referenceValidationFailure(ref: String, errors: [ValidationError])
 
@@ -86,96 +89,92 @@ extension ValidationIssue: CustomStringConvertible {
   public var description: String {
     switch self {
     // General
-    case .typeMismatch:
-      return "Type mismatch: the instance does not match the expected type."
-    case .notEnumCase:
-      return "The instance is not one of the allowed enum values."
-    case .constantMismatch:
-      return "The instance does not match the constant value specified in 'const'."
+    case .typeMismatch(let expected, let actual):
+      return "Expected type '\(expected)' but found '\(actual)'"
+    case .notEnumCase(let value, let allowedValues):
+      return "'\(value)' is not one of the allowed values: \(allowedValues.joined(separator: ", "))"
+    case .constantMismatch(let expected, let actual):
+      return "Expected constant value '\(expected)' but found '\(actual)'"
 
     // Number
-    case .notMultipleOf:
-      return "The number is not a multiple of the specified 'multipleOf' value."
-    case .exceedsMaximum:
-      return "The number exceeds the specified 'maximum' value."
-    case .exceedsExclusiveMaximum:
-      return "The number exceeds the specified 'exclusiveMaximum' value."
-    case .belowMinimum:
-      return "The number is below the specified 'minimum' value."
-    case .belowExclusiveMinimum:
-      return "The number is below the specified 'exclusiveMinimum' value."
+    case .notMultipleOf(let number, let multiple):
+      return "\(number) is not a multiple of \(multiple)"
+    case .exceedsMaximum(let number, let maximum):
+      return "\(number) exceeds maximum value of \(maximum)"
+    case .exceedsExclusiveMaximum(let number, let maximum):
+      return "\(number) exceeds exclusive maximum value of \(maximum)"
+    case .belowMinimum(let number, let minimum):
+      return "\(number) is below minimum value of \(minimum)"
+    case .belowExclusiveMinimum(let number, let minimum):
+      return "\(number) is below exclusive minimum value of \(minimum)"
 
     // String
-    case .exceedsMaxLength:
-      return "The string length exceeds the specified 'maxLength'."
-    case .belowMinLength:
-      return "The string length is less than the specified 'minLength'."
-    case .patternMismatch:
-      return "The string does not match the specified 'pattern'."
+    case .exceedsMaxLength(let string, let maxLength):
+      return "String '\(string)' exceeds maximum length of \(maxLength)"
+    case .belowMinLength(let string, let minLength):
+      return "String '\(string)' is shorter than minimum length of \(minLength)"
+    case .patternMismatch(let string, let pattern):
+      return "String '\(string)' does not match pattern '\(pattern)'"
 
     // Arrays
-    case .exceedsMaxItems:
-      return "The array has more items than the specified 'maxItems'."
-    case .belowMinItems:
-      return "The array has fewer items than the specified 'minItems'."
+    case .exceedsMaxItems(let count, let maxItems):
+      return "Array has \(count) items which exceeds maximum of \(maxItems)"
+    case .belowMinItems(let count, let minItems):
+      return "Array has \(count) items which is less than minimum of \(minItems)"
     case .itemsNotUnique:
-      return "The array items are not unique as required by 'uniqueItems'."
-    case .containsInsufficientMatches:
-      return "The array does not contain enough items matching the 'contains' schema."
-    case .containsExcessiveMatches:
-      return
-        "The array contains more items matching the 'contains' schema than allowed by 'maxContains'."
-    case .invalidItem:
-      return "An item in the array failed to validate against the schema."
+      return "Array items are not unique as required"
+    case .containsInsufficientMatches(let count, let required):
+      return "Array contains \(count) matching items but requires at least \(required)"
+    case .containsExcessiveMatches(let count, let maxAllowed):
+      return "Array contains \(count) matching items which exceeds maximum allowed of \(maxAllowed)"
+    case .invalidItem(let index, let error):
+      return "Item at index \(index) failed validation: \(error.message)"
 
     // Objects
-    case .exceedsMaxProperties:
-      return "The object has more properties than the specified 'maxProperties'."
-    case .belowMinProperties:
-      return "The object has fewer properties than the specified 'minProperties'."
+    case .exceedsMaxProperties(let count, let maxProperties):
+      return "Object has \(count) properties which exceeds maximum of \(maxProperties)"
+    case .belowMinProperties(let count, let minProperties):
+      return "Object has \(count) properties which is less than minimum of \(minProperties)"
     case .missingRequiredProperty(let key):
-      return "The required property '\(key)' is missing."
+      return "Required property '\(key)' is missing"
     case .missingDependentProperty(let key, let dependentOn):
-      return "Property '\(key)' is missing, which is required when '\(dependentOn)' is present."
-    case .invalidProperty:
-      return "A property in the object failed to validate against the schema."
-    case .invalidPatternProperty:
-      return "A property name did not match any of the specified 'patternProperties' patterns."
-    case .invalidAdditionalProperty:
-      return "An additional property is not allowed by 'additionalProperties'."
+      return "Property '\(key)' is missing, which is required when '\(dependentOn)' is present"
+    case .invalidProperty(let key, let error):
+      return "Property '\(key)' failed validation: \(error.message)"
+    case .invalidPatternProperty(let key, let pattern):
+      return "Property name '\(key)' does not match pattern '\(pattern)'"
+    case .invalidAdditionalProperty(let key):
+      return "Additional property '\(key)' is not allowed"
 
     // Logical
-    case .allOfFailed:
-      return "The instance does not satisfy all of the schemas specified in 'allOf'."
-    case .anyOfFailed:
-      return "The instance does not satisfy any of the schemas specified in 'anyOf'."
-    case .oneOfFailed:
-      return "The instance does not satisfy exactly one schema specified in 'oneOf'."
+    case .allOfFailed(let errors):
+      return "Failed to satisfy all schemas: \(errors.map { $0.message }.joined(separator: "; "))"
+    case .anyOfFailed(let errors):
+      return "Failed to satisfy any schema: \(errors.map { $0.message }.joined(separator: "; "))"
+    case .oneOfFailed(let errors):
+      return "Failed to satisfy exactly one schema: \(errors.map { $0.message }.joined(separator: "; "))"
     case .notFailed:
-      return "The instance should not match the schema specified in 'not'."
+      return "Instance should not match the schema"
 
     // Conditional
-    case .conditionalFailed:
-      return
-        "The instance failed to validate against the 'if' condition and corresponding 'then' or 'else' schemas."
-    case .invalidDependentSchema:
-      return
-        "The instance failed to validate against a dependent schema specified in 'dependentSchemas'."
-    case .unevaluatedItemsFailed:
-      return "The unevaluated items in the array do not match the 'unevaluatedItems' schema."
-    case .unevaluatedPropertyFailed:
-      return
-        "The unevaluated properties in the object do not match the 'unevaluatedProperties' schema."
+    case .conditionalFailed(let condition, let errors):
+      return "Failed conditional validation for '\(condition)': \(errors.map { $0.message }.joined(separator: "; "))"
+    case .invalidDependentSchema(let key, let errors):
+      return "Failed dependent schema validation for '\(key)': \(errors.map { $0.message }.joined(separator: "; "))"
+    case .unevaluatedItemsFailed(let errors):
+      return "Failed unevaluated items validation: \(errors.map { $0.message }.joined(separator: "; "))"
+    case .unevaluatedPropertyFailed(let errors):
+      return "Failed unevaluated properties validation: \(errors.map { $0.message }.joined(separator: "; "))"
 
     // Reference
     case .invalidReference(let ref):
       return "Invalid reference: \(ref)"
-    case .referenceValidationFailure(let ref, _):
-      return "Validation failed for reference '\(ref)'."
+    case .referenceValidationFailure(let ref, let errors):
+      return "Validation failed for reference '\(ref)': \(errors.map { $0.message }.joined(separator: "; "))"
 
     // General
-    case .keywordFailure(let keyword, _):
-      return "Validation failed for keyword '\(keyword)'."
+    case .keywordFailure(let keyword, let errors):
+      return "Validation failed for keyword '\(keyword)': \(errors.map { $0.message }.joined(separator: "; "))"
     }
   }
 }
