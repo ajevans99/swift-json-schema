@@ -1,10 +1,16 @@
 import JSONSchema
 
+/// The result of validating patternProperties against an input object.
+/// Stores all matches as a mapping from the pattern string to an array of outputs,
+/// since multiple patterns may match the same key.
 public struct PatternPropertiesParseResult<PatternOut> {
   public let matches: [String: [PatternOut]]
 }
 
 extension JSONComponents {
+  /// A JSON schema component that augments a base schema with patternProperties support.
+  /// Each key in the input object is tested against the provided regex patterns,
+  /// and matched values are validated using the associated subschemas.
   public struct PatternProperties<
     Base: JSONSchemaComponent,
     PatternProps: PropertyCollection

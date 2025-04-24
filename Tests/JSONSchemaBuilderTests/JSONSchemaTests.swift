@@ -217,6 +217,8 @@ struct JSONSchemaOptionBuilderTests {
 
     #expect(sample.schemaValue == .object(expected))
   }
+
+
 }
 
 struct JSONSchemaAnnotationsBuilderTests {
