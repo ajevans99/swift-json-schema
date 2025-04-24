@@ -23,7 +23,8 @@ extension JSONComponents {
 
     public func parse(
       _ input: JSONValue
-    ) -> Parsed<(Base.Output, AdditionalPropertiesParseResult<AdditionalProps.Output>), ParseIssue> {
+    ) -> Parsed<(Base.Output, AdditionalPropertiesParseResult<AdditionalProps.Output>), ParseIssue>
+    {
       guard case .object(let dictionary) = input else {
         return .error(.typeMismatch(expected: .object, actual: input))
       }

@@ -135,7 +135,9 @@ printSchema(patternSchema)
 let patternSchemaExampleInstance = try! patternSchema.parse(instance: patternSchemaExampleInput)
 dump(patternSchemaExampleInstance.value)
 
-let patternSchemaExampleInstance1 = try? patternSchema.parseAndValidate(instance: patternSchemaExampleInput)
+let patternSchemaExampleInstance1 = try? patternSchema.parseAndValidate(
+  instance: patternSchemaExampleInput
+)
 dump(patternSchemaExampleInstance1)
 let zc = """
   [
