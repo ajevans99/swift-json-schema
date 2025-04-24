@@ -305,7 +305,10 @@ struct JSONAdvancedBuilderTests {
       if bool { JSONNumber().maximum(100) } else { JSONNumber() }
     }
 
-    #expect(sample.schemaValue == .object((bool ? ["type": "number", "maximum": 100] : ["type": "number"])))
+    #expect(
+      sample.schemaValue
+        == .object((bool ? ["type": "number", "maximum": 100] : ["type": "number"]))
+    )
   }
 
   @Test func array() {
@@ -330,5 +333,6 @@ struct JSONAdvancedBuilderTests {
       ],
     ]
 
-    #expect(sample.schemaValue == .object(expected))  }
+    #expect(sample.schemaValue == .object(expected))
+  }
 }
