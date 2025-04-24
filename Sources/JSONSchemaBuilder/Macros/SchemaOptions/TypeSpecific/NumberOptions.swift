@@ -1,6 +1,7 @@
 import JSONSchema
 
-@attached(peer) public macro NumberOptions(
+@attached(peer)
+public macro NumberOptions(
   multipleOf: Double? = nil,
   minimum: Double? = nil,
   exclusiveMinimum: Bool? = nil,
