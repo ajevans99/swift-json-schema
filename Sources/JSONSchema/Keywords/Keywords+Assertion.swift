@@ -47,7 +47,7 @@ extension Keywords {
         allowedType.matches(instanceType: instanceType)
       }
       if !isValid {
-        throw .typeMismatch
+        throw ValidationIssue.typeMismatch(expected: allowedPrimitives.map { $0.rawValue }.joined(separator: ", "), actual: instanceType.rawValue)
       }
     }
   }
@@ -72,7 +72,7 @@ extension Keywords {
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
       if !enumCases.contains(input) {
-        throw .notEnumCase
+        throw ValidationIssue.notEnumCase(value: input.string ?? "", allowedValues: enumCases.compactMap { $0.string })
       }
     }
   }
@@ -94,7 +94,7 @@ extension Keywords {
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
       if input != value {
-        throw .constantMismatch
+        throw ValidationIssue.constantMismatch(expected: value.string ?? "", actual: input.string ?? "")
       }
     }
   }
@@ -133,7 +133,7 @@ extension Keywords {
         let remainder = double.remainder(dividingBy: divisor)
         let tolerance = 1e-10  // A small tolerance value to account for floating-point precision
         if abs(remainder) > tolerance {
-          throw ValidationIssue.notMultipleOf
+          throw ValidationIssue.notMultipleOf(number: double, multiple: divisor)
         }
       }
     }
@@ -160,7 +160,7 @@ extension Keywords {
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
       if let number = input.numeric, number > maxValue {
-        throw .exceedsMaximum
+        throw ValidationIssue.exceedsMaximum(number: number, maximum: maxValue)
       }
     }
   }
@@ -185,7 +185,7 @@ extension Keywords {
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
       if let number = input.numeric, number >= exclusiveMaxValue {
-        throw .exceedsExclusiveMaximum
+        throw ValidationIssue.exceedsExclusiveMaximum(number: number, maximum: exclusiveMaxValue)
       }
     }
   }
@@ -211,7 +211,7 @@ extension Keywords {
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
       if let number = input.numeric, number < minValue {
-        throw .belowMinimum
+        throw ValidationIssue.belowMinimum(number: number, minimum: minValue)
       }
     }
   }
@@ -236,7 +236,7 @@ extension Keywords {
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
       if let number = input.numeric, number <= exclusiveMinValue {
-        throw .belowExclusiveMinimum
+        throw ValidationIssue.belowExclusiveMinimum(number: number, minimum: exclusiveMinValue)
       }
     }
   }
@@ -266,7 +266,7 @@ extension Keywords {
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
       if let string = input.string, string.count > maxLength {
-        throw .exceedsMaxLength
+        throw ValidationIssue.exceedsMaxLength(string: string, maxLength: maxLength)
       }
     }
   }
@@ -292,7 +292,7 @@ extension Keywords {
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
       if let string = input.string, string.count < minLength {
-        throw .belowMinLength
+        throw ValidationIssue.belowMinLength(string: string, minLength: minLength)
       }
     }
   }
@@ -325,7 +325,7 @@ extension Keywords {
     ) throws(ValidationIssue) {
       if let string = input.string, let regex = regex {
         if string.firstMatch(of: regex) == nil {
-          throw .patternMismatch
+          throw ValidationIssue.patternMismatch(string: string, pattern: value.string ?? "")
         }
       }
     }
@@ -376,7 +376,7 @@ extension Keywords {
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
       if let array = input.array, array.count > maxItems {
-        throw .exceedsMaxItems
+        throw ValidationIssue.exceedsMaxItems(count: array.count, maxItems: maxItems)
       }
     }
   }
@@ -402,7 +402,7 @@ extension Keywords {
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
       if let array = input.array, array.count < minItems {
-        throw .belowMinItems
+        throw ValidationIssue.belowMinItems(count: array.count, minItems: minItems)
       }
     }
   }
@@ -430,7 +430,7 @@ extension Keywords {
       if uniqueItemsRequired, let array = input.array {
         let set = Set(array)
         if set.count != array.count {
-          throw .itemsNotUnique
+          throw ValidationIssue.itemsNotUnique
         }
       }
     }
@@ -465,11 +465,11 @@ extension Keywords {
       switch containsAnnotation.value {
       case .everyIndex:
         if array.count > maxContains {
-          throw .containsExcessiveMatches
+          throw ValidationIssue.containsExcessiveMatches(count: array.count, maxAllowed: maxContains)
         }
       case .indicies(let indicies):
         if indicies.count > maxContains {
-          throw .containsExcessiveMatches
+          throw ValidationIssue.containsExcessiveMatches(count: indicies.count, maxAllowed: maxContains)
         }
       }
     }
@@ -508,11 +508,11 @@ extension Keywords {
       switch containsAnnotation.value {
       case .everyIndex:
         if array.count < minContains {
-          throw .containsInsufficientMatches
+          throw ValidationIssue.containsInsufficientMatches(count: array.count, required: minContains)
         }
       case .indicies(let indicies):
         if indicies.count < minContains {
-          throw .containsInsufficientMatches
+          throw ValidationIssue.containsInsufficientMatches(count: indicies.count, required: minContains)
         }
       }
     }
@@ -545,7 +545,7 @@ extension Keywords {
       guard let object = input.object else { return }
 
       if object.count > maxProperties {
-        throw .exceedsMaxProperties
+        throw ValidationIssue.exceedsMaxProperties(count: object.count, maxProperties: maxProperties)
       }
     }
   }
@@ -573,7 +573,7 @@ extension Keywords {
       guard let object = input.object else { return }
 
       if object.count < minProperties {
-        throw ValidationIssue.belowMinProperties
+        throw ValidationIssue.belowMinProperties(count: object.count, minProperties: minProperties)
       }
     }
   }

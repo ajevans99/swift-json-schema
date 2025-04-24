@@ -21,7 +21,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.typeMismatch) {
+        #expect(throws: ValidationIssue.typeMismatch(expected: "string", actual: instance.type.rawValue)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -43,7 +43,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.typeMismatch) {
+        #expect(throws: ValidationIssue.typeMismatch(expected: "string, boolean", actual: instance.type.rawValue)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -66,7 +66,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.notEnumCase) {
+        #expect(throws: ValidationIssue.notEnumCase(value: instance.stringValue, allowedValues: ["hello", "world", "boolean", "number"])) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -89,7 +89,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.constantMismatch) {
+        #expect(throws: ValidationIssue.constantMismatch(expected: "hello", actual: instance.stringValue)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -114,7 +114,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.notMultipleOf) {
+        #expect(throws: ValidationIssue.notMultipleOf(number: instance.doubleValue, multiple: 2)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -138,7 +138,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.exceedsMaximum) {
+        #expect(throws: ValidationIssue.exceedsMaximum(number: instance.doubleValue, maximum: 5)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -162,7 +162,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.exceedsExclusiveMaximum) {
+        #expect(throws: ValidationIssue.exceedsExclusiveMaximum(number: instance.doubleValue, maximum: 5)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -186,7 +186,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.belowMinimum) {
+        #expect(throws: ValidationIssue.belowMinimum(number: instance.doubleValue, minimum: 5)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -210,7 +210,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.belowExclusiveMinimum) {
+        #expect(throws: ValidationIssue.belowExclusiveMinimum(number: instance.doubleValue, minimum: 5)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -234,7 +234,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.exceedsMaxLength) {
+        #expect(throws: ValidationIssue.exceedsMaxLength(string: instance.stringValue, maxLength: 5)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -256,7 +256,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.belowMinLength) {
+        #expect(throws: ValidationIssue.belowMinLength(string: instance.stringValue, minLength: 3)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -278,7 +278,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.patternMismatch, "\(instance)") {
+        #expect(throws: ValidationIssue.patternMismatch(string: instance.stringValue, pattern: "\\d")) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -301,7 +301,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.exceedsMaxItems) {
+        #expect(throws: ValidationIssue.exceedsMaxItems(count: instance.arrayValue.count, maxItems: 3)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -322,7 +322,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.belowMinItems) {
+        #expect(throws: ValidationIssue.belowMinItems(count: instance.arrayValue.count, minItems: 2)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -372,7 +372,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.containsExcessiveMatches) {
+        #expect(throws: ValidationIssue.containsExcessiveMatches(count: instance.arrayValue.count, maxAllowed: 3)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -402,7 +402,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.containsInsufficientMatches) {
+        #expect(throws: ValidationIssue.containsInsufficientMatches(count: instance.arrayValue.count, required: 2)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -423,7 +423,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.exceedsMaxProperties) {
+        #expect(throws: ValidationIssue.exceedsMaxProperties(count: instance.objectValue.count, maxProperties: 2)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -444,7 +444,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.belowMinProperties) {
+        #expect(throws: ValidationIssue.belowMinProperties(count: instance.objectValue.count, minProperties: 2)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -593,7 +593,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: &annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.containsInsufficientMatches) {
+        #expect(throws: ValidationIssue.containsInsufficientMatches(count: instance.arrayValue.count, required: 2)) {
           try keyword.validate(instance, at: .init(), using: &annotations)
         }
       }
