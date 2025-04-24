@@ -1,16 +1,24 @@
 import JSONSchema
 
+/// The result of validating additionalProperties against an input object.
+/// Stores all extra key-value pairs that were not handled by the base schema.
+public struct AdditionalPropertiesParseResult<AdditionalOut> {
+  public let matches: [String: AdditionalOut]
+}
+
 extension JSONComponents {
+  /// A JSON schema component that augments a base schema with additionalProperties support.
+  /// Any properties not consumed by the base schema are validated using a fallback subschema.
   public struct AdditionalProperties<
-    Props: PropertyCollection,
+    Base: JSONSchemaComponent,
     AdditionalProps: JSONSchemaComponent
   >: JSONSchemaComponent {
     public var schemaValue: SchemaValue
 
-    var base: JSONObject<Props>
+    var base: Base
     let additionalPropertiesSchema: AdditionalProps
 
-    public init(base: JSONObject<Props>, additionalProperties: AdditionalProps) {
+    public init(base: Base, additionalProperties: AdditionalProps) {
       self.base = base
       self.additionalPropertiesSchema = additionalProperties
       schemaValue = base.schemaValue
@@ -19,7 +27,8 @@ extension JSONComponents {
 
     public func parse(
       _ input: JSONValue
-    ) -> Parsed<(Props.Output, [String: AdditionalProps.Output]), ParseIssue> {
+    ) -> Parsed<(Base.Output, AdditionalPropertiesParseResult<AdditionalProps.Output>), ParseIssue>
+    {
       guard case .object(let dictionary) = input else {
         return .error(.typeMismatch(expected: .object, actual: input))
       }
@@ -32,13 +41,13 @@ extension JSONComponents {
       for (key, value) in dictionary where base.schemaValue.object?.keys.contains(key) == false {
         switch additionalPropertiesSchema.parse(value) {
         case .valid(let output): additionalProperties[key] = output
-        case .invalid(let errors): return .invalid(errors)
+        case .invalid: continue
         }
       }
 
       // Combine the base properties and additional properties
       switch baseValidation {
-      case .valid(let baseOutput): return .valid((baseOutput, additionalProperties))
+      case .valid(let baseOutput): return .valid((baseOutput, .init(matches: additionalProperties)))
       case .invalid(let errors): return .invalid(errors)
       }
     }

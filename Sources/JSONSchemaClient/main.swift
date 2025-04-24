@@ -13,10 +13,10 @@ func printInstance<T: Codable>(_ instance: T) {
   }
 }
 
-func printSchema<T: Schemable>(_ schema: T.Type) {
-  let schemaData = try? encoder.encode(T.schema.schemaValue)
+func printSchema<C: JSONSchemaComponent>(_ schema: C) {
+  let schemaData = try? encoder.encode(schema.schemaValue)
   if let schemaData {
-    print("\(T.self) Schema")
+    print("\(C.self) Schema")
     print(String(decoding: schemaData, as: UTF8.self))
   }
 }
