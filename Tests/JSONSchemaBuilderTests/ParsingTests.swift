@@ -65,7 +65,7 @@ struct ParsingTests {
     let result = sample.parse(input)
 
     switch result {
-    case .valid(let ((_, patternResult), additionalResult)):
+    case .valid(((_, let patternResult), let additionalResult)):
       #expect(patternResult.matches["^x-"]?.count == 2)
       #expect(additionalResult.matches.count == 1)
     default:

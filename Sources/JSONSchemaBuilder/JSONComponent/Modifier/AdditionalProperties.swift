@@ -41,7 +41,7 @@ extension JSONComponents {
       for (key, value) in dictionary where base.schemaValue.object?.keys.contains(key) == false {
         switch additionalPropertiesSchema.parse(value) {
         case .valid(let output): additionalProperties[key] = output
-        case .invalid(let errors): return .invalid(errors)
+        case .invalid: continue
         }
       }
 
