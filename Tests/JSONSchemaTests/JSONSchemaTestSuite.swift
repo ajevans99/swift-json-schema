@@ -101,8 +101,8 @@ struct JSONSchemaTestSuite {
   //      """
   //
   //    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
-  //    let schema = try #require(try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)))
-  //    let result = try #require(try schema.validate(instance: testCase))
+  //    let schema = try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes))
+  //    let result = try schema.validate(instance: testCase)
   //    dump(result)
   //    #expect((result.isValid) == false, "\(result)")
   //  }

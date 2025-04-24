@@ -6,17 +6,13 @@ import Testing
 struct SchemaTests {
   @Test func trueBooleanSchema() throws {
     let truthy: JSONValue = .boolean(true)
-    let schema = try #require(
-      try Schema(rawSchema: truthy, context: Context(dialect: .draft2020_12))
-    )
+    let schema = try Schema(rawSchema: truthy, context: Context(dialect: .draft2020_12))
     #expect(schema.validate(.integer(4)).isValid)
   }
 
   @Test func falseBooleanSchema() throws {
     let falsy: JSONValue = .boolean(false)
-    let schema = try #require(
-      try Schema(rawSchema: falsy, context: Context(dialect: .draft2020_12))
-    )
+    let schema = try Schema(rawSchema: falsy, context: Context(dialect: .draft2020_12))
     #expect(schema.validate(.integer(4)).isValid == false)
   }
 
@@ -85,9 +81,7 @@ struct SchemaTests {
     let validInstance: JSONValue = ["age": 1]
     let invalidInstance: JSONValue = ["age": 0]
 
-    let schema = try #require(
-      try Schema(rawSchema: rawSchema, context: Context(dialect: .draft2020_12))
-    )
+    let schema = try Schema(rawSchema: rawSchema, context: Context(dialect: .draft2020_12))
     #expect(schema.validate(validInstance).isValid)
     #expect(schema.validate(invalidInstance).isValid == false)
   }
@@ -103,9 +97,7 @@ struct SchemaTests {
 
     let instance: JSONValue = ["name": 123, "age": -5]
 
-    let schema = try #require(
-      try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12))
-    )
+    let schema = try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12))
     let result = schema.validate(instance)
     #expect(result.isValid == false)
     #expect(result.errors?.count == 1)
@@ -113,7 +105,7 @@ struct SchemaTests {
   }
 
   @Test func metaSchema() throws {
-    let metaSchema = try #require(try Dialect.draft2020_12.loadMetaSchema())
+    let metaSchema = try Dialect.draft2020_12.loadMetaSchema()
     let result = metaSchema.validate(.object(["minLength": 1]))
     #expect(result.isValid == true)
   }
