@@ -5,7 +5,7 @@ extension JSONComponents {
     Props: PropertyCollection,
     AdditionalProps: JSONSchemaComponent
   >: JSONSchemaComponent {
-    public var schemaValue: [KeywordIdentifier: JSONValue]
+    public var schemaValue: SchemaValue
 
     var base: JSONObject<Props>
     let additionalPropertiesSchema: AdditionalProps
@@ -14,7 +14,7 @@ extension JSONComponents {
       self.base = base
       self.additionalPropertiesSchema = additionalProperties
       schemaValue = base.schemaValue
-      schemaValue[Keywords.AdditionalProperties.name] = .object(additionalProperties.schemaValue)
+      schemaValue[Keywords.AdditionalProperties.name] = additionalProperties.schemaValue.value
     }
 
     public func parse(
@@ -29,7 +29,7 @@ extension JSONComponents {
 
       // Validate the additional properties
       var additionalProperties: [String: AdditionalProps.Output] = [:]
-      for (key, value) in dictionary where !base.schemaValue.keys.contains(key) {
+      for (key, value) in dictionary where base.schemaValue.object?.keys.contains(key) == false {
         switch additionalPropertiesSchema.parse(value) {
         case .valid(let output): additionalProperties[key] = output
         case .invalid(let errors): return .invalid(errors)

@@ -2,7 +2,7 @@ import JSONSchema
 
 /// A JSON array type component for use in ``JSONSchemaBuilder``.
 public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
-  public var schemaValue = [KeywordIdentifier: JSONValue]()
+  public var schemaValue = SchemaValue.object([:])
 
   let items: T
 
@@ -12,8 +12,8 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
     let items = items()
     self.items = items
     schemaValue[Keywords.TypeKeyword.name] = .string(JSONType.array.rawValue)
-    if !items.schemaValue.isEmpty {
-      schemaValue[Keywords.Items.name] = .object(self.items.schemaValue)
+    if items.schemaValue.object?.isEmpty == false {
+      schemaValue[Keywords.Items.name] = self.items.schemaValue.value
     }
   }
 
@@ -52,7 +52,7 @@ extension JSONArray {
   ) -> Self {
     var copy = self
     copy.schemaValue[Keywords.PrefixItems.name] = .array(
-      prefixItems().map { .object($0.schemaValue) }
+      prefixItems().map { $0.schemaValue.value }
     )
     return copy
   }
@@ -64,7 +64,7 @@ extension JSONArray {
     @JSONSchemaBuilder _ unevaluatedItems: () -> Component
   ) -> Self {
     var copy = self
-    copy.schemaValue[Keywords.UnevaluatedItems.name] = .object(unevaluatedItems().schemaValue)
+    copy.schemaValue[Keywords.UnevaluatedItems.name] = unevaluatedItems().schemaValue.value
     return copy
   }
 
@@ -73,7 +73,7 @@ extension JSONArray {
   /// - Returns: A new `JSONArray` with the `contains` schema set.
   public func contains(@JSONSchemaBuilder _ contains: () -> any JSONSchemaComponent) -> Self {
     var copy = self
-    copy.schemaValue[Keywords.Contains.name] = .object(contains().schemaValue)
+    copy.schemaValue[Keywords.Contains.name] = contains().schemaValue.value
     return copy
   }
 

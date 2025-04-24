@@ -4,7 +4,7 @@ public protocol JSONNumberType: JSONSchemaComponent {}
 
 /// A JSON integer schema component for use in ``JSONSchemaBuilder``.
 public struct JSONInteger: JSONNumberType {
-  public var schemaValue = [KeywordIdentifier: JSONValue]()
+  public var schemaValue = SchemaValue.object([:])
 
   public init() {
     schemaValue[Keywords.TypeKeyword.name] = .string(JSONType.integer.rawValue)
@@ -18,7 +18,7 @@ public struct JSONInteger: JSONNumberType {
 
 /// A JSON number schema component for use in ``JSONSchemaBuilder``.
 public struct JSONNumber: JSONNumberType {
-  public var schemaValue = [KeywordIdentifier: JSONValue]()
+  public var schemaValue = SchemaValue.object([:])
 
   public init() {
     schemaValue[Keywords.TypeKeyword.name] = .string(JSONType.number.rawValue)

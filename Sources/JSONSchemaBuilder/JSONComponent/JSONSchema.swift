@@ -3,7 +3,7 @@ import JSONSchema
 /// Analogous to `Group` in SwiftUI, this component can be used to group other components together.
 /// It can also be used to transform the output of the grouped components.
 public struct JSONSchema<Components: JSONSchemaComponent, NewOutput>: JSONSchemaComponent {
-  public var schemaValue: [KeywordIdentifier: JSONValue] {
+  public var schemaValue: SchemaValue {
     get { components.schemaValue }
     set { components.schemaValue = newValue }
   }

@@ -44,7 +44,7 @@ struct DocumentationExampleTests {
       ],
     ]
 
-    #expect(jsonSchema.schemaValue == expected)
+    #expect(jsonSchema.schemaValue == .object(expected))
   }
 
   @Schemable struct Person {
@@ -136,6 +136,6 @@ struct DocumentationExampleTests {
 
   @Test func readMeEnumMacro() {
     let expected: [String: JSONValue] = ["type": "string", "enum": ["active", "inactive"]]
-    #expect(Status.schema.schemaValue == expected)
+    #expect(Status.schema.schemaValue == .object(expected))
   }
 }

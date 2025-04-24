@@ -5,7 +5,7 @@ import JSONSchema
 public protocol JSONSchemaComponent<Output>: Sendable {
   associatedtype Output
 
-  var schemaValue: [KeywordIdentifier: JSONValue] { get set }
+  var schemaValue: SchemaValue { get set }
 
   /// Parse a JSON instance into a Swift type using the schema.
   /// - Parameter value: The value (aka instance or document) to validate.
@@ -15,12 +15,22 @@ public protocol JSONSchemaComponent<Output>: Sendable {
 
 extension JSONSchemaComponent {
   public func definition() -> Schema {
-    ObjectSchema(
-      schemaValue: schemaValue,
-      location: .init(),
-      context: .init(dialect: .draft2020_12)
-    )
-    .asSchema()
+    switch schemaValue {
+    case .boolean(let bool):
+      BooleanSchema(
+        schemaValue: bool,
+        location: .init(),
+        context: .init(dialect: .draft2020_12)
+      )
+      .asSchema()
+    case .object(let dict):
+      ObjectSchema(
+        schemaValue: dict,
+        location: .init(),
+        context: .init(dialect: .draft2020_12)
+      )
+      .asSchema()
+    }
   }
 
   public func parse(

@@ -1,5 +1,3 @@
-/// A result builder type that collects multiple ``JSONProperty`` instances into a single array.
-
 import JSONSchema
 
 /// A result builder type that collects multiple ``JSONPropertyValue`` instances into a single array.

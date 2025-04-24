@@ -19,7 +19,7 @@ struct JSONCompositionTests {
       ]
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func allOfComposition() {
@@ -37,7 +37,7 @@ struct JSONCompositionTests {
       ]
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func oneOfComposition() {
@@ -55,7 +55,7 @@ struct JSONCompositionTests {
       ]
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func notComposition() {
@@ -67,7 +67,7 @@ struct JSONCompositionTests {
       "not": ["type": "string"]
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func annotations() {
@@ -89,6 +89,6 @@ struct JSONCompositionTests {
       ],
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 }

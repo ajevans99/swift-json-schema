@@ -8,7 +8,7 @@ extension JSONComponents {
   /// Component for type erasure.
   public struct AnyComponent<Output>: JSONSchemaComponent {
     private let validate: @Sendable (JSONValue) -> Parsed<Output, ParseIssue>
-    public var schemaValue: [KeywordIdentifier: JSONValue]
+    public var schemaValue: SchemaValue
 
     public init<Component: JSONSchemaComponent>(_ component: Component)
     where Component.Output == Output {

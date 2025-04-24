@@ -8,9 +8,9 @@ extension JSONPropertyComponents {
       components.flatMap(\.requiredKeys)
     }
 
-    public var schemaValue: [String: JSONValue] {
-      components.reduce(into: [:]) { result, component in
-        result.merge(component.schemaValue) { current, _ in current }
+    public var schemaValue: SchemaValue {
+      components.reduce(into: SchemaValue.object([:])) { result, component in
+        result.merge(component.schemaValue)
       }
     }
 

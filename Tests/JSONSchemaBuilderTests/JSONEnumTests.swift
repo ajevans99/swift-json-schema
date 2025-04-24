@@ -15,7 +15,7 @@ struct JSONEnumTests {
       "enum": ["red"],
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func sameType() {
@@ -33,7 +33,7 @@ struct JSONEnumTests {
       "enum": ["red", "amber", "green"],
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func differentType() {
@@ -52,7 +52,7 @@ struct JSONEnumTests {
       "enum": ["red", "amber", "green", nil, 42]
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 
   @Test func annotations() {
@@ -72,6 +72,6 @@ struct JSONEnumTests {
       "enum": ["red", "amber", "green"],
     ]
 
-    #expect(sample.schemaValue == expected)
+    #expect(sample.schemaValue == .object(expected))
   }
 }
