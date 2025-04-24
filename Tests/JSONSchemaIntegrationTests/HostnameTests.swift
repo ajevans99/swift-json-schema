@@ -32,7 +32,7 @@ struct FieldnameSchema: Equatable {
             }
             .required()
           }
-          .map { $1.matches.mapValues { $0.flatMap { $0.value } } }
+          .map { $1.matches.mapValues(\.value) }
           .unevaluatedProperties { false }
       }
     }

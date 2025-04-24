@@ -21,7 +21,10 @@ struct ParsingTests {
 
     let result = sample.parse(input)
 
-    #expect(result.value?.1.matches["^x-"]?.count == 2)
+    let match1 = try #require(result.value?.1.matches["x-custom"])
+    #expect(match1.value == "abc")
+    let match2 = try #require(result.value?.1.matches["x-extra"])
+    #expect(match2.value == "def")
   }
 
   @Test func additionalPropertiesValidation() throws {
@@ -66,7 +69,7 @@ struct ParsingTests {
 
     switch result {
     case .valid(((_, let patternResult), let additionalResult)):
-      #expect(patternResult.matches["^x-"]?.count == 2)
+      #expect(patternResult.matches.count == 2)
       #expect(additionalResult.matches.count == 1)
     default:
       #expect(

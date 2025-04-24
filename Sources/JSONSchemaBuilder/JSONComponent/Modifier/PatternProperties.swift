@@ -12,7 +12,7 @@ public struct PatternPropertiesParseResult<PatternOut> {
   }
 
   /// The key is the instance string that matches the regex.
-  public let matches: [MatchingKey: [Match]]
+  public let matches: [MatchingKey: Match]
 }
 
 extension JSONComponents {
@@ -44,7 +44,7 @@ extension JSONComponents {
 
       let baseResult = base.parse(input)
 
-      var matches = [String: [PatternPropertiesParseResult<PatternProps.Output>.Match]]()
+      var matches = [String: PatternPropertiesParseResult<PatternProps.Output>.Match]()
       for (patternString, _) in patternPropertiesSchema.schemaValue.object ?? [:] {
         let regex: Regex<AnyRegexOutput>
         do {
@@ -57,7 +57,7 @@ extension JSONComponents {
           let singleKeyDict = [patternString: value]
           switch patternPropertiesSchema.validate(singleKeyDict) {
           case .valid(let out):
-            matches[key, default: []].append(.init(value: out, regex: patternString))
+            matches[key] = .init(value: out, regex: patternString)
           case .invalid:
             continue
           }
