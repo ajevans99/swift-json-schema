@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-json-schema}",
+            "name": "Debug JSONSchemaClient",
+            "program": "${workspaceFolder:swift-json-schema}/.build/debug/JSONSchemaClient",
+            "preLaunchTask": "swift: Build Debug JSONSchemaClient"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-json-schema}",
+            "name": "Release JSONSchemaClient",
+            "program": "${workspaceFolder:swift-json-schema}/.build/release/JSONSchemaClient",
+            "preLaunchTask": "swift: Build Release JSONSchemaClient"
+        }
+    ]
+}

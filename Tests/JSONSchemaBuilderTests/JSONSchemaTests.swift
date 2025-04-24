@@ -297,7 +297,7 @@ struct JSONAdvancedBuilderTests {
       }
     }
 
-    #expect(sample.schemaValue == (bool ? .object(["type": "string"]) : .boolean(true)))
+    #expect(sample.schemaValue == (bool ? .object(["type": "string"]) : .object([:])))
   }
 
   @Test(arguments: [true, false]) func either(_ bool: Bool) {
