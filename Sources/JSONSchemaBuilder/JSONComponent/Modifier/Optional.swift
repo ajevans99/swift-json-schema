@@ -5,7 +5,7 @@ extension JSONComponents {
   /// When the wrapped component is nil, the output of validation is `.valid(nil)` and the schema accepts any input.
   public struct OptionalNoType<Wrapped: JSONSchemaComponent>: JSONSchemaComponent {
     public var schemaValue: SchemaValue {
-      get { wrapped?.schemaValue ?? .boolean(true) }
+      get { wrapped?.schemaValue ?? .object([:]) }
       set { wrapped?.schemaValue = newValue }
     }
 
