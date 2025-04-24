@@ -115,7 +115,21 @@ struct SchemaGenerator {
     }
 
     if let objectArguemnts = attributes.arguments(for: "ObjectOptions") {
-      codeBlockItem.applyArguments(objectArguemnts)
+      for argument in objectArguemnts {
+        if let functionCall = argument.expression.as(FunctionCallExprSyntax.self),
+           let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self),
+           memberAccess.declName.baseName.text == "additionalProperties",
+           let closure = functionCall.trailingClosure {
+          codeBlockItem = """
+            \(codeBlockItem)
+            .additionalProperties { \(closure.statements) }
+            // Drop the `AdditionalPropertiesParseResult` parse information. Use custom builder if needed.
+            .map { $0.0 }
+            """
+        } else {
+          codeBlockItem.applyArguments([argument])
+        }
+      }
     }
 
     let variableDecl: DeclSyntax = """

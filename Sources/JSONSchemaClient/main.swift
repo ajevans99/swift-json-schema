@@ -76,6 +76,19 @@ let result2 = schema.validate(instance2)
 dump(result2, name: "Instance 2 Validation Result")
 
 @Schemable
+@ObjectOptions(.additionalProperties { false })
 public struct Weather {
+  let temperature: Double
+}
+
+
+@Schemable
+@ObjectOptions(
+  .additionalProperties {
+    JSONString()
+      .pattern("^[a-zA-Z]+$")
+  }
+)
+public struct Weather20 {
   let temperature: Double
 }

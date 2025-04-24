@@ -244,6 +244,45 @@ struct ObjectOptionsTests {
       macros: testMacros
     )
   }
+
+  @Test func additionalProperties() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      @ObjectOptions(.additionalProperties { false })
+      struct Weather {
+        let cityName: String
+      }
+      """,
+      expandedSource: """
+        struct Weather {
+          let cityName: String
+
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "cityName") {
+                  JSONString()
+                }
+                .required()
+              }
+              .additionalProperties {
+                false
+              }
+              // Drop the `AdditionalPropertiesParseResult` parse information. Use custom builder if needed.
+              .map {
+                $0.0
+              }
+            }
+          }
+        }
+
+        extension Weather: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
 }
 
 struct StringOptionsTests {
