@@ -50,7 +50,7 @@ struct DocumentationExampleTests {
   @Schemable struct Person {
     let firstName: String
     let lastName: String?
-    @NumberOptions(minimum: 0, maximum: 120)
+    @NumberOptions(.minimum(0), .maximum(120))
     let age: Int
   }
 

@@ -43,7 +43,7 @@ struct Flight: Sendable {
   let origin: String
   let destination: String?
   let airline: Airline
-  @NumberOptions(multipleOf: 0.5)
+  @NumberOptions(.multipleOf(0.5))
   let duration: Double
 }
 
