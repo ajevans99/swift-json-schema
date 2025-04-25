@@ -175,29 +175,27 @@ struct SchemaOptionsTests {
           case rainy
 
           static var schema: some JSONSchemaComponent<Weather> {
-            JSONEnum {
-              "sunny"
-              "cloudy"
-              "rainy"
-            }
+            JSONString()
+              .enumValues {
+                "sunny"
+                "cloudy"
+                "rainy"
+              }
+              .compactMap {
+                switch $0 {
+                case "sunny":
+                  return Self.sunny
+                case "cloudy":
+                  return Self.cloudy
+                case "rainy":
+                  return Self.rainy
+                default:
+                  return nil
+                }
+              }
             .title("Weather")
             .description("The current weather conditions")
             .deprecated(false)
-            .compactMap { value in
-              guard case .string(let string) = value else {
-                return nil
-              }
-              switch string {
-              case "sunny":
-                return .sunny
-              case "cloudy":
-                return .cloudy
-              case "rainy":
-                return .rainy
-              default:
-                return nil
-              }
-            }
           }
         }
 

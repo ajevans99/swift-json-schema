@@ -189,7 +189,7 @@ struct ObjectOptionsTests {
               .additionalProperties {
                 false
               }
-              // Drop the `AdditionalPropertiesParseResult` parse information. Use custom builder if needed.
+              // Drop the parse information. Use custom builder if needed.
               .map {
                 $0.0
               }
@@ -236,7 +236,7 @@ struct ObjectOptionsTests {
                 }
                 .required()
               }
-              // Drop the `PatternPropertiesParseResult` parse information. Use custom builder if needed.
+              // Drop the parse information. Use custom builder if needed.
               .map {
                 $0.0
               }
