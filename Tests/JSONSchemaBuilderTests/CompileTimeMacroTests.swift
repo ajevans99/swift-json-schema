@@ -57,3 +57,18 @@ public struct Weather2 {
 struct Weather3 {
   let cityName: String
 }
+
+@Schemable
+struct Weather4 {
+  @SchemaOptions(
+    .title("Temperature"),
+    .description("The current temperature in fahrenheit, like 70°F"),
+    .default(75.0),
+    .examples([72.0, 75.0, 78.0]),
+    .readOnly(true),
+    .writeOnly(false),
+    .deprecated(true),
+    .comment("This is a comment about temperature")
+  )
+  let temperature: Double
+}
