@@ -81,7 +81,7 @@ Use the `@Schemable` macro from `JSONSchemaBuilder` to automatically generate th
 struct Person {
   let firstName: String
   let lastName: String?
-  @NumberOptions(minimum: 0, maximum: 120)
+  @NumberOptions(.minimum(0), .maximum(120))
   let age: Int
 }
 ```
@@ -236,8 +236,7 @@ dump(result2, name: "Instance 2 Validation Result")
 <details>
   <summary>Instance 2 Validation Result</summary>
 
-  ```
-  ▿ Instance 2 Validation Result: JSONSchema.ValidationResult
+  ```  ▿ Instance 2 Validation Result: JSONSchema.ValidationResult
   - isValid: false
   ▿ keywordLocation: #
     - path: 0 elements

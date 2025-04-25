@@ -55,14 +55,14 @@ There are also type specific attributes that can be used to customize the genera
 ```swift
 @Schemable
 struct Person {
-  @SchemaOptions(description: "The person's first name.")
+  @SchemaOptions(.description("The person's first name."))
   let firstName: String
 
-  @SchemaOptions(description: "The person's last name.")
+  @SchemaOptions(.description("The person's last name."))
   let lastName: String
 
-  @SchemaOptions(description: "Age in years")
-  @JSONInteger(minimum: 0, maximum: 120)
+  @SchemaOptions(.description("Age in years"))
+  @NumberOptions(.minimum(0), .maximum(120))
   let age: Int
 }
 ```
