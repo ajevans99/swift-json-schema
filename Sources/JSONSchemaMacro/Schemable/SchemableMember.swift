@@ -46,7 +46,9 @@ struct SchemableMember {
   private func applyArguments(to codeBlock: inout CodeBlockItemSyntax) {
     if let annotationArguments { codeBlock.applyArguments(annotationArguments) }
 
-    if let typeSpecificArguments { codeBlock.applyArguments(typeSpecificArguments) }
+    if let typeSpecificArguments { 
+      codeBlock = TypeSpecificOptions.apply(typeSpecificArguments, to: codeBlock, for: type)
+    }
   }
 
   func generateSchema() -> CodeBlockItemSyntax? {

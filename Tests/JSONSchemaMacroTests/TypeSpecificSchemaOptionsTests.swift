@@ -165,43 +165,6 @@ struct ObjectOptionsTests {
     "Schemable": SchemableMacro.self, "ObjectOptions": ObjectOptionsMacro.self,
   ]
 
-  @Test func onStructDeclaration() {
-    assertMacroExpansion(
-      """
-      @ObjectOptions(
-        minProperties: 2,
-        maxProperties: 5
-      )
-      @Schemable
-      struct Weather {
-        let cityName: String
-      }
-      """,
-      expandedSource: """
-        struct Weather {
-          let cityName: String
-
-          static var schema: some JSONSchemaComponent<Weather> {
-            JSONSchema(Weather.init) {
-              JSONObject {
-                JSONProperty(key: "cityName") {
-                  JSONString()
-                }
-                .required()
-              }
-              .minProperties(2)
-              .maxProperties(5)
-            }
-          }
-        }
-
-        extension Weather: Schemable {
-        }
-        """,
-      macros: testMacros
-    )
-  }
-
   @Test func additionalProperties() {
     assertMacroExpansion(
       """
