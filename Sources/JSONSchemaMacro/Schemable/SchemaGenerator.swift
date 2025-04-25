@@ -38,7 +38,11 @@ struct EnumSchemaGenerator {
     }
 
     if let annotationArguments = attributes.arguments(for: "SchemaOptions") {
-      codeBlockItem.applyArguments(annotationArguments)
+      codeBlockItem = SchemaOptionsGenerator.apply(
+        annotationArguments,
+        to: codeBlockItem,
+        for: "SchemaOptions"
+      )
     }
 
     let variableDecl: DeclSyntax = """
@@ -111,11 +115,19 @@ struct SchemaGenerator {
       "JSONObject { \(CodeBlockItemListSyntax(statements, separator: .newline)) }"
 
     if let annotationArguments = attributes.arguments(for: "SchemaOptions") {
-      codeBlockItem.applyArguments(annotationArguments)
+      codeBlockItem = SchemaOptionsGenerator.apply(
+        annotationArguments,
+        to: codeBlockItem,
+        for: "SchemaOptions"
+      )
     }
 
-    if let objectArguemnts = attributes.arguments(for: "ObjectOptions") {
-      codeBlockItem.applyArguments(objectArguemnts)
+    if let objectArguments = attributes.arguments(for: "ObjectOptions") {
+      codeBlockItem = SchemaOptionsGenerator.apply(
+        objectArguments,
+        to: codeBlockItem,
+        for: "ObjectOptions"
+      )
     }
 
     let variableDecl: DeclSyntax = """

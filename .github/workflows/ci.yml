@@ -11,7 +11,7 @@ on:
 
 jobs:
   build_and_test:
-    runs-on: macos-latest
+    runs-on: macos-15
 
     name: Build and Test on macOS with Swift 6.0
     steps:
@@ -29,7 +29,7 @@ jobs:
     - name: Build
       run: swift build -v
     - name: Run tests
-      run: swift test --enable-experimental-swift-testing
+      run: swift test
   
   build_linux:
     name: Build on Linux

@@ -5,54 +5,54 @@ import Testing
 
 @Schemable
 @SchemaOptions(
-  title: "Poll",
-  description: "A schema for representing a poll with options and metadata."
+  .title("Poll"),
+  .description("A schema for representing a poll with options and metadata.")
 )
 struct Poll {
-  @SchemaOptions(description: "Unique identifier for the poll")
-  @NumberOptions(minimum: 1)
+  @SchemaOptions(.description("Unique identifier for the poll"))
+  @NumberOptions(.minimum(1))
   let id: Int
 
-  @SchemaOptions(description: "The title of the poll")
-  @StringOptions(minLength: 1, maxLength: 200)
+  @SchemaOptions(.description("The title of the poll"))
+  @StringOptions(.minLength(1), .maxLength(200))
   let title: String
 
-  @SchemaOptions(description: "Optional description of the poll")
-  @StringOptions(maxLength: 500)
+  @SchemaOptions(.description("Optional description of the poll"))
+  @StringOptions(.maxLength(500))
   let description: String?
 
-  @StringOptions(format: "date-time")
+  @StringOptions(.format("date-time"))
   let createdAt: String
 
-  @SchemaOptions(description: "Optional expiration timestamp for the poll")
-  @StringOptions(format: "date-time")
+  @SchemaOptions(.description("Optional expiration timestamp for the poll"))
+  @StringOptions(.format("date-time"))
   let expiresAt: String?
 
-  @SchemaOptions(description: "Whether the poll is currently active")
+  @SchemaOptions(.description("Whether the poll is currently active"))
   var isActive: Bool = true
 
-  @SchemaOptions(description: "List of options available in the poll")
-  @ArrayOptions(minItems: 2, uniqueItems: true)
+  @SchemaOptions(.description("List of options available in the poll"))
+  @ArrayOptions(.minItems(2), .uniqueItems(true))
   let options: [Option]
 
-  @SchemaOptions(description: "Category of the poll, limited to specific types")
+  @SchemaOptions(.description("Category of the poll, limited to specific types"))
   let category: Category
 
   let settings: Settings?
 
   @Schemable
-  @ObjectOptions()  // TODO: Additional properties to false
+  @ObjectOptions(.additionalProperties { false })
   struct Option {
-    @SchemaOptions(description: "Unique identifier for the poll")
-    @NumberOptions(minimum: 1)
+    @SchemaOptions(.description("Unique identifier for the poll"))
+    @NumberOptions(.minimum(1))
     let id: Int
 
-    @SchemaOptions(description: "Option text")
-    @StringOptions(minLength: 1, maxLength: 100)
+    @SchemaOptions(.description("Option text"))
+    @StringOptions(.minLength(1), .maxLength(100))
     let text: String
 
-    @SchemaOptions(description: "Number of votes received")
-    @NumberOptions(minimum: 0)
+    @SchemaOptions(.description("Number of votes received"))
+    @NumberOptions(.minimum(0))
     var voteCount: Int = 0
   }
 

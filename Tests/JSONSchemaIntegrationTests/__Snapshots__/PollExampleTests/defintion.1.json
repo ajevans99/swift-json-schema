@@ -154,6 +154,7 @@
     "options" : {
       "description" : "List of options available in the poll",
       "items" : {
+        "additionalProperties" : false,
         "properties" : {
           "id" : {
             "description" : "Unique identifier for the poll",

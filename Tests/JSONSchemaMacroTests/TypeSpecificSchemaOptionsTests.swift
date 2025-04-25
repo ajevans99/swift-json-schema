@@ -12,7 +12,7 @@ struct NumberOptionsTests {
       """
       @Schemable
       struct Weather {
-        @NumberOptions(minimum: 0, maximum: 100)
+        @NumberOptions(.minimum(0), .maximum(100))
         let temperature: Double
       }
       """,
@@ -46,7 +46,7 @@ struct NumberOptionsTests {
       """
       @Schemable
       struct Weather {
-        @NumberOptions(exclusiveMinimum: 0, exclusiveMaximum: 100)
+        @NumberOptions(.exclusiveMinimum(0), .exclusiveMaximum(100))
         let temperature: Double
       }
       """,
@@ -80,7 +80,7 @@ struct NumberOptionsTests {
       """
       @Schemable
       struct Weather {
-        @NumberOptions(multipleOf: 5)
+        @NumberOptions(.multipleOf(5))
         let temperature: Int
       }
       """,
@@ -120,11 +120,11 @@ struct ArrayOptionsTests {
       @Schemable
       struct Weather {
         @ArrayOptions(
-          minContains: 1,
-          maxContains: 5,
-          minItems: 2,
-          maxItems: 10,
-          uniqueItems: true
+          .minContains(1),
+          .maxContains(5),
+          .minItems(2),
+          .maxItems(10),
+          .uniqueItems(true)
         )
         let temperatureReadings: [Double]
       }
@@ -165,37 +165,33 @@ struct ObjectOptionsTests {
     "Schemable": SchemableMacro.self, "ObjectOptions": ObjectOptionsMacro.self,
   ]
 
-  @Test(.bug("https://github.com/ajevans99/swift-json-schema/issues/19")) func basic() {
+  @Test func additionalProperties() {
     assertMacroExpansion(
       """
       @Schemable
+      @ObjectOptions(.additionalProperties { false })
       struct Weather {
-        @ObjectOptions(
-          propertyNames: .options(pattern: "^[A-Za-z_][A-Za-z0-9_]*$"),
-          minProperties: 2,
-          maxProperties: 5
-        )
-        let metadata: [String: String]
+        let cityName: String
       }
       """,
       expandedSource: """
         struct Weather {
-          let metadata: [String: String]
+          let cityName: String
 
           static var schema: some JSONSchemaComponent<Weather> {
             JSONSchema(Weather.init) {
               JSONObject {
-                JSONProperty(key: "metadata") {
-                  JSONObject()
-                  .additionalProperties {
-                    JSONString()
-                  }
-                  .map(\\.1)
-                  .propertyNames(.options(pattern: "^[A-Za-z_][A-Za-z0-9_]*$"))
-                  .minProperties(2)
-                  .maxProperties(5)
+                JSONProperty(key: "cityName") {
+                  JSONString()
                 }
                 .required()
+              }
+              .additionalProperties {
+                false
+              }
+              // Drop the parse information. Use custom builder if needed.
+              .map {
+                $0.0
               }
             }
           }
@@ -208,14 +204,68 @@ struct ObjectOptionsTests {
     )
   }
 
-  @Test func onStructDeclaration() {
+  @Test func patternProperties() {
     assertMacroExpansion(
       """
-      @ObjectOptions(
-        minProperties: 2,
-        maxProperties: 5
-      )
       @Schemable
+      @ObjectOptions(.patternProperties {
+        JSONProperty(key: "^[A-Za-z_][A-Za-z0-9_]*$") {
+          JSONString()
+        }
+        .required()
+      })
+      struct Weather {
+        let cityName: String
+      }
+      """,
+      expandedSource: """
+        struct Weather {
+          let cityName: String
+
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "cityName") {
+                  JSONString()
+                }
+                .required()
+              }
+              .patternProperties {
+                JSONProperty(key: "^[A-Za-z_][A-Za-z0-9_]*$") {
+                  JSONString()
+                }
+                .required()
+              }
+              // Drop the parse information. Use custom builder if needed.
+              .map {
+                $0.0
+              }
+            }
+          }
+        }
+
+        extension Weather: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func allObjectOptions() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      @ObjectOptions(
+        .minProperties(2),
+        .maxProperties(5),
+        .propertyNames {
+          JSONString()
+            .pattern("^[A-Za-z_][A-Za-z0-9_]*$")
+        },
+        .unevaluatedProperties {
+          JSONString()
+        }
+      )
       struct Weather {
         let cityName: String
       }
@@ -234,6 +284,13 @@ struct ObjectOptionsTests {
               }
               .minProperties(2)
               .maxProperties(5)
+              .propertyNames {
+                  JSONString()
+                    .pattern("^[A-Za-z_][A-Za-z0-9_]*$")
+              }
+              .unevaluatedProperties {
+                  JSONString()
+              }
             }
           }
         }
@@ -257,10 +314,10 @@ struct StringOptionsTests {
       @Schemable
       struct Weather {
         @StringOptions(
-          minLength: 5,
-          maxLength: 100,
-          pattern: "^[a-zA-Z]+$",
-          format: "city"
+          .minLength(5),
+          .maxLength(100),
+          .pattern("^[a-zA-Z]+$"),
+          .format("city")
         )
         let cityName: String
       }

@@ -43,7 +43,7 @@ struct Flight: Sendable {
   let origin: String
   let destination: String?
   let airline: Airline
-  @NumberOptions(multipleOf: 0.5)
+  @NumberOptions(.multipleOf(0.5))
   let duration: Double
 }
 
@@ -67,6 +67,10 @@ let nameBuilder = JSONObject {
 }
 let schema = nameBuilder.definition()
 
+let schemaData = try! encoder.encode(nameBuilder.definition())
+let string = String(data: schemaData, encoding: .utf8)!
+print(string)
+
 let instance1: JSONValue = ["name": "Alice"]
 let instance2: JSONValue = ["name": ""]
 
@@ -76,6 +80,18 @@ let result2 = schema.validate(instance2)
 dump(result2, name: "Instance 2 Validation Result")
 
 @Schemable
+@ObjectOptions(.additionalProperties { false })
 public struct Weather {
+  let temperature: Double
+}
+
+@Schemable
+@ObjectOptions(
+  .additionalProperties {
+    JSONString()
+      .pattern("^[a-zA-Z]+$")
+  }
+)
+public struct Weather20 {
   let temperature: Double
 }
