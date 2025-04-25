@@ -67,6 +67,10 @@ let nameBuilder = JSONObject {
 }
 let schema = nameBuilder.definition()
 
+let schemaData = try! encoder.encode(nameBuilder.definition())
+let string = String(data: schemaData, encoding: .utf8)!
+print(string)
+
 let instance1: JSONValue = ["name": "Alice"]
 let instance2: JSONValue = ["name": ""]
 

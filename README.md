@@ -46,11 +46,20 @@ Use the power of Swift result builders to generate JSON schema documents.
 
 <details>
   <summary>Generated JSON Schema</summary>
+
+  `Schema` returned from `personSchema.definition()` conforms to `Codable`.
+
+  ```swift
+  let encoder = JSONEncoder()
+  encoder.outputFormatting = .prettyPrinted
+
+  let schemaData = try! encoder.encode(personSchema.definition())
+  let string = String(data: schemaData, encoding: .utf8)!
+  print(string)
+  ```
   
   ```json
   {
-    "$id": "https://example.com/person.schema.json",
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "Person",
     "type": "object",
     "properties": {
@@ -78,6 +87,7 @@ Use the `@Schemable` macro from `JSONSchemaBuilder` to automatically generate th
 
 ```swift
 @Schemable
+@ObjectOptions(.additionalProperties { false })
 struct Person {
   let firstName: String
   let lastName: String?
@@ -113,6 +123,7 @@ struct Person {
           }
           .required()
         }
+        .additionalProperties { false }
       }
     }
   }

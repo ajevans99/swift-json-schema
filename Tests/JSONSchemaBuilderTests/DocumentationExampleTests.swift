@@ -47,7 +47,9 @@ struct DocumentationExampleTests {
     #expect(jsonSchema.schemaValue == .object(expected))
   }
 
-  @Schemable struct Person {
+  @Schemable
+  @ObjectOptions(.additionalProperties { false })
+  struct Person {
     let firstName: String
     let lastName: String?
     @NumberOptions(.minimum(0), .maximum(120))
