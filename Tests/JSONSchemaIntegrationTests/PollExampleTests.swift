@@ -41,7 +41,7 @@ struct Poll {
   let settings: Settings?
 
   @Schemable
-  @ObjectOptions()  // TODO: Additional properties to false
+  @ObjectOptions(.additionalProperties { false })
   struct Option {
     @SchemaOptions(description: "Unique identifier for the poll")
     @NumberOptions(.minimum(1))
@@ -52,7 +52,7 @@ struct Poll {
     let text: String
 
     @SchemaOptions(description: "Number of votes received")
-    @NumberOptions(.minimum(0), .maximum(1000))
+    @NumberOptions(.minimum(0))
     var voteCount: Int = 0
   }
 
