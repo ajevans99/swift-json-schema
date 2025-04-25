@@ -114,8 +114,8 @@ struct SchemaGenerator {
       codeBlockItem = SchemaOptionsGenerator.apply(annotationArguments, to: codeBlockItem, for: "SchemaOptions")
     }
 
-    if let objectArguemnts = attributes.arguments(for: "ObjectOptions") {
-      codeBlockItem = SchemaOptionsGenerator.apply(objectArguemnts, to: codeBlockItem, for: "ObjectOptions")
+    if let objectArguments = attributes.arguments(for: "ObjectOptions") {
+      codeBlockItem = SchemaOptionsGenerator.apply(objectArguments, to: codeBlockItem, for: "ObjectOptions")
     }
 
     let variableDecl: DeclSyntax = """
