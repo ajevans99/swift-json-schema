@@ -43,14 +43,6 @@ struct SchemableMember {
     )
   }
 
-  private func applyArguments(to codeBlock: inout CodeBlockItemSyntax) {
-    if let annotationArguments { codeBlock.applyArguments(annotationArguments) }
-
-    if let typeSpecificArguments { 
-      codeBlock = TypeSpecificOptions.apply(typeSpecificArguments, to: codeBlock, for: type)
-    }
-  }
-
   func generateSchema() -> CodeBlockItemSyntax? {
     var codeBlock: CodeBlockItemSyntax
     switch type.typeInformation() {
@@ -69,7 +61,15 @@ struct SchemableMember {
     case .notSupported: return nil
     }
 
-    applyArguments(to: &codeBlock)
+    // Apply schema options if present
+    if let annotationArguments = annotationArguments {
+      codeBlock = TypeSpecificOptions.apply(annotationArguments, to: codeBlock, for: "SchemaOptions")
+    }
+
+    // Apply type-specific options if present
+    if let typeSpecificArguments = typeSpecificArguments {
+      codeBlock = TypeSpecificOptions.apply(typeSpecificArguments, to: codeBlock, for: type.description)
+    }
 
     var block: CodeBlockItemSyntax = """
       JSONProperty(key: "\(raw: identifier.text)") { \(codeBlock) }

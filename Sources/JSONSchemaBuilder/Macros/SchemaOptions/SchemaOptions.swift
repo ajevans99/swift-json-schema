@@ -2,12 +2,47 @@ import JSONSchema
 
 @attached(peer)
 public macro SchemaOptions(
-  title: String? = nil,
-  description: String? = nil,
-  default: JSONValue? = nil,
-  examples: JSONValue? = nil,
-  readOnly: Bool? = nil,
-  writeOnly: Bool? = nil,
-  deprecated: Bool? = nil,
-  comment: String? = nil
+  _ traits: SchemaTrait...
 ) = #externalMacro(module: "JSONSchemaMacro", type: "SchemaOptionsMacro")
+
+public protocol SchemaTrait {}
+
+public struct SchemaOptionsTrait: SchemaTrait {
+  fileprivate init() {}
+  
+  fileprivate static let errorMessage = "This method should only be used within @SchemaOptions macro"
+}
+
+extension SchemaTrait where Self == SchemaOptionsTrait {
+  public static func title(_ value: String) -> SchemaOptionsTrait {
+    fatalError(SchemaOptionsTrait.errorMessage)
+  }
+
+  public static func description(_ value: String) -> SchemaOptionsTrait {
+    fatalError(SchemaOptionsTrait.errorMessage)
+  }
+
+  public static func `default`(_ value: JSONValue) -> SchemaOptionsTrait {
+    fatalError(SchemaOptionsTrait.errorMessage)
+  }
+
+  public static func examples(_ value: JSONValue) -> SchemaOptionsTrait {
+    fatalError(SchemaOptionsTrait.errorMessage)
+  }
+
+  public static func readOnly(_ value: Bool) -> SchemaOptionsTrait {
+    fatalError(SchemaOptionsTrait.errorMessage)
+  }
+
+  public static func writeOnly(_ value: Bool) -> SchemaOptionsTrait {
+    fatalError(SchemaOptionsTrait.errorMessage)
+  }
+
+  public static func deprecated(_ value: Bool) -> SchemaOptionsTrait {
+    fatalError(SchemaOptionsTrait.errorMessage)
+  }
+
+  public static func comment(_ value: String) -> SchemaOptionsTrait {
+    fatalError(SchemaOptionsTrait.errorMessage)
+  }
+}

@@ -12,7 +12,7 @@ struct SchemaOptionsTests {
       """
       @Schemable
       struct Weather {
-        @SchemaOptions(description: "The current temperature in fahrenheit, like 70°F")
+        @SchemaOptions(.description("The current temperature in fahrenheit, like 70°F"))
         let temperature: Double
       }
       """,
@@ -46,26 +46,26 @@ struct SchemaOptionsTests {
       @Schemable
       struct Weather {
         @SchemaOptions(
-          title: "Temperature",
-          description: "The current temperature in fahrenheit, like 70°F",
-          default: 75.0,
-          examples: [72.0, 75.0, 78.0],
-          readOnly: true,
-          writeOnly: false,
-          deprecated: true,
-          comment: "This is a comment about temperature"
+          .title("Temperature"),
+          .description("The current temperature in fahrenheit, like 70°F"),
+          .default(75.0),
+          .examples([72.0, 75.0, 78.0]),
+          .readOnly(true),
+          .writeOnly(false),
+          .deprecated(true),
+          .comment("This is a comment about temperature")
         )
         let temperature: Double
 
         @SchemaOptions(
-          title: "Humidity",
-          description: "The current humidity percentage",
-          default: 50,
-          examples: [40, 50, 60],
-          readOnly: false,
-          writeOnly: true,
-          deprecated: false,
-          comment: "This is a comment about humidity"
+          .title("Humidity"),
+          .description("The current humidity percentage"),
+          .default(50),
+          .examples([40, 50, 60]),
+          .readOnly(false),
+          .writeOnly(true),
+          .deprecated(false),
+          .comment("This is a comment about humidity")
         )
         let humidity: Int
       }
@@ -119,9 +119,9 @@ struct SchemaOptionsTests {
       """
       @Schemable
       @SchemaOptions(
-        title: "Weather Data",
-        description: "Contains weather-related information",
-        deprecated: false
+        .title("Weather Data"),
+        .description("Contains weather-related information"),
+        .deprecated(false)
       )
       struct Weather {
         let cityName: String
@@ -153,14 +153,14 @@ struct SchemaOptionsTests {
     )
   }
 
-  func onEnum() {
+  @Test func onEnum() {
     assertMacroExpansion(
       """
       @Schemable
       @SchemaOptions(
-        title: "Weather",
-        description: "The current weather conditions",
-        deprecated: false
+        .title("Weather"),
+        .description("The current weather conditions"),
+        .deprecated(false)
       )
       enum Weather {
         case sunny

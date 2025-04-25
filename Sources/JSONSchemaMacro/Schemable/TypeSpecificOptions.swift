@@ -4,7 +4,7 @@ enum TypeSpecificOptions {
   static func apply(
     _ arguments: LabeledExprListSyntax,
     to codeBlockItem: CodeBlockItemSyntax,
-    for type: TypeSyntax
+    for type: String
   ) -> CodeBlockItemSyntax {
     var result = codeBlockItem
     
@@ -19,7 +19,7 @@ enum TypeSpecificOptions {
   private static func applyOption(
     _ argument: LabeledExprSyntax,
     to codeBlockItem: CodeBlockItemSyntax,
-    for type: TypeSyntax
+    for type: String
   ) -> CodeBlockItemSyntax {
     guard let functionCall = argument.expression.as(FunctionCallExprSyntax.self),
           let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self) else {
@@ -39,7 +39,7 @@ enum TypeSpecificOptions {
     _ optionName: String,
     closure: ClosureExprSyntax,
     to codeBlockItem: CodeBlockItemSyntax,
-    for type: TypeSyntax
+    for type: String
   ) -> CodeBlockItemSyntax {
     switch optionName {
     case "additionalProperties":
@@ -90,7 +90,7 @@ enum TypeSpecificOptions {
     _ optionName: String,
     functionCall: FunctionCallExprSyntax,
     to codeBlockItem: CodeBlockItemSyntax,
-    for type: TypeSyntax
+    for type: String
   ) -> CodeBlockItemSyntax {
     guard let value = functionCall.arguments.first else {
       return codeBlockItem
