@@ -81,7 +81,6 @@ public struct Weather {
   let temperature: Double
 }
 
-
 @Schemable
 @ObjectOptions(
   .additionalProperties {

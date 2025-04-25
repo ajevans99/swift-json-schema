@@ -7,11 +7,11 @@ enum SchemaOptionsGenerator {
     for type: String
   ) -> CodeBlockItemSyntax {
     var result = codeBlockItem
-    
+
     for argument in arguments {
       result = applyOption(argument, to: result)
     }
-    
+
     return result
   }
 
@@ -20,7 +20,8 @@ enum SchemaOptionsGenerator {
     to codeBlockItem: CodeBlockItemSyntax
   ) -> CodeBlockItemSyntax {
     guard let functionCall = argument.expression.as(FunctionCallExprSyntax.self),
-          let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self) else {
+      let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self)
+    else {
       return codeBlockItem
     }
 
@@ -34,7 +35,7 @@ enum SchemaOptionsGenerator {
         .\(raw: optionName)(\(value))
         """
     }
-    
+
     return codeBlockItem
   }
 
@@ -58,4 +59,4 @@ enum SchemaOptionsGenerator {
         """
     }
   }
-} 
+}

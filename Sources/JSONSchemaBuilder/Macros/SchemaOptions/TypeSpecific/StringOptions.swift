@@ -9,8 +9,9 @@ public protocol StringTrait {}
 
 public struct StringSchemaTrait: StringTrait {
   fileprivate init() {}
-  
-  fileprivate static let errorMessage = "This method should only be used within @StringOptions macro"
+
+  fileprivate static let errorMessage =
+    "This method should only be used within @StringOptions macro"
 }
 
 extension StringTrait where Self == StringSchemaTrait {

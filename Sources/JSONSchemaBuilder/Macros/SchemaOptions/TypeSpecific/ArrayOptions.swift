@@ -9,7 +9,7 @@ public protocol ArrayTrait {}
 
 public struct ArraySchemaTrait: ArrayTrait {
   fileprivate init() {}
-  
+
   fileprivate static let errorMessage = "This method should only be used within @ArrayOptions macro"
 }
 
@@ -34,15 +34,22 @@ extension ArrayTrait where Self == ArraySchemaTrait {
     fatalError(ArraySchemaTrait.errorMessage)
   }
 
-  public static func prefixItems(@JSONSchemaCollectionBuilder<JSONValue> _ prefixItems: @escaping () -> [JSONComponents.AnyComponent<JSONValue>]) -> ArraySchemaTrait {
+  public static func prefixItems(
+    @JSONSchemaCollectionBuilder<JSONValue> _ prefixItems: @escaping () -> [JSONComponents
+      .AnyComponent<JSONValue>]
+  ) -> ArraySchemaTrait {
     fatalError(ArraySchemaTrait.errorMessage)
   }
 
-  public static func unevaluatedItems<Component: JSONSchemaComponent>(@JSONSchemaBuilder _ unevaluatedItems: @escaping () -> Component) -> ArraySchemaTrait {
+  public static func unevaluatedItems<Component: JSONSchemaComponent>(
+    @JSONSchemaBuilder _ unevaluatedItems: @escaping () -> Component
+  ) -> ArraySchemaTrait {
     fatalError(ArraySchemaTrait.errorMessage)
   }
 
-  public static func contains(@JSONSchemaBuilder _ contains: @escaping () -> any JSONSchemaComponent) -> ArraySchemaTrait {
+  public static func contains(
+    @JSONSchemaBuilder _ contains: @escaping () -> any JSONSchemaComponent
+  ) -> ArraySchemaTrait {
     fatalError(ArraySchemaTrait.errorMessage)
   }
 }

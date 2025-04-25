@@ -63,12 +63,20 @@ struct SchemableMember {
 
     // Apply schema options if present
     if let annotationArguments = annotationArguments {
-      codeBlock = SchemaOptionsGenerator.apply(annotationArguments, to: codeBlock, for: "SchemaOptions")
+      codeBlock = SchemaOptionsGenerator.apply(
+        annotationArguments,
+        to: codeBlock,
+        for: "SchemaOptions"
+      )
     }
 
     // Apply type-specific options if present
     if let typeSpecificArguments = typeSpecificArguments {
-      codeBlock = SchemaOptionsGenerator.apply(typeSpecificArguments, to: codeBlock, for: type.description)
+      codeBlock = SchemaOptionsGenerator.apply(
+        typeSpecificArguments,
+        to: codeBlock,
+        for: type.description
+      )
     }
 
     var block: CodeBlockItemSyntax = """

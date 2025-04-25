@@ -9,8 +9,9 @@ public protocol NumberTrait {}
 
 public struct NumberSchemaTrait: NumberTrait {
   fileprivate init() {}
-  
-  fileprivate static let errorMessage = "This method should only be used within @NumberOptions macro"
+
+  fileprivate static let errorMessage =
+    "This method should only be used within @NumberOptions macro"
 }
 
 extension NumberTrait where Self == NumberSchemaTrait {

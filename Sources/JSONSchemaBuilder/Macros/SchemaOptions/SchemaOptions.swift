@@ -9,8 +9,9 @@ public protocol SchemaTrait {}
 
 public struct SchemaOptionsTrait: SchemaTrait {
   fileprivate init() {}
-  
-  fileprivate static let errorMessage = "This method should only be used within @SchemaOptions macro"
+
+  fileprivate static let errorMessage =
+    "This method should only be used within @SchemaOptions macro"
 }
 
 extension SchemaTrait where Self == SchemaOptionsTrait {
