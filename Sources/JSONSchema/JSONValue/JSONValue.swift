@@ -109,3 +109,25 @@ extension JSONValue {
     }
   }
 }
+
+extension JSONValue: CustomStringConvertible {
+  public var description: String {
+    switch self {
+    case .string(let value):
+      return "\"\(value)\""
+    case .number(let value):
+      return String(value)
+    case .integer(let value):
+      return String(value)
+    case .object(let value):
+      let pairs = value.map { "\"\($0.key)\": \($0.value.description)" }
+      return "{\(pairs.joined(separator: ", "))}"
+    case .array(let value):
+      return "[\(value.map { $0.description }.joined(separator: ", "))]"
+    case .boolean(let value):
+      return value ? "true" : "false"
+    case .null:
+      return "null"
+    }
+  }
+}
