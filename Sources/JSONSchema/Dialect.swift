@@ -126,7 +126,7 @@ public enum Dialect: String, Hashable, Sendable {
     let metaDictionary: [String: JSONValue] =
       try metaURLs?
       .reduce(into: [:]) { result, url in
-        #if os(Linux)
+        #if os(Linux) || os(WASI)
           guard url.lastPathComponent?.hasPrefix("schema") == false else { return }
           let value = try jsonValue(from: url as URL)
           let uriString =
