@@ -2,13 +2,13 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 
 struct EnumSchemaGenerator {
-  let declModifer: DeclModifierSyntax?
+  let declModifier: DeclModifierSyntax?
   let name: TokenSyntax
   let members: MemberBlockItemListSyntax
   let attributes: AttributeListSyntax
 
   init(fromEnum enumDecl: EnumDeclSyntax) {
-    declModifer = enumDecl.modifiers.first
+    declModifier = enumDecl.modifiers.first
     name = enumDecl.name.trimmed
     members = enumDecl.memberBlock.members
     attributes = enumDecl.attributes
@@ -46,7 +46,7 @@ struct EnumSchemaGenerator {
     }
 
     let variableDecl: DeclSyntax = """
-      \(declModifer)static var schema: some JSONSchemaComponent<\(name)> {
+      \(declModifier)static var schema: some JSONSchemaComponent<\(name)> {
         \(codeBlockItem)
       }
       """
@@ -87,20 +87,20 @@ struct EnumSchemaGenerator {
 }
 
 struct SchemaGenerator {
-  let declModifer: DeclModifierSyntax?
+  let declModifier: DeclModifierSyntax?
   let name: TokenSyntax
   let members: MemberBlockItemListSyntax
   let attributes: AttributeListSyntax
 
   init(fromClass classDecl: ClassDeclSyntax) {
-    declModifer = classDecl.modifiers.first
+    declModifier = classDecl.modifiers.first
     name = classDecl.name.trimmed
     members = classDecl.memberBlock.members
     attributes = classDecl.attributes
   }
 
   init(fromStruct structDecl: StructDeclSyntax) {
-    declModifer = structDecl.modifiers.first
+    declModifier = structDecl.modifiers.first
     name = structDecl.name.trimmed
     members = structDecl.memberBlock.members
     attributes = structDecl.attributes
@@ -131,7 +131,7 @@ struct SchemaGenerator {
     }
 
     let variableDecl: DeclSyntax = """
-      \(declModifer)static var schema: some JSONSchemaComponent<\(name)> {
+      \(declModifier)static var schema: some JSONSchemaComponent<\(name)> {
         JSONSchema(\(name).init) { \(codeBlockItem) }
       }
       """
