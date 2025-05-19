@@ -119,12 +119,12 @@ extension VariableDeclSyntax {
     }
     .contains(where: { $0 == "ExcludeFromSchema" })
   }
-  
+
   var docString: String? {
     // Get the leading trivia which contains the docstring
     let trivia = leadingTrivia
     var docStringLines: [String] = []
-    
+
     for piece in trivia {
       switch piece {
       case .docLineComment(let comment):
@@ -140,9 +140,9 @@ extension VariableDeclSyntax {
           let trimmed = line.trimmingCharacters(in: .whitespaces)
           if !trimmed.isEmpty {
             // Remove leading asterisk and any following whitespace
-            let cleanLine = trimmed.hasPrefix("*") ? 
-              String(trimmed.dropFirst().trimmingCharacters(in: .whitespaces)) : 
-              trimmed
+            let cleanLine =
+              trimmed.hasPrefix("*")
+              ? String(trimmed.dropFirst().trimmingCharacters(in: .whitespaces)) : trimmed
             docStringLines.append(cleanLine)
           }
         }
@@ -150,7 +150,7 @@ extension VariableDeclSyntax {
         break
       }
     }
-    
+
     return docStringLines.isEmpty ? nil : docStringLines.joined(separator: "\n")
   }
 }

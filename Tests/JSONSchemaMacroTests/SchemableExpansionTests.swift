@@ -622,7 +622,7 @@ struct SchemableExpansionTests {
         let complexProperty: String
       }
       """,
-      expandedSource: #"""
+      expandedSource: """
         struct ComplexDocstring {
           /// This is a complex docstring with **bold** and *italic* text.
           /// It spans multiple lines and includes:
@@ -642,19 +642,17 @@ struct SchemableExpansionTests {
               JSONObject {
                 JSONProperty(key: "complexProperty") {
                   JSONString()
-                    .description(#\"\"\"
-                    This is a complex docstring with **bold** and *italic* text.
-                    It spans multiple lines and includes:
-                    - Bullet points
-                    - More bullet points
-                    
-                    It also has a code block:
-                    ```swift
-                    let example = "code"
-                    ```
-                    
-                    And some `inline code` as well.
-                    \"\"\"#)
+                  .description(#\"\"\"
+                  This is a complex docstring with **bold** and *italic* text.
+                  It spans multiple lines and includes:
+                  - Bullet points
+                  - More bullet points\n
+                  It also has a code block:
+                  ```swift
+                  let example = "code"
+                  ```\n
+                  And some `inline code` as well.
+                  \"\"\"#)
                 }
                 .required()
               }
@@ -664,7 +662,7 @@ struct SchemableExpansionTests {
 
         extension ComplexDocstring: Schemable {
         }
-        """#,
+        """,
       macros: testMacros
     )
   }

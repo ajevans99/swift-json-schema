@@ -111,7 +111,7 @@ struct SchemableMember {
     guard let annotationArguments = annotationArguments else { return false }
     return annotationArguments.contains { argument in
       guard let functionCall = argument.expression.as(FunctionCallExprSyntax.self),
-            let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self)
+        let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self)
       else { return false }
       return memberAccess.declName.baseName.text == "description"
     }
