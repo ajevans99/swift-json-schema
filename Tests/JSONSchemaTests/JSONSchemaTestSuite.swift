@@ -47,11 +47,9 @@ struct JSONSchemaTestSuite {
       return
     }
 
-    let schema = try #require(
-      try Schema(
-        rawSchema: schemaTest.schema,
-        context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)
-      )
+    let schema = try Schema(
+      rawSchema: schemaTest.schema,
+      context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)
     )
 
     for testCase in schemaTest.tests {
