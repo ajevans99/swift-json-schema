@@ -390,4 +390,282 @@ struct SchemableExpansionTests {
       macros: testMacros
     )
   }
+
+  @Test func docstringSupport() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct Weather {
+        /// The current temperature in fahrenheit
+        let temperature: Double
+        
+        /// The city name where the weather is being reported
+        let location: String
+        
+        /// Whether it is currently raining
+        let isRaining: Bool
+        
+        /// The wind speed in miles per hour
+        let windSpeed: Int
+        
+        /// The amount of precipitation in inches
+        let precipitationAmount: Double?
+        
+        /// The relative humidity as a percentage
+        let humidity: Float
+      }
+      """,
+      expandedSource: """
+        struct Weather {
+          /// The current temperature in fahrenheit
+          let temperature: Double
+          
+          /// The city name where the weather is being reported
+          let location: String
+          
+          /// Whether it is currently raining
+          let isRaining: Bool
+          
+          /// The wind speed in miles per hour
+          let windSpeed: Int
+          
+          /// The amount of precipitation in inches
+          let precipitationAmount: Double?
+          
+          /// The relative humidity as a percentage
+          let humidity: Float
+
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperature") {
+                  JSONNumber()
+                  .description(#\"\"\"
+                  The current temperature in fahrenheit
+                  \"\"\"#)
+                }
+                .required()
+                JSONProperty(key: "location") {
+                  JSONString()
+                  .description(#\"\"\"
+                  The city name where the weather is being reported
+                  \"\"\"#)
+                }
+                .required()
+                JSONProperty(key: "isRaining") {
+                  JSONBoolean()
+                  .description(#\"\"\"
+                  Whether it is currently raining
+                  \"\"\"#)
+                }
+                .required()
+                JSONProperty(key: "windSpeed") {
+                  JSONInteger()
+                  .description(#\"\"\"
+                  The wind speed in miles per hour
+                  \"\"\"#)
+                }
+                .required()
+                JSONProperty(key: "precipitationAmount") {
+                  JSONNumber()
+                  .description(#\"\"\"
+                  The amount of precipitation in inches
+                  \"\"\"#)
+                }
+                JSONProperty(key: "humidity") {
+                  JSONNumber()
+                  .description(#\"\"\"
+                  The relative humidity as a percentage
+                  \"\"\"#)
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension Weather: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func docstringWithSchemaOptions() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct Weather {
+        /// The current temperature in fahrenheit
+        @SchemaOptions(.description("Temperature in degrees Fahrenheit"))
+        let temperature: Double
+        
+        /// The city name where the weather is being reported
+        let location: String
+      }
+      """,
+      expandedSource: """
+        struct Weather {
+          /// The current temperature in fahrenheit
+          @SchemaOptions(.description("Temperature in degrees Fahrenheit"))
+          let temperature: Double
+          
+          /// The city name where the weather is being reported
+          let location: String
+
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperature") {
+                  JSONNumber()
+                  .description("Temperature in degrees Fahrenheit")
+                }
+                .required()
+                JSONProperty(key: "location") {
+                  JSONString()
+                  .description(#\"\"\"
+                  The city name where the weather is being reported
+                  \"\"\"#)
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension Weather: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func blockDocstringSupport() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct Weather {
+        /**
+         * The current temperature in fahrenheit.
+         * This value should be between -100 and 150.
+         */
+        let temperature: Double
+        
+        /**
+         * The city name where the weather is being reported.
+         * Must be a valid city name.
+         */
+        let location: String
+      }
+      """,
+      expandedSource: """
+        struct Weather {
+          /**
+           * The current temperature in fahrenheit.
+           * This value should be between -100 and 150.
+           */
+          let temperature: Double
+          
+          /**
+           * The city name where the weather is being reported.
+           * Must be a valid city name.
+           */
+          let location: String
+
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+                JSONProperty(key: "temperature") {
+                  JSONNumber()
+                  .description(#\"\"\"
+                  The current temperature in fahrenheit.
+                  This value should be between -100 and 150.
+                  \"\"\"#)
+                }
+                .required()
+                JSONProperty(key: "location") {
+                  JSONString()
+                  .description(#\"\"\"
+                  The city name where the weather is being reported.
+                  Must be a valid city name.
+                  \"\"\"#)
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension Weather: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func complexDocstringSupport() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct ComplexDocstring {
+        /// This is a complex docstring with **bold** and *italic* text.
+        /// It spans multiple lines and includes:
+        /// - Bullet points
+        /// - More bullet points
+        /// 
+        /// It also has a code block:
+        /// ```swift
+        /// let example = "code"
+        /// ```
+        /// 
+        /// And some `inline code` as well.
+        let complexProperty: String
+      }
+      """,
+      expandedSource: #"""
+        struct ComplexDocstring {
+          /// This is a complex docstring with **bold** and *italic* text.
+          /// It spans multiple lines and includes:
+          /// - Bullet points
+          /// - More bullet points
+          /// 
+          /// It also has a code block:
+          /// ```swift
+          /// let example = "code"
+          /// ```
+          /// 
+          /// And some `inline code` as well.
+          let complexProperty: String
+
+          static var schema: some JSONSchemaComponent<ComplexDocstring> {
+            JSONSchema(ComplexDocstring.init) {
+              JSONObject {
+                JSONProperty(key: "complexProperty") {
+                  JSONString()
+                    .description(#\"\"\"
+                    This is a complex docstring with **bold** and *italic* text.
+                    It spans multiple lines and includes:
+                    - Bullet points
+                    - More bullet points
+                    
+                    It also has a code block:
+                    ```swift
+                    let example = "code"
+                    ```
+                    
+                    And some `inline code` as well.
+                    \"\"\"#)
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension ComplexDocstring: Schemable {
+        }
+        """#,
+      macros: testMacros
+    )
+  }
 }

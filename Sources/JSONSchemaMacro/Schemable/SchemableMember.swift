@@ -5,6 +5,7 @@ struct SchemableMember {
   let type: TypeSyntax
   let attributes: AttributeListSyntax
   let defaultValue: ExprSyntax?
+  let docString: String?
 
   var annotationArguments: LabeledExprListSyntax? { attributes.arguments(for: "SchemaOptions") }
 
@@ -22,12 +23,14 @@ struct SchemableMember {
     identifier: TokenSyntax,
     type: TypeSyntax,
     attributes: AttributeListSyntax,
-    defaultValue: ExprSyntax? = nil
+    defaultValue: ExprSyntax? = nil,
+    docString: String? = nil
   ) {
     self.identifier = identifier
     self.type = type
     self.attributes = attributes
     self.defaultValue = defaultValue
+    self.docString = docString
   }
 
   init?(variableDecl: VariableDeclSyntax, patternBinding: PatternBindingSyntax) {
@@ -39,7 +42,8 @@ struct SchemableMember {
       identifier: identifier,
       type: type,
       attributes: variableDecl.attributes,
-      defaultValue: patternBinding.initializer?.value
+      defaultValue: patternBinding.initializer?.value,
+      docString: variableDecl.docString
     )
   }
 
@@ -79,6 +83,16 @@ struct SchemableMember {
       )
     }
 
+    // Apply docstring if present and no description was set via SchemaOptions
+    if let docString, !hasDescriptionInOptions {
+      codeBlock = """
+        \(codeBlock)
+        .description(#\"\"\"
+        \(raw: docString)
+        \"\"\"#)
+        """
+    }
+
     var block: CodeBlockItemSyntax = """
       JSONProperty(key: "\(raw: identifier.text)") { \(codeBlock) }
       """
@@ -91,5 +105,15 @@ struct SchemableMember {
     }
 
     return block
+  }
+
+  private var hasDescriptionInOptions: Bool {
+    guard let annotationArguments = annotationArguments else { return false }
+    return annotationArguments.contains { argument in
+      guard let functionCall = argument.expression.as(FunctionCallExprSyntax.self),
+            let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self)
+      else { return false }
+      return memberAccess.declName.baseName.text == "description"
+    }
   }
 }
