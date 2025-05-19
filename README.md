@@ -90,9 +90,15 @@ Use the `@Schemable` macro from `JSONSchemaBuilder` to automatically generate th
 @ObjectOptions(.additionalProperties { false })
 struct Person {
   let firstName: String
+
   let lastName: String?
+
   @NumberOptions(.minimum(0), .maximum(120))
   let age: Int
+
+  /// A short bio or summary about the person, shown on their public profile.
+  @StringOptions(.maxLength(500))
+  let bio: String?
 }
 ```
 
@@ -102,28 +108,46 @@ struct Person {
   ```swift
   struct Person {
     let firstName: String
+
     let lastName: String?
+
     let age: Int
+
+    /// A short bio or summary about the person, shown on their public profile.
+    let bio: String?
 
     // Auto-generated schema ↴
     static var schema: some JSONSchemaComponent<Person> {
       JSONSchema(Person.init) {
-        JSONObject {
-          JSONProperty(key: "firstName") {
-            JSONString()
+          JSONObject {
+              JSONProperty(key: "firstName") {
+                  JSONString()
+              }
+              .required()
+              JSONProperty(key: "lastName") {
+                  JSONString()
+              }
+              JSONProperty(key: "age") {
+                  JSONInteger()
+                  .minimum(0)
+                  .maximum(120)
+              }
+              .required()
+              JSONProperty(key: "bio") {
+                  JSONString()
+                  .maxLength(500)
+                  .description(#"""
+                  A short bio or summary about the person, shown on their public profile.
+                  """#)
+              }
           }
-          .required()
-          JSONProperty(key: "lastName") {
-            JSONString()
+          .additionalProperties {
+              false
           }
-          JSONProperty(key: "age") {
-            JSONInteger()
-            .minimum(0)
-            .maximum(120)
+          // Drop the parse information. Use custom builder if needed.
+          .map {
+              $0.0
           }
-          .required()
-        }
-        .additionalProperties { false }
       }
     }
   }

@@ -51,9 +51,15 @@ struct DocumentationExampleTests {
   @ObjectOptions(.additionalProperties { false })
   struct Person {
     let firstName: String
+
     let lastName: String?
+
     @NumberOptions(.minimum(0), .maximum(120))
     let age: Int
+
+    /// A short bio or summary about the person, shown on their public profile.
+    @StringOptions(.maxLength(500))
+    let bio: String?
   }
 
   @Test func readMeMacros() {
