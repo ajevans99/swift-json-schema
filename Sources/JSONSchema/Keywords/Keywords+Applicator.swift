@@ -191,7 +191,7 @@ extension Keywords {
       if validIndices.isEmpty
         && !context.context.minContainsIsZero[self.context.location.dropLast(), default: false]
       {
-        throw .containsInsufficientMatches
+        throw ValidationIssue.containsInsufficientMatches(count: instances.count, required: 1)
       }
 
       let annotationValue =
@@ -519,7 +519,7 @@ extension Keywords {
       }
 
       if validCount != 1 {
-        throw ValidationIssue.oneOfFailed
+        throw ValidationIssue.oneOfFailed(errors: [])
       }
     }
   }
@@ -618,7 +618,7 @@ extension Keywords {
       var subAnnotations = AnnotationContainer()
       let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
       if !result.isValid {
-        throw .conditionalFailed
+        throw ValidationIssue.conditionalFailed(condition: "then", errors: result.errors ?? [])
       }
       annotations.merge(subAnnotations)
     }
@@ -653,7 +653,7 @@ extension Keywords {
       var subAnnotations = AnnotationContainer()
       let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
       if !result.isValid {
-        throw .conditionalFailed
+        throw ValidationIssue.conditionalFailed(condition: "else", errors: result.errors ?? [])
       }
       annotations.merge(subAnnotations)
     }
