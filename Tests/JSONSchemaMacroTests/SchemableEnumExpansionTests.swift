@@ -599,7 +599,7 @@ import Testing
           }
         }
 
-        extension TemperatureKind: Schemable {
+        \(modifier == "private" || modifier == "fileprivate" ? "\(modifier) " : "")extension TemperatureKind: Schemable {
         }
         """,
       macros: testMacros
