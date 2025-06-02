@@ -4,14 +4,14 @@ public enum SchemaValue: Sendable, Equatable {
   case boolean(Bool)
   case object([KeywordIdentifier: JSONValue])
 
-  var object: [KeywordIdentifier: JSONValue]? {
+  public var object: [KeywordIdentifier: JSONValue]? {
     switch self {
     case .boolean: return nil
     case .object(let dict): return dict
     }
   }
 
-  var value: JSONValue {
+  public var value: JSONValue {
     switch self {
     case .boolean(let bool):
       return .boolean(bool)
@@ -20,7 +20,7 @@ public enum SchemaValue: Sendable, Equatable {
     }
   }
 
-  subscript(key: KeywordIdentifier) -> JSONValue? {
+  public subscript(key: KeywordIdentifier) -> JSONValue? {
     get {
       switch self {
       case .boolean:
@@ -40,7 +40,7 @@ public enum SchemaValue: Sendable, Equatable {
     }
   }
 
-  mutating func merge(_ other: SchemaValue) {
+  public mutating func merge(_ other: SchemaValue) {
     switch (self, other) {
     case (.boolean, .boolean):
       break
