@@ -20,9 +20,20 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     conformingTo protocols: [TypeSyntax],
     in context: some MacroExpansionContext
   ) throws -> [ExtensionDeclSyntax] {
-    let schemableExtension = try ExtensionDeclSyntax("extension \(type.trimmed): Schemable {}")
+    // Get the access level from the declaration
+    let accessLevel = declaration.modifiers.first { modifier in
+      ["private", "fileprivate"].contains(modifier.name.text)
+    }?
+    .name.text
 
-    return [schemableExtension]
+    // Create extension with access level if present
+    let extensionDecl = try ExtensionDeclSyntax(
+      """
+      \(raw: accessLevel.map { "\($0) " } ?? "")extension \(type.trimmed): Schemable {}
+      """
+    )
+
+    return [extensionDecl]
   }
 
   public static func expansion(
