@@ -32,7 +32,7 @@ let price = priceSchema.validate(.number(199.99)) // Parsed<Double, String>
 let inStock = inStockSchema.validate(.boolean(true)) // Parsed<Bool, String>
 ```
 
-Notice that in the valid case, the first generic is a Swift primatives, not a `JSONValue` anymore. Of course, your instance is more likely to be a JSON string format.
+Notice that in the valid case, the first generic is a Swift primitives, not a `JSONValue` anymore. Of course, your instance is more likely to be a JSON string format.
 
 ```json
 {

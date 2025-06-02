@@ -23,7 +23,7 @@ struct SchemableEnumCase {
         let codeBlock: CodeBlockItemSyntax
 
         switch typeInfo {
-        case .primative(_, schema: let code):
+        case .primitive(_, schema: let code):
           if let defaultValue = parameter.defaultValue?.value {
             codeBlock = """
               \(code)

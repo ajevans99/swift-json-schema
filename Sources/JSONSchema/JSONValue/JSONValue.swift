@@ -25,7 +25,7 @@ public enum JSONValue: Hashable, Equatable, Sendable {
   case boolean(Bool)
   case null
 
-  public var primative: JSONType {
+  public var primitive: JSONType {
     switch self {
     case .string: return .string
     case .number: return .number

@@ -1,4 +1,4 @@
-enum SupportedPrimative: String, CaseIterable {
+enum SupportedPrimitive: String, CaseIterable {
   case double = "Double"
   case float = "Float"
   case string = "String"

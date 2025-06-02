@@ -12,7 +12,7 @@ extension ParseIssue: CustomStringConvertible {
   public var description: String {
     switch self {
     case .typeMismatch(let expected, let actual):
-      "Type mismatch: the instance of type `\(actual.primative)` does not match the expected type `\(expected)`."
+      "Type mismatch: the instance of type `\(actual.primitive)` does not match the expected type `\(expected)`."
     case .noEnumCaseMatch(let value):
       "The instance `\(value)` does not match any enum case."
     case .missingRequiredProperty(let property):

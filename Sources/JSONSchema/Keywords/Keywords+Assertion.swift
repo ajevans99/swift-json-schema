@@ -42,7 +42,7 @@ extension Keywords {
       at location: JSONPointer,
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
-      let instanceType = input.primative
+      let instanceType = input.primitive
       let isValid = allowedPrimitives.contains { allowedType in
         allowedType.matches(instanceType: instanceType)
       }

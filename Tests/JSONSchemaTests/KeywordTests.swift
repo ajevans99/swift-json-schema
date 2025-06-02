@@ -22,7 +22,7 @@ struct KeywordTests {
         }
       } else {
         #expect(
-          throws: ValidationIssue.typeMismatch(expected: [.string], actual: instance.primative)
+          throws: ValidationIssue.typeMismatch(expected: [.string], actual: instance.primitive)
         ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
@@ -48,7 +48,7 @@ struct KeywordTests {
         #expect(
           throws: ValidationIssue.typeMismatch(
             expected: [.string, .boolean],
-            actual: instance.primative
+            actual: instance.primitive
           )
         ) {
           try keyword.validate(instance, at: .init(), using: annotations)

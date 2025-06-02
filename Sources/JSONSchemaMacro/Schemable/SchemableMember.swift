@@ -52,9 +52,9 @@ struct SchemableMember {
   func generateSchema() -> CodeBlockItemSyntax? {
     var codeBlock: CodeBlockItemSyntax
     switch type.typeInformation() {
-    case .primative(_, let code):
+    case .primitive(_, let code):
       codeBlock = code
-      // Only use default value on primatives that can be `ExpressibleBy*Literal` to transform
+      // Only use default value on primitives that can be `ExpressibleBy*Literal` to transform
       // from Swift type to JSONValue (required by .default())
       // In the future, JSONValue types should also be allowed to apply default value
       if let defaultValue {

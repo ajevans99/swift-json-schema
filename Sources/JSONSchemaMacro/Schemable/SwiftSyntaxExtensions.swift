@@ -12,13 +12,13 @@ extension TypeSyntax {
   }
 
   enum TypeInformation {
-    case primative(SupportedPrimative, schema: CodeBlockItemSyntax)
+    case primitive(SupportedPrimitive, schema: CodeBlockItemSyntax)
     case schemable(String, schema: CodeBlockItemSyntax)
     case notSupported
 
     var codeBlock: CodeBlockItemSyntax? {
       switch self {
-      case .primative(_, let schema): schema
+      case .primitive(_, let schema): schema
       case .schemable(_, let schema): schema
       case .notSupported: nil
       }
@@ -31,7 +31,7 @@ extension TypeSyntax {
       guard let codeBlock = arrayType.element.typeInformation().codeBlock else {
         return .notSupported
       }
-      return .primative(
+      return .primitive(
         .array,
         schema: """
           JSONArray {
@@ -46,7 +46,7 @@ extension TypeSyntax {
       guard let codeBlock = dictionaryType.value.typeInformation().codeBlock else {
         return .notSupported
       }
-      return .primative(
+      return .primitive(
         .dictionary,
         schema: """
           JSONObject()
@@ -70,14 +70,14 @@ extension TypeSyntax {
         }
       }
 
-      guard let primative = SupportedPrimative(rawValue: identifierType.name.text) else {
+      guard let primitive = SupportedPrimitive(rawValue: identifierType.name.text) else {
         return .schemable(
           identifierType.name.text,
           schema: "\(raw: identifierType.name.text).schema"
         )
       }
 
-      return .primative(primative, schema: "\(raw: primative.schema)()")
+      return .primitive(primitive, schema: "\(raw: primitive.schema)()")
     case .implicitlyUnwrappedOptionalType(let implicitlyUnwrappedOptionalType):
       return implicitlyUnwrappedOptionalType.wrappedType.typeInformation()
     case .optionalType(let optionalType): return optionalType.wrappedType.typeInformation()
