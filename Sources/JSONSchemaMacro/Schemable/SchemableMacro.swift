@@ -23,7 +23,8 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     // Get the access level from the declaration
     let accessLevel = declaration.modifiers.first { modifier in
       ["private", "fileprivate"].contains(modifier.name.text)
-    }?.name.text
+    }?
+    .name.text
 
     // Create extension with access level if present
     let extensionDecl = try ExtensionDeclSyntax(
