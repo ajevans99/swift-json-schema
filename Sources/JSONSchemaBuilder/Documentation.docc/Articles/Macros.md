@@ -105,7 +105,7 @@ struct Person {
 
 ### Supported Types
 
-The following Swift primative types are supported for macro expansion.
+The following Swift primitive types are supported for macro expansion.
 
 Swift Type | Schema (``JSONSchemaComponent``)
 ---|---
@@ -116,7 +116,7 @@ Swift Type | Schema (``JSONSchemaComponent``)
 `Array<Element>`, `[Element]` | ``JSONArray`` \*
 `Dictionary<String, Element>`, `[String: Element]` | ``JSONObject`` \*
 
-\* Where `Element` is another primative or ``Schemable`` type.
+\* Where `Element` is another primitive or ``Schemable`` type.
 In Arrays, the ``JSONArray/init(items:)`` nuilder contain will the `Element` type.
 In Dictionaries, the ``JSONObject/additionalProperties(_:)-5r2qu`` closure will contain the `Element` type.
 
@@ -297,7 +297,7 @@ Notice how unnamed associated values are represented as `_0`, `_1`, etc.
 
 #### Default values
 
-For primative types, if you provide a default value, it will be added to the schema as a default value. This is not supported for custom types. Notice these are `var` instead of `let` to have Swift still give us the automatic memberwise initializer for the struct.
+For primitive types, if you provide a default value, it will be added to the schema as a default value. This is not supported for custom types. Notice these are `var` instead of `let` to have Swift still give us the automatic memberwise initializer for the struct.
 
 ```swift
 @Schemable

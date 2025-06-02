@@ -14,19 +14,19 @@
           ▿ Missing required property `education`.
             ▿ missingRequiredProperty: (1 element)
               - property: "education"
-          ▿ The instance `object(["food": JSONSchema.JSONValue.object(["_0": JSONSchema.JSONValue.object(["customDescription": JSONSchema.JSONValue.string("What\'s your favorite?")])])])` does not match any enum case.
+          ▿ The instance `{"food": {"_0": {"customDescription": "What's your favorite?"}}}` does not match any enum case.
             ▿ noEnumCaseMatch: (1 element)
-              ▿ value: JSONValue
+              ▿ value: {"food": {"_0": {"customDescription": "What's your favorite?"}}}
                 ▿ object: 1 key/value pair
                   ▿ (2 elements)
                     - key: "food"
-                    ▿ value: JSONValue
+                    ▿ value: {"_0": {"customDescription": "What's your favorite?"}}
                       ▿ object: 1 key/value pair
                         ▿ (2 elements)
                           - key: "_0"
-                          ▿ value: JSONValue
+                          ▿ value: {"customDescription": "What's your favorite?"}
                             ▿ object: 1 key/value pair
                               ▿ (2 elements)
                                 - key: "customDescription"
-                                ▿ value: JSONValue
+                                ▿ value: "What's your favorite?"
                                   - string: "What\'s your favorite?"

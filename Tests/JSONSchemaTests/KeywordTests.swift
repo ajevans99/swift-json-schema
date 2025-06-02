@@ -21,7 +21,9 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.typeMismatch) {
+        #expect(
+          throws: ValidationIssue.typeMismatch(expected: [.string], actual: instance.primitive)
+        ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -43,7 +45,12 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.typeMismatch) {
+        #expect(
+          throws: ValidationIssue.typeMismatch(
+            expected: [.string, .boolean],
+            actual: instance.primitive
+          )
+        ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -66,7 +73,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.notEnumCase) {
+        #expect(throws: ValidationIssue.notEnumCase(value: instance, allowedValues: ["hello", 1])) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -89,7 +96,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.constantMismatch) {
+        #expect(throws: ValidationIssue.constantMismatch(expected: "hello", actual: instance)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -114,7 +121,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.notMultipleOf) {
+        #expect(throws: ValidationIssue.notMultipleOf(number: instance.numeric ?? 0, multiple: 2)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -123,8 +130,10 @@ struct KeywordTests {
     @Test(arguments: [
       (JSONValue.number(5), true),
       (JSONValue.number(10), false),
-      (JSONValue.integer(5), true),
-      (JSONValue.integer(10), false),
+      // TODO: Reenable, causes Xcode Internal inconsistency error
+      // https://forums.swift.org/t/fatal-error-internal-inconsistency-no-test-reporter-for-test-case-argumentids/75666
+      // (JSONValue.integer(5), true),
+      // (JSONValue.integer(10), false),
       (JSONValue.string("5"), true),
       (JSONValue.null, true),
     ])
@@ -138,7 +147,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.exceedsMaximum) {
+        #expect(throws: ValidationIssue.exceedsMaximum(number: instance.numeric ?? 0, maximum: 5)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -148,7 +157,9 @@ struct KeywordTests {
       (JSONValue.number(4.9), true),
       (JSONValue.number(5), false),
       (JSONValue.integer(4), true),
-      (JSONValue.integer(5), false),
+      // TODO: Reenable, causes Xcode Internal inconsistency error
+      // https://forums.swift.org/t/fatal-error-internal-inconsistency-no-test-reporter-for-test-case-argumentids/75666
+      // (JSONValue.integer(5), false),
       (JSONValue.string("4"), true),
       (JSONValue.null, true),
     ])
@@ -162,7 +173,9 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.exceedsExclusiveMaximum) {
+        #expect(
+          throws: ValidationIssue.exceedsExclusiveMaximum(number: instance.numeric ?? 0, maximum: 5)
+        ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -171,8 +184,10 @@ struct KeywordTests {
     @Test(arguments: [
       (JSONValue.number(5), true),
       (JSONValue.number(0), false),
-      (JSONValue.integer(5), true),
-      (JSONValue.integer(0), false),
+      // TODO: Reenable, causes Xcode Internal inconsistency error
+      // https://forums.swift.org/t/fatal-error-internal-inconsistency-no-test-reporter-for-test-case-argumentids/75666
+      // (JSONValue.integer(5), true),
+      (JSONValue.integer(1), false),
       (JSONValue.string("5"), true),
       (JSONValue.null, true),
     ])
@@ -186,7 +201,7 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.belowMinimum) {
+        #expect(throws: ValidationIssue.belowMinimum(number: instance.numeric ?? 0, minimum: 5)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -196,7 +211,9 @@ struct KeywordTests {
       (JSONValue.number(5.1), true),
       (JSONValue.number(5), false),
       (JSONValue.integer(6), true),
-      (JSONValue.integer(5), false),
+      // TODO: Reenable, causes Xcode Internal inconsistency error
+      // https://forums.swift.org/t/fatal-error-internal-inconsistency-no-test-reporter-for-test-case-argumentids/75666
+      // (JSONValue.integer(5), false),
       (JSONValue.string("6"), true),
       (JSONValue.null, true),
     ])
@@ -210,7 +227,9 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.belowExclusiveMinimum) {
+        #expect(
+          throws: ValidationIssue.belowExclusiveMinimum(number: instance.numeric ?? 0, minimum: 5)
+        ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -234,7 +253,9 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.exceedsMaxLength) {
+        #expect(
+          throws: ValidationIssue.exceedsMaxLength(string: instance.string ?? "", maxLength: 5)
+        ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -256,7 +277,8 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.belowMinLength) {
+        #expect(throws: ValidationIssue.belowMinLength(string: instance.string ?? "", minLength: 3))
+        {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -278,7 +300,9 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.patternMismatch, "\(instance)") {
+        #expect(
+          throws: ValidationIssue.patternMismatch(string: instance.string ?? "", pattern: "\\d")
+        ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -301,7 +325,9 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.exceedsMaxItems) {
+        #expect(
+          throws: ValidationIssue.exceedsMaxItems(count: instance.array?.count ?? 0, maxItems: 3)
+        ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -322,7 +348,9 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.belowMinItems) {
+        #expect(
+          throws: ValidationIssue.belowMinItems(count: instance.array?.count ?? 0, minItems: 2)
+        ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -372,7 +400,12 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.containsExcessiveMatches) {
+        let count =
+          switch containsAnnotation {
+          case .everyIndex: instance.array?.count ?? 0
+          case .indicies(let indicies): indicies.count
+          }
+        #expect(throws: ValidationIssue.containsExcessiveMatches(count: count, maxAllowed: 3)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -402,7 +435,12 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.containsInsufficientMatches) {
+        let count =
+          switch containsAnnotation {
+          case .everyIndex: instance.array?.count ?? 0
+          case .indicies(let indicies): indicies.count
+          }
+        #expect(throws: ValidationIssue.containsInsufficientMatches(count: count, required: 2)) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -423,7 +461,12 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.exceedsMaxProperties) {
+        #expect(
+          throws: ValidationIssue.exceedsMaxProperties(
+            count: instance.object?.count ?? 0,
+            maxProperties: 2
+          )
+        ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -444,7 +487,12 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.belowMinProperties) {
+        #expect(
+          throws: ValidationIssue.belowMinProperties(
+            count: instance.object?.count ?? 0,
+            minProperties: 2
+          )
+        ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -593,7 +641,12 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: &annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.containsInsufficientMatches) {
+        #expect(
+          throws: ValidationIssue.containsInsufficientMatches(
+            count: instance.array?.count ?? 0,
+            required: 1
+          )
+        ) {
           try keyword.validate(instance, at: .init(), using: &annotations)
         }
       }

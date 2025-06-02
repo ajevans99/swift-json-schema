@@ -438,7 +438,7 @@ import Testing
     )
   }
 
-  @Test func nestedEnumAndNonPrimativeType() {
+  @Test func nestedEnumAndNonprimitiveType() {
     assertMacroExpansion(
       """
       @Schemable

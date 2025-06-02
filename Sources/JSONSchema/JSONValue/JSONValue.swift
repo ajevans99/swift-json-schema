@@ -25,7 +25,7 @@ public enum JSONValue: Hashable, Equatable, Sendable {
   case boolean(Bool)
   case null
 
-  public var primative: JSONType {
+  public var primitive: JSONType {
     switch self {
     case .string: return .string
     case .number: return .number
@@ -106,6 +106,28 @@ extension JSONValue {
     case .integer(let integer): return Double(integer)
     case .number(let double): return double
     default: return nil
+    }
+  }
+}
+
+extension JSONValue: CustomStringConvertible {
+  public var description: String {
+    switch self {
+    case .string(let value):
+      return "\"\(value)\""
+    case .number(let value):
+      return String(value)
+    case .integer(let value):
+      return String(value)
+    case .object(let value):
+      let pairs = value.map { "\"\($0.key)\": \($0.value.description)" }
+      return "{\(pairs.joined(separator: ", "))}"
+    case .array(let value):
+      return "[\(value.map { $0.description }.joined(separator: ", "))]"
+    case .boolean(let value):
+      return value ? "true" : "false"
+    case .null:
+      return "null"
     }
   }
 }
