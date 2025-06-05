@@ -15,6 +15,9 @@ public final class Context: Sendable {
 
   var dynamicScopes: [[String: JSONPointer]] = []
 
+  /// Validators used when the ``Keywords.Format`` keyword is present.
+  var formatValidators: [String: any FormatValidator] = [:]
+
   /// A dictionary that tracks whether the `minContains` constraint is effectively zero
   /// for specific schema locations.
   ///
@@ -34,8 +37,15 @@ public final class Context: Sendable {
   ///   conditional validation at the specified schema location.
   var ifConditionalResults = [JSONPointer: ValidationResult]()
 
-  public init(dialect: Dialect, remoteSchema: [String: JSONValue] = [:]) {
+  public init(
+    dialect: Dialect,
+    remoteSchema: [String: JSONValue] = [:],
+    formatValidators: [any FormatValidator] = []
+  ) {
     self.dialect = dialect
     self.remoteSchemaStorage = remoteSchema
+    self.formatValidators = Dictionary(
+      uniqueKeysWithValues: formatValidators.map { ($0.formatName, $0) }
+    )
   }
 }
