@@ -15,7 +15,9 @@ extension JSONSchemaComponent {
 
   public func vocabulary(_ mapping: [String: Bool]) -> Self {
     var copy = self
-    copy.schemaValue[Keywords.Vocabulary.name] = .object(Dictionary(uniqueKeysWithValues: mapping.map { ($0.key, .boolean($0.value)) }))
+    copy.schemaValue[Keywords.Vocabulary.name] = .object(
+      Dictionary(uniqueKeysWithValues: mapping.map { ($0.key, .boolean($0.value)) })
+    )
     return copy
   }
 

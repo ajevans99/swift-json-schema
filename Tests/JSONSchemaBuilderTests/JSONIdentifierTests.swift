@@ -11,7 +11,7 @@ struct JSONIdentifierBuilderTests {
         .schema("https://json-schema.org/draft/2020-12/schema")
         .vocabulary([
           "https://example.com/vocab/core": true,
-          "https://example.com/vocab/other": false
+          "https://example.com/vocab/other": false,
         ])
         .anchor("nameAnchor")
         .dynamicAnchor("dynAnchor")
@@ -26,7 +26,7 @@ struct JSONIdentifierBuilderTests {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$vocabulary": [
         "https://example.com/vocab/core": true,
-        "https://example.com/vocab/other": false
+        "https://example.com/vocab/other": false,
       ],
       "$anchor": "nameAnchor",
       "$dynamicAnchor": "dynAnchor",
