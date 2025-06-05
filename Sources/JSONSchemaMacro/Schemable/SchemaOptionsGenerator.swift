@@ -45,7 +45,19 @@ enum SchemaOptionsGenerator {
     to codeBlockItem: CodeBlockItemSyntax
   ) -> CodeBlockItemSyntax {
     switch optionName {
-    case "additionalProperties", "patternProperties":
+    case "additionalProperties":
+      if closure.statements.count == 1,
+        let first = closure.statements.first,
+        let expr = first.item.as(ExprSyntax.self),
+        let bool = expr.as(BooleanLiteralExprSyntax.self)
+      {
+        return """
+          \(codeBlockItem)
+          .additionalProperties(\(raw: bool.literal.text))
+          """
+      }
+      fallthrough
+    case "patternProperties":
       return """
         \(codeBlockItem)
         .\(raw: optionName) { \(closure.statements) }
