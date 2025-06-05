@@ -11,15 +11,15 @@ protocol ReferenceKeyword: Keyword {
 }
 
 extension Keywords {
-  struct Reference: ReferenceKeyword {
-    static let name = "$ref"
+  package struct Reference: ReferenceKeyword {
+    package static let name = "$ref"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
     private let referenceURI: String
     private let resolver: ReferenceResolver
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.referenceURI = value.string ?? ""
@@ -59,15 +59,15 @@ extension Keywords {
     }
   }
 
-  struct DynamicReference: ReferenceKeyword {
-    static let name = "$dynamicRef"
+  package struct DynamicReference: ReferenceKeyword {
+    package static let name = "$dynamicRef"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
     private let referenceURI: String
     private let resolver: ReferenceResolver
 
-    init(value: JSONValue, context: KeywordContext) {
+    package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.referenceURI = value.string ?? ""

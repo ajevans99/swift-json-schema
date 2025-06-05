@@ -1,31 +1,51 @@
 protocol ReservedKeyword: Keyword {}
 
 extension Keywords {
-  struct Defintions: ReservedKeyword {
-    static let name = "defintions"
+  package struct Defintions: ReservedKeyword {
+    package static let name = "defintions"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
   }
 
-  struct Dependencies: ReservedKeyword {
-    static let name = "dependencies"
+  package struct Dependencies: ReservedKeyword {
+    package static let name = "dependencies"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
   }
 
-  struct RecursiveAnchor: ReservedKeyword {
-    static let name = "$recursiveAnchor"
+  package struct RecursiveAnchor: ReservedKeyword {
+    package static let name = "$recursiveAnchor"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
   }
 
-  struct RecursiveReference: ReservedKeyword {
-    static let name = "$recursiveRef"
+  package struct RecursiveReference: ReservedKeyword {
+    package static let name = "$recursiveRef"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
   }
 }
