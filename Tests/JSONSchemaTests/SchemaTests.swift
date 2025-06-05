@@ -109,4 +109,25 @@ struct SchemaTests {
     let result = metaSchema.validate(.object(["minLength": 1]))
     #expect(result.isValid == true)
   }
+
+  @Test func formatValidators() throws {
+    let rawSchema: JSONValue = [
+      "type": "string",
+      "format": "uuid",
+    ]
+
+    let valid: JSONValue = .string("00000000-0000-0000-0000-000000000000")
+    let invalid: JSONValue = .string("not-a-uuid")
+
+    let schema = try Schema(
+      rawSchema: rawSchema,
+      context: Context(
+        dialect: .draft2020_12,
+        formatValidators: [UUIDFormatValidator()]
+      )
+    )
+
+    #expect(schema.validate(valid).isValid)
+    #expect(schema.validate(invalid).isValid == false)
+  }
 }

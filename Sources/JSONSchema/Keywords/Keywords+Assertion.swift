@@ -347,7 +347,15 @@ extension Keywords {
       at location: JSONPointer,
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
-      // TODO: Support format keyword
+      guard
+        let formatName = value.string,
+        let string = input.string,
+        let validator = context.context.formatValidators[formatName]
+      else { return }
+
+      if !validator.validate(string) {
+        throw ValidationIssue.invalidFormat(name: formatName, value: string)
+      }
     }
   }
 }

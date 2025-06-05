@@ -308,6 +308,36 @@ struct KeywordTests {
       }
     }
 
+    @Test(arguments: [
+      (JSONValue.string("test@example.com"), true),
+      (JSONValue.string("invalid"), false),
+      (JSONValue.number(1), true),
+      (JSONValue.null, true),
+    ])
+    func format(instance: JSONValue, isValid: Bool) {
+      let schemaValue: JSONValue = "email"
+      let annotations = AnnotationContainer()
+      let context = KeywordContext(
+        context: Context(
+          dialect: .draft2020_12,
+          formatValidators: [EmailFormatValidator()]
+        )
+      )
+      let keyword = Keywords.Format(value: schemaValue, context: context)
+
+      if isValid {
+        #expect(throws: Never.self) {
+          try keyword.validate(instance, at: .init(), using: annotations)
+        }
+      } else {
+        #expect(
+          throws: ValidationIssue.invalidFormat(name: "email", value: instance.string ?? "")
+        ) {
+          try keyword.validate(instance, at: .init(), using: annotations)
+        }
+      }
+    }
+
     // MARK: - Arrays
 
     @Test(arguments: [
