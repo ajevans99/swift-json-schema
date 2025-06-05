@@ -13,7 +13,10 @@ public final class Context: Sendable {
 
   var anchors = [URL: JSONPointer]()
 
-  var dynamicScopes: [[String: JSONPointer]] = []
+  /// Stack of dynamic scopes used to resolve ``$dynamicRef`` references.
+  /// Each scope maps an anchor name to the schema location pointer and its
+  /// associated base URI.
+  var dynamicScopes: [[String: (pointer: JSONPointer, baseURI: URL)]] = []
 
   /// Validators used when the ``Keywords.Format`` keyword is present.
   var formatValidators: [String: any FormatValidator] = [:]

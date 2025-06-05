@@ -12,23 +12,7 @@ struct JSONSchemaTestSuite {
     "dynamicRef.json"
   ]
 
-  static let unsupportedTests: [(path: String, description: String, reason: String)] = [
-    ("defs.json", "validate definition against metaschema", "Metaschema uses dynamic references"),
-    (
-      "unevaluatedItems.json", "unevaluatedItems with $dynamicRef",
-      "Dynamic refs not fully supported"
-    ),
-    (
-      "unevaluatedProperies.json", "unevaluatedProperties with $dynamicRef",
-      "Dynamic refs not fully supported"
-    ),
-    ("refRemote.json", "remote HTTP ref with different URN $id", "URN support incomplete"),
-    ("refRemote.json", "remote HTTP ref with nested absolute ref", "URN support incomplete"),
-    (
-      "vocabulary.json", "schema that uses custom metaschema with with no validation vocabulary",
-      "Vocabulary not supported yet"
-    ),
-  ]
+  static let unsupportedTests: [(path: String, description: String, reason: String)] = []
 
   static let flattenedArguments: [(schemaTest: JSONSchemaTest, path: URL)] = {
     fileLoader.loadAllFiles()
