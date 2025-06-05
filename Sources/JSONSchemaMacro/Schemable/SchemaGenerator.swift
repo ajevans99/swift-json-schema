@@ -21,10 +21,15 @@ struct EnumSchemaGenerator {
     let casesWithAssociatedValues = schemableCases.filter { $0.associatedValues != nil }
 
     var codeBlockItem: CodeBlockItemSyntax
+    var needsAnchor = schemableCases.contains { caseItem in
+      caseItem.associatedValues?.contains(where: { $0.type.containsSelf(name.text) }) ?? false
+    }
 
     if !casesWithAssociatedValues.isEmpty {
       // When any case has an associated value, use composition and any of to build schema with nested objects
-      let statements = casesWithAssociatedValues.compactMap { $0.generateSchema() }
+      let statements = casesWithAssociatedValues.compactMap { caseItem in
+        caseItem.generateSchema(selfTypeName: name.text)
+      }
       var codeBlockItemList = CodeBlockItemListSyntax(statements)
 
       // Add cases without associated value
@@ -48,6 +53,7 @@ struct EnumSchemaGenerator {
     let variableDecl: DeclSyntax = """
       \(declModifier)static var schema: some JSONSchemaComponent<\(name)> {
         \(codeBlockItem)
+        \(raw: needsAnchor ? ".anchor(id: \"\(name.text)\")" : "")
       }
       """
 
@@ -58,7 +64,7 @@ struct EnumSchemaGenerator {
   private func simpleEnumSchema(
     for casesWithoutAssociatedValues: [SchemableEnumCase]
   ) -> CodeBlockItemSyntax {
-    let statements = casesWithoutAssociatedValues.compactMap { $0.generateSchema() }
+    let statements = casesWithoutAssociatedValues.compactMap { $0.generateSchema(selfTypeName: name.text) }
     let statementList = CodeBlockItemListSyntax(statements, separator: .newline)
 
     var switchCases = casesWithoutAssociatedValues.map(\.identifier)
@@ -108,8 +114,12 @@ struct SchemaGenerator {
 
   func makeSchema() -> DeclSyntax {
     let schemableMembers = members.schemableMembers()
-
-    let statements = schemableMembers.compactMap { $0.generateSchema() }
+    var needsAnchor = false
+    let statements = schemableMembers.compactMap { member -> CodeBlockItemSyntax? in
+      guard let result = member.generateSchema(selfTypeName: name.text) else { return nil }
+      needsAnchor = needsAnchor || result.1
+      return result.0
+    }
 
     var codeBlockItem: CodeBlockItemSyntax =
       "JSONObject { \(CodeBlockItemListSyntax(statements, separator: .newline)) }"
@@ -133,6 +143,7 @@ struct SchemaGenerator {
     let variableDecl: DeclSyntax = """
       \(declModifier)static var schema: some JSONSchemaComponent<\(name)> {
         JSONSchema(\(name).init) { \(codeBlockItem) }
+        \(raw: needsAnchor ? ".anchor(id: \"\(name.text)\")" : "")
       }
       """
 

@@ -26,10 +26,10 @@ extension TypeSyntax {
     }
   }
 
-  func typeInformation() -> TypeInformation {
+  func typeInformation(selfTypeName: String? = nil) -> TypeInformation {
     switch self.as(TypeSyntaxEnum.self) {
     case .arrayType(let arrayType):
-      guard let codeBlock = arrayType.element.typeInformation().codeBlock else {
+      guard let codeBlock = arrayType.element.typeInformation(selfTypeName: selfTypeName).codeBlock else {
         return .notSupported
       }
       return .primitive(
@@ -44,7 +44,7 @@ extension TypeSyntax {
       guard let keyType = dictionaryType.key.as(IdentifierTypeSyntax.self),
         keyType.name.text == "String"
       else { return .notSupported }
-      guard let codeBlock = dictionaryType.value.typeInformation().codeBlock else {
+      guard let codeBlock = dictionaryType.value.typeInformation(selfTypeName: selfTypeName).codeBlock else {
         return .notSupported
       }
       return .primitive(
@@ -61,17 +61,23 @@ extension TypeSyntax {
       if let generic = identifierType.genericArgumentClause {
         guard identifierType.name.text != "Array" else {
           let arrayType = ArrayTypeSyntax(element: generic.arguments.first!.argument)
-          return TypeSyntax(arrayType).typeInformation()
+          return TypeSyntax(arrayType).typeInformation(selfTypeName: selfTypeName)
         }
 
         guard identifierType.name.text != "Dictionary" else {
           let test = Array(generic.arguments.prefix(2))
           let dictionaryType = DictionaryTypeSyntax(key: test[0].argument, value: test[1].argument)
-          return TypeSyntax(dictionaryType).typeInformation()
+          return TypeSyntax(dictionaryType).typeInformation(selfTypeName: selfTypeName)
         }
       }
 
       guard let primitive = SupportedPrimitive(rawValue: identifierType.name.text) else {
+        if identifierType.name.text == selfTypeName {
+          return .schemable(
+            identifierType.name.text,
+            schema: "JSONReference<\(raw: identifierType.name.text)>(\"#\(raw: identifierType.name.text)\")"
+          )
+        }
         return .schemable(
           identifierType.name.text,
           schema: "\(raw: identifierType.name.text).schema"
@@ -80,13 +86,32 @@ extension TypeSyntax {
 
       return .primitive(primitive, schema: "\(raw: primitive.schema)()")
     case .implicitlyUnwrappedOptionalType(let implicitlyUnwrappedOptionalType):
-      return implicitlyUnwrappedOptionalType.wrappedType.typeInformation()
-    case .optionalType(let optionalType): return optionalType.wrappedType.typeInformation()
-    case .someOrAnyType(let someOrAnyType): return someOrAnyType.constraint.typeInformation()
+      return implicitlyUnwrappedOptionalType.wrappedType.typeInformation(selfTypeName: selfTypeName)
+    case .optionalType(let optionalType): return optionalType.wrappedType.typeInformation(selfTypeName: selfTypeName)
+    case .someOrAnyType(let someOrAnyType): return someOrAnyType.constraint.typeInformation(selfTypeName: selfTypeName)
     case .attributedType, .classRestrictionType, .compositionType, .functionType, .memberType,
       .metatypeType, .missingType, .namedOpaqueReturnType, .packElementType, .packExpansionType,
       .suppressedType, .tupleType:
       return .notSupported
+    }
+  }
+
+  func containsSelf(_ name: String) -> Bool {
+    switch self.as(TypeSyntaxEnum.self) {
+    case .identifierType(let id):
+      return id.name.text == name
+    case .optionalType(let opt):
+      return opt.wrappedType.containsSelf(name)
+    case .implicitlyUnwrappedOptionalType(let opt):
+      return opt.wrappedType.containsSelf(name)
+    case .arrayType(let array):
+      return array.element.containsSelf(name)
+    case .dictionaryType(let dict):
+      return dict.value.containsSelf(name)
+    case .someOrAnyType(let some):
+      return some.constraint.containsSelf(name)
+    default:
+      return false
     }
   }
 }
