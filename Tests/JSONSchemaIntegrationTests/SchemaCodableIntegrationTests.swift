@@ -17,15 +17,15 @@ struct SchemaCodableIntegrationTests {
   @Test
   func decodeObjectSchema() throws {
     let json = """
-    {
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "age": { "type": "integer", "minimum": 0 }
-      },
-      "required": ["name"]
-    }
-    """
+      {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "age": { "type": "integer", "minimum": 0 }
+        },
+        "required": ["name"]
+      }
+      """
     let decoder = JSONDecoder()
     let schema = try decoder.decode(Schema.self, from: Data(json.utf8))
 
@@ -33,9 +33,9 @@ struct SchemaCodableIntegrationTests {
       "type": "object",
       "properties": [
         "name": ["type": "string"],
-        "age": ["type": "integer", "minimum": 0]
+        "age": ["type": "integer", "minimum": 0],
       ],
-      "required": ["name"]
+      "required": ["name"],
     ]
     let expectedSchema = try Schema(rawSchema: expected, context: Context(dialect: .draft2020_12))
     #expect(schema == expectedSchema)
