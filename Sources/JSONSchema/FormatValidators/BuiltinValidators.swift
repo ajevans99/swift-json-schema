@@ -32,7 +32,9 @@ public struct DateFormatValidator: FormatValidator {
 
 public struct TimeFormatValidator: FormatValidator {
   public let formatName = "time"
-  private static let regex = try! Regex(#"^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):?[0-5]\d)?$"#)
+  private static let regex = try! Regex(
+    #"^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):?[0-5]\d)?$"#
+  )
 
   public func validate(_ value: String) -> Bool {
     value.firstMatch(of: Self.regex) != nil
@@ -49,13 +51,17 @@ public struct EmailFormatValidator: FormatValidator {
 
 public struct HostnameFormatValidator: FormatValidator {
   public let formatName = "hostname"
-  private static let regex = try! Regex(#"^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)(?:\.(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?))*$"#)
+  private static let regex = try! Regex(
+    #"^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)(?:\.(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?))*$"#
+  )
   public func validate(_ value: String) -> Bool { value.firstMatch(of: Self.regex) != nil }
 }
 
 public struct IPv4FormatValidator: FormatValidator {
   public let formatName = "ipv4"
-  private static let regex = try! Regex(#"^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$"#)
+  private static let regex = try! Regex(
+    #"^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$"#
+  )
   public func validate(_ value: String) -> Bool { value.firstMatch(of: Self.regex) != nil }
 }
 
