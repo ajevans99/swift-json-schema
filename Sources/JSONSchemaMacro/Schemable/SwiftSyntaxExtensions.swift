@@ -29,7 +29,8 @@ extension TypeSyntax {
   func typeInformation(selfTypeName: String? = nil) -> TypeInformation {
     switch self.as(TypeSyntaxEnum.self) {
     case .arrayType(let arrayType):
-      guard let codeBlock = arrayType.element.typeInformation(selfTypeName: selfTypeName).codeBlock else {
+      guard let codeBlock = arrayType.element.typeInformation(selfTypeName: selfTypeName).codeBlock
+      else {
         return .notSupported
       }
       return .primitive(
@@ -44,7 +45,9 @@ extension TypeSyntax {
       guard let keyType = dictionaryType.key.as(IdentifierTypeSyntax.self),
         keyType.name.text == "String"
       else { return .notSupported }
-      guard let codeBlock = dictionaryType.value.typeInformation(selfTypeName: selfTypeName).codeBlock else {
+      guard
+        let codeBlock = dictionaryType.value.typeInformation(selfTypeName: selfTypeName).codeBlock
+      else {
         return .notSupported
       }
       return .primitive(
@@ -75,7 +78,8 @@ extension TypeSyntax {
         if identifierType.name.text == selfTypeName {
           return .schemable(
             identifierType.name.text,
-            schema: "JSONReference<\(raw: identifierType.name.text)>(\"#\(raw: identifierType.name.text)\")"
+            schema:
+              "JSONReference<\(raw: identifierType.name.text)>(\"#\(raw: identifierType.name.text)\")"
           )
         }
         return .schemable(
@@ -87,8 +91,10 @@ extension TypeSyntax {
       return .primitive(primitive, schema: "\(raw: primitive.schema)()")
     case .implicitlyUnwrappedOptionalType(let implicitlyUnwrappedOptionalType):
       return implicitlyUnwrappedOptionalType.wrappedType.typeInformation(selfTypeName: selfTypeName)
-    case .optionalType(let optionalType): return optionalType.wrappedType.typeInformation(selfTypeName: selfTypeName)
-    case .someOrAnyType(let someOrAnyType): return someOrAnyType.constraint.typeInformation(selfTypeName: selfTypeName)
+    case .optionalType(let optionalType):
+      return optionalType.wrappedType.typeInformation(selfTypeName: selfTypeName)
+    case .someOrAnyType(let someOrAnyType):
+      return someOrAnyType.constraint.typeInformation(selfTypeName: selfTypeName)
     case .attributedType, .classRestrictionType, .compositionType, .functionType, .memberType,
       .metatypeType, .missingType, .namedOpaqueReturnType, .packElementType, .packExpansionType,
       .suppressedType, .tupleType:

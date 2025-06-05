@@ -64,7 +64,9 @@ struct EnumSchemaGenerator {
   private func simpleEnumSchema(
     for casesWithoutAssociatedValues: [SchemableEnumCase]
   ) -> CodeBlockItemSyntax {
-    let statements = casesWithoutAssociatedValues.compactMap { $0.generateSchema(selfTypeName: name.text) }
+    let statements = casesWithoutAssociatedValues.compactMap {
+      $0.generateSchema(selfTypeName: name.text)
+    }
     let statementList = CodeBlockItemListSyntax(statements, separator: .newline)
 
     var switchCases = casesWithoutAssociatedValues.map(\.identifier)
