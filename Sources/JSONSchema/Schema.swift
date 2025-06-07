@@ -115,6 +115,8 @@ package struct ObjectSchema: ValidatableSchema {
   let context: Context
   let keywords: [any Keyword]
   let uri: URL?
+  /// Name and base URI for any `$dynamicAnchor` declared on this schema.
+  let dynamicAnchorInfo: (name: String, baseURI: URL)?
 
   package init(
     schemaValue: [String: JSONValue],
@@ -125,7 +127,7 @@ package struct ObjectSchema: ValidatableSchema {
     self.schemaValue = schemaValue
     self.location = location
     self.context = context
-    let (processedURI, keywords) = Self.collectKeywords(
+    let (processedURI, keywords, dynamicAnchorInfo) = Self.collectKeywords(
       from: schemaValue,
       location: location,
       context: context,
@@ -133,6 +135,7 @@ package struct ObjectSchema: ValidatableSchema {
     )
     self.keywords = keywords
     self.uri = processedURI
+    self.dynamicAnchorInfo = dynamicAnchorInfo
   }
 
   private static func collectKeywords(
@@ -140,9 +143,15 @@ package struct ObjectSchema: ValidatableSchema {
     location: JSONPointer,
     context: Context,
     baseURI: URL
-  ) -> (processedURI: URL?, keywords: [any Keyword]) {
+  ) -> (
+    processedURI: URL?,
+    keywords: [any Keyword],
+    dynamicAnchorInfo: (name: String, baseURI: URL)?
+  ) {
     var keywords = [any Keyword]()
     var processedURI = baseURI
+
+    var dynamicAnchorInfo: (name: String, baseURI: URL)? = nil
 
     var didProcessIdentiferKeyword = false
 
@@ -162,6 +171,9 @@ package struct ObjectSchema: ValidatableSchema {
           processedURI = id.processSubschema(baseURI: baseURI)
           didProcessIdentiferKeyword = true
         }
+        if let dynamic = identifier as? Keywords.DynamicAnchor, let name = dynamic.value.string {
+          dynamicAnchorInfo = (name, processedURI)
+        }
       }
     }
 
@@ -169,7 +181,7 @@ package struct ObjectSchema: ValidatableSchema {
       context.identifierRegistry[baseURI] = location
     }
 
-    return (processedURI, keywords)
+    return (processedURI, keywords, dynamicAnchorInfo)
   }
 
   package func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
@@ -183,6 +195,21 @@ package struct ObjectSchema: ValidatableSchema {
     annotations: inout AnnotationContainer
   ) -> ValidationResult {
     var errors: [ValidationError] = []
+
+    if let dynamicAnchorInfo {
+      context.dynamicScopes.append([
+        dynamicAnchorInfo.name: (
+          pointer: self.location,
+          baseURI: dynamicAnchorInfo.baseURI
+        )
+      ])
+    }
+
+    defer {
+      if dynamicAnchorInfo != nil {
+        _ = context.dynamicScopes.popLast()
+      }
+    }
 
     for keyword in keywords {
       do throws(ValidationIssue) {

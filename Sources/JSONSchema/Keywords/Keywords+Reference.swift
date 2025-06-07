@@ -129,8 +129,21 @@ struct ReferenceResolver {
       throw ValidationIssue.invalidReference("Invalid reference URI: \(refURI)")
     }
 
-    if isDynamic {
-      // TODO: Resolve dynamic anchors
+    if isDynamic, let fragment = refURL.fragment, !fragment.isEmpty {
+      let anchor = fragment
+      for scope in context.dynamicScopes.reversed() {
+        if let entry = scope[anchor] {
+          guard let raw = context.rootRawSchema?.value(at: entry.pointer) else {
+            break
+          }
+          return try Schema(
+            rawSchema: raw,
+            location: entry.pointer,
+            context: context,
+            baseURI: entry.baseURI
+          )
+        }
+      }
     }
 
     // Fallback to regular reference resolution
