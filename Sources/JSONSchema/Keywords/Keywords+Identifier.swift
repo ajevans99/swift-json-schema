@@ -6,11 +6,16 @@ protocol IdentifierKeyword: Keyword {
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-the-id-keyword
-  struct Identifier: IdentifierKeyword {
-    static let name = "$id"
+  package struct Identifier: IdentifierKeyword {
+    package static let name = "$id"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
 
     func processIdentifier() {}
 
@@ -25,11 +30,16 @@ extension Keywords {
     }
   }
 
-  struct Defs: IdentifierKeyword {
-    static let name = "$defs"
+  package struct Defs: IdentifierKeyword {
+    package static let name = "$defs"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
 
     func processIdentifier() {
       guard case .object(let object) = value else { return }
@@ -46,11 +56,16 @@ extension Keywords {
     }
   }
 
-  struct Anchor: IdentifierKeyword {
-    static let name = "$anchor"
+  package struct Anchor: IdentifierKeyword {
+    package static let name = "$anchor"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
 
     func processIdentifier() {
       guard let anchorName = value.string else { return }
@@ -64,11 +79,16 @@ extension Keywords {
     }
   }
 
-  struct DynamicAnchor: IdentifierKeyword {
-    static let name = "$dynamicAnchor"
+  package struct DynamicAnchor: IdentifierKeyword {
+    package static let name = "$dynamicAnchor"
 
-    let value: JSONValue
-    let context: KeywordContext
+    package let value: JSONValue
+    package let context: KeywordContext
+
+    package init(value: JSONValue, context: KeywordContext) {
+      self.value = value
+      self.context = context
+    }
 
     func processIdentifier() {
       guard let anchorName = value.string else { return }
