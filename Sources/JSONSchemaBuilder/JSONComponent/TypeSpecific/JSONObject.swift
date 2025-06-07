@@ -75,6 +75,23 @@ extension JSONSchemaComponent {
     )
   }
 
+  /// Adds a constant additional properties flag to the schema.
+  /// - Parameter flag: A boolean value that will be used for the
+  ///   ``Keywords.AdditionalProperties`` keyword.
+  /// - Returns: A copy of the receiver with the keyword set.
+  public func additionalProperties(_ flag: Bool) -> Self {
+    var copy = self
+    copy.schemaValue[Keywords.AdditionalProperties.name] = .boolean(flag)
+    return copy
+  }
+
+  /// Adds a constant additional properties flag using a ``JSONBooleanSchema``.
+  /// - Parameter flag: The boolean schema used for the keyword.
+  /// - Returns: A copy of the receiver with the keyword set.
+  public func additionalProperties(_ flag: JSONBooleanSchema) -> Self {
+    additionalProperties(flag.value)
+  }
+
   /// Adds unevaluated properties to the schema.
   /// - Parameter content: A closure that returns a JSON schema representing the unevaluated properties.
   /// - Returns: A new `JSONObject` with the unevaluated properties set.

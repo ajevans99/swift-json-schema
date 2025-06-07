@@ -78,4 +78,20 @@ struct ParsingTests {
       )
     }
   }
+
+  @Test func additionalPropertiesFalseValidation() throws {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent<Void> {
+      JSONObject()
+        .additionalProperties(false)
+    }
+
+    let input: JSONValue = ["extra": true]
+
+    let result = sample.parse(input)
+    #expect(result.value != nil)
+
+    #expect(throws: ParseAndValidateIssue.self) {
+      _ = try sample.parseAndValidate(instance: "{\"extra\": true}")
+    }
+  }
 }

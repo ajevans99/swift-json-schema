@@ -141,13 +141,7 @@ struct Person {
                   """#)
               }
           }
-          .additionalProperties {
-              false
-          }
-          // Drop the parse information. Use custom builder if needed.
-          .map {
-              $0.0
-          }
+          .additionalProperties(false)
       }
     }
   }
