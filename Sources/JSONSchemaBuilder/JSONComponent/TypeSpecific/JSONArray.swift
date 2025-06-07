@@ -46,7 +46,7 @@ extension JSONArray {
   /// - Parameter prefixItems: A closure that returns an array of JSON schemas representing the prefix items.
   /// - Returns: A new `JSONArray` with the prefix items set.
   public func prefixItems(
-    @JSONSchemaCollectionBuilder<JSONValue> _ prefixItems: () -> [JSONComponents.AnyComponent<
+    @JSONSchemaCollectionBuilder<JSONValue> _ prefixItems: () -> [JSONComponents.AnySchemaComponent<
       JSONValue
     >]
   ) -> Self {

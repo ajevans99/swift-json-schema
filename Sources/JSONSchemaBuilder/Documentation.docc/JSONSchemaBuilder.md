@@ -105,6 +105,7 @@ The third example will validate that:
 - <doc:Macros>
 - <doc:Validation>
 - <doc:ValueBuilder>
+- <doc:WrapperTypes>
 
 ## See Also
 
