@@ -347,6 +347,10 @@ Optionally, combine parsing and validation in a single step.
 let weather: Weather = try Weather.schema.parseAndValidate(instance: data)
 ```
 
+**Note:** Schemas that include `$ref` keywords, such as those built using
+``JSONReference``, cannot be parsed directly. Convert the builder result to a
+``Schema`` first so that references can be resolved before parsing.
+
 > Shoutout to the [swift-parsing](https://github.com/pointfreeco/swift-parsing) library and the [Point-Free Parsing series](https://www.pointfree.co/collections/parsing) for the inspiration behind the parsing API and implementation.
 
 ## Documentation

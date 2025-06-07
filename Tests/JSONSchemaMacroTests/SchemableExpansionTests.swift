@@ -666,4 +666,38 @@ struct SchemableExpansionTests {
       macros: testMacros
     )
   }
+
+  @Test func selfReference() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct Node {
+        var children: [Node]
+      }
+      """,
+      expandedSource: """
+        struct Node {
+          var children: [Node]
+
+          static var schema: some JSONSchemaComponent<Node> {
+            JSONSchema(Node.init) {
+              JSONObject {
+                JSONProperty(key: \"children\") {
+                  JSONArray {
+                    JSONReference<Node>("#Node")
+                  }
+                }
+                .required()
+              }
+            }
+            .anchor(id: \"Node\")
+          }
+        }
+
+        extension Node: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
 }

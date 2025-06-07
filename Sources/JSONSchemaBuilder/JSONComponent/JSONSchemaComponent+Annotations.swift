@@ -80,4 +80,13 @@ extension JSONSchemaComponent {
     copy.schemaValue[Keywords.Comment.name] = .string(value)
     return copy
   }
+
+  /// Adds an `$anchor` to the schema to allow referencing it elsewhere.
+  /// - Parameter id: The anchor identifier.
+  /// - Returns: A new instance of the schema with the anchor set.
+  public func anchor(id: String) -> Self {
+    var copy = self
+    copy.schemaValue["$anchor"] = .string(id)
+    return copy
+  }
 }
