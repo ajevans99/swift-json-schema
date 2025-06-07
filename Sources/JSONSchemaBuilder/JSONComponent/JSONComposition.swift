@@ -9,13 +9,13 @@ public protocol JSONComposableCollectionComponent: JSONComposableComponent {
 
   init(
     into output: Output.Type,
-    @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnyComponent<Output>]
+    @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnySchemaComponent<Output>]
   )
 }
 
 extension JSONComposableCollectionComponent where Output == JSONValue {
   init(
-    @JSONSchemaCollectionBuilder<JSONValue> _ builder: () -> [JSONComponents.AnyComponent<
+    @JSONSchemaCollectionBuilder<JSONValue> _ builder: () -> [JSONComponents.AnySchemaComponent<
       JSONValue
     >]
   ) { self.init(into: JSONValue.self, builder) }
@@ -35,7 +35,7 @@ public enum JSONComposition: Sendable {
 
     public init(
       into output: Output.Type,
-      @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnyComponent<Output>]
+      @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnySchemaComponent<Output>]
     ) {
       components = builder()
       schemaValue[Keywords.AnyOf.name] = .array(components.map(\.schemaValue.value))
@@ -64,7 +64,7 @@ public enum JSONComposition: Sendable {
 
     public init(
       into output: Output.Type,
-      @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnyComponent<Output>]
+      @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnySchemaComponent<Output>]
     ) {
       components = builder()
       schemaValue[Keywords.AllOf.name] = .array(components.map(\.schemaValue.value))
@@ -102,7 +102,7 @@ public enum JSONComposition: Sendable {
 
     public init(
       into output: Output.Type,
-      @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnyComponent<Output>]
+      @JSONSchemaCollectionBuilder<Output> _ builder: () -> [JSONComponents.AnySchemaComponent<Output>]
     ) {
       components = builder()
       schemaValue[Keywords.OneOf.name] = .array(components.map(\.schemaValue.value))

@@ -36,7 +36,7 @@ extension ArrayTrait where Self == ArraySchemaTrait {
 
   public static func prefixItems(
     @JSONSchemaCollectionBuilder<JSONValue> _ prefixItems: @escaping () -> [JSONComponents
-      .AnyComponent<JSONValue>]
+      .AnySchemaComponent<JSONValue>]
   ) -> ArraySchemaTrait {
     fatalError(ArraySchemaTrait.errorMessage)
   }

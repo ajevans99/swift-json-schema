@@ -1,12 +1,12 @@
 import JSONSchema
 
 extension JSONSchemaComponent {
-  public func eraseToAnyComponent() -> JSONComponents.AnyComponent<Self.Output> { .init(self) }
+  public func eraseToAnySchemaComponent() -> JSONComponents.AnySchemaComponent<Self.Output> { .init(self) }
 }
 
 extension JSONComponents {
   /// Component for type erasure.
-  public struct AnyComponent<Output>: JSONSchemaComponent {
+  public struct AnySchemaComponent<Output>: JSONSchemaComponent {
     private let validate: @Sendable (JSONValue) -> Parsed<Output, ParseIssue>
     public var schemaValue: SchemaValue
 

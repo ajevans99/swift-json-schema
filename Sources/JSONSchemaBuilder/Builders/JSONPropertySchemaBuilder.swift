@@ -16,7 +16,7 @@ import JSONSchema
 
   public static func buildOptional<Component: PropertyCollection>(
     _ component: Component?
-  ) -> JSONPropertyComponents.OptionalNoType<Component> { .init(wrapped: component) }
+  ) -> JSONPropertyComponents.OptionalComponent<Component> { .init(wrapped: component) }
 
   public static func buildEither<TrueComponent, FalseComponent>(
     first component: TrueComponent
