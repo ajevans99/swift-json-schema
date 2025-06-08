@@ -21,6 +21,10 @@ extension ObjectTrait where Self == ObjectSchemaTrait {
     fatalError(ObjectSchemaTrait.errorMessage)
   }
 
+  public static func additionalProperties(_ flag: Bool) -> ObjectSchemaTrait {
+    fatalError(ObjectSchemaTrait.errorMessage)
+  }
+
   public static func patternProperties(
     @JSONPropertySchemaBuilder _ patternProperties: @escaping () -> some PropertyCollection
   ) -> ObjectSchemaTrait {
