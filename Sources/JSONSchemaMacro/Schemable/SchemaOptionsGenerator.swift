@@ -56,6 +56,7 @@ enum SchemaOptionsGenerator {
           .additionalProperties(\(raw: bool.literal.text))
           """
       }
+      // Intentionally fall through to "patternProperties" to handle shared logic.
       fallthrough
     case "patternProperties":
       return """
