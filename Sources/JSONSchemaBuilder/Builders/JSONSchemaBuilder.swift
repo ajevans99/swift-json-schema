@@ -63,6 +63,8 @@ extension JSONSchemaCollectionBuilder where Output == JSONValue {
     accumulated: [JSONComponents.AnySchemaComponent<JSONValue>],
     next component: Component
   ) -> [JSONComponents.AnySchemaComponent<JSONValue>] {
-    accumulated + [JSONComponents.PassthroughComponent(wrapped: component).eraseToAnySchemaComponent()]
+    accumulated + [
+      JSONComponents.PassthroughComponent(wrapped: component).eraseToAnySchemaComponent()
+    ]
   }
 }

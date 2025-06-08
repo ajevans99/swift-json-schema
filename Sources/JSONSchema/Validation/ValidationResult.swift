@@ -39,10 +39,10 @@ public struct ValidationResult: Sendable, Encodable, Equatable {
   }
 
   public static func == (lhs: ValidationResult, rhs: ValidationResult) -> Bool {
-    return lhs.isValid == rhs.isValid
-    && lhs.keywordLocation == rhs.keywordLocation
-    && lhs.instanceLocation == rhs.instanceLocation
-    && lhs.errors == rhs.errors
+    lhs.isValid == rhs.isValid
+      && lhs.keywordLocation == rhs.keywordLocation
+      && lhs.instanceLocation == rhs.instanceLocation
+      && lhs.errors == rhs.errors
   }
 }
 

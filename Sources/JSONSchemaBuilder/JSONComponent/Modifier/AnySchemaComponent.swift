@@ -1,7 +1,9 @@
 import JSONSchema
 
 extension JSONSchemaComponent {
-  public func eraseToAnySchemaComponent() -> JSONComponents.AnySchemaComponent<Self.Output> { .init(self) }
+  public func eraseToAnySchemaComponent() -> JSONComponents.AnySchemaComponent<Self.Output> {
+    .init(self)
+  }
 }
 
 extension JSONComponents {

@@ -17,7 +17,9 @@ public struct RuntimeComponent: JSONSchemaComponent {
     case .object(let dict):
       self.schemaValue = .object(dict)
     default:
-      throw UnsupportedSchemaTypeError.unsupportedType("Unsupported rawSchema type encountered: \(rawSchema)")
+      throw UnsupportedSchemaTypeError.unsupportedType(
+        "Unsupported rawSchema type encountered: \(rawSchema)"
+      )
     }
     self.schema = try Schema(rawSchema: rawSchema, context: .init(dialect: dialect))
   }
