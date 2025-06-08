@@ -1,4 +1,4 @@
-public struct ValidationResult: Sendable, Encodable {
+public struct ValidationResult: Sendable, Encodable, Equatable {
   public let isValid: Bool
   public let keywordLocation: JSONPointer
   public let instanceLocation: JSONPointer
@@ -36,6 +36,13 @@ public struct ValidationResult: Sendable, Encodable {
       annotations?.map { AnyAnnotationWrapper(annotation: $0) },
       forKey: .annotations
     )
+  }
+
+  public static func == (lhs: ValidationResult, rhs: ValidationResult) -> Bool {
+    return lhs.isValid == rhs.isValid
+    && lhs.keywordLocation == rhs.keywordLocation
+    && lhs.instanceLocation == rhs.instanceLocation
+    && lhs.errors == rhs.errors
   }
 }
 
