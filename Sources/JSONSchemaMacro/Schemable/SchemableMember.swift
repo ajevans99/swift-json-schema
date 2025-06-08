@@ -47,9 +47,10 @@ struct SchemableMember {
     )
   }
 
-  func generateSchema() -> CodeBlockItemSyntax? {
+  func generateSchema(selfTypeName: String) -> (CodeBlockItemSyntax, Bool)? {
     var codeBlock: CodeBlockItemSyntax
-    switch type.typeInformation() {
+    var hasSelf = type.containsSelf(selfTypeName)
+    switch type.typeInformation(selfTypeName: selfTypeName) {
     case .primitive(_, let code):
       codeBlock = code
       // Only use default value on primitives that can be `ExpressibleBy*Literal` to transform
@@ -61,7 +62,8 @@ struct SchemableMember {
           .default(\(defaultValue))
           """
       }
-    case .schemable(_, let code): codeBlock = code
+    case .schemable(_, let code):
+      codeBlock = code
     case .notSupported: return nil
     }
 
@@ -104,7 +106,7 @@ struct SchemableMember {
         """
     }
 
-    return block
+    return (block, hasSelf)
   }
 
   private var hasDescriptionInOptions: Bool {

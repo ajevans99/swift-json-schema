@@ -9,7 +9,7 @@ struct SchemableEnumCase {
     associatedValues = caseElement.parameterClause?.parameters
   }
 
-  func generateSchema() -> CodeBlockItemSyntax? {
+  func generateSchema(selfTypeName: String) -> CodeBlockItemSyntax? {
     guard let associatedValues else {
       return """
         "\(identifier)"
@@ -19,7 +19,7 @@ struct SchemableEnumCase {
       .compactMap { index, parameter in
         let key = parameter.firstName?.text ?? "_\(index)"
 
-        let typeInfo = parameter.type.typeInformation()
+        let typeInfo = parameter.type.typeInformation(selfTypeName: selfTypeName)
         let codeBlock: CodeBlockItemSyntax
 
         switch typeInfo {
