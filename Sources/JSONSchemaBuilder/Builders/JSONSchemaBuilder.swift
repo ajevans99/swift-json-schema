@@ -26,7 +26,7 @@ import JSONSchema
 
   public static func buildOptional<Component: JSONSchemaComponent>(
     _ component: Component?
-  ) -> JSONComponents.OptionalNoType<Component> { .init(wrapped: component) }
+  ) -> JSONComponents.OptionalComponent<Component> { .init(wrapped: component) }
 
   public static func buildEither<TrueComponent, FalseComponent>(
     first component: TrueComponent
@@ -40,29 +40,31 @@ import JSONSchema
 @resultBuilder public enum JSONSchemaCollectionBuilder<Output> {
   public static func buildPartialBlock<Component: JSONSchemaComponent>(
     first component: Component
-  ) -> [JSONComponents.AnyComponent<Output>] where Component.Output == Output {
-    [component.eraseToAnyComponent()]
+  ) -> [JSONComponents.AnySchemaComponent<Output>] where Component.Output == Output {
+    [component.eraseToAnySchemaComponent()]
   }
 
   public static func buildPartialBlock<Component: JSONSchemaComponent>(
-    accumulated: [JSONComponents.AnyComponent<Output>],
+    accumulated: [JSONComponents.AnySchemaComponent<Output>],
     next component: Component
-  ) -> [JSONComponents.AnyComponent<Output>] where Component.Output == Output {
-    accumulated + [component.eraseToAnyComponent()]
+  ) -> [JSONComponents.AnySchemaComponent<Output>] where Component.Output == Output {
+    accumulated + [component.eraseToAnySchemaComponent()]
   }
 }
 
 extension JSONSchemaCollectionBuilder where Output == JSONValue {
   public static func buildPartialBlock<Component: JSONSchemaComponent>(
     first component: Component
-  ) -> [JSONComponents.AnyComponent<JSONValue>] {
-    [JSONComponents.Passthrough(wrapped: component).eraseToAnyComponent()]
+  ) -> [JSONComponents.AnySchemaComponent<JSONValue>] {
+    [JSONComponents.PassthroughComponent(wrapped: component).eraseToAnySchemaComponent()]
   }
 
   public static func buildPartialBlock<Component: JSONSchemaComponent>(
-    accumulated: [JSONComponents.AnyComponent<JSONValue>],
+    accumulated: [JSONComponents.AnySchemaComponent<JSONValue>],
     next component: Component
-  ) -> [JSONComponents.AnyComponent<JSONValue>] {
-    accumulated + [JSONComponents.Passthrough(wrapped: component).eraseToAnyComponent()]
+  ) -> [JSONComponents.AnySchemaComponent<JSONValue>] {
+    accumulated + [
+      JSONComponents.PassthroughComponent(wrapped: component).eraseToAnySchemaComponent()
+    ]
   }
 }

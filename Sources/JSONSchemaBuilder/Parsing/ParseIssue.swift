@@ -6,6 +6,7 @@ public enum ParseIssue: Error, Equatable, Sendable {
   case missingRequiredProperty(property: String)
   case compactMapValueNil(value: JSONValue)
   case compositionFailure(type: JSONComposition, reason: String, nestedErrors: [ParseIssue])
+  case runtimeValidationIssue(ValidationResult)
 }
 
 extension ParseIssue: CustomStringConvertible {
@@ -21,6 +22,8 @@ extension ParseIssue: CustomStringConvertible {
       "The instance `\(value)` returned nil when evaluated against compact map."
     case .compositionFailure(let type, let reason, _):
       "Composition (`\(type)`) failure: the instance \(reason)."
+    case .runtimeValidationIssue(let error):
+      "Runtime validation issue: \(error)"
     }
   }
 }
