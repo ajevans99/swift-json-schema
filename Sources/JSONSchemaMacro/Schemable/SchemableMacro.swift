@@ -15,9 +15,10 @@ extension SchemableError: CustomStringConvertible {
 public struct SchemableMacro: MemberMacro, ExtensionMacro {
   /// Extract access level from declaration modifiers
   private static func extractAccessLevel(from declaration: some DeclGroupSyntax) -> String? {
-    return declaration.modifiers.first { modifier in
+    declaration.modifiers.first { modifier in
       ["public", "internal", "package", "fileprivate", "private"].contains(modifier.name.text)
-    }?.name.text
+    }?
+    .name.text
   }
 
   public static func expansion(
