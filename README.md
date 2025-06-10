@@ -305,7 +305,7 @@ dump(result2, name: "Instance 2 Validation Result")
 </details>
 <br/>
 
-> **Note:** Dynamic references and other advanced features are not yet supported. The library is still in development, and more features will be added in the future. See current [unsupported tests](Tests/JSONSchemaTests/JSONSchemaTestSuite.swift) from the [JSON Schema Test Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite).
+
 
 ## Parsing
 
