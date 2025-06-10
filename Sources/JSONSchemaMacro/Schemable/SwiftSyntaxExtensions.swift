@@ -52,7 +52,7 @@ extension TypeSyntax {
       // Only add .map(\.matches) for schemable types (custom types), not for primitives
       let mapMatches =
         switch valueTypeInfo {
-        case .schemable: "\n          .map(\\.matches)"
+        case .schemable: "\n.map(\\.matches)"
         case .primitive: ""
         case .notSupported: ""
         }

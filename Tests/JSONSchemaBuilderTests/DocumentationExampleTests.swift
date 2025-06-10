@@ -148,13 +148,13 @@ struct DocumentationExampleTests {
   }
 
   @Schemable
-  struct Child {
+  struct Child: Equatable {
     let one: String
     let two: String
   }
 
   @Schemable
-  struct Parent {
+  struct Parent: Equatable {
     let children: [String: Child]
   }
 
@@ -196,6 +196,8 @@ struct DocumentationExampleTests {
       #expect(parsedParent.children["child1"]?.two == "value2")
       #expect(parsedParent.children["child2"]?.one == "value3")
       #expect(parsedParent.children["child2"]?.two == "value4")
+
+      #expect(parsedParent == parent)
     case .invalid(let errors):
       Issue.record("Parsing failed with errors: \(errors)")
     }
