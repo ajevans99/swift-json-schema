@@ -40,6 +40,11 @@ public final class Context: Sendable {
   ///   conditional validation at the specified schema location.
   var ifConditionalResults = [JSONPointer: ValidationResult]()
 
+  /// Set of active vocabularies that should be applied when creating schemas.
+  /// If nil, all dialect keywords are available. If set, only keywords from
+  /// these vocabularies will be processed.
+  var activeVocabularies: Set<String>? = nil
+
   public init(
     dialect: Dialect,
     remoteSchema: [String: JSONValue] = [:],

@@ -1,6 +1,14 @@
 import Foundation
 
-protocol IdentifierKeyword: Keyword {
+protocol CoreKeyword: Keyword {}
+
+extension CoreKeyword {
+  package static var vocabulary: String {
+    "https://json-schema.org/draft/2020-12/vocab/core"
+  }
+}
+
+protocol IdentifierKeyword: CoreKeyword {
   func processIdentifier()
 }
 
