@@ -26,6 +26,25 @@ package enum Keywords {
       self.value = value
       self.context = context
     }
+    
+    /// Validates that all required vocabularies are supported
+    func validateVocabularies() throws(SchemaIssue) {
+      guard let vocabObject = value.object else {
+        throw .invalidVocabularyFormat
+      }
+      
+      let supportedVocabularies = context.context.dialect.supportedVocabularies
+      
+      for (vocabularyURI, required) in vocabObject {
+        guard let isRequired = required.boolean else {
+          throw .invalidVocabularyFormat
+        }
+        
+        if isRequired && !supportedVocabularies.contains(vocabularyURI) {
+          throw .unsupportedRequiredVocabulary(vocabularyURI)
+        }
+      }
+    }
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-comments-with-comment

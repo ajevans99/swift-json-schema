@@ -26,7 +26,7 @@ public struct Schema: ValidatableSchema {
         context: context
       )
     case .object(let schemaDict):
-      self.schema = ObjectSchema(
+      self.schema = try ObjectSchema(
         schemaValue: schemaDict,
         location: location,
         context: context,
@@ -123,11 +123,11 @@ package struct ObjectSchema: ValidatableSchema {
     location: JSONPointer,
     context: Context,
     baseURI: URL = URL(fileURLWithPath: #file)
-  ) {
+  ) throws(SchemaIssue) {
     self.schemaValue = schemaValue
     self.location = location
     self.context = context
-    let (processedURI, keywords, dynamicAnchorInfo) = Self.collectKeywords(
+    let (processedURI, keywords, dynamicAnchorInfo) = try Self.collectKeywords(
       from: schemaValue,
       location: location,
       context: context,
@@ -143,7 +143,7 @@ package struct ObjectSchema: ValidatableSchema {
     location: JSONPointer,
     context: Context,
     baseURI: URL
-  ) -> (
+  ) throws(SchemaIssue) -> (
     processedURI: URL?,
     keywords: [any Keyword],
     dynamicAnchorInfo: (name: String, baseURI: URL)?
@@ -163,6 +163,11 @@ package struct ObjectSchema: ValidatableSchema {
         context: .init(location: keywordLocation, context: context, uri: processedURI)
       )
       keywords.append(keyword)
+
+      // Special handling for vocabulary validation - must be done at schema creation time
+      if let vocabulary = keyword as? Keywords.Vocabulary {
+        try vocabulary.validateVocabularies()
+      }
 
       if let identifier = keyword as? (any IdentifierKeyword) {
         identifier.processIdentifier()
