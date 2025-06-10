@@ -12,6 +12,22 @@ public enum Dialect: String, Hashable, Sendable {
     self.init(rawValue: uri)
   }
 
+  /// The vocabularies supported by this dialect.
+  var supportedVocabularies: Set<String> {
+    switch self {
+    case .draft2020_12:
+      [
+        "https://json-schema.org/draft/2020-12/vocab/core",
+        "https://json-schema.org/draft/2020-12/vocab/applicator",
+        "https://json-schema.org/draft/2020-12/vocab/unevaluated",
+        "https://json-schema.org/draft/2020-12/vocab/validation",
+        "https://json-schema.org/draft/2020-12/vocab/meta-data",
+        "https://json-schema.org/draft/2020-12/vocab/format-annotation",
+        "https://json-schema.org/draft/2020-12/vocab/content"
+      ]
+    }
+  }
+
   /// The supported keywords by dialect.
   /// Order matters as some keywords require annoation results of others.
   /// In the future, keywords should define their own dependencies and order should be determined by a dependency graph algorithm.

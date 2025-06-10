@@ -22,7 +22,10 @@ public struct Schema: ValidatableSchema {
     let documentURL = baseURI.withoutFragment ?? baseURI
     self.documentURL = documentURL
     if self.context.documentCache[documentURL] == nil {
-      self.context.documentCache[documentURL] = SchemaDocument(url: documentURL, rawSchema: rawSchema)
+      self.context.documentCache[documentURL] = SchemaDocument(
+        url: documentURL,
+        rawSchema: rawSchema
+      )
     }
 
     switch rawSchema {
@@ -33,7 +36,7 @@ public struct Schema: ValidatableSchema {
         context: context
       )
     case .object(let schemaDict):
-      self.schema = ObjectSchema(
+      self.schema = try ObjectSchema(
         schemaValue: schemaDict,
         location: location,
         context: context,
@@ -160,7 +163,7 @@ package struct ObjectSchema: ValidatableSchema {
     location: JSONPointer,
     context: Context,
     baseURI: URL
-  ) -> (
+  ) throws(SchemaIssue) -> (
     processedURI: URL?,
     keywords: [any Keyword],
     dynamicAnchorInfo: (name: String, baseURI: URL)?
@@ -180,6 +183,11 @@ package struct ObjectSchema: ValidatableSchema {
         context: .init(location: keywordLocation, context: context, uri: processedURI)
       )
       keywords.append(keyword)
+
+      // Special handling for vocabulary validation - must be done at schema creation time
+      if let vocabulary = keyword as? Keywords.Vocabulary {
+        try vocabulary.validateVocabularies()
+      }
 
       if let identifier = keyword as? (any IdentifierKeyword) {
         identifier.processIdentifier()
@@ -219,7 +227,9 @@ package struct ObjectSchema: ValidatableSchema {
     // Push every document-wide `$dynamicAnchor` so this schema inherits the surrounding scope.
     let documentAnchors = context.documentDynamicAnchors[documentURL] ?? [:]
     context.dynamicScopes.append(
-      documentAnchors.mapValues { (document: documentURL, pointer: $0.pointer, baseURI: $0.baseURI) }
+      documentAnchors.mapValues {
+        (document: documentURL, pointer: $0.pointer, baseURI: $0.baseURI)
+      }
     )
     defer {
       _ = context.dynamicScopes.popLast()
