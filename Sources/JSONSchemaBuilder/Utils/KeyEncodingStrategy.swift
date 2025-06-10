@@ -6,14 +6,13 @@ public protocol KeyEncodingStrategy {
   static func encode(_ key: String) -> String
 }
 
-
 /// A collection of key encoding strategies that can be used to transform string keys.
 ///
 /// This type provides static access to various key encoding strategies and allows
 /// for custom strategy implementations.
 public struct KeyEncodingStrategies {
   private let strategy: any KeyEncodingStrategy.Type
-  
+
   private init(_ strategy: any KeyEncodingStrategy.Type) {
     self.strategy = strategy
   }
@@ -28,7 +27,7 @@ public struct KeyEncodingStrategies {
   /// strategy.encode("JSONSchema") // "JSONSchema"
   /// ```
   public static var identity: Self { Self(Identity.self) }
-  
+
   /// Returns a strategy that converts camelCase to snake_case.
   ///
   /// Example:
@@ -40,7 +39,7 @@ public struct KeyEncodingStrategies {
   /// strategy.encode("URLRequest") // "url_request"
   /// ```
   public static var snakeCase: Self { Self(SnakeCase.self) }
-  
+
   /// Returns a strategy that converts to kebab-case.
   ///
   /// This strategy converts camelCase to kebab-case.
@@ -54,7 +53,7 @@ public struct KeyEncodingStrategies {
   /// strategy.encode("URLRequest") // "url-request"
   /// ```
   public static var kebabCase: Self { Self(KebabCase.self) }
-  
+
   /// Returns a custom encoding strategy.
   ///
   /// - Parameter type: A type conforming to `KeyEncodingStrategy` that provides
@@ -67,7 +66,7 @@ public struct KeyEncodingStrategies {
   ///     key.uppercased()
   ///   }
   /// }
-  /// 
+  ///
   /// let strategy = KeyEncodingStrategies.custom(UppercaseStrategy.self)
   /// strategy.encode("helloWorld") // "HELLOWORLD"
   /// strategy.encode("userID") // "USERID"
@@ -109,11 +108,12 @@ public struct KeyEncodingStrategies {
     public static func encode(_ key: String) -> String {
       var result = ""
       var previousWasUppercase = false
-      
+
       for (index, character) in key.enumerated() {
         let isLastCharacter = index == key.count - 1
-        let nextCharacter = isLastCharacter ? nil : key[key.index(after: key.index(key.startIndex, offsetBy: index))]
-        
+        let nextCharacter =
+          isLastCharacter ? nil : key[key.index(after: key.index(key.startIndex, offsetBy: index))]
+
         if character.isUppercase {
           if !result.isEmpty {
             // Add underscore if this is the start of a new word (previous was lowercase)
@@ -153,11 +153,12 @@ public struct KeyEncodingStrategies {
     public static func encode(_ key: String) -> String {
       var result = ""
       var previousWasUppercase = false
-      
+
       for (index, character) in key.enumerated() {
         let isLastCharacter = index == key.count - 1
-        let nextCharacter = isLastCharacter ? nil : key[key.index(after: key.index(key.startIndex, offsetBy: index))]
-        
+        let nextCharacter =
+          isLastCharacter ? nil : key[key.index(after: key.index(key.startIndex, offsetBy: index))]
+
         if character.isUppercase {
           if !result.isEmpty {
             // Add hyphen if this is the start of a new word (previous was lowercase)

@@ -38,4 +38,4 @@ struct KeyEncodingStrategyTests {
     #expect(strategy.encode("JSONSchema") == "JSONSCHEMA")
     #expect(strategy.encode("userID") == "USERID")
   }
-} 
+}
