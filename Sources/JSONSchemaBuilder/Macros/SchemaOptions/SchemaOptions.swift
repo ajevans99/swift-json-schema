@@ -23,6 +23,10 @@ extension SchemaTrait where Self == SchemaOptionsTrait {
     fatalError(SchemaOptionsTrait.errorMessage)
   }
 
+  public static func key(_ value: String) -> SchemaOptionsTrait {
+    fatalError(SchemaOptionsTrait.errorMessage)
+  }
+
   public static func `default`(_ value: JSONValue) -> SchemaOptionsTrait {
     fatalError(SchemaOptionsTrait.errorMessage)
   }

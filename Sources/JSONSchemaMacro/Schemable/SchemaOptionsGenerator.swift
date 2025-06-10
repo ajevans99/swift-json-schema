@@ -27,6 +27,10 @@ enum SchemaOptionsGenerator {
 
     let optionName = memberAccess.declName.baseName.text
 
+    if optionName == "key" {
+      return codeBlockItem
+    }
+
     if let closure = functionCall.trailingClosure {
       return applyClosureBasedOption(optionName, closure: closure, to: codeBlockItem)
     } else if let value = functionCall.arguments.first {
