@@ -56,9 +56,6 @@ public struct KeyEncodingStrategies {
 
   /// Returns a custom encoding strategy.
   ///
-  /// - Parameter type: A type conforming to `KeyEncodingStrategy` that provides
-  ///   custom key encoding behavior.
-  ///
   /// Example:
   /// ```swift
   /// struct UppercaseStrategy: KeyEncodingStrategy {
@@ -72,6 +69,9 @@ public struct KeyEncodingStrategies {
   /// strategy.encode("userID") // "USERID"
   /// strategy.encode("JSONSchema") // "JSONSCHEMA"
   /// ```
+  /// - Parameter type: A type conforming to `KeyEncodingStrategy` that provides
+  ///   custom key encoding behavior.
+  /// - Returns: A new `KeyEncodingStrategies` instance using the provided strategy type.
   public static func custom(_ type: any KeyEncodingStrategy.Type) -> Self { Self(type) }
 
   /// Encodes the given key using the current strategy.
