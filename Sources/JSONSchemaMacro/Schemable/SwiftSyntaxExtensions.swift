@@ -44,9 +44,18 @@ extension TypeSyntax {
       guard let keyType = dictionaryType.key.as(IdentifierTypeSyntax.self),
         keyType.name.text == "String"
       else { return .notSupported }
-      guard let codeBlock = dictionaryType.value.typeInformation().codeBlock else {
+      let valueTypeInfo = dictionaryType.value.typeInformation()
+      guard let codeBlock = valueTypeInfo.codeBlock else {
         return .notSupported
       }
+      
+      // Only add .map(\.matches) for schemable types (custom types), not for primitives
+      let mapMatches = switch valueTypeInfo {
+      case .schemable: "\n          .map(\\.matches)"
+      case .primitive: ""
+      case .notSupported: ""
+      }
+      
       return .primitive(
         .dictionary,
         schema: """
@@ -54,8 +63,7 @@ extension TypeSyntax {
           .additionalProperties {
             \(codeBlock)
           }
-          .map(\\.1)
-          .map(\\.matches)
+          .map(\\.1)\(raw: mapMatches)
           """
       )
     case .identifierType(let identifierType):
