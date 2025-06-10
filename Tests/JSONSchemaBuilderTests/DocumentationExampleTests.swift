@@ -163,31 +163,31 @@ struct DocumentationExampleTests {
     let child1 = Child(one: "value1", two: "value2")
     let child2 = Child(one: "value3", two: "value4")
     let parent = Parent(children: ["child1": child1, "child2": child2])
-    
+
     // Verify schema generation
     let schema = Parent.schema
     #expect(schema.schemaValue["type"]?.string == "object")
     #expect(schema.schemaValue["properties"]?.object?["children"] != nil)
-    
+
     // Verify the schema has the correct structure for dictionary with additionalProperties
     let childrenProperty = schema.schemaValue["properties"]?.object?["children"]?.object
     #expect(childrenProperty?["type"]?.string == "object")
     #expect(childrenProperty?["additionalProperties"] != nil)
-    
+
     // Test parsing
     let jsonInput: JSONValue = [
       "children": [
         "child1": [
           "one": "value1",
-          "two": "value2"
+          "two": "value2",
         ],
         "child2": [
-          "one": "value3", 
-          "two": "value4"
-        ]
+          "one": "value3",
+          "two": "value4",
+        ],
       ]
     ]
-    
+
     let parseResult = schema.parse(jsonInput)
     switch parseResult {
     case .valid(let parsedParent):

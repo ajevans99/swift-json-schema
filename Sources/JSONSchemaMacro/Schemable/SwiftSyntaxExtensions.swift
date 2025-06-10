@@ -48,14 +48,15 @@ extension TypeSyntax {
       guard let codeBlock = valueTypeInfo.codeBlock else {
         return .notSupported
       }
-      
+
       // Only add .map(\.matches) for schemable types (custom types), not for primitives
-      let mapMatches = switch valueTypeInfo {
-      case .schemable: "\n          .map(\\.matches)"
-      case .primitive: ""
-      case .notSupported: ""
-      }
-      
+      let mapMatches =
+        switch valueTypeInfo {
+        case .schemable: "\n          .map(\\.matches)"
+        case .primitive: ""
+        case .notSupported: ""
+        }
+
       return .primitive(
         .dictionary,
         schema: """
