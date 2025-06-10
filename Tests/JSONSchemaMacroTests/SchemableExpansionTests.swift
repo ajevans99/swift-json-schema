@@ -106,6 +106,7 @@ struct SchemableExpansionTests {
                     WeatherCondition.schema
                   }
                   .map(\\.1)
+                  .map(\\.matches)
                 }
                 .required()
               }
