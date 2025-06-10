@@ -28,85 +28,6 @@ public enum Dialect: String, Hashable, Sendable {
     }
   }
 
-  /// Maps keyword types to their vocabulary URIs
-  private var keywordVocabularyMapping: [String: String] {
-    switch self {
-    case .draft2020_12:
-      [
-        // Core vocabulary
-        "$schema": "https://json-schema.org/draft/2020-12/vocab/core",
-        "$vocabulary": "https://json-schema.org/draft/2020-12/vocab/core",
-        "$id": "https://json-schema.org/draft/2020-12/vocab/core",
-        "$ref": "https://json-schema.org/draft/2020-12/vocab/core",
-        "$defs": "https://json-schema.org/draft/2020-12/vocab/core",
-        "$anchor": "https://json-schema.org/draft/2020-12/vocab/core",
-        "$dynamicRef": "https://json-schema.org/draft/2020-12/vocab/core",
-        "$dynamicAnchor": "https://json-schema.org/draft/2020-12/vocab/core",
-        "$comment": "https://json-schema.org/draft/2020-12/vocab/core",
-
-        // Applicator vocabulary
-        "allOf": "https://json-schema.org/draft/2020-12/vocab/applicator",
-        "anyOf": "https://json-schema.org/draft/2020-12/vocab/applicator",
-        "oneOf": "https://json-schema.org/draft/2020-12/vocab/applicator",
-        "not": "https://json-schema.org/draft/2020-12/vocab/applicator",
-        "if": "https://json-schema.org/draft/2020-12/vocab/applicator",
-        "then": "https://json-schema.org/draft/2020-12/vocab/applicator",
-        "else": "https://json-schema.org/draft/2020-12/vocab/applicator",
-        "dependentSchemas": "https://json-schema.org/draft/2020-12/vocab/applicator",
-        "prefixItems": "https://json-schema.org/draft/2020-12/vocab/applicator",
-        "items": "https://json-schema.org/draft/2020-12/vocab/applicator",
-        "contains": "https://json-schema.org/draft/2020-12/vocab/applicator",
-        "properties": "https://json-schema.org/draft/2020-12/vocab/applicator",
-        "patternProperties": "https://json-schema.org/draft/2020-12/vocab/applicator",
-        "additionalProperties": "https://json-schema.org/draft/2020-12/vocab/applicator",
-        "propertyNames": "https://json-schema.org/draft/2020-12/vocab/applicator",
-
-        // Validation vocabulary
-        "type": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "enum": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "const": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "multipleOf": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "maximum": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "exclusiveMaximum": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "minimum": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "exclusiveMinimum": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "maxLength": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "minLength": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "pattern": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "maxItems": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "minItems": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "uniqueItems": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "maxContains": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "minContains": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "maxProperties": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "minProperties": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "required": "https://json-schema.org/draft/2020-12/vocab/validation",
-        "dependentRequired": "https://json-schema.org/draft/2020-12/vocab/validation",
-
-        // Meta-data vocabulary
-        "title": "https://json-schema.org/draft/2020-12/vocab/meta-data",
-        "description": "https://json-schema.org/draft/2020-12/vocab/meta-data",
-        "default": "https://json-schema.org/draft/2020-12/vocab/meta-data",
-        "deprecated": "https://json-schema.org/draft/2020-12/vocab/meta-data",
-        "readOnly": "https://json-schema.org/draft/2020-12/vocab/meta-data",
-        "writeOnly": "https://json-schema.org/draft/2020-12/vocab/meta-data",
-        "examples": "https://json-schema.org/draft/2020-12/vocab/meta-data",
-
-        // Format-annotation vocabulary
-        "format": "https://json-schema.org/draft/2020-12/vocab/format-annotation",
-
-        // Content vocabulary
-        "contentEncoding": "https://json-schema.org/draft/2020-12/vocab/content",
-        "contentMediaType": "https://json-schema.org/draft/2020-12/vocab/content",
-        "contentSchema": "https://json-schema.org/draft/2020-12/vocab/content",
-
-        // Unevaluated vocabulary
-        "unevaluatedItems": "https://json-schema.org/draft/2020-12/vocab/unevaluated",
-        "unevaluatedProperties": "https://json-schema.org/draft/2020-12/vocab/unevaluated",
-      ]
-    }
-  }
-
   /// Returns keywords filtered by active vocabularies. If no active vocabularies are specified, returns all keywords.
   func keywords(activeVocabularies: Set<String>? = nil) -> [any Keyword.Type] {
     let allKeywords = keywords
@@ -116,12 +37,9 @@ public enum Dialect: String, Hashable, Sendable {
     }
 
     return allKeywords.filter { keywordType in
-      let keywordName = keywordType.name
-      if let vocabularyURI = keywordVocabularyMapping[keywordName] {
-        return activeVocabs.contains(vocabularyURI)
-      }
-      // If we can't find the vocabulary mapping, include the keyword (conservative approach)
-      return true
+      let vocabularyURI = keywordType.vocabulary
+      // Include keywords that have no vocabulary (empty string) or whose vocabulary is active
+      return vocabularyURI.isEmpty || activeVocabs.contains(vocabularyURI)
     }
   }
 

@@ -1,6 +1,6 @@
 import Foundation
 
-protocol ReferenceKeyword: Keyword {
+protocol ReferenceKeyword: CoreKeyword {
   func validate(
     _ input: JSONValue,
     at instanceLocation: JSONPointer,
