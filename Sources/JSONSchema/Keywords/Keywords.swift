@@ -45,6 +45,20 @@ package enum Keywords {
         }
       }
     }
+    
+    /// Returns the set of active vocabularies (those listed with any value, true or false)
+    func getActiveVocabularies() -> Set<String>? {
+      guard let vocabObject = value.object else {
+        return nil
+      }
+      
+      var activeVocabularies = Set<String>()
+      for (vocabularyURI, _) in vocabObject {
+        activeVocabularies.insert(vocabularyURI)
+      }
+      
+      return activeVocabularies
+    }
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-comments-with-comment

@@ -4,6 +4,47 @@ import Testing
 @testable import JSONSchema
 
 struct VocabularyTests {
+  @Test func testCustomVocabularies() throws {
+    // Test schema with custom vocabularies - required one should fail
+    let schemaWithCustomRequired = """
+    {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$vocabulary": {
+            "https://json-schema.org/draft/2020-12/vocab/core": true,
+            "https://example.com/custom-vocabulary": true
+        },
+        "type": "string"
+    }
+    """
+    
+    let jsonData = schemaWithCustomRequired.data(using: .utf8)!
+    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: jsonData)
+    
+    #expect(throws: SchemaIssue.unsupportedRequiredVocabulary("https://example.com/custom-vocabulary")) {
+      _ = try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12))
+    }
+    
+    // Test schema with custom vocabularies - optional one should succeed
+    let schemaWithCustomOptional = """
+    {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$vocabulary": {
+            "https://json-schema.org/draft/2020-12/vocab/core": true,
+            "https://example.com/custom-vocabulary": false,
+            "https://another.example.com/optional-vocab": false
+        },
+        "type": "string"
+    }
+    """
+    
+    let jsonData2 = schemaWithCustomOptional.data(using: .utf8)!
+    let rawSchema2 = try JSONDecoder().decode(JSONValue.self, from: jsonData2)
+    
+    // Should not throw because custom vocabularies are optional
+    let schema = try Schema(rawSchema: rawSchema2, context: .init(dialect: .draft2020_12))
+    let result = schema.validate(JSONValue.string("test"))
+    #expect(result.isValid)
+  }
   @Test func testVocabularyBasic() throws {
     let schemaWithVocabulary = """
     {

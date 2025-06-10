@@ -175,7 +175,33 @@ package struct ObjectSchema: ValidatableSchema {
 
     var didProcessIdentiferKeyword = false
 
-    for keywordType in context.dialect.keywords where schemaValue.keys.contains(keywordType.name) {
+    // First pass: Process vocabulary keyword to determine active vocabularies
+    if let vocabularyValue = schemaValue[Keywords.Vocabulary.name] {
+      let keywordLocation = location.appending(.key(Keywords.Vocabulary.name))
+      let vocabulary = Keywords.Vocabulary(
+        value: vocabularyValue,
+        context: .init(location: keywordLocation, context: context, uri: processedURI)
+      )
+      keywords.append(vocabulary)
+      
+      // Validate vocabularies
+      try vocabulary.validateVocabularies()
+      
+      // Set active vocabularies in the context for sub-schemas
+      context.activeVocabularies = vocabulary.getActiveVocabularies()
+    }
+
+    // Get keywords filtered by active vocabularies (either from $vocabulary or context)
+    let activeVocabs = context.activeVocabularies
+    let availableKeywords = context.dialect.keywords(activeVocabularies: activeVocabs)
+    
+    // Second pass: Process all other keywords using filtered keyword list
+    for keywordType in availableKeywords where schemaValue.keys.contains(keywordType.name) {
+      // Skip vocabulary keyword as it's already processed
+      if keywordType.name == Keywords.Vocabulary.name {
+        continue
+      }
+      
       let value = schemaValue[keywordType.name]!
       let keywordLocation = location.appending(.key(keywordType.name))
       let keyword = keywordType.init(
@@ -183,11 +209,6 @@ package struct ObjectSchema: ValidatableSchema {
         context: .init(location: keywordLocation, context: context, uri: processedURI)
       )
       keywords.append(keyword)
-
-      // Special handling for vocabulary validation - must be done at schema creation time
-      if let vocabulary = keyword as? Keywords.Vocabulary {
-        try vocabulary.validateVocabularies()
-      }
 
       if let identifier = keyword as? (any IdentifierKeyword) {
         identifier.processIdentifier()
