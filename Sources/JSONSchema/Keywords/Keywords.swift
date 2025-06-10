@@ -1,7 +1,7 @@
 /// Namespace for `Keyword` definitions.
 package enum Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-the-schema-keyword
-  package struct SchemaKeyword: Keyword {
+  package struct SchemaKeyword: CoreKeyword {
     package static let name = "$schema"
 
     package let value: JSONValue
@@ -16,7 +16,7 @@ package enum Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-the-vocabulary-keyword
-  package struct Vocabulary: Keyword {
+  package struct Vocabulary: CoreKeyword {
     package static let name = "$vocabulary"
 
     package let value: JSONValue
@@ -62,7 +62,7 @@ package enum Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-comments-with-comment
-  package struct Comment: Keyword {
+  package struct Comment: CoreKeyword {
     package static let name = "$comment"
 
     package let value: JSONValue
