@@ -47,7 +47,7 @@ struct SchemableMember {
     )
   }
 
-  func generateSchema() -> CodeBlockItemSyntax? {
+  func generateSchema(keyStrategy: ExprSyntax?, typeName: String) -> CodeBlockItemSyntax? {
     var codeBlock: CodeBlockItemSyntax
     switch type.typeInformation() {
     case .primitive(_, let code):
@@ -65,10 +65,27 @@ struct SchemableMember {
     case .notSupported: return nil
     }
 
+    var customKey: ExprSyntax?
+    let options: LabeledExprListSyntax? = annotationArguments.flatMap { args in
+      let filtered = args.filter { argument in
+        guard let functionCall = argument.expression.as(FunctionCallExprSyntax.self),
+          let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self)
+        else { return true }
+
+        if memberAccess.declName.baseName.text == "key" {
+          customKey = functionCall.arguments.first?.expression
+          return false
+        }
+
+        return true
+      }
+      return filtered.isEmpty ? nil : LabeledExprListSyntax(filtered)
+    }
+
     // Apply schema options if present
-    if let annotationArguments = annotationArguments {
+    if let options, !options.isEmpty {
       codeBlock = SchemaOptionsGenerator.apply(
-        annotationArguments,
+        options,
         to: codeBlock,
         for: "SchemaOptions"
       )
@@ -93,8 +110,17 @@ struct SchemableMember {
         """
     }
 
+    let keyExpr: ExprSyntax
+    if let customKey {
+      keyExpr = customKey
+    } else if keyStrategy != nil {
+      keyExpr = "\(raw: typeName).keyEncodingStrategy.encode(\"\(raw: identifier.text)\")"
+    } else {
+      keyExpr = "\"\(raw: identifier.text)\""
+    }
+
     var block: CodeBlockItemSyntax = """
-      JSONProperty(key: "\(raw: identifier.text)") { \(codeBlock) }
+      JSONProperty(key: \(keyExpr)) { \(codeBlock) }
       """
 
     if !type.isOptional {

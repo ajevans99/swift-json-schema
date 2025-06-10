@@ -359,6 +359,86 @@ struct SchemableExpansionTests {
     )
   }
 
+  @Test func propertyKeyOverride() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct Item {
+        @SchemaOptions(.key("item_id"))
+        let id: Int
+        let name: String
+      }
+      """,
+      expandedSource: """
+        struct Item {
+          @SchemaOptions(.key("item_id"))
+          let id: Int
+          let name: String
+
+          static var schema: some JSONSchemaComponent<Item> {
+            JSONSchema(Item.init) {
+              JSONObject {
+                JSONProperty(key: "item_id") {
+                  JSONInteger()
+                }
+                .required()
+                JSONProperty(key: "name") {
+                  JSONString()
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension Item: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func typeWideKeyStrategy() {
+    assertMacroExpansion(
+      """
+      @Schemable(keyStrategy: .snakeCase)
+      struct Person {
+        let firstName: String
+        let lastName: String
+      }
+      """,
+      expandedSource: """
+        struct Person {
+          let firstName: String
+          let lastName: String
+
+          static var schema: some JSONSchemaComponent<Person> {
+            JSONSchema(Person.init) {
+              JSONObject {
+                JSONProperty(key: Person.keyEncodingStrategy.encode("firstName")) {
+                  JSONString()
+                }
+                .required()
+                JSONProperty(key: Person.keyEncodingStrategy.encode("lastName")) {
+                  JSONString()
+                }
+                .required()
+              }
+            }
+          }
+
+          static var keyEncodingStrategy: KeyEncodingStrategies {
+            .snakeCase
+          }
+        }
+
+        extension Person: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
   @Test(arguments: ["public", "internal", "fileprivate", "package", "private"])
   func accessModifiers(_ modifier: String) {
     assertMacroExpansion(

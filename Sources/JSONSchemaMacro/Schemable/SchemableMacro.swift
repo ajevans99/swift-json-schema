@@ -43,17 +43,50 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     in context: some MacroExpansionContext
   ) throws -> [DeclSyntax] {
     if let structDecl = declaration.as(StructDeclSyntax.self) {
-      let generator = SchemaGenerator(fromStruct: structDecl)
+      let strategyArg = node.arguments?
+        .as(LabeledExprListSyntax.self)?
+        .first(where: { $0.label?.text == "keyStrategy" })?
+        .expression
+      let generator = SchemaGenerator(fromStruct: structDecl, keyStrategy: strategyArg)
       let schemaDecl = generator.makeSchema()
-      return [schemaDecl]
+      var decls: [DeclSyntax] = [schemaDecl]
+      if let strategyArg {
+        let property: DeclSyntax = """
+          static var keyEncodingStrategy: KeyEncodingStrategies { \(strategyArg) }
+          """
+        decls.append(property)
+      }
+      return decls
     } else if let classDecl = declaration.as(ClassDeclSyntax.self) {
-      let generator = SchemaGenerator(fromClass: classDecl)
+      let strategyArg = node.arguments?
+        .as(LabeledExprListSyntax.self)?
+        .first(where: { $0.label?.text == "keyStrategy" })?
+        .expression
+      let generator = SchemaGenerator(fromClass: classDecl, keyStrategy: strategyArg)
       let schemaDecl = generator.makeSchema()
-      return [schemaDecl]
+      var decls: [DeclSyntax] = [schemaDecl]
+      if let strategyArg {
+        let property: DeclSyntax = """
+          static var keyEncodingStrategy: KeyEncodingStrategies { \(strategyArg) }
+          """
+        decls.append(property)
+      }
+      return decls
     } else if let enumDecl = declaration.as(EnumDeclSyntax.self) {
+      let strategyArg = node.arguments?
+        .as(LabeledExprListSyntax.self)?
+        .first(where: { $0.label?.text == "keyStrategy" })?
+        .expression
       let generator = EnumSchemaGenerator(fromEnum: enumDecl)
       let schemaDecl = generator.makeSchema()
-      return [schemaDecl]
+      var decls: [DeclSyntax] = [schemaDecl]
+      if let strategyArg {
+        let property: DeclSyntax = """
+          static var keyEncodingStrategy: KeyEncodingStrategies { \(strategyArg) }
+          """
+        decls.append(property)
+      }
+      return decls
     }
 
     throw SchemableError.unsupportedDeclaration

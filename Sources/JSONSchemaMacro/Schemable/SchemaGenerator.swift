@@ -91,25 +91,30 @@ struct SchemaGenerator {
   let name: TokenSyntax
   let members: MemberBlockItemListSyntax
   let attributes: AttributeListSyntax
+  let keyStrategy: ExprSyntax?
 
-  init(fromClass classDecl: ClassDeclSyntax) {
+  init(fromClass classDecl: ClassDeclSyntax, keyStrategy: ExprSyntax?) {
     declModifier = classDecl.modifiers.first
     name = classDecl.name.trimmed
     members = classDecl.memberBlock.members
     attributes = classDecl.attributes
+    self.keyStrategy = keyStrategy
   }
 
-  init(fromStruct structDecl: StructDeclSyntax) {
+  init(fromStruct structDecl: StructDeclSyntax, keyStrategy: ExprSyntax?) {
     declModifier = structDecl.modifiers.first
     name = structDecl.name.trimmed
     members = structDecl.memberBlock.members
     attributes = structDecl.attributes
+    self.keyStrategy = keyStrategy
   }
 
   func makeSchema() -> DeclSyntax {
     let schemableMembers = members.schemableMembers()
 
-    let statements = schemableMembers.compactMap { $0.generateSchema() }
+    let statements = schemableMembers.compactMap {
+      $0.generateSchema(keyStrategy: keyStrategy, typeName: name.text)
+    }
 
     var codeBlockItem: CodeBlockItemSyntax =
       "JSONObject { \(CodeBlockItemListSyntax(statements, separator: .newline)) }"

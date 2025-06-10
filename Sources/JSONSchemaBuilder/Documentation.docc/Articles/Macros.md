@@ -351,3 +351,20 @@ struct Weather {
   }
 }
 ```
+
+#### Key encoding strategies
+
+You can override a property's JSON key using ``SchemaOptions/key(_:)`` or apply a
+type-wide strategy by providing ``@Schemable(keyStrategy:)``. Strategies are
+represented by ``KeyEncodingStrategies`` which offers built-in ``.identity`` and
+``.snakeCase`` options but can also wrap custom types conforming to
+``KeyEncodingStrategy``.
+
+```swift
+@Schemable(keyStrategy: .snakeCase)
+struct Person {
+  let firstName: String
+  @SchemaOptions(.key("last-name"))
+  let lastName: String
+}
+```
