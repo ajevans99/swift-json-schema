@@ -471,6 +471,48 @@ struct SchemableExpansionTests {
     )
   }
 
+  @Test(arguments: ["public", "internal", "fileprivate", "package", "private"])
+  func accessModifiersWithKeyStrategy(_ modifier: String) {
+    assertMacroExpansion(
+      """
+      @Schemable(keyStrategy: .snakeCase)
+      \(modifier) struct Person {
+        let firstName: String
+        let lastName: String
+      }
+      """,
+      expandedSource: """
+        \(modifier) struct Person {
+          let firstName: String
+          let lastName: String
+
+          \(modifier) static var schema: some JSONSchemaComponent<Person> {
+            JSONSchema(Person.init) {
+              JSONObject {
+                JSONProperty(key: Person.keyEncodingStrategy.encode("firstName")) {
+                  JSONString()
+                }
+                .required()
+                JSONProperty(key: Person.keyEncodingStrategy.encode("lastName")) {
+                  JSONString()
+                }
+                .required()
+              }
+            }
+          }
+
+          \(modifier) static var keyEncodingStrategy: KeyEncodingStrategies {
+            .snakeCase
+          }
+        }
+
+        \(modifier == "private" || modifier == "fileprivate" ? "\(modifier) " : "")extension Person: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
   @Test func docstringSupport() {
     assertMacroExpansion(
       """

@@ -13,6 +13,14 @@ extension SchemableError: CustomStringConvertible {
 }
 
 public struct SchemableMacro: MemberMacro, ExtensionMacro {
+  /// Extract access level from declaration modifiers
+  private static func extractAccessLevel(from declaration: some DeclGroupSyntax) -> String? {
+    declaration.modifiers.first { modifier in
+      ["public", "internal", "package", "fileprivate", "private"].contains(modifier.name.text)
+    }?
+    .name.text
+  }
+
   public static func expansion(
     of node: AttributeSyntax,
     attachedTo declaration: some DeclGroupSyntax,
@@ -20,7 +28,7 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     conformingTo protocols: [TypeSyntax],
     in context: some MacroExpansionContext
   ) throws -> [ExtensionDeclSyntax] {
-    // Get the access level from the declaration
+    // Get the access level from the declaration - only add it for private/fileprivate
     let accessLevel = declaration.modifiers.first { modifier in
       ["private", "fileprivate"].contains(modifier.name.text)
     }?
@@ -42,6 +50,10 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     conformingTo protocols: [TypeSyntax],
     in context: some MacroExpansionContext
   ) throws -> [DeclSyntax] {
+    // Get the access level from the declaration
+    let accessLevel = extractAccessLevel(from: declaration)
+    let accessModifier = accessLevel.map { "\($0) " } ?? ""
+
     if let structDecl = declaration.as(StructDeclSyntax.self) {
       let strategyArg = node.arguments?
         .as(LabeledExprListSyntax.self)?
@@ -52,7 +64,7 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
       var decls: [DeclSyntax] = [schemaDecl]
       if let strategyArg {
         let property: DeclSyntax = """
-          static var keyEncodingStrategy: KeyEncodingStrategies { \(strategyArg) }
+          \(raw: accessModifier)static var keyEncodingStrategy: KeyEncodingStrategies { \(strategyArg) }
           """
         decls.append(property)
       }
@@ -67,7 +79,7 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
       var decls: [DeclSyntax] = [schemaDecl]
       if let strategyArg {
         let property: DeclSyntax = """
-          static var keyEncodingStrategy: KeyEncodingStrategies { \(strategyArg) }
+          \(raw: accessModifier)static var keyEncodingStrategy: KeyEncodingStrategies { \(strategyArg) }
           """
         decls.append(property)
       }
@@ -82,7 +94,7 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
       var decls: [DeclSyntax] = [schemaDecl]
       if let strategyArg {
         let property: DeclSyntax = """
-          static var keyEncodingStrategy: KeyEncodingStrategies { \(strategyArg) }
+          \(raw: accessModifier)static var keyEncodingStrategy: KeyEncodingStrategies { \(strategyArg) }
           """
         decls.append(property)
       }
