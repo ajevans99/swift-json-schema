@@ -146,4 +146,58 @@ struct DocumentationExampleTests {
     let expected: [String: JSONValue] = ["type": "string", "enum": ["active", "inactive"]]
     #expect(Status.schema.schemaValue == .object(expected))
   }
+
+  @Schemable
+  struct Child {
+    let one: String
+    let two: String
+  }
+
+  @Schemable
+  struct Parent {
+    let children: [String: Child]
+  }
+
+  @Test func dictionaryWithCustomTypeCompilation() {
+    // This test verifies that the generated code compiles and works correctly
+    let child1 = Child(one: "value1", two: "value2")
+    let child2 = Child(one: "value3", two: "value4")
+    let parent = Parent(children: ["child1": child1, "child2": child2])
+    
+    // Verify schema generation
+    let schema = Parent.schema
+    #expect(schema.schemaValue["type"]?.string == "object")
+    #expect(schema.schemaValue["properties"]?.object?["children"] != nil)
+    
+    // Verify the schema has the correct structure for dictionary with additionalProperties
+    let childrenProperty = schema.schemaValue["properties"]?.object?["children"]?.object
+    #expect(childrenProperty?["type"]?.string == "object")
+    #expect(childrenProperty?["additionalProperties"] != nil)
+    
+    // Test parsing
+    let jsonInput: JSONValue = [
+      "children": [
+        "child1": [
+          "one": "value1",
+          "two": "value2"
+        ],
+        "child2": [
+          "one": "value3", 
+          "two": "value4"
+        ]
+      ]
+    ]
+    
+    let parseResult = schema.parse(jsonInput)
+    switch parseResult {
+    case .valid(let parsedParent):
+      #expect(parsedParent.children.count == 2)
+      #expect(parsedParent.children["child1"]?.one == "value1")
+      #expect(parsedParent.children["child1"]?.two == "value2")
+      #expect(parsedParent.children["child2"]?.one == "value3")
+      #expect(parsedParent.children["child2"]?.two == "value4")
+    case .invalid(let errors):
+      Issue.record("Parsing failed with errors: \(errors)")
+    }
+  }
 }

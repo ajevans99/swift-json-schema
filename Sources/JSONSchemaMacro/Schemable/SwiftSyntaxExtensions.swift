@@ -55,6 +55,7 @@ extension TypeSyntax {
             \(codeBlock)
           }
           .map(\\.1)
+          .map(\\.matches)
           """
       )
     case .identifierType(let identifierType):
