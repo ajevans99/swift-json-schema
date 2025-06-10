@@ -23,7 +23,7 @@ public enum Dialect: String, Hashable, Sendable {
         "https://json-schema.org/draft/2020-12/vocab/validation",
         "https://json-schema.org/draft/2020-12/vocab/meta-data",
         "https://json-schema.org/draft/2020-12/vocab/format-annotation",
-        "https://json-schema.org/draft/2020-12/vocab/content"
+        "https://json-schema.org/draft/2020-12/vocab/content",
       ]
     }
   }
@@ -43,7 +43,7 @@ public enum Dialect: String, Hashable, Sendable {
         "$dynamicRef": "https://json-schema.org/draft/2020-12/vocab/core",
         "$dynamicAnchor": "https://json-schema.org/draft/2020-12/vocab/core",
         "$comment": "https://json-schema.org/draft/2020-12/vocab/core",
-        
+
         // Applicator vocabulary
         "allOf": "https://json-schema.org/draft/2020-12/vocab/applicator",
         "anyOf": "https://json-schema.org/draft/2020-12/vocab/applicator",
@@ -60,7 +60,7 @@ public enum Dialect: String, Hashable, Sendable {
         "patternProperties": "https://json-schema.org/draft/2020-12/vocab/applicator",
         "additionalProperties": "https://json-schema.org/draft/2020-12/vocab/applicator",
         "propertyNames": "https://json-schema.org/draft/2020-12/vocab/applicator",
-        
+
         // Validation vocabulary
         "type": "https://json-schema.org/draft/2020-12/vocab/validation",
         "enum": "https://json-schema.org/draft/2020-12/vocab/validation",
@@ -82,7 +82,7 @@ public enum Dialect: String, Hashable, Sendable {
         "minProperties": "https://json-schema.org/draft/2020-12/vocab/validation",
         "required": "https://json-schema.org/draft/2020-12/vocab/validation",
         "dependentRequired": "https://json-schema.org/draft/2020-12/vocab/validation",
-        
+
         // Meta-data vocabulary
         "title": "https://json-schema.org/draft/2020-12/vocab/meta-data",
         "description": "https://json-schema.org/draft/2020-12/vocab/meta-data",
@@ -91,15 +91,15 @@ public enum Dialect: String, Hashable, Sendable {
         "readOnly": "https://json-schema.org/draft/2020-12/vocab/meta-data",
         "writeOnly": "https://json-schema.org/draft/2020-12/vocab/meta-data",
         "examples": "https://json-schema.org/draft/2020-12/vocab/meta-data",
-        
+
         // Format-annotation vocabulary
         "format": "https://json-schema.org/draft/2020-12/vocab/format-annotation",
-        
+
         // Content vocabulary
         "contentEncoding": "https://json-schema.org/draft/2020-12/vocab/content",
         "contentMediaType": "https://json-schema.org/draft/2020-12/vocab/content",
         "contentSchema": "https://json-schema.org/draft/2020-12/vocab/content",
-        
+
         // Unevaluated vocabulary
         "unevaluatedItems": "https://json-schema.org/draft/2020-12/vocab/unevaluated",
         "unevaluatedProperties": "https://json-schema.org/draft/2020-12/vocab/unevaluated",
@@ -110,11 +110,11 @@ public enum Dialect: String, Hashable, Sendable {
   /// Returns keywords filtered by active vocabularies. If no active vocabularies are specified, returns all keywords.
   func keywords(activeVocabularies: Set<String>? = nil) -> [any Keyword.Type] {
     let allKeywords = keywords
-    
+
     guard let activeVocabs = activeVocabularies, !activeVocabs.isEmpty else {
       return allKeywords
     }
-    
+
     return allKeywords.filter { keywordType in
       let keywordName = keywordType.name
       if let vocabularyURI = keywordVocabularyMapping[keywordName] {
