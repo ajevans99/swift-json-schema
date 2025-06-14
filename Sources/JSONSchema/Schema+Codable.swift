@@ -65,7 +65,16 @@ extension ObjectSchema: Codable {
       }
     }
 
-    self.init(schemaValue: schemaValue, location: .init(), context: context)
+    do {
+      try self.init(schemaValue: schemaValue, location: .init(), context: context)
+    } catch {
+      throw DecodingError.dataCorrupted(
+        .init(
+          codingPath: decoder.codingPath,
+          debugDescription: "Failed to initialize schema: \(error)"
+        )
+      )
+    }
   }
 
   public func encode(to encoder: any Encoder) throws {
