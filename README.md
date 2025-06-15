@@ -305,8 +305,6 @@ dump(result2, name: "Instance 2 Validation Result")
 </details>
 <br/>
 
-> **Note:** Dynamic references, vocabulary, and other advanced features are not yet supported. The library is still in development, and more features will be added in the future. See current [unsupported tests](Tests/JSONSchemaTests/JSONSchemaTestSuite.swift) from the [JSON Schema Test Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite).
-
 ## Parsing
 
 When using [builders](#schema-generation) or [macros](#macros), you can also parse JSON instances into Swift types.
