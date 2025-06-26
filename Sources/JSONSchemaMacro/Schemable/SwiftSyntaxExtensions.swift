@@ -99,6 +99,19 @@ extension TypeSyntax {
       return .notSupported
     }
   }
+
+  func baseTypeName() -> String {
+    switch self.as(TypeSyntaxEnum.self) {
+    case .identifierType(let identifierType):
+      return identifierType.name.text
+    case .implicitlyUnwrappedOptionalType(let implicitlyUnwrappedOptionalType):
+      return implicitlyUnwrappedOptionalType.wrappedType.baseTypeName()
+    case .optionalType(let optionalType): 
+      return optionalType.wrappedType.baseTypeName()
+    default:
+      return description.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+  }
 }
 
 extension PatternBindingListSyntax.Element {

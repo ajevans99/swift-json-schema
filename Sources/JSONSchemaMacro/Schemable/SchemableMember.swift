@@ -1,3 +1,4 @@
+import Foundation
 import SwiftSyntax
 
 struct SchemableMember {
@@ -75,11 +76,45 @@ struct SchemableMember {
     
     var codeBlock: CodeBlockItemSyntax
     
-    // If format is specified, use JSONString with format instead of type resolution
+    // If format is specified, use JSONString with format and type conversion
     if let customFormat {
-      codeBlock = """
+      let baseTypeName = type.baseTypeName()
+      
+      // Extract format string by removing quotes
+      let formatString = customFormat.description.trimmingCharacters(in: .whitespacesAndNewlines)
+        .replacingOccurrences(of: "\"", with: "")
+      
+      // Generate appropriate conversion based on format and type
+      let conversion: String
+      switch (baseTypeName, formatString) {
+      case ("UUID", "uuid"):
+        conversion = "UUID(uuidString: $0)!"
+      case ("Date", "date-time"):
+        conversion = "ISO8601DateFormatter().date(from: $0)!"
+      default:
+        // Generic fallback for string-based formats
+        conversion = "\(baseTypeName)($0)"
+      }
+      
+      // Start with basic JSONString with format
+      var innerCodeBlock: CodeBlockItemSyntax = """
         JSONString()
         .format(\(customFormat))
+        """
+      
+      // Apply other schema options to the inner JSONString
+      if let options, !options.isEmpty {
+        innerCodeBlock = SchemaOptionsGenerator.apply(
+          options,
+          to: innerCodeBlock,
+          for: "SchemaOptions"
+        )
+      }
+      
+      codeBlock = """
+        JSONSchema({ \(raw: conversion) }) {
+          \(innerCodeBlock)
+        }
         """
     } else {
       switch type.typeInformation() {
@@ -99,8 +134,8 @@ struct SchemableMember {
       }
     }
 
-    // Apply schema options if present
-    if let options, !options.isEmpty {
+    // Apply schema options if present (but skip if we already applied them in format case)
+    if let options, !options.isEmpty, customFormat == nil {
       codeBlock = SchemaOptionsGenerator.apply(
         options,
         to: codeBlock,

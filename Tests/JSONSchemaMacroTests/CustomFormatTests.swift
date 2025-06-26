@@ -24,8 +24,12 @@ struct CustomFormatTests {
             JSONSchema(Person.init) {
               JSONObject {
                 JSONProperty(key: "id") {
-                  JSONString()
-                  .format("uuid")
+                  JSONSchema({
+                      UUID(uuidString: $0)!
+                    }) {
+                    JSONString()
+                    .format("uuid")
+                  }
                 }
                 .required()
               }
@@ -57,8 +61,12 @@ struct CustomFormatTests {
             JSONSchema(Event.init) {
               JSONObject {
                 JSONProperty(key: "createdAt") {
-                  JSONString()
-                  .format("date-time")
+                  JSONSchema({
+                      ISO8601DateFormatter().date(from: $0)!
+                    }) {
+                    JSONString()
+                    .format("date-time")
+                  }
                 }
                 .required()
               }
@@ -90,9 +98,13 @@ struct CustomFormatTests {
             JSONSchema(Person.init) {
               JSONObject {
                 JSONProperty(key: "id") {
-                  JSONString()
-                  .format("uuid")
-                  .description("Unique identifier")
+                  JSONSchema({
+                      UUID(uuidString: $0)!
+                    }) {
+                    JSONString()
+                    .format("uuid")
+                    .description("Unique identifier")
+                  }
                 }
                 .required()
               }
@@ -124,8 +136,12 @@ struct CustomFormatTests {
             JSONSchema(Person.init) {
               JSONObject {
                 JSONProperty(key: "userId") {
-                  JSONString()
-                  .format("uuid")
+                  JSONSchema({
+                      UUID(uuidString: $0)!
+                    }) {
+                    JSONString()
+                    .format("uuid")
+                  }
                 }
                 .required()
               }
@@ -157,8 +173,12 @@ struct CustomFormatTests {
             JSONSchema(Person.init) {
               JSONObject {
                 JSONProperty(key: "id") {
-                  JSONString()
-                  .format("uuid")
+                  JSONSchema({
+                      UUID(uuidString: $0)!
+                    }) {
+                    JSONString()
+                    .format("uuid")
+                  }
                 }
               }
             }
