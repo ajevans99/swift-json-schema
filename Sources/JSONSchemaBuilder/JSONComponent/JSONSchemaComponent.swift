@@ -51,6 +51,12 @@ extension JSONSchemaComponent {
     } catch {
       throw .decodingFailed(error)
     }
+    return try parseAndValidate(value)
+  }
+
+  public func parseAndValidate(
+    _ value: JSONValue
+  ) throws(ParseAndValidateIssue) -> Output {
     let parsingResult = parse(value)
     let validationResult = definition().validate(value)
     switch (parsingResult, validationResult.isValid) {

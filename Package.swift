@@ -26,6 +26,10 @@ let package = Package(
       name: "JSONSchemaClient",
       targets: ["JSONSchemaClient"]
     ),
+    .library(
+      name: "JSONSchemaConversion",
+      targets: ["JSONSchemaConversion"]
+    ),
   ],
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.0.0"),
@@ -101,6 +105,20 @@ let package = Package(
       ],
       exclude: [
         "__Snapshots__"
+      ]
+    ),
+
+    // Library for custom conversions for JSONSchemaBuilder.
+    .target(
+      name: "JSONSchemaConversion",
+      dependencies: [
+        "JSONSchemaBuilder"
+      ]
+    ),
+    .testTarget(
+      name: "JSONSchemaConversionTests",
+      dependencies: [
+        "JSONSchemaConversion"
       ]
     ),
   ]
