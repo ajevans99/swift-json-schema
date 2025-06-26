@@ -48,24 +48,10 @@ struct SchemableMember {
   }
 
   func generateSchema(keyStrategy: ExprSyntax?, typeName: String) -> CodeBlockItemSyntax? {
-    var codeBlock: CodeBlockItemSyntax
-    switch type.typeInformation() {
-    case .primitive(_, let code):
-      codeBlock = code
-      // Only use default value on primitives that can be `ExpressibleBy*Literal` to transform
-      // from Swift type to JSONValue (required by .default())
-      // In the future, JSONValue types should also be allowed to apply default value
-      if let defaultValue {
-        codeBlock = """
-          \(codeBlock)
-          .default(\(defaultValue))
-          """
-      }
-    case .schemable(_, let code): codeBlock = code
-    case .notSupported: return nil
-    }
-
     var customKey: ExprSyntax?
+    var customFormat: ExprSyntax?
+    
+    // Check for custom key and format options first
     let options: LabeledExprListSyntax? = annotationArguments.flatMap { args in
       let filtered = args.filter { argument in
         guard let functionCall = argument.expression.as(FunctionCallExprSyntax.self),
@@ -76,10 +62,41 @@ struct SchemableMember {
           customKey = functionCall.arguments.first?.expression
           return false
         }
+        
+        if memberAccess.declName.baseName.text == "format" {
+          customFormat = functionCall.arguments.first?.expression
+          return false
+        }
 
         return true
       }
       return filtered.isEmpty ? nil : LabeledExprListSyntax(filtered)
+    }
+    
+    var codeBlock: CodeBlockItemSyntax
+    
+    // If format is specified, use JSONString with format instead of type resolution
+    if let customFormat {
+      codeBlock = """
+        JSONString()
+        .format(\(customFormat))
+        """
+    } else {
+      switch type.typeInformation() {
+      case .primitive(_, let code):
+        codeBlock = code
+        // Only use default value on primitives that can be `ExpressibleBy*Literal` to transform
+        // from Swift type to JSONValue (required by .default())
+        // In the future, JSONValue types should also be allowed to apply default value
+        if let defaultValue {
+          codeBlock = """
+            \(codeBlock)
+            .default(\(defaultValue))
+            """
+        }
+      case .schemable(_, let code): codeBlock = code
+      case .notSupported: return nil
+      }
     }
 
     // Apply schema options if present

@@ -25,7 +25,7 @@ struct CustomFormatTests {
               JSONObject {
                 JSONProperty(key: "id") {
                   JSONString()
-                    .format("uuid")
+                  .format("uuid")
                 }
                 .required()
               }
@@ -58,7 +58,7 @@ struct CustomFormatTests {
               JSONObject {
                 JSONProperty(key: "createdAt") {
                   JSONString()
-                    .format("date-time")
+                  .format("date-time")
                 }
                 .required()
               }
@@ -67,6 +67,105 @@ struct CustomFormatTests {
         }
 
         extension Event: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func formatWithOtherOptions() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct Person {
+        @SchemaOptions(.format("uuid"), .description("Unique identifier"))
+        let id: UUID
+      }
+      """,
+      expandedSource: """
+        struct Person {
+          let id: UUID
+
+          static var schema: some JSONSchemaComponent<Person> {
+            JSONSchema(Person.init) {
+              JSONObject {
+                JSONProperty(key: "id") {
+                  JSONString()
+                  .format("uuid")
+                  .description("Unique identifier")
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension Person: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func formatWithCustomKey() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct Person {
+        @SchemaOptions(.format("uuid"), .key("userId"))
+        let id: UUID
+      }
+      """,
+      expandedSource: """
+        struct Person {
+          let id: UUID
+
+          static var schema: some JSONSchemaComponent<Person> {
+            JSONSchema(Person.init) {
+              JSONObject {
+                JSONProperty(key: "userId") {
+                  JSONString()
+                  .format("uuid")
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension Person: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func formatWithOptionalType() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct Person {
+        @SchemaOptions(.format("uuid"))
+        let id: UUID?
+      }
+      """,
+      expandedSource: """
+        struct Person {
+          let id: UUID?
+
+          static var schema: some JSONSchemaComponent<Person> {
+            JSONSchema(Person.init) {
+              JSONObject {
+                JSONProperty(key: "id") {
+                  JSONString()
+                  .format("uuid")
+                }
+              }
+            }
+          }
+        }
+
+        extension Person: Schemable {
         }
         """,
       macros: testMacros

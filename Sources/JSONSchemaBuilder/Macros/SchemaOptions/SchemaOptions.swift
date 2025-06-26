@@ -35,6 +35,10 @@ extension SchemaTrait where Self == SchemaOptionsTrait {
     fatalError(SchemaOptionsTrait.errorMessage)
   }
 
+  public static func format(_ value: String) -> SchemaOptionsTrait {
+    fatalError(SchemaOptionsTrait.errorMessage)
+  }
+
   public static func readOnly(_ value: Bool) -> SchemaOptionsTrait {
     fatalError(SchemaOptionsTrait.errorMessage)
   }
