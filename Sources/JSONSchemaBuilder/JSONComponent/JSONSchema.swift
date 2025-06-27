@@ -24,14 +24,20 @@ public struct JSONSchema<Components: JSONSchemaComponent, NewOutput>: JSONSchema
     self.components = component()
   }
 
-  /// Creates a new schema component.
-  /// - Parameter component: The components to group together.
-  public init(@JSONSchemaBuilder component: () -> Components) where Components.Output == NewOutput {
-    self.transform = { $0 }
-    self.components = component()
-  }
-
   public func parse(_ value: JSONValue) -> Parsed<NewOutput, ParseIssue> {
     components.parse(value).map(transform)
+  }
+}
+
+extension JSONSchema where NewOutput == JSONValue, Components == JSONComponents.MergedComponent {
+  /// Creates a new schema component.
+  /// - Parameter components: The components to group together.
+  public init(
+    @JSONSchemaCollectionBuilder<JSONValue> components: () -> [JSONComponents.AnySchemaComponent<
+      JSONValue
+    >]
+  ) {
+    self.transform = { $0 }
+    self.components = JSONComponents.MergedComponent(components: components())
   }
 }
