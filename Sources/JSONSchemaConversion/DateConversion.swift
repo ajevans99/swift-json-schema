@@ -43,14 +43,18 @@ public struct TimeConversion: Schemable {
   public static var schema: some JSONSchemaComponent<DateComponents> {
     JSONString()
       .format("time")
-      .compactMap { value in
+      .compactMap { value -> DateComponents? in
         // Basic ISO8601 time parsing (hh:mm:ss(.sss)?(Z|+hh:mm)?)
         let isoFormatter = ISO8601DateFormatter()
         isoFormatter.formatOptions = [
           .withTime, .withColonSeparatorInTime, .withFractionalSeconds, .withTimeZone,
         ]
-        if let date = isoFormatter.date(from: "1970-01-01T" + value) {
-          let calendar = Calendar(identifier: .gregorian)
+        if let date = isoFormatter.date(from: value) {
+          var calendar = Calendar(identifier: .gregorian)
+          guard let timeZone = TimeZone(secondsFromGMT: 0) else {
+            return nil
+          }
+          calendar.timeZone = timeZone
           return calendar.dateComponents(
             [.hour, .minute, .second, .nanosecond, .timeZone],
             from: date
