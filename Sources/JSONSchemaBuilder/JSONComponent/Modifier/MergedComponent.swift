@@ -14,17 +14,24 @@ extension JSONComponents {
   public struct MergedComponent: JSONSchemaComponent {
     public var schemaValue: SchemaValue {
       get {
-        components.reduce(into: SchemaValue.object([:])) { result, component in
+        var result = SchemaValue.object([:])
+        for component in components {
           result.merge(component.schemaValue)
         }
+        result.merge(_schemaValue)
+        return result
       }
-      set {}
+      set {
+        _schemaValue = newValue
+      }
     }
 
     let components: [JSONComponents.AnySchemaComponent<JSONValue>]
+    var _schemaValue: SchemaValue
 
     public init(components: [JSONComponents.AnySchemaComponent<JSONValue>]) {
       self.components = components
+      self._schemaValue = .object([:])
     }
 
     public func parse(_ value: JSONValue) -> Parsed<JSONValue, ParseIssue> {
