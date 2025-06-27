@@ -225,7 +225,7 @@ enum TemperatureType: String {
 }
 ```
 
-If any of the enum cases have an associated value, the macro will instead expand using the `AnyOf` ``JSONComposition/AnyOf/init(_:)`` builder.
+If any of the enum cases have an associated value, the macro will instead expand using the `OneOf` ``JSONComposition/OneOf/init(_:)`` builder.
 
 ```swift
 @Schemable
@@ -255,7 +255,7 @@ enum TemperatureType {
       case windy
 
       static var schema: some JSONSchemaComponent {
-        JSONComposition.AnyOf {
+        JSONComposition.OneOf {
           JSONObject {
             JSONProperty(key: "cloudy") {
               JSONObject {
