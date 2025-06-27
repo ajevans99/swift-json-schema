@@ -1,7 +1,6 @@
 import JSONSchema
+import JSONSchemaBuilder
 import Testing
-
-@testable import JSONSchemaBuilder
 
 struct JSONEnumTests {
   @Test func singleValue() {
@@ -70,6 +69,35 @@ struct JSONEnumTests {
       "title": "Color",
       "type": "string",
       "enum": ["red", "amber", "green"],
+    ]
+
+    #expect(sample.schemaValue == .object(expected))
+  }
+}
+
+struct JSONConstantTests {
+  @Test func constantOnly() {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
+      JSONAnyValue()
+        .constant("red")
+    }
+
+    let expected: [String: JSONValue] = [
+      "const": "red"
+    ]
+
+    #expect(sample.schemaValue == .object(expected))
+  }
+
+  @Test func string() {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
+      JSONString()
+        .constant("red")
+    }
+
+    let expected: [String: JSONValue] = [
+      "type": "string",
+      "const": "red",
     ]
 
     #expect(sample.schemaValue == .object(expected))
