@@ -31,6 +31,15 @@ enum SchemaOptionsGenerator {
       return codeBlockItem
     }
 
+    // Handle customSchema specially - it replaces the entire schema
+    if optionName == "customSchema" {
+      guard let value = functionCall.arguments.first else {
+        return codeBlockItem
+      }
+
+      return "\(value).schema"
+    }
+
     if let closure = functionCall.trailingClosure {
       return applyClosureBasedOption(optionName, closure: closure, to: codeBlockItem)
     } else if let value = functionCall.arguments.first {

@@ -5,9 +5,8 @@ import JSONSchemaBuilder
 ///
 /// Accepts strings that are valid URIs (e.g. "https://example.com").
 /// Returns a `URL` if parsing succeeds, otherwise fails validation.
-public struct URLConversion: CustomSchemaConvertible {
-  public typealias Output = URL
-  public var schema: any JSONSchemaComponent<URL> {
+public struct URLConversion: Schemable {
+  public static var schema: some JSONSchemaComponent<URL> {
     JSONString()
       .format("uri")
       .compactMap { URL(string: $0) }

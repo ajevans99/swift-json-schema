@@ -51,8 +51,7 @@ extension SchemaTrait where Self == SchemaOptionsTrait {
     fatalError(SchemaOptionsTrait.errorMessage)
   }
 
-  public static func customSchema<C: CustomSchemaConvertible>(_ conversion: C) -> SchemaOptionsTrait
-  {
+  public static func customSchema<S: Schemable>(_ conversion: S.Type) -> SchemaOptionsTrait {
     fatalError(SchemaOptionsTrait.errorMessage)
   }
 }

@@ -14,20 +14,20 @@ public protocol JSONSchemaComponent<Output>: Sendable {
 }
 
 extension JSONSchemaComponent {
-  public func definition() -> Schema {
+  public func definition(context: Context = .init(dialect: .draft2020_12)) -> Schema {
     switch schemaValue {
     case .boolean(let bool):
       BooleanSchema(
         schemaValue: bool,
         location: .init(),
-        context: .init(dialect: .draft2020_12)
+        context: context
       )
       .asSchema()
     case .object(let dict):
       ObjectSchema(
         schemaValue: dict,
         location: .init(),
-        context: .init(dialect: .draft2020_12)
+        context: context
       )
       .asSchema()
     }
@@ -43,7 +43,8 @@ extension JSONSchemaComponent {
 
   public func parseAndValidate(
     instance: String,
-    decoder: JSONDecoder = JSONDecoder()
+    decoder: JSONDecoder = JSONDecoder(),
+    validationContext: Context = .init(dialect: .draft2020_12)
   ) throws(ParseAndValidateIssue) -> Output {
     let value: JSONValue
     do {
@@ -51,14 +52,15 @@ extension JSONSchemaComponent {
     } catch {
       throw .decodingFailed(error)
     }
-    return try parseAndValidate(value)
+    return try parseAndValidate(value, validationContext: validationContext)
   }
 
   public func parseAndValidate(
-    _ value: JSONValue
+    _ value: JSONValue,
+    validationContext: Context = .init(dialect: .draft2020_12)
   ) throws(ParseAndValidateIssue) -> Output {
     let parsingResult = parse(value)
-    let validationResult = definition().validate(value)
+    let validationResult = definition(context: validationContext).validate(value)
     switch (parsingResult, validationResult.isValid) {
     case (.valid(let output), true):
       return output

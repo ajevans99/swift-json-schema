@@ -92,6 +92,7 @@ let package = Package(
         "JSONSchema",
         "JSONSchemaBuilder",
         "JSONSchemaMacro",
+        "JSONSchemaConversion",
       ]
     ),
 
@@ -100,6 +101,7 @@ let package = Package(
       dependencies: [
         "JSONSchema",
         "JSONSchemaBuilder",
+        "JSONSchemaConversion",
         .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
         .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
       ],
@@ -112,6 +114,7 @@ let package = Package(
     .target(
       name: "JSONSchemaConversion",
       dependencies: [
+        
         "JSONSchemaBuilder"
       ]
     ),
