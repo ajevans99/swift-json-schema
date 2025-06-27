@@ -26,6 +26,10 @@ let package = Package(
       name: "JSONSchemaClient",
       targets: ["JSONSchemaClient"]
     ),
+    .library(
+      name: "JSONSchemaConversion",
+      targets: ["JSONSchemaConversion"]
+    ),
   ],
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.0.0"),
@@ -88,6 +92,7 @@ let package = Package(
         "JSONSchema",
         "JSONSchemaBuilder",
         "JSONSchemaMacro",
+        "JSONSchemaConversion",
       ]
     ),
 
@@ -96,11 +101,27 @@ let package = Package(
       dependencies: [
         "JSONSchema",
         "JSONSchemaBuilder",
+        "JSONSchemaConversion",
         .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
         .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
       ],
       exclude: [
         "__Snapshots__"
+      ]
+    ),
+
+    // Library for custom conversions for JSONSchemaBuilder.
+    .target(
+      name: "JSONSchemaConversion",
+      dependencies: [
+        
+        "JSONSchemaBuilder"
+      ]
+    ),
+    .testTarget(
+      name: "JSONSchemaConversionTests",
+      dependencies: [
+        "JSONSchemaConversion"
       ]
     ),
   ]

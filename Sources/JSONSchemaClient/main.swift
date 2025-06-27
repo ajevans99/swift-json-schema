@@ -1,6 +1,7 @@
 import Foundation
 import JSONSchema
 import JSONSchemaBuilder
+import JSONSchemaConversion
 
 let encoder = JSONEncoder()
 encoder.outputFormatting = .prettyPrinted
@@ -94,4 +95,39 @@ public struct Weather {
 )
 public struct Weather20 {
   let temperature: Double
+}
+
+struct IPAddress: Schemable {
+  static var schema: some JSONSchemaComponent<String> {
+    JSONString()
+      .format("ipv4")
+  }
+}
+
+@Schemable
+struct User {
+  @SchemaOptions(.customSchema(Conversions.uuid))
+  let id: UUID
+
+  @SchemaOptions(.customSchema(Conversions.dateTime))
+  let createdAt: Date
+
+  @SchemaOptions(.customSchema(Conversions.url))
+  let website: URL
+
+  @SchemaOptions(.customSchema(IPAddress.self))
+  let ipAddress: String
+}
+
+let json = """
+  {"id":"123e4567-e89b-12d3-a456-426614174000","createdAt":"2025-06-27T12:34:56.789Z","website":"https://example.com","ipAddress":".168.0.1"}
+  """
+do {
+  let result = try User.schema.parseAndValidate(
+    instance: json,
+    validationContext: .init(dialect: .draft2020_12, formatValidators: DefaultFormatValidators.all)
+  )
+  dump(result)
+} catch {
+  dump(error)
 }

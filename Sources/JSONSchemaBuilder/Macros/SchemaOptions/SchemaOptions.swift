@@ -50,4 +50,8 @@ extension SchemaTrait where Self == SchemaOptionsTrait {
   public static func comment(_ value: String) -> SchemaOptionsTrait {
     fatalError(SchemaOptionsTrait.errorMessage)
   }
+
+  public static func customSchema<S: Schemable>(_ conversion: S.Type) -> SchemaOptionsTrait {
+    fatalError(SchemaOptionsTrait.errorMessage)
+  }
 }

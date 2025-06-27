@@ -205,4 +205,60 @@ struct SchemaOptionsTests {
       macros: testMacros
     )
   }
+
+  @Test func customSchema() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct User {
+        @SchemaOptions(.customSchema(Conversions.uuid))
+        let id: UUID
+
+        @SchemaOptions(.customSchema(Conversions.dateTime))
+        let createdAt: Date
+
+        @SchemaOptions(.customSchema(Conversions.url))
+        let website: URL
+
+        @SchemaOptions(.customSchema(IPAddress.self))
+        let ipAddress: String
+      }
+      """,
+      expandedSource: """
+        struct User {
+          let id: UUID
+          let createdAt: Date
+          let website: URL
+          let ipAddress: String
+
+          static var schema: some JSONSchemaComponent<User> {
+            JSONSchema(User.init) {
+              JSONObject {
+                JSONProperty(key: "id") {
+                  Conversions.uuid.schema
+                }
+                .required()
+                JSONProperty(key: "createdAt") {
+                  Conversions.dateTime.schema
+                }
+                .required()
+                JSONProperty(key: "website") {
+                  Conversions.url.schema
+                }
+                .required()
+                JSONProperty(key: "ipAddress") {
+                  IPAddress.self.schema
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension User: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
 }
