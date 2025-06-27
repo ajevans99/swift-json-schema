@@ -2,7 +2,8 @@
   "description" : "A schema for representing a poll with options and metadata.",
   "properties" : {
     "category" : {
-      "anyOf" : [
+      "description" : "Category of the poll, limited to specific types",
+      "oneOf" : [
         {
           "properties" : {
             "technology" : {
@@ -124,8 +125,7 @@
           ],
           "type" : "string"
         }
-      ],
-      "description" : "Category of the poll, limited to specific types"
+      ]
     },
     "createdAt" : {
       "format" : "date-time",
