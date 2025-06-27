@@ -60,7 +60,7 @@ import Testing
           case rainy(chanceOfRain: Double, amount: Double)
 
           static var schema: some JSONSchemaComponent<TemperatureKind> {
-            JSONComposition.AnyOf(into: TemperatureKind.self) {
+            JSONComposition.OneOf(into: TemperatureKind.self) {
               JSONObject {
                 JSONProperty(key: "cloudy") {
                   JSONObject {
@@ -119,7 +119,7 @@ import Testing
           case rainy(Double, Double)
 
           static var schema: some JSONSchemaComponent<TemperatureKind> {
-            JSONComposition.AnyOf(into: TemperatureKind.self) {
+            JSONComposition.OneOf(into: TemperatureKind.self) {
               JSONObject {
                 JSONProperty(key: "cloudy") {
                   JSONObject {
@@ -184,7 +184,7 @@ import Testing
           case stormy
 
           static var schema: some JSONSchemaComponent<TemperatureKind> {
-            JSONComposition.AnyOf(into: TemperatureKind.self) {
+            JSONComposition.OneOf(into: TemperatureKind.self) {
               JSONObject {
                 JSONProperty(key: "cloudy") {
                   JSONObject {
@@ -264,7 +264,7 @@ import Testing
           case contactInfo([String: String])
 
           static var schema: some JSONSchemaComponent<UserProfileSetting> {
-            JSONComposition.AnyOf(into: UserProfileSetting.self) {
+            JSONComposition.OneOf(into: UserProfileSetting.self) {
               JSONObject {
                 JSONProperty(key: "username") {
                   JSONObject {
@@ -357,7 +357,7 @@ import Testing
           case passengerInfo(name: String = "Unknown", seatNumber: String? = nil)
 
           static var schema: some JSONSchemaComponent<FlightInfo> {
-            JSONComposition.AnyOf(into: FlightInfo.self) {
+            JSONComposition.OneOf(into: FlightInfo.self) {
               JSONObject {
                 JSONProperty(key: "flightNumber") {
                   JSONObject {
@@ -492,7 +492,7 @@ import Testing
           case music(details: ItemDetails, category: Category)
 
           static var schema: some JSONSchemaComponent<LibraryItem> {
-            JSONComposition.AnyOf(into: LibraryItem.self) {
+            JSONComposition.OneOf(into: LibraryItem.self) {
               JSONObject {
                 JSONProperty(key: "book") {
                   JSONObject {

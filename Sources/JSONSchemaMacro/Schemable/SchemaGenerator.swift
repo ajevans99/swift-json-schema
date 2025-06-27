@@ -31,7 +31,7 @@ struct EnumSchemaGenerator {
       if !casesWithoutAssociatedValues.isEmpty {
         codeBlockItemList.append(simpleEnumSchema(for: casesWithoutAssociatedValues))
       }
-      codeBlockItem = "JSONComposition.AnyOf(into: \(name).self) { \(codeBlockItemList) }"
+      codeBlockItem = "JSONComposition.OneOf(into: \(name).self) { \(codeBlockItemList) }"
     } else {
       // When no case has an associated value, use simple enum schema
       codeBlockItem = simpleEnumSchema(for: casesWithoutAssociatedValues)

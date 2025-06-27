@@ -1,9 +1,9 @@
 ▿ Parsed<Poll, ParseIssue>
   ▿ invalid: 1 element
-    ▿ Composition (`anyOf`) failure: the instance did not match any.
+    ▿ Composition (`oneOf`) failure: the instance no match found.
       ▿ compositionFailure: (3 elements)
-        - type: JSONComposition.anyOf
-        - reason: "did not match any"
+        - type: JSONComposition.oneOf
+        - reason: "no match found"
         ▿ nestedErrors: 4 elements
           ▿ Missing required property `technology`.
             ▿ missingRequiredProperty: (1 element)
