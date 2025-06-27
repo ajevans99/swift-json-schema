@@ -18,20 +18,20 @@ extension JSONComponents {
         for component in components {
           result.merge(component.schemaValue)
         }
-        result.merge(_schemaValue)
+        result.merge(setSchemaValue)
         return result
       }
       set {
-        _schemaValue = newValue
+        setSchemaValue = newValue
       }
     }
 
     let components: [JSONComponents.AnySchemaComponent<JSONValue>]
-    var _schemaValue: SchemaValue
+    private var setSchemaValue: SchemaValue
 
     public init(components: [JSONComponents.AnySchemaComponent<JSONValue>]) {
       self.components = components
-      self._schemaValue = .object([:])
+      self.setSchemaValue = .object([:])
     }
 
     public func parse(_ value: JSONValue) -> Parsed<JSONValue, ParseIssue> {
