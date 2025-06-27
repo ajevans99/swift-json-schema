@@ -48,8 +48,18 @@ public enum SchemaValue: Sendable, Equatable {
       self = .object(dict)
     case (.object(let dict), .boolean):
       self = .object(dict)
-    case (.object(let dict1), .object(let dict2)):
-      self = .object(dict1.merging(dict2) { current, _ in current })
+    case (.object(var dict1), .object(let dict2)):
+      for (key, value2) in dict2 {
+        if let value1 = dict1[key] {
+          // If both values are objects, merge recursively
+          var merged = value1
+          merged.merge(value2)
+          dict1[key] = merged
+        } else {
+          dict1[key] = value2
+        }
+      }
+      self = .object(dict1)
     }
   }
 }

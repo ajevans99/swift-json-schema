@@ -342,3 +342,34 @@ struct JSONAdvancedBuilderTests {
     #expect(sample.schemaValue == .object(expected))
   }
 }
+
+struct JSONSchemaGroupTests {
+  @Test func group() {
+    let message = JSONObject {
+      JSONProperty(key: "to") { JSONString() }
+      JSONProperty(key: "from") { JSONString() }
+    }
+
+    let typeExtension = JSONObject {
+      JSONProperty(key: "type") {
+        JSONAnyValue().constant("message")
+      }
+    }
+
+    let fullMessage = JSONSchema {
+      message
+      typeExtension
+    }
+
+    let expected: [String: JSONValue] = [
+      "type": "object",
+      "properties": [
+        "to": ["type": "string"],
+        "from": ["type": "string"],
+        "type": ["const": "message"],
+      ],
+    ]
+
+    #expect(fullMessage.schemaValue == .object(expected))
+  }
+}
