@@ -16,7 +16,7 @@ public protocol JSONComposableCollectionComponent: JSONComposableComponent {
 }
 
 extension JSONComposableCollectionComponent where Output == JSONValue {
-  init(
+  public init(
     @JSONSchemaCollectionBuilder<JSONValue> _ builder: () -> [JSONComponents.AnySchemaComponent<
       JSONValue
     >]
