@@ -1,7 +1,7 @@
 import JSONSchema
 import Testing
 
-@testable import JSONSchemaBuilder
+import JSONSchemaBuilder
 
 struct JSONCompositionTests {
   @Test func anyOfComposition() {
