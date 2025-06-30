@@ -90,4 +90,32 @@ struct JSONCompositionTests {
 
     #expect(sample.schemaValue == .object(expected))
   }
+
+  @Test func forLoop() {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
+      JSONComposition.AllOf {
+        for i in 0..<10 {
+          JSONString()
+            .title("\(i)")
+        }
+      }
+    }
+
+    #expect(sample.schemaValue.object?[Keywords.AllOf.name]?.array?.count == 10)
+  }
+
+  @Test(arguments: [true, false]) func `if`(bool: Bool) {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
+      JSONComposition.AllOf {
+        if bool {
+          JSONString()
+            .title("0")
+        }
+      }
+    }
+
+    #expect(
+      sample.schemaValue.object?[Keywords.AllOf.name]?.array?.count == (bool ? 1 : 0)
+    )
+  }
 }

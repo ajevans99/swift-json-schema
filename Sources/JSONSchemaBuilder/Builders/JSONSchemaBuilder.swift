@@ -50,6 +50,37 @@ import JSONSchema
   ) -> [JSONComponents.AnySchemaComponent<Output>] where Component.Output == Output {
     accumulated + [component.eraseToAnySchemaComponent()]
   }
+
+  public static func buildPartialBlock(
+    first components: [JSONComponents.AnySchemaComponent<Output>]
+  ) -> [JSONComponents.AnySchemaComponent<Output>] { components }
+
+  public static func buildPartialBlock(
+    accumulated: [JSONComponents.AnySchemaComponent<Output>],
+    next components: [JSONComponents.AnySchemaComponent<Output>]
+  ) -> [JSONComponents.AnySchemaComponent<Output>] {
+    accumulated + components
+  }
+
+  public static func buildOptional(
+    _ component: [JSONComponents.AnySchemaComponent<Output>]?
+  ) -> [JSONComponents.AnySchemaComponent<Output>] {
+    component ?? []
+  }
+
+  public static func buildEither(
+    first component: [JSONComponents.AnySchemaComponent<Output>]
+  ) -> [JSONComponents.AnySchemaComponent<Output>] { component }
+
+  public static func buildEither(
+    second component: [JSONComponents.AnySchemaComponent<Output>]
+  ) -> [JSONComponents.AnySchemaComponent<Output>] { component }
+
+  public static func buildArray(
+    _ components: [[JSONComponents.AnySchemaComponent<Output>]]
+  ) -> [JSONComponents.AnySchemaComponent<Output>] {
+    components.flatMap { $0 }
+  }
 }
 
 extension JSONSchemaCollectionBuilder where Output == JSONValue {
