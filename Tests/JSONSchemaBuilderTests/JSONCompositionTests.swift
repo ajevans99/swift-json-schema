@@ -94,7 +94,7 @@ struct JSONCompositionTests {
   @Test func forLoop() {
     @JSONSchemaBuilder var sample: some JSONSchemaComponent {
       JSONComposition.AllOf {
-        for i in 0..<10 {
+        for i in 0 ..< 10 {
           JSONString()
             .title("\(i)")
         }
