@@ -33,16 +33,18 @@ public struct ConditionalSchema: JSONSchemaComponent {
 }
 
 // MARK: - DSL helper
+// swift-format-ignore: AlwaysUseLowerCamelCase
 @inlinable
-public func `if`(
+public func If(
   @JSONSchemaBuilder _ ifSchema: () -> some JSONSchemaComponent,
   then thenSchema: () -> some JSONSchemaComponent
 ) -> some JSONSchemaComponent<JSONValue> {
   ConditionalSchema(if: ifSchema(), then: thenSchema())
 }
 
+// swift-format-ignore: AlwaysUseLowerCamelCase
 @inlinable
-public func `if`(
+public func If(
   @JSONSchemaBuilder _ ifSchema: () -> some JSONSchemaComponent,
   then thenSchema: () -> some JSONSchemaComponent,
   else elseSchema: () -> some JSONSchemaComponent

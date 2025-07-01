@@ -4,27 +4,9 @@ import Testing
 @testable import JSONSchemaBuilder
 
 struct JSONConditionalBuilderTests {
-  @Test func ifThenElse() {
-    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
-      JSONString()
-        .`if` { JSONString().minLength(1) }
-        .then { JSONString().pattern("^foo") }
-        .`else` { JSONString().pattern("^bar") }
-    }
-
-    let expected: [String: JSONValue] = [
-      "type": "string",
-      "if": ["type": "string", "minLength": 1],
-      "then": ["type": "string", "pattern": "^foo"],
-      "else": ["type": "string", "pattern": "^bar"],
-    ]
-
-    #expect(sample.schemaValue == .object(expected))
-  }
-
   @Test func conditionalDSL() {
     @JSONSchemaBuilder var sample: some JSONSchemaComponent {
-      `if`(
+      If(
         { JSONString().minLength(1) },
         then: { JSONString().pattern("^foo") },
         else: { JSONString().pattern("^bar") }

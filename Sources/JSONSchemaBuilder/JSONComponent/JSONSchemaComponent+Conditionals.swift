@@ -1,44 +1,6 @@
 import JSONSchema
 
 extension JSONSchemaComponent {
-  /// Sets the ``Keywords/If`` subschema on the schema.
-  ///
-  /// Use this method to specify a condition that must hold for the ``then`` or
-  /// ``else`` branches to apply.
-  /// - Parameter schema: A builder that creates the conditional subschema.
-  /// - Returns: A copy of this component with the ``if`` subschema set.
-  public func `if`(@JSONSchemaBuilder _ schema: () -> some JSONSchemaComponent) -> Self {
-    var copy = self
-    copy.schemaValue[Keywords.If.name] = schema().schemaValue.value
-    return copy
-  }
-
-  /// Sets the ``Keywords/Then`` subschema on the schema.
-  ///
-  /// The ``then`` subschema is applied when the ``if`` condition evaluates to
-  /// `true`.
-  /// - Parameter schema: A builder that creates the subschema to apply when the
-  ///   condition matches.
-  /// - Returns: A copy of this component with the ``then`` subschema set.
-  public func then(@JSONSchemaBuilder _ schema: () -> some JSONSchemaComponent) -> Self {
-    var copy = self
-    copy.schemaValue[Keywords.Then.name] = schema().schemaValue.value
-    return copy
-  }
-
-  /// Sets the ``Keywords/Else`` subschema on the schema.
-  ///
-  /// The ``else`` subschema is applied when the ``if`` condition evaluates to
-  /// `false`.
-  /// - Parameter schema: A builder that creates the subschema to apply when the
-  ///   condition does not match.
-  /// - Returns: A copy of this component with the ``else`` subschema set.
-  public func `else`(@JSONSchemaBuilder _ schema: () -> some JSONSchemaComponent) -> Self {
-    var copy = self
-    copy.schemaValue[Keywords.Else.name] = schema().schemaValue.value
-    return copy
-  }
-
   /// Sets the ``Keywords/DependentRequired`` mapping on the schema.
   ///
   /// When the specified key is present in the input, each of the associated
