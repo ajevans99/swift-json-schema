@@ -195,6 +195,8 @@ enum Status {
 
 Enums with associated values are also supported using `anyOf` schema composition. See the [JSONSchemaBuilder documentation](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder) for more information.
 
+For details on modeling dependencies and other conditional constructs, check the [Conditional Validation guide](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder/ConditionalValidation).
+
 ## Validation
 
 Using the `Schema` type, you can validate JSON data against a schema.
