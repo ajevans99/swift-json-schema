@@ -18,6 +18,16 @@ struct CreditInfo: Equatable {
   }
 }
 
+struct NameConditional {
+  static var schema: some JSONSchemaComponent<JSONValue> {
+    `if`(
+      { JSONString().minLength(1) },
+      then: { JSONString().pattern("^foo") },
+      else: { JSONString().pattern("^bar") }
+    )
+  }
+}
+
 struct ConditionalTests {
   @Test(.snapshots(record: false))
   func schema() {
@@ -39,6 +49,29 @@ struct ConditionalTests {
           }
         },
         "type" : "object"
+      }
+      """#
+    }
+  }
+
+  @Test(.snapshots(record: false))
+  func dslSchema() {
+    let schema = NameConditional.schema.schemaValue
+    assertInlineSnapshot(of: schema, as: .json) {
+      #"""
+      {
+        "else" : {
+          "pattern" : "^bar",
+          "type" : "string"
+        },
+        "if" : {
+          "minLength" : 1,
+          "type" : "string"
+        },
+        "then" : {
+          "pattern" : "^foo",
+          "type" : "string"
+        }
       }
       """#
     }

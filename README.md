@@ -195,21 +195,7 @@ enum Status {
 
 Enums with associated values are also supported using `anyOf` schema composition. See the [JSONSchemaBuilder documentation](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder) for more information.
 
-### Conditional Validation
-
-Use conditional keywords to model dependencies between properties. For example,
-`dependentRequired` enforces that `billing_address` must be provided whenever a
-`credit_card` is present.
-
-```swift
-@JSONSchemaBuilder var creditInfo: some JSONSchemaComponent {
-  JSONObject {
-    JSONProperty(key: "credit_card") { JSONInteger() }
-    JSONProperty(key: "billing_address") { JSONString() }
-  }
-  .dependentRequired(["credit_card": ["billing_address"]])
-}
-```
+For details on modeling dependencies and other conditional constructs, check the [Conditional Validation guide](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder/ConditionalValidation).
 
 ## Validation
 
