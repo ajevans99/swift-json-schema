@@ -123,14 +123,7 @@ extension PatternBindingListSyntax.Element {
   }
 }
 
-extension VariableDeclSyntax {
-  var shouldExcludedFromSchema: Bool {
-    !attributes.compactMap {
-      $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text
-    }
-    .contains(where: { $0 == "ExcludeFromSchema" })
-  }
-
+extension SyntaxProtocol {
   var docString: String? {
     // Get the leading trivia which contains the docstring
     let trivia = leadingTrivia
@@ -163,6 +156,15 @@ extension VariableDeclSyntax {
     }
 
     return docStringLines.isEmpty ? nil : docStringLines.joined(separator: "\n")
+  }
+}
+
+extension VariableDeclSyntax {
+  var shouldExcludedFromSchema: Bool {
+    !attributes.compactMap {
+      $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text
+    }
+    .contains(where: { $0 == "ExcludeFromSchema" })
   }
 }
 
@@ -207,41 +209,7 @@ extension AttributeListSyntax {
   }
 }
 
-extension EnumCaseParameterSyntax {
-  var docString: String? {
-    // Get the leading trivia which contains the docstring
-    let trivia = leadingTrivia
-    var docStringLines: [String] = []
 
-    for piece in trivia {
-      switch piece {
-      case .docLineComment(let comment):
-        // Remove the /// prefix and trim whitespace
-        let line = String(comment.dropFirst(3)).trimmingCharacters(in: .whitespaces)
-        docStringLines.append(line)
-      case .docBlockComment(let comment):
-        // Remove the /** and */ and trim whitespace
-        let content = comment.dropFirst(3).dropLast(2)
-        let lines = content.split(separator: "\n")
-        for line in lines {
-          // Remove leading asterisks and trim whitespace
-          let trimmed = line.trimmingCharacters(in: .whitespaces)
-          if !trimmed.isEmpty {
-            // Remove leading asterisk and any following whitespace
-            let cleanLine =
-              trimmed.hasPrefix("*")
-              ? String(trimmed.dropFirst().trimmingCharacters(in: .whitespaces)) : trimmed
-            docStringLines.append(cleanLine)
-          }
-        }
-      default:
-        break
-      }
-    }
-
-    return docStringLines.isEmpty ? nil : docStringLines.joined(separator: "\n")
-  }
-}
 
 extension CodeBlockItemListSyntax {
   init(_ children: [CodeBlockItemSyntax], separator: Trivia) {
