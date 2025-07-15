@@ -103,6 +103,81 @@ struct Person {
 
 ``SchemaOptions(title:description:default:examples:readOnly:writeOnly:deprecated:comment:)`` may also be applied directly to the root struct or class.
 
+### Documentation Comments
+
+As an alternative to using ``SchemaOptions(.description(...))``, you can use Swift's documentation comments (`///`) to add descriptions to both struct properties and enum associated values.
+
+#### Struct Properties
+
+Documentation comments on struct properties are automatically converted to descriptions in the generated schema:
+
+```swift
+@Schemable
+struct User {
+  /// The user's unique identifier
+  let id: String
+  
+  /// The user's full name
+  let name: String
+  
+  /// Age in years (must be positive)
+  let age: Int
+}
+```
+
+This generates the same schema as using `@SchemaOptions(.description(...))` but with cleaner syntax. If both a documentation comment and `@SchemaOptions(.description(...))` are present, the `@SchemaOptions` takes precedence.
+
+#### Enum Associated Values
+
+Documentation comments can also be added to enum case parameters:
+
+```swift
+@Schemable
+enum Configuration {
+  case database(
+    /// The database connection URL
+    url: String,
+    /// Maximum number of connections in the pool  
+    maxConnections: Int
+  )
+  case redis(
+    /// Redis server host address
+    host: String,
+    /// Redis server port number
+    port: Int
+  )
+}
+```
+
+This will generate a schema where each parameter includes its description:
+
+```json
+{
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "database": {
+          "type": "object", 
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The database connection URL"
+            },
+            "maxConnections": {
+              "type": "integer", 
+              "description": "Maximum number of connections in the pool"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+You can mix documented and undocumented parameters within the same enum case - only the documented ones will have descriptions in the generated schema.
+
 ### Supported Types
 
 The following Swift primitive types are supported for macro expansion.
