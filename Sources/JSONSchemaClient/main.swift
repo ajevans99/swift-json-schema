@@ -119,26 +119,6 @@ struct User {
   let ipAddress: String
 }
 
-// MARK: Test enum with documented associated values
-
-@Schemable
-enum Configuration {
-  case database(
-    /// The database connection URL
-    url: String,
-    /// Maximum number of connections in the pool
-    maxConnections: Int
-  )
-  case redis(
-    /// Redis server host address  
-    host: String,
-    /// Redis server port number
-    port: Int
-  )
-}
-
-print("\n=== Testing Enum with Associated Value Descriptions ===")
-printSchema(Configuration.schema)
 
 let json = """
   {"id":"123e4567-e89b-12d3-a456-426614174000","createdAt":"2025-06-27T12:34:56.789Z","website":"https://example.com","ipAddress":".168.0.1"}

@@ -605,4 +605,107 @@ import Testing
       macros: testMacros
     )
   }
+
+  @Test func documentedAssociatedValues() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      enum Configuration {
+        case database(
+          /// The database connection URL
+          url: String
+        )
+      }
+      """,
+      expandedSource: """
+        enum Configuration {
+          case database(
+            /// The database connection URL
+            url: String
+          )
+
+          static var schema: some JSONSchemaComponent<Configuration> {
+            JSONComposition.OneOf(into: Configuration.self) {
+              JSONObject {
+                JSONProperty(key: "database") {
+                  JSONObject {
+                    JSONProperty(key: "url") {
+                      JSONString()
+                        .description("The database connection URL")
+                    }
+                      .required()
+                  }
+                }
+                  .required()
+              }
+                .map {
+                  Self.database(
+                    /// The database connection URL
+                    url: $0)
+                }
+            }
+          }
+        }
+
+        extension Configuration: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func mixedDocumentedAssociatedValues() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      enum MixedConfig {
+        case server(
+          /// The server hostname
+          host: String,
+          port: Int
+        )
+      }
+      """,
+      expandedSource: """
+        enum MixedConfig {
+          case server(
+            /// The server hostname
+            host: String,
+            port: Int
+          )
+
+          static var schema: some JSONSchemaComponent<MixedConfig> {
+            JSONComposition.OneOf(into: MixedConfig.self) {
+              JSONObject {
+                JSONProperty(key: "server") {
+                  JSONObject {
+                    JSONProperty(key: "host") {
+                      JSONString()
+                        .description("The server hostname")
+                    }
+                      .required()
+                    JSONProperty(key: "port") {
+                      JSONInteger()
+                    }
+                      .required()
+                  }
+                }
+                  .required()
+              }
+                .map {
+                  Self.server(
+                    /// The server hostname
+                    host: $0,
+                    port: $1)
+                }
+            }
+          }
+        }
+
+        extension MixedConfig: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
 }
