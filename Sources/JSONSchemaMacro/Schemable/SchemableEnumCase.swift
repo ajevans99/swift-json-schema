@@ -62,7 +62,7 @@ struct SchemableEnumCase {
       for (index, parameter) in associatedValues.enumerated() {
         if let label = parameter.firstName, label.text != "_" {
           LabeledExprSyntax(
-            label: label,
+            label: label.trimmed,
             colon: .colonToken(trailingTrivia: .space),
             expression: DeclReferenceExprSyntax(baseName: "$\(raw: index)")
           )

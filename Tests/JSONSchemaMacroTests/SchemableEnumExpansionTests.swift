@@ -639,9 +639,7 @@ import Testing
                   .required()
               }
                 .map {
-                  Self.database(
-                    /// The database connection URL
-                    url: $0)
+                  Self.database(url: $0)
                 }
             }
           }
@@ -693,10 +691,7 @@ import Testing
                   .required()
               }
                 .map {
-                  Self.server(
-                    /// The server hostname
-                    host: $0,
-                    port: $1)
+                  Self.server(host: $0, port: $1)
                 }
             }
           }
