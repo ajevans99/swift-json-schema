@@ -20,7 +20,7 @@ struct SchemableEnumCase {
         let key = parameter.firstName?.text ?? "_\(index)"
 
         let typeInfo = parameter.type.typeInformation()
-        let codeBlock: CodeBlockItemSyntax
+        var codeBlock: CodeBlockItemSyntax
 
         switch typeInfo {
         case .primitive(_, schema: let code):
@@ -34,6 +34,14 @@ struct SchemableEnumCase {
           }
         case .schemable(_, schema: let code): codeBlock = code
         case .notSupported: return nil
+        }
+
+        // Add description if available
+        if let docString = parameter.docString {
+          codeBlock = """
+            \(codeBlock)
+            .description(\(literal: docString))
+            """
         }
 
         var block: CodeBlockItemSyntax = """
