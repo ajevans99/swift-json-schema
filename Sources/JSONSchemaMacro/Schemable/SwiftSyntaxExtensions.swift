@@ -123,14 +123,7 @@ extension PatternBindingListSyntax.Element {
   }
 }
 
-extension VariableDeclSyntax {
-  var shouldExcludedFromSchema: Bool {
-    !attributes.compactMap {
-      $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text
-    }
-    .contains(where: { $0 == "ExcludeFromSchema" })
-  }
-
+extension SyntaxProtocol {
   var docString: String? {
     // Get the leading trivia which contains the docstring
     let trivia = leadingTrivia
@@ -166,11 +159,20 @@ extension VariableDeclSyntax {
   }
 }
 
+extension VariableDeclSyntax {
+  var shouldExcludeFromSchema: Bool {
+    !attributes.compactMap {
+      $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text
+    }
+    .contains(where: { $0 == "ExcludeFromSchema" })
+  }
+}
+
 extension MemberBlockItemListSyntax {
   func schemableMembers() -> [SchemableMember] {
     self.compactMap { $0.decl.as(VariableDeclSyntax.self) }
       .flatMap { variableDecl in variableDecl.bindings.map { (variableDecl, $0) } }
-      .filter { $0.0.shouldExcludedFromSchema }.filter { $0.1.isStoredProperty }
+      .filter { $0.0.shouldExcludeFromSchema }.filter { $0.1.isStoredProperty }
       .compactMap(SchemableMember.init)
   }
 
