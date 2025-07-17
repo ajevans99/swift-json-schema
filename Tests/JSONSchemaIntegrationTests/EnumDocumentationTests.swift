@@ -28,7 +28,7 @@ import Testing
 
     // Get the JSON representation
     let jsonData = try JSONEncoder().encode(schema)
-    let jsonValue = try JSONSerialization.jsonObject(with: jsonData) as! [String: Any]
+    let jsonValue = try #require(try JSONSerialization.jsonObject(with: jsonData) as? [String: Any])
 
     // Verify the overall structure is a oneOf
     guard let oneOf = jsonValue["oneOf"] as? [[String: Any]] else {
