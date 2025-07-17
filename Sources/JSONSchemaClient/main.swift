@@ -119,7 +119,6 @@ struct User {
   let ipAddress: String
 }
 
-
 let json = """
   {"id":"123e4567-e89b-12d3-a456-426614174000","createdAt":"2025-06-27T12:34:56.789Z","website":"https://example.com","ipAddress":".168.0.1"}
   """

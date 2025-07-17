@@ -209,8 +209,6 @@ extension AttributeListSyntax {
   }
 }
 
-
-
 extension CodeBlockItemListSyntax {
   init(_ children: [CodeBlockItemSyntax], separator: Trivia) {
     let newChildren = children.enumerated()
