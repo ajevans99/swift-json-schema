@@ -94,4 +94,25 @@ struct ParsingTests {
       _ = try sample.parseAndValidate(instance: "{\"extra\": true}")
     }
   }
+
+  @Schemable enum Emotion: String { case happy, sad }
+  @Schemable struct EmotionValue { let value: Int }
+
+  @Test func propertyNamesMapping() throws {
+    @JSONSchemaBuilder var schema: some JSONSchemaComponent<[Emotion: EmotionValue]> {
+      JSONObject()
+        .additionalProperties { EmotionValue.schema }
+        .map(\.1)
+        .propertyNames { Emotion.schema }
+    }
+
+    let input: JSONValue = [
+      "happy": ["value": 1],
+      "sad": ["value": 2],
+    ]
+
+    let result = schema.parse(input)
+    #expect(result.value?[.happy]?.value == 1)
+    #expect(result.value?[.sad]?.value == 2)
+  }
 }

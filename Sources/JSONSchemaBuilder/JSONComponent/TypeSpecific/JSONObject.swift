@@ -115,6 +115,16 @@ extension JSONSchemaComponent {
     return copy
   }
 
+  /// Adds schema options to validate property names against and converts
+  /// the resulting keys to a strongly typed dictionary.
+  public func propertyNames<Names: JSONSchemaComponent, Value>(
+    @JSONSchemaBuilder _ content: () -> Names
+  ) -> JSONComponents.PropertyNames<Self, Names, Value>
+  where Output == [String: Value]
+  {
+    JSONComponents.PropertyNames(base: self, propertyNamesSchema: content())
+  }
+
   /// Adds a minimum number of properties constraint to the schema.
   /// - Parameter value: The minimum number of properties that the object must have.
   /// - Returns: A new `JSONObject` with the min properties constraint set.

@@ -41,32 +41,44 @@ extension TypeSyntax {
           """
       )
     case .dictionaryType(let dictionaryType):
-      guard let keyType = dictionaryType.key.as(IdentifierTypeSyntax.self),
-        keyType.name.text == "String"
-      else { return .notSupported }
-      let valueTypeInfo = dictionaryType.value.typeInformation()
-      guard let codeBlock = valueTypeInfo.codeBlock else {
-        return .notSupported
-      }
+      let keyInfo = dictionaryType.key.typeInformation()
+      let valueInfo = dictionaryType.value.typeInformation()
 
-      // Only add .map(\.matches) for schemable types (custom types), not for primitives
+      guard let valueBlock = valueInfo.codeBlock else { return .notSupported }
+      guard let keyBlock = keyInfo.codeBlock else { return .notSupported }
+
       let mapMatches =
-        switch valueTypeInfo {
+        switch valueInfo {
         case .schemable: "\n.map(\\.matches)"
-        case .primitive: ""
-        case .notSupported: ""
+        case .primitive, .notSupported: ""
         }
 
-      return .primitive(
-        .dictionary,
-        schema: """
-          JSONObject()
-          .additionalProperties {
-            \(codeBlock)
-          }
-          .map(\\.1)\(raw: mapMatches)
-          """
-      )
+      if case .primitive(.string, _) = keyInfo {
+        return .primitive(
+          .dictionary,
+          schema: """
+            JSONObject()
+            .additionalProperties {
+              \(valueBlock)
+            }
+            .map(\\.1)\(raw: mapMatches)
+            """
+        )
+      } else {
+        return .primitive(
+          .dictionary,
+          schema: """
+            JSONObject()
+            .additionalProperties {
+              \(valueBlock)
+            }
+            .map(\\.1)\(raw: mapMatches)
+            .propertyNames {
+              \(keyBlock)
+            }
+            """
+        )
+      }
     case .identifierType(let identifierType):
       if let generic = identifierType.genericArgumentClause {
         guard identifierType.name.text != "Array" else {

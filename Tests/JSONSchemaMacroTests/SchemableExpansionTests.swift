@@ -789,4 +789,101 @@ struct SchemableExpansionTests {
       macros: testMacros
     )
   }
+
+  @Test(arguments: ["struct", "class"]) func dictionaryWithEnumKeys(declarationType: String) {
+    assertMacroExpansion(
+      """
+      @Schemable
+      enum TestEmotion: String {
+        case happy
+        case sad
+      }
+
+      @Schemable
+      struct TestEmotionValue {
+        let value: Int
+      }
+
+      @Schemable
+      \(declarationType) TestPerson {
+        let emotions: [TestEmotion: TestEmotionValue]
+        let analysisNotes: String
+      }
+      """,
+      expandedSource: """
+        enum TestEmotion: String {
+          case happy
+          case sad
+
+          static var schema: some JSONSchemaComponent<TestEmotion> {
+            JSONString()
+              .enumValues {
+                "happy"
+                "sad"
+              }
+              .compactMap {
+                switch $0 {
+                case "happy":
+                  return Self.happy
+                case "sad":
+                  return Self.sad
+                default:
+                  return nil
+                }
+              }
+          }
+        }
+
+        struct TestEmotionValue {
+          let value: Int
+
+          static var schema: some JSONSchemaComponent<TestEmotionValue> {
+            JSONSchema(TestEmotionValue.init) {
+              JSONObject {
+                JSONProperty(key: "value") {
+                  JSONInteger()
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        \(declarationType) TestPerson {
+          let emotions: [TestEmotion: TestEmotionValue]
+          let analysisNotes: String
+
+          static var schema: some JSONSchemaComponent<TestPerson> {
+            JSONSchema(TestPerson.init) {
+              JSONObject {
+                JSONProperty(key: "emotions") {
+                  JSONObject()
+                  .additionalProperties {
+                    TestEmotionValue.schema
+                  }
+                  .map(\\.1)
+                  .propertyNames {
+                    TestEmotion.schema
+                  }
+                }
+                .required()
+                JSONProperty(key: "analysisNotes") {
+                  JSONString()
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension TestEmotion: Schemable {
+        }
+        extension TestEmotionValue: Schemable {
+        }
+        extension TestPerson: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
 }
