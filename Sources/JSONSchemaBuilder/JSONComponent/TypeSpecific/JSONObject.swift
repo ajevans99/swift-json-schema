@@ -103,25 +103,14 @@ extension JSONSchemaComponent {
     return copy
   }
 
-  /// Adds schema options to validate property names against.
-  /// The content should be a ``JSONString`` to produce a valid schema.
-  /// - Parameter content: A string schema component.
-  /// - Returns: A new `JSONObject` with the property names set.
-  public func propertyNames<C: JSONSchemaComponent>(
-    @JSONSchemaBuilder _ content: () -> C
-  ) -> Self {
-    var copy = self
-    copy.schemaValue[Keywords.PropertyNames.name] = content().schemaValue.value
-    return copy
-  }
-
   /// Adds schema options to validate property names against and converts
   /// the resulting keys to a strongly typed dictionary.
-  public func propertyNames<Names: JSONSchemaComponent, Value>(
+  /// - Parameter content: A schema component for keys.
+  /// - Returns: A new `JSONObject` with the property names set.
+  public func propertyNames<Names: JSONSchemaComponent, Key, Value>(
     @JSONSchemaBuilder _ content: () -> Names
-  ) -> JSONComponents.PropertyNames<Self, Names, Value>
-  where Output == [String: Value]
-  {
+  ) -> JSONComponents.PropertyNames<Self, Key, Names, Value>
+  where Output == [String: Value] {
     JSONComponents.PropertyNames(base: self, propertyNamesSchema: content())
   }
 

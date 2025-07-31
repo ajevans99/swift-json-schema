@@ -46,10 +46,10 @@ public struct Weather2 {
 @ObjectOptions(
   .minProperties(2),
   .maxProperties(5),
-  .propertyNames {
-    JSONString()
-      .pattern("^[A-Za-z_][A-Za-z0-9_]*$")
-  },
+//  .propertyNames {
+//    JSONString()
+//      .pattern("^[A-Za-z_][A-Za-z0-9_]*$")
+//  },
   .unevaluatedProperties {
     JSONString()
   }

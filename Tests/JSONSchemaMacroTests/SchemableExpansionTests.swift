@@ -794,61 +794,12 @@ struct SchemableExpansionTests {
     assertMacroExpansion(
       """
       @Schemable
-      enum TestEmotion: String {
-        case happy
-        case sad
-      }
-
-      @Schemable
-      struct TestEmotionValue {
-        let value: Int
-      }
-
-      @Schemable
       \(declarationType) TestPerson {
         let emotions: [TestEmotion: TestEmotionValue]
         let analysisNotes: String
       }
       """,
       expandedSource: """
-        enum TestEmotion: String {
-          case happy
-          case sad
-
-          static var schema: some JSONSchemaComponent<TestEmotion> {
-            JSONString()
-              .enumValues {
-                "happy"
-                "sad"
-              }
-              .compactMap {
-                switch $0 {
-                case "happy":
-                  return Self.happy
-                case "sad":
-                  return Self.sad
-                default:
-                  return nil
-                }
-              }
-          }
-        }
-
-        struct TestEmotionValue {
-          let value: Int
-
-          static var schema: some JSONSchemaComponent<TestEmotionValue> {
-            JSONSchema(TestEmotionValue.init) {
-              JSONObject {
-                JSONProperty(key: "value") {
-                  JSONInteger()
-                }
-                .required()
-              }
-            }
-          }
-        }
-
         \(declarationType) TestPerson {
           let emotions: [TestEmotion: TestEmotionValue]
           let analysisNotes: String
@@ -862,6 +813,7 @@ struct SchemableExpansionTests {
                     TestEmotionValue.schema
                   }
                   .map(\\.1)
+                  .map(\\.matches)
                   .propertyNames {
                     TestEmotion.schema
                   }
@@ -876,10 +828,6 @@ struct SchemableExpansionTests {
           }
         }
 
-        extension TestEmotion: Schemable {
-        }
-        extension TestEmotionValue: Schemable {
-        }
         extension TestPerson: Schemable {
         }
         """,

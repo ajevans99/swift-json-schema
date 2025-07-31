@@ -95,14 +95,14 @@ struct ParsingTests {
     }
   }
 
-  @Schemable enum Emotion: String { case happy, sad }
+  @Schemable enum Emotion { case happy, sad }
   @Schemable struct EmotionValue { let value: Int }
 
   @Test func propertyNamesMapping() throws {
     @JSONSchemaBuilder var schema: some JSONSchemaComponent<[Emotion: EmotionValue]> {
       JSONObject()
         .additionalProperties { EmotionValue.schema }
-        .map(\.1)
+        .map(\.1.matches)
         .propertyNames { Emotion.schema }
     }
 

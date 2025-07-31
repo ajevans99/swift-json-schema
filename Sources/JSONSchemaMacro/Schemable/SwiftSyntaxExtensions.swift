@@ -53,18 +53,7 @@ extension TypeSyntax {
         case .primitive, .notSupported: ""
         }
 
-      if case .primitive(.string, _) = keyInfo {
-        return .primitive(
-          .dictionary,
-          schema: """
-            JSONObject()
-            .additionalProperties {
-              \(valueBlock)
-            }
-            .map(\\.1)\(raw: mapMatches)
-            """
-        )
-      } else {
+      guard case .primitive(.string, _) = keyInfo else {
         return .primitive(
           .dictionary,
           schema: """
@@ -79,6 +68,16 @@ extension TypeSyntax {
             """
         )
       }
+      return .primitive(
+        .dictionary,
+        schema: """
+          JSONObject()
+          .additionalProperties {
+            \(valueBlock)
+          }
+          .map(\\.1)\(raw: mapMatches)
+          """
+      )
     case .identifierType(let identifierType):
       if let generic = identifierType.genericArgumentClause {
         guard identifierType.name.text != "Array" else {

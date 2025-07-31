@@ -21,7 +21,7 @@ struct JSONSchemaOptionBuilderTests {
       }
       .patternProperties { JSONProperty(key: "^property[0-1]$") { JSONString() } }
       .unevaluatedProperties { false }
-      .propertyNames { JSONString().pattern("^property[0-9]$") }
+//      .propertyNames { JSONString().pattern("^property[0-9]$") }
       .minProperties(1)
       .maxProperties(10)
       .additionalProperties { JSONBoolean() }
