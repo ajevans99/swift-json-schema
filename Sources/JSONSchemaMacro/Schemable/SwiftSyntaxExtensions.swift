@@ -70,13 +70,31 @@ extension TypeSyntax {
     case .identifierType(let identifierType):
       if let generic = identifierType.genericArgumentClause {
         guard identifierType.name.text != "Array" else {
+#if canImport(SwiftSyntax601)
+          let arguments = generic.arguments.first!.argument
+          guard case let GenericArgumentSyntax.Argument.type(element) = argument else {
+            // The other enum value `.expr` requires an @spi(ExperimentalLangaugeFeature) import of SwiftSyntax
+            fatalError("swift-json-schema error: Failed to get Array type, please open an issue")
+          }
+          let arrayType = ArrayTypeSyntax(element: element)
+#else
           let arrayType = ArrayTypeSyntax(element: generic.arguments.first!.argument)
+#endif
           return TypeSyntax(arrayType).typeInformation()
         }
 
         guard identifierType.name.text != "Dictionary" else {
           let test = Array(generic.arguments.prefix(2))
+#if canImport(SwiftSyntax601)
+          guard case let GenericArgumentSyntax.Argument.type(key) = test[0].argument,
+                case let GenericArgumentSyntax.Argument.type(value) = test[1].argument else {
+            // The other enum value `.expr` requires an @spi(ExperimentalLangaugeFeature) import of SwiftSyntax
+            fatalError("swift-json-schema error: Failed to get Dictionary type, please open an issue")
+          }
+          let dictionaryType = DictionaryTypeSyntax(key: key, value: value)
+#else
           let dictionaryType = DictionaryTypeSyntax(key: test[0].argument, value: test[1].argument)
+#endif
           return TypeSyntax(dictionaryType).typeInformation()
         }
       }
