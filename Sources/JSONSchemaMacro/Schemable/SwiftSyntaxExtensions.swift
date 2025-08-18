@@ -72,7 +72,7 @@ extension TypeSyntax {
         guard identifierType.name.text != "Array" else {
           #if canImport(SwiftSyntax601)
             let argument = generic.arguments.first!.argument
-            guard case let GenericArgumentSyntax.Argument.type(element) = argument else {
+            guard case GenericArgumentSyntax.Argument.type(let element) = argument else {
               // The other enum value `.expr` requires an @spi(ExperimentalLangaugeFeature) import of SwiftSyntax
               fatalError("swift-json-schema error: Failed to get Array type, please open an issue")
             }
@@ -86,8 +86,8 @@ extension TypeSyntax {
         guard identifierType.name.text != "Dictionary" else {
           let test = Array(generic.arguments.prefix(2))
           #if canImport(SwiftSyntax601)
-            guard case let GenericArgumentSyntax.Argument.type(key) = test[0].argument,
-              case let GenericArgumentSyntax.Argument.type(value) = test[1].argument
+            guard case GenericArgumentSyntax.Argument.type(let key) = test[0].argument,
+              case GenericArgumentSyntax.Argument.type(let value) = test[1].argument
             else {
               // The other enum value `.expr` requires an @spi(ExperimentalLangaugeFeature) import of SwiftSyntax
               fatalError(
