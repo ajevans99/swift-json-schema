@@ -120,6 +120,7 @@ struct PollExampleTests {
   private static let shouldRecord: SnapshotTestingConfiguration.Record = false
 
   struct TestInstance {
+    let id: String
     let data: String
     let description: String
 
@@ -134,6 +135,7 @@ struct PollExampleTests {
 
   static let instances = [
     TestInstance(
+      id: "1",
       data: """
         {
           "id": 1,
@@ -165,6 +167,7 @@ struct PollExampleTests {
       isValid: true
     ),
     TestInstance(
+      id: "2",
       data: """
         {
           "id": 2,
@@ -190,6 +193,7 @@ struct PollExampleTests {
       isValid: true
     ),
     TestInstance(
+      id: "3",
       data: """
         {
           "id": 3,
@@ -208,6 +212,7 @@ struct PollExampleTests {
       isValid: true
     ),
     TestInstance(
+      id: "4",
       data: """
         {
           "id": 4,
@@ -232,6 +237,7 @@ struct PollExampleTests {
       isValid: false
     ),
     TestInstance(
+      id: "5",
       data: """
         {
           "id": 5,
@@ -256,6 +262,7 @@ struct PollExampleTests {
       isValid: false
     ),
     TestInstance(
+      id: "6",
       data: """
         {
           "id": 6,
@@ -273,6 +280,7 @@ struct PollExampleTests {
       isValid: false
     ),
     TestInstance(
+      id: "7",
       data: """
         {
           "id": 7,
@@ -293,10 +301,10 @@ struct PollExampleTests {
     ),
   ]
 
-  @Test(.snapshots(record: shouldRecord), .serialized, arguments: instances)
+  @Test(.snapshots(record: shouldRecord), arguments: instances)
   func parse(instance: TestInstance) throws {
     let pollResult = try Poll.schema.parse(instance: instance.data)
-    assertSnapshot(of: pollResult, as: .dump)
+    assertSnapshot(of: pollResult, as: .dump, named: instance.id)
     #expect(instance.shouldParse ? pollResult.value != nil : pollResult.errors?.isEmpty == false)
   }
 
