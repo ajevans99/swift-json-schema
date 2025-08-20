@@ -54,9 +54,7 @@ struct ParsingTests {
   @Test func propertyNamesCapture() throws {
     enum Emotion: String, CaseIterable { case happy, sad, angry }
 
-    @JSONSchemaBuilder var sample:
-      some JSONSchemaComponent<((), CapturedPropertyNames<Emotion>)>
-    {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent<((), CapturedPropertyNames<Emotion>)> {
       JSONObject()
         .propertyNames {
           JSONString()
