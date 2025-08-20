@@ -76,10 +76,15 @@ extension TypeSyntax {
               \(valueCodeBlock)
             }
             .map { value in
-              Dictionary(
-                uniqueKeysWithValues: zip(value.0.1.seen, value.0.1.raw).compactMap { seen, raw in
-                  value.1.matches[raw].map { (seen, $0) }
-                }
+              let (_, capturedNames) = value.0
+              let additionalProperties = value.1
+              return Dictionary(
+                uniqueKeysWithValues: zip(capturedNames.seen, capturedNames.raw)
+                  .compactMap { parsedKey, rawKey in
+                    additionalProperties.matches[rawKey].map { parsedValue in
+                      (parsedKey, parsedValue)
+                    }
+                  }
               )
             }
             """
