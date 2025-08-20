@@ -103,18 +103,6 @@ extension JSONSchemaComponent {
     return copy
   }
 
-  /// Adds schema options to validate property names against.
-  /// The content should be a ``JSONString`` to produce a valid schema.
-  /// - Parameter content: A string schema component.
-  /// - Returns: A new `JSONObject` with the property names set.
-  public func propertyNames<C: JSONSchemaComponent>(
-    @JSONSchemaBuilder _ content: () -> C
-  ) -> Self {
-    var copy = self
-    copy.schemaValue[Keywords.PropertyNames.name] = content().schemaValue.value
-    return copy
-  }
-
   /// Adds a minimum number of properties constraint to the schema.
   /// - Parameter value: The minimum number of properties that the object must have.
   /// - Returns: A new `JSONObject` with the min properties constraint set.

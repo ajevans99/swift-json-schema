@@ -98,6 +98,7 @@ struct SchemableExpansionTests {
                     JSONNumber()
                   }
                   .map(\\.1)
+                  .map(\\.matches)
                 }
                 .required()
                 JSONProperty(key: "conditionsByLocation") {
@@ -152,6 +153,7 @@ struct SchemableExpansionTests {
                     JSONNumber()
                   }
                   .map(\\.1)
+                  .map(\\.matches)
                 }
                 .required()
               }
@@ -784,6 +786,97 @@ struct SchemableExpansionTests {
         }
 
         extension ComplexDocstring: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func dictionaryWithCustomKeySchema() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct TestPerson {
+        let emotions: [TestEmotion: Int]
+        let analysisNotes: String
+      }
+      """,
+      expandedSource: """
+        struct TestPerson {
+          let emotions: [TestEmotion: Int]
+          let analysisNotes: String
+
+          static var schema: some JSONSchemaComponent<TestPerson> {
+            JSONSchema(TestPerson.init) {
+              JSONObject {
+                JSONProperty(key: "emotions") {
+                  JSONObject()
+                  .propertyNames {
+                    TestEmotion.schema
+                  }
+                  .additionalProperties {
+                    JSONInteger()
+                  }
+                  .map { value in
+                    let (_, capturedNames) = value.0
+                    let additionalProperties = value.1
+                    return Dictionary(
+                      uniqueKeysWithValues: zip(capturedNames.seen, capturedNames.raw)
+                        .compactMap { parsedKey, rawKey in
+                          additionalProperties.matches[rawKey].map { parsedValue in
+                            (parsedKey, parsedValue)
+                          }
+                        }
+                    )
+                  }
+                }
+                .required()
+                JSONProperty(key: "analysisNotes") {
+                  JSONString()
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension TestPerson: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func dictionaryWithStringKeys() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct SimpleStringIntDict {
+        let emotions: [String: Int]
+      }
+      """,
+      expandedSource: """
+        struct SimpleStringIntDict {
+          let emotions: [String: Int]
+
+          static var schema: some JSONSchemaComponent<SimpleStringIntDict> {
+            JSONSchema(SimpleStringIntDict.init) {
+              JSONObject {
+                JSONProperty(key: "emotions") {
+                  JSONObject()
+                  .additionalProperties {
+                    JSONInteger()
+                  }
+                  .map(\\.1)
+                  .map(\\.matches)
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension SimpleStringIntDict: Schemable {
         }
         """,
       macros: testMacros

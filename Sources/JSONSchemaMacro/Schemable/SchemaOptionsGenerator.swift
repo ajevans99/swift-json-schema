@@ -71,7 +71,7 @@ enum SchemaOptionsGenerator {
       }
       // Intentionally fall through to "patternProperties" to handle shared logic.
       fallthrough
-    case "patternProperties":
+    case "patternProperties", "propertyNames":
       return """
         \(codeBlockItem)
         .\(raw: optionName) { \(closure.statements) }

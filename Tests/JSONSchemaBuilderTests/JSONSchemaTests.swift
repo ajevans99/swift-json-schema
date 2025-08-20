@@ -8,7 +8,10 @@ struct JSONSchemaOptionBuilderTests {
     @JSONSchemaBuilder var sample:
       some JSONSchemaComponent<
         (
-          ((String?, String, Bool?, Double), PatternPropertiesParseResult<String?>),
+          (
+            ((String?, String, Bool?, Double), PatternPropertiesParseResult<String?>),
+            CapturedPropertyNames<String>
+          ),
           AdditionalPropertiesParseResult<Bool>
         )
       >

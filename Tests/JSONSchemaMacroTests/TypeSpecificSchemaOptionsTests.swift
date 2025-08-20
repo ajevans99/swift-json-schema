@@ -282,6 +282,10 @@ struct ObjectOptionsTests {
                   JSONString()
                     .pattern("^[A-Za-z_][A-Za-z0-9_]*$")
               }
+              // Drop the parse information. Use custom builder if needed.
+              .map {
+                $0.0
+              }
               .unevaluatedProperties {
                   JSONString()
               }

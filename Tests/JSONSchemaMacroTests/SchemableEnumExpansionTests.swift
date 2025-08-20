@@ -318,6 +318,7 @@ import Testing
                           JSONString()
                         }
                         .map(\\.1)
+                        .map(\\.matches)
                     }
                       .required()
                   }
