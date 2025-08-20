@@ -12,6 +12,7 @@ The builder provides several wrappers that can modify or combine components.
 | ``JSONComponents/PassthroughComponent`` | Validates with a wrapped component but returns the original input value. |
 | ``JSONComponents/AdditionalProperties`` | Adds ``additionalProperties`` validation for objects. |
 | ``JSONComponents/PatternProperties`` | Adds ``patternProperties`` validation for objects. |
+| ``JSONComponents/PropertyNames`` | Validates and captures property names for objects. |
 | ``JSONComponents/Conditional`` | Stores either of two components for ``buildEither`` cases. |
 | ``JSONComposition`` wrappers | ``AnyOf``/``AllOf``/``OneOf``/``Not`` compose multiple schemas. |
 | ``JSONSchema`` | Groups several components together and optionally maps them to a new type. |

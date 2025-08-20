@@ -166,6 +166,7 @@ struct SchemableExpansionTests {
     )
   }
 
+
   @Test(arguments: ["struct", "class"]) func multipleBindings(declarationType: String) {
     assertMacroExpansion(
       """

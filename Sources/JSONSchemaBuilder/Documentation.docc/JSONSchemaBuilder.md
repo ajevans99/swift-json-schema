@@ -100,6 +100,23 @@ The third example will validate that:
 - The `name` property is a string
 - Any additional properties must be numbers greater than or equal to 0
 
+### Property Names
+
+The ``JSONObject/propertyNames(_:)`` modifier validates each property name using a subschema and captures the ones that match. The captured result is provided as a ``CapturedPropertyNames`` value containing the names seen, their raw strings, and an optional whitelist derived from ``enum`` values.
+
+```swift
+enum Emotion: String, CaseIterable { case happy, sad, angry }
+
+@JSONSchemaBuilder var schema: some JSONSchemaComponent<((), CapturedPropertyNames<Emotion>)> {
+  JSONObject()
+    .propertyNames {
+      JSONString()
+        .enumValues { Emotion.allCases.map(\.rawValue) }
+        .compactMap(Emotion.init(rawValue:))
+    }
+}
+```
+
 ## Topics
 
 - <doc:Macros>

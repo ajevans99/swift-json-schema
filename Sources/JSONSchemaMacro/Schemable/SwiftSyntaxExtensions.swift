@@ -41,32 +41,55 @@ extension TypeSyntax {
           """
       )
     case .dictionaryType(let dictionaryType):
-      guard let keyType = dictionaryType.key.as(IdentifierTypeSyntax.self),
-        keyType.name.text == "String"
-      else { return .notSupported }
+      let keyTypeInfo = dictionaryType.key.typeInformation()
       let valueTypeInfo = dictionaryType.value.typeInformation()
-      guard let codeBlock = valueTypeInfo.codeBlock else {
+      guard let valueCodeBlock = valueTypeInfo.codeBlock else { return .notSupported }
+
+      switch keyTypeInfo {
+      case .primitive(let primitive, _):
+        guard primitive == .string else { return .notSupported }
+
+        // Only add .map(\.matches) for schemable types (custom types), not for primitives
+        let mapMatches =
+          switch valueTypeInfo {
+          case .schemable: "\n.map(\\.matches)"
+          case .primitive: ""
+          case .notSupported: ""
+          }
+
+        return .primitive(
+          .dictionary,
+          schema: """
+            JSONObject()
+            .additionalProperties {
+              \(valueCodeBlock)
+            }
+            .map(\\.1)\(raw: mapMatches)
+            """
+        )
+
+      case .schemable(_, let keySchema):
+        return .primitive(
+          .dictionary,
+          schema: """
+            JSONObject()
+            .propertyNames { \(raw: keySchema) }
+            .additionalProperties {
+              \(valueCodeBlock)
+            }
+            .map { value in
+              Dictionary(
+                uniqueKeysWithValues: zip(value.0.1.seen, value.0.1.raw).compactMap { seen, raw in
+                  value.1.matches[raw].map { (seen, $0) }
+                }
+              )
+            }
+            """
+        )
+
+      case .primitive, .notSupported:
         return .notSupported
       }
-
-      // Only add .map(\.matches) for schemable types (custom types), not for primitives
-      let mapMatches =
-        switch valueTypeInfo {
-        case .schemable: "\n.map(\\.matches)"
-        case .primitive: ""
-        case .notSupported: ""
-        }
-
-      return .primitive(
-        .dictionary,
-        schema: """
-          JSONObject()
-          .additionalProperties {
-            \(codeBlock)
-          }
-          .map(\\.1)\(raw: mapMatches)
-          """
-      )
     case .identifierType(let identifierType):
       if let generic = identifierType.genericArgumentClause {
         guard identifierType.name.text != "Array" else {
