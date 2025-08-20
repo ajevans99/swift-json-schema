@@ -49,11 +49,9 @@ extension TypeSyntax {
       case .primitive(let primitive, _):
         guard primitive == .string else { return .notSupported }
 
-        // Only add .map(\.matches) for schemable types (custom types), not for primitives
         let mapMatches =
           switch valueTypeInfo {
-          case .schemable: "\n.map(\\.matches)"
-          case .primitive: ""
+          case .schemable, .primitive: "\n.map(\\.matches)"
           case .notSupported: ""
           }
 
@@ -87,7 +85,7 @@ extension TypeSyntax {
             """
         )
 
-      case .primitive, .notSupported:
+      case .notSupported:
         return .notSupported
       }
     case .identifierType(let identifierType):

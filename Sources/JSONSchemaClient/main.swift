@@ -131,3 +131,51 @@ do {
 } catch {
   dump(error)
 }
+
+@Schemable
+enum TestEmotion: String {
+  case happy
+  case sad
+  case angry
+  case neutral
+  case nurturantLove
+}
+
+@Schemable
+struct TestPerson {
+  let emotions: [TestEmotion: Int]
+  let analysisNotes: String
+}
+
+printSchema(TestPerson.schema)
+
+//@Schemable
+struct AntherTestPerson: Schemable {
+  let emotions: [String: Int]
+  let analysisNotes: String
+
+  static var schema: some JSONSchemaComponent<AntherTestPerson> {
+    JSONSchema(AntherTestPerson.init) {
+      JSONObject {
+        JSONProperty(key: "emotions") {
+          JSONObject()
+            .additionalProperties {
+              JSONInteger()
+            }
+            .map(\.1.matches)
+        }
+        .required()
+        JSONProperty(key: "analysisNotes") {
+          JSONString()
+        }
+        .required()
+      }
+    }
+  }
+}
+
+@Schemable
+struct AutoAntherTestPerson {
+  let emotions: [String: Int]
+  let analysisNotes: String
+}

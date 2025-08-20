@@ -166,7 +166,6 @@ struct SchemableExpansionTests {
     )
   }
 
-
   @Test(arguments: ["struct", "class"]) func multipleBindings(declarationType: String) {
     assertMacroExpansion(
       """
@@ -785,6 +784,94 @@ struct SchemableExpansionTests {
         }
 
         extension ComplexDocstring: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func dictionaryWithCustomKeySchema() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct TestPerson {
+        let emotions: [TestEmotion: Int]
+        let analysisNotes: String
+      }
+      """,
+      expandedSource: """
+        struct TestPerson {
+          let emotions: [TestEmotion: Int]
+          let analysisNotes: String
+
+          static var schema: some JSONSchemaComponent<TestPerson> {
+            JSONSchema(TestPerson.init) {
+              JSONObject {
+                JSONProperty(key: "emotions") {
+                  JSONObject()
+                  .propertyNames {
+                    TestEmotion.schema
+                  }
+                  .additionalProperties {
+                    JSONInteger()
+                  }
+                  .map { value in
+                    Dictionary(
+                      uniqueKeysWithValues: zip(value.0.1.seen, value.0.1.raw).compactMap { seen, raw in
+                        value.1.matches[raw].map {
+                          (seen, $0)
+                        }
+                      }
+                    )
+                  }
+                }
+                .required()
+                JSONProperty(key: "analysisNotes") {
+                  JSONString()
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension TestPerson: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func dictionaryWithStringKeys() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct SimpleStringIntDict {
+        let emotions: [String: Int]
+      }
+      """,
+      expandedSource: """
+        struct SimpleStringIntDict {
+          let emotions: [String: Int]
+
+          static var schema: some JSONSchemaComponent<SimpleStringIntDict> {
+            JSONSchema(SimpleStringIntDict.init) {
+              JSONObject {
+                JSONProperty(key: "emotions") {
+                  JSONObject()
+                  .additionalProperties {
+                    JSONInteger()
+                  }
+                  .map(\\.1)
+                  .map(\\.matches)
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension SimpleStringIntDict: Schemable {
         }
         """,
       macros: testMacros
