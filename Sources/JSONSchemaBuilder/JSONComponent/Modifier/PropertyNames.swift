@@ -6,13 +6,10 @@ public struct CapturedPropertyNames<Name: Hashable> {
   public var seen: [Name]
   /// The original string keys from the instance.
   public var raw: [String]
-  /// Optional whitelist of allowed names if provided by the schema via `enum`.
-  public var allowed: Set<Name>?
 
-  public init(seen: [Name] = [], raw: [String] = [], allowed: Set<Name>? = nil) {
+  public init(seen: [Name] = [], raw: [String] = []) {
     self.seen = seen
     self.raw = raw
-    self.allowed = allowed
   }
 }
 
@@ -56,21 +53,7 @@ extension JSONComponents {
         }
       }
 
-      var allowed: Set<Names.Output>? = nil
-      if let enumValues = propertyNamesSchema.schemaValue[Keywords.Enum.name]?.array {
-        var set = Set<Names.Output>()
-        for value in enumValues {
-          switch propertyNamesSchema.parse(value) {
-          case .valid(let name):
-            set.insert(name)
-          case .invalid:
-            continue
-          }
-        }
-        allowed = set
-      }
-
-      let capture = CapturedPropertyNames(seen: seen, raw: raw, allowed: allowed)
+      let capture = CapturedPropertyNames(seen: seen, raw: raw)
 
       switch baseResult {
       case .valid(let baseOut):

@@ -74,7 +74,6 @@ struct ParsingTests {
     case .valid((_, let names)):
       #expect(Set(names.seen) == Set([.happy, .sad]))
       #expect(Set(names.raw) == Set(["happy", "sad"]))
-      #expect(names.allowed == Set(Emotion.allCases))
     default:
       #expect(Bool(false), "Expected valid parse result with propertyNames capture")
     }

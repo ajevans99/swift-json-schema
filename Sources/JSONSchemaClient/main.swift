@@ -179,3 +179,11 @@ struct AutoAntherTestPerson {
   let emotions: [String: Int]
   let analysisNotes: String
 }
+
+@Schemable
+enum UserProfileSetting {
+  case username(String)
+  case age(Int)
+  case preferredLanguages([String])
+  case contactInfo([String: String])
+}
