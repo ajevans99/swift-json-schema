@@ -28,6 +28,20 @@ extension TypeSyntax {
 
   func typeInformation() -> TypeInformation {
     switch self.as(TypeSyntaxEnum.self) {
+    #if canImport(SwiftSyntax602)
+    case .inlineArrayType(let inlineArrayType):
+      guard let codeBlock = inlineArrayType.element.typeInformation().codeBlock else {
+        return .notSupported
+      }
+      return .primitive(
+        .array,
+        schema: """
+          JSONArray {
+            \(codeBlock)
+          }
+          """
+      )
+    #endif
     case .arrayType(let arrayType):
       guard let codeBlock = arrayType.element.typeInformation().codeBlock else {
         return .notSupported
