@@ -41,22 +41,25 @@ extension TypeSyntax {
           """
       )
     #if canImport(SwiftSyntax602)
-    case .inlineArrayType(let inlineArrayType):
-      guard case GenericArgumentSyntax.Argument.type(let elementType) = inlineArrayType.element.argument else {
-        // The other enum value `.expr` requires an @spi(ExperimentalLanguageFeature) import of SwiftSyntax
-        return .notSupported
-      }
-      guard let codeBlock = elementType.typeInformation().codeBlock else {
-        return .notSupported
-      }
-      return .primitive(
-        .array,
-        schema: """
-          JSONArray {
-            \(codeBlock)
-          }
-          """
-      )
+      case .inlineArrayType(let inlineArrayType):
+        guard
+          case GenericArgumentSyntax.Argument.type(let elementType) = inlineArrayType.element
+            .argument
+        else {
+          // The other enum value `.expr` requires an @spi(ExperimentalLanguageFeature) import of SwiftSyntax
+          return .notSupported
+        }
+        guard let codeBlock = elementType.typeInformation().codeBlock else {
+          return .notSupported
+        }
+        return .primitive(
+          .array,
+          schema: """
+            JSONArray {
+              \(codeBlock)
+            }
+            """
+        )
     #endif
     case .dictionaryType(let dictionaryType):
       let keyTypeInfo = dictionaryType.key.typeInformation()
