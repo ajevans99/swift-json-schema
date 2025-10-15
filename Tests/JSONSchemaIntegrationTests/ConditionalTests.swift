@@ -19,7 +19,7 @@ struct CreditInfo: Equatable {
 }
 
 struct NameConditional {
-  static var schema: some JSONSchemaComponent<JSONValue> {
+  static var schema: some JSONSchemaComponent<String> {
     If(
       { JSONString().minLength(1) },
       then: { JSONString().pattern("^foo") },
