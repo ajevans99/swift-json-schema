@@ -6,12 +6,11 @@
 
 The Swift JSON Schema library provides a type-safe way to generate and validate JSON schema documents directly in Swift.
 
-Checkout [this example repo](https://github.com/ajevans99/SwiftFunctionToolsExperiment) which uses `swift-json-schema` to create type-safe [OpenAI API function tool calls](https://platform.openai.com/docs/guides/function-calling).
-
 * [Schema Generation](#schema-generation)
 * [Macros](#macros)
 * [Validation](#validation)
 * [Parsing](#parsing)
+* [Example Projects](#example-projects)
 * [Documentation](#documentation)
 * [Installation](#installation)
 * [Next Steps](#next-steps)
@@ -342,6 +341,15 @@ let weather: Weather = try Weather.schema.parseAndValidate(instance: data)
 ```
 
 > Shoutout to the [swift-parsing](https://github.com/pointfreeco/swift-parsing) library and the [Point-Free Parsing series](https://www.pointfree.co/collections/parsing) for the inspiration behind the parsing API and implementation.
+
+## Example Projects
+
+Explore these companion repositories to see `swift-json-schema` in action:
+
+- [SwiftFunctionToolsExperiment](https://github.com/ajevans99/SwiftFunctionToolsExperiment) – demonstrates creating type-safe [OpenAI API function tool calls](https://platform.openai.com/docs/guides/function-calling) using schemas built with this library.
+- [swift-mcp-toolkit](https://github.com/ajevans99/swift-mcp-toolkit) – a toolkit built on top of the official Model Context Protocol Swift SDK ([modelcontextprotocol/swift-sdk](https://github.com/modelcontextprotocol/swift-sdk)) that makes it easy to define strongly-typed tools for MCP servers and clients.
+
+Have a project of your own? We'd love to showcase it. Open a PR to add your repository to this list.
 
 ## Documentation
 
