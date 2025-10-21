@@ -1,7 +1,8 @@
 @attached(extension, conformances: Schemable)
-@attached(member, names: named(schema), named(keyEncodingStrategy))
+@attached(member, names: named(schema), named(keyEncodingStrategy), named(encode(_:)), named(toJSONValue()))
 public macro Schemable(
-  keyStrategy: KeyEncodingStrategies? = nil
+  keyStrategy: KeyEncodingStrategies? = nil,
+  generateEncoding: Bool = false
 ) = #externalMacro(module: "JSONSchemaMacro", type: "SchemableMacro")
 
 public protocol Schemable {

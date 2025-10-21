@@ -6,6 +6,21 @@ Automatically generate schemas from Swift types with macros.
 
 The `Schemable` macro can be used to generate JSON schemas from Swift structs, classes, and enums. Just add the `@Schemable` attribute to your type and the macro will generate a `schema` property on your type.
 
+Pass `generateEncoding: true` if you also want a `toJSONValue()` helper:
+
+```swift
+@Schemable(generateEncoding: true)
+struct Weather {
+  let temperature: Double
+  let location: String
+}
+
+let encoded = Weather(temperature: 72, location: "Reykjavík").toJSONValue()
+// encoded == .object(["temperature": .number(72), "location": .string("Reykjavík")])
+```
+
+> Note: encoding currently supports primitives, nested `@Schemable(generateEncoding: true)` types, and custom schema conversions. Dictionaries must use `String` keys.
+
 ```swift
 @Schemable
 struct Person {

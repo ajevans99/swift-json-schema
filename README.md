@@ -149,6 +149,24 @@ struct Person {
   ```
 
 </details>
+
+### Encoding `@Schemable` types
+
+You can opt-in to JSON encoding helpers by setting `generateEncoding` to `true` when applying the macro:
+
+```swift
+@Schemable(generateEncoding: true)
+struct Weather {
+  let temperature: Double
+  let location: String
+}
+
+let weather = Weather(temperature: 79, location: "Detroit")
+let jsonValue = weather.toJSONValue()
+// jsonValue == .object(["temperature": .number(79), "location": .string("Detroit")])
+```
+
+Encoding currently supports primitive properties, nested `@Schemable(generateEncoding: true)` types, and fields that use `@SchemaOptions(.customSchema(_:) )`. Dictionary encoding requires `String` keys.
 <br/>
 
 `@Schemable` can be applied to enums.

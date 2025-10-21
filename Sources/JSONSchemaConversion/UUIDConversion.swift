@@ -1,4 +1,5 @@
 import Foundation
+import JSONSchema
 import JSONSchemaBuilder
 
 public struct UUIDConversion: Schemable {
@@ -6,5 +7,9 @@ public struct UUIDConversion: Schemable {
     JSONString()
       .format("uuid")
       .compactMap { UUID(uuidString: $0) }
+  }
+
+  public static func encode(_ value: UUID) -> JSONValue {
+    .string(value.uuidString)
   }
 }

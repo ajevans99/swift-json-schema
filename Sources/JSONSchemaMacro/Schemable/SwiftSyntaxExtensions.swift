@@ -1,5 +1,14 @@
 import Foundation
 import SwiftSyntax
+import SwiftSyntaxBuilder
+
+func identifierExpr(_ name: String) -> ExprSyntax {
+  ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(name)))
+}
+
+func identifierExpr(_ token: TokenSyntax) -> ExprSyntax {
+  ExprSyntax(DeclReferenceExprSyntax(baseName: token))
+}
 
 extension TypeSyntax {
   var isOptional: Bool {
@@ -168,6 +177,224 @@ extension TypeSyntax {
       .metatypeType, .missingType, .namedOpaqueReturnType, .packElementType, .packExpansionType,
       .suppressedType, .tupleType:
       return .notSupported
+    }
+  }
+
+  func unwrappedOptionalType() -> TypeSyntax? {
+    switch self.as(TypeSyntaxEnum.self) {
+    case .optionalType(let optionalType):
+      return optionalType.wrappedType
+    case .implicitlyUnwrappedOptionalType(let implicitlyUnwrappedOptionalType):
+      return implicitlyUnwrappedOptionalType.wrappedType
+    case .identifierType(let identifierType):
+      guard identifierType.name.text == "Optional",
+        let arguments = identifierType.genericArgumentClause?.arguments.first
+      else { return nil }
+      #if canImport(SwiftSyntax601)
+        guard case GenericArgumentSyntax.Argument.type(let wrappedType) = arguments.argument else {
+          return nil
+        }
+        return wrappedType
+      #else
+        return arguments.argument
+      #endif
+    default:
+      return nil
+    }
+  }
+
+  func encodeExpression(
+    valueExpr: ExprSyntax,
+    customSchema: ExprSyntax?,
+    context: String
+  ) -> ExprSyntax? {
+    if let customSchema {
+      return "\(customSchema).encode(\(valueExpr))"
+    }
+
+    switch self.as(TypeSyntaxEnum.self) {
+    case .identifierType(let identifierType):
+      if let generic = identifierType.genericArgumentClause {
+        if identifierType.name.text == "Array" {
+          #if canImport(SwiftSyntax601)
+            guard
+              let firstArgument = generic.arguments.first,
+              case GenericArgumentSyntax.Argument.type(let element) = firstArgument.argument
+            else { return nil }
+            return TypeSyntax(ArrayTypeSyntax(element: element))
+              .encodeExpression(valueExpr: valueExpr, customSchema: nil, context: context)
+          #else
+            guard let element = generic.arguments.first?.argument else { return nil }
+            return TypeSyntax(ArrayTypeSyntax(element: element))
+              .encodeExpression(valueExpr: valueExpr, customSchema: nil, context: context)
+          #endif
+        }
+
+        if identifierType.name.text == "Dictionary" {
+          let arguments = Array(generic.arguments.prefix(2))
+          guard arguments.count == 2 else { return nil }
+          #if canImport(SwiftSyntax601)
+            guard case GenericArgumentSyntax.Argument.type(let key) = arguments[0].argument,
+              case GenericArgumentSyntax.Argument.type(let value) = arguments[1].argument
+            else { return nil }
+            return TypeSyntax(DictionaryTypeSyntax(key: key, value: value))
+              .encodeExpression(valueExpr: valueExpr, customSchema: nil, context: context)
+          #else
+            return TypeSyntax(
+              DictionaryTypeSyntax(
+                key: arguments[0].argument,
+                value: arguments[1].argument
+              )
+            )
+            .encodeExpression(valueExpr: valueExpr, customSchema: nil, context: context)
+          #endif
+        }
+      }
+
+      let name = identifierType.name.text
+      switch name {
+      case "String":
+        return "JSONValue.string(\(valueExpr))"
+      case "Double":
+        return "JSONValue.number(\(valueExpr))"
+      case "Float":
+        return "JSONValue.number(Double(\(valueExpr)))"
+      case "Int":
+        return "JSONValue.integer(\(valueExpr))"
+      case "Bool":
+        return "JSONValue.boolean(\(valueExpr))"
+      case "JSONValue":
+        return valueExpr
+      default:
+        return "\(valueExpr).toJSONValue()"
+      }
+    case .arrayType(let arrayType):
+      return encodeArray(arrayType, valueExpr: valueExpr, context: context)
+    case .dictionaryType(let dictionaryType):
+      return encodeDictionary(dictionaryType, valueExpr: valueExpr, context: context)
+    case .implicitlyUnwrappedOptionalType(let implicitlyUnwrappedOptionalType):
+      return implicitlyUnwrappedOptionalType.wrappedType.encodeExpression(
+        valueExpr: valueExpr,
+        customSchema: customSchema,
+        context: context
+      )
+    case .optionalType(let optionalType):
+      return optionalType.wrappedType.encodeExpression(
+        valueExpr: valueExpr,
+        customSchema: customSchema,
+        context: context
+      )
+    case .someOrAnyType(let someOrAnyType):
+      return someOrAnyType.constraint.encodeExpression(
+        valueExpr: valueExpr,
+        customSchema: customSchema,
+        context: context
+      )
+    case .memberType:
+      return "\(valueExpr).toJSONValue()"
+    case .metatypeType(let metatypeType):
+      return metatypeType.baseType.encodeExpression(
+        valueExpr: valueExpr,
+        customSchema: customSchema,
+        context: context
+      )
+    default:
+      return nil
+    }
+  }
+
+  private func encodeArray(
+    _ arrayType: ArrayTypeSyntax,
+    valueExpr: ExprSyntax,
+    context: String
+  ) -> ExprSyntax? {
+    let elementType = arrayType.element
+    if elementType.isJSONValueType {
+      return "JSONValue.array(\(valueExpr))"
+    }
+
+    if let wrapped = elementType.unwrappedOptionalType() {
+      guard
+        let wrappedExpr = wrapped.encodeExpression(
+          valueExpr: identifierExpr("nonNilElement"),
+          customSchema: nil,
+          context: "\(context)[]"
+        )
+      else { return nil }
+      return """
+        JSONValue.array(
+          \(valueExpr).map { element in
+            if let nonNilElement = element {
+              \(wrappedExpr)
+            } else {
+              JSONValue.null
+            }
+          }
+        )
+        """
+    }
+
+    guard
+      let elementExpr = elementType.encodeExpression(
+        valueExpr: identifierExpr("element"),
+        customSchema: nil,
+        context: "\(context)[]"
+      )
+    else { return nil }
+
+    return """
+      JSONValue.array(
+        \(valueExpr).map { element in
+          \(elementExpr)
+        }
+      )
+      """
+  }
+
+  private func encodeDictionary(
+    _ dictionaryType: DictionaryTypeSyntax,
+    valueExpr: ExprSyntax,
+    context: String
+  ) -> ExprSyntax? {
+    let valueContext = "\(context)[value]"
+
+    if dictionaryType.key.isStringType {
+      guard
+        let valueExprSyntax = dictionaryType.value.encodeExpression(
+          valueExpr: identifierExpr("value"),
+          customSchema: nil,
+          context: valueContext
+        )
+      else { return nil }
+        return """
+        {
+          var dictionary: [String: JSONValue] = [:]
+          for (key, value) in \(valueExpr) {
+            dictionary[key] = \(valueExprSyntax)
+          }
+          return JSONValue.object(dictionary)
+        }()
+        """
+    }
+
+    return nil
+  }
+
+  private var isJSONValueType: Bool {
+    switch self.as(TypeSyntaxEnum.self) {
+    case .identifierType(let identifierType):
+      return identifierType.name.text == "JSONValue"
+    default:
+      return false
+    }
+  }
+
+  private var isStringType: Bool {
+    switch self.as(TypeSyntaxEnum.self) {
+    case .identifierType(let identifierType):
+      return identifierType.name.text == "String"
+    default:
+      return false
     }
   }
 }

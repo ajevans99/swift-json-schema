@@ -1,4 +1,5 @@
 import Foundation
+import JSONSchema
 import JSONSchemaBuilder
 
 /// A conversion for JSON Schema `uri` format to `Foundation.URL`.
@@ -10,5 +11,9 @@ public struct URLConversion: Schemable {
     JSONString()
       .format("uri")
       .compactMap { URL(string: $0) }
+  }
+
+  public static func encode(_ value: URL) -> JSONValue {
+    .string(value.absoluteString)
   }
 }

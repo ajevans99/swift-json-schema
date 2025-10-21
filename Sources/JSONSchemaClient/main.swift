@@ -102,6 +102,10 @@ struct IPAddress: Schemable {
     JSONString()
       .format("ipv4")
   }
+
+  static func encode(_ value: String) -> JSONValue {
+    .string(value)
+  }
 }
 
 @Schemable
@@ -171,6 +175,20 @@ struct AntherTestPerson: Schemable {
         .required()
       }
     }
+  }
+
+  static func encode(_ value: AntherTestPerson) -> JSONValue {
+    let encodedEmotions = Dictionary(
+      uniqueKeysWithValues: value.emotions.map { key, value in (key, JSONValue.integer(value)) }
+    )
+    return .object([
+      "emotions": .object(encodedEmotions),
+      "analysisNotes": .string(value.analysisNotes),
+    ])
+  }
+
+  func toJSONValue() -> JSONValue {
+    Self.encode(self)
   }
 }
 

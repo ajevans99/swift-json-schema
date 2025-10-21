@@ -16,6 +16,14 @@ struct FieldnameSchema: Equatable {
           .pattern(#"^[^\\/]+$"#)
       }
     }
+
+    static func encode(_ value: FileExtension) -> JSONValue {
+      .string(value.value)
+    }
+
+    func toJSONValue() -> JSONValue {
+      Self.encode(self)
+    }
   }
 
   struct Field: Schemable, Equatable {
@@ -35,6 +43,19 @@ struct FieldnameSchema: Equatable {
           .map { $1.matches.mapValues(\.value) }
           .unevaluatedProperties { false }
       }
+    }
+
+    static func encode(_ value: FieldnameSchema.Field) -> JSONValue {
+      let encoded = Dictionary(
+        uniqueKeysWithValues: value.value.map { key, extensions in
+          (key, JSONValue.array(extensions.map { $0.toJSONValue() }))
+        }
+      )
+      return .object(encoded)
+    }
+
+    func toJSONValue() -> JSONValue {
+      Self.encode(self)
     }
   }
 }

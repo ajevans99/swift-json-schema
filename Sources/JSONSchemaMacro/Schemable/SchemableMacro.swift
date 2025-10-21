@@ -54,19 +54,36 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     let accessLevel = extractAccessLevel(from: declaration)
     let accessModifier = accessLevel.map { "\($0) " } ?? ""
 
+    let generateEncodingExpr = node.arguments?
+      .as(LabeledExprListSyntax.self)?
+      .first(where: { $0.label?.text == "generateEncoding" })?
+      .expression
+    let shouldGenerateEncoding: Bool
+    if let boolLiteral = generateEncodingExpr?.as(BooleanLiteralExprSyntax.self) {
+      shouldGenerateEncoding = boolLiteral.literal.tokenKind != .keyword(.false)
+    } else {
+      shouldGenerateEncoding = false
+    }
+
     if let structDecl = declaration.as(StructDeclSyntax.self) {
       let strategyArg = node.arguments?
         .as(LabeledExprListSyntax.self)?
         .first(where: { $0.label?.text == "keyStrategy" })?
         .expression
-      let generator = SchemaGenerator(fromStruct: structDecl, keyStrategy: strategyArg)
-      let schemaDecl = generator.makeSchema()
-      var decls: [DeclSyntax] = [schemaDecl]
+      let generator = SchemaGenerator(
+        fromStruct: structDecl,
+        keyStrategy: strategyArg,
+        accessModifier: accessModifier
+      )
+      var decls: [DeclSyntax] = [generator.makeSchema()]
       if let strategyArg {
         let property: DeclSyntax = """
           \(raw: accessModifier)static var keyEncodingStrategy: KeyEncodingStrategies { \(strategyArg) }
           """
         decls.append(property)
+      }
+      if shouldGenerateEncoding {
+        decls.append(contentsOf: generator.makeEncodingDeclarations())
       }
       return decls
     } else if let classDecl = declaration.as(ClassDeclSyntax.self) {
@@ -74,14 +91,20 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
         .as(LabeledExprListSyntax.self)?
         .first(where: { $0.label?.text == "keyStrategy" })?
         .expression
-      let generator = SchemaGenerator(fromClass: classDecl, keyStrategy: strategyArg)
-      let schemaDecl = generator.makeSchema()
-      var decls: [DeclSyntax] = [schemaDecl]
+      let generator = SchemaGenerator(
+        fromClass: classDecl,
+        keyStrategy: strategyArg,
+        accessModifier: accessModifier
+      )
+      var decls: [DeclSyntax] = [generator.makeSchema()]
       if let strategyArg {
         let property: DeclSyntax = """
           \(raw: accessModifier)static var keyEncodingStrategy: KeyEncodingStrategies { \(strategyArg) }
           """
         decls.append(property)
+      }
+      if shouldGenerateEncoding {
+        decls.append(contentsOf: generator.makeEncodingDeclarations())
       }
       return decls
     } else if let enumDecl = declaration.as(EnumDeclSyntax.self) {
@@ -89,14 +112,16 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
         .as(LabeledExprListSyntax.self)?
         .first(where: { $0.label?.text == "keyStrategy" })?
         .expression
-      let generator = EnumSchemaGenerator(fromEnum: enumDecl)
-      let schemaDecl = generator.makeSchema()
-      var decls: [DeclSyntax] = [schemaDecl]
+      let generator = EnumSchemaGenerator(fromEnum: enumDecl, accessModifier: accessModifier)
+      var decls: [DeclSyntax] = [generator.makeSchema()]
       if let strategyArg {
         let property: DeclSyntax = """
           \(raw: accessModifier)static var keyEncodingStrategy: KeyEncodingStrategies { \(strategyArg) }
           """
         decls.append(property)
+      }
+      if shouldGenerateEncoding {
+        decls.append(contentsOf: generator.makeEncodingDeclarations())
       }
       return decls
     }

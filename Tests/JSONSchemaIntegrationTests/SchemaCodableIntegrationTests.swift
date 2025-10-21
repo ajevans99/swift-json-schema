@@ -50,6 +50,10 @@ struct IPAddress: Schemable {
     JSONString()
       .format("ipv4")
   }
+
+  static func encode(_ value: String) -> JSONValue {
+    .string(value)
+  }
 }
 
 @Schemable
