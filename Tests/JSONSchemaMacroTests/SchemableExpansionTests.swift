@@ -882,4 +882,279 @@ struct SchemableExpansionTests {
       macros: testMacros
     )
   }
+
+  @Test(arguments: ["struct", "class"]) func extensionDefinedType(declarationType: String) {
+    assertMacroExpansion(
+      """
+      public extension Weather {
+        @Schemable
+        \(declarationType) Forecast {
+          let temperature: Double
+          let humidity: Int
+        }
+      }
+      """,
+      expandedSource: """
+        public extension Weather {
+          \(declarationType) Forecast {
+            let temperature: Double
+            let humidity: Int
+
+            static var schema: some JSONSchemaComponent<Forecast> {
+              JSONSchema(Forecast.init) {
+                JSONObject {
+                  JSONProperty(key: "temperature") {
+                    JSONNumber()
+                  }
+                  .required()
+                  JSONProperty(key: "humidity") {
+                    JSONInteger()
+                  }
+                  .required()
+                }
+              }
+            }
+          }
+        }
+
+        extension Weather.Forecast: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test(arguments: ["struct", "class"]) func extensionDefinedTypeTwoLevelsDeep(
+    declarationType: String
+  ) {
+    assertMacroExpansion(
+      """
+      public extension Weather {
+        \(declarationType) Forecast {
+          @Schemable
+          \(declarationType) Hourly {
+            let temperature: Double
+            let windSpeed: Int
+          }
+        }
+      }
+      """,
+      expandedSource: """
+        public extension Weather {
+          \(declarationType) Forecast {
+            \(declarationType) Hourly {
+              let temperature: Double
+              let windSpeed: Int
+
+              static var schema: some JSONSchemaComponent<Hourly> {
+                JSONSchema(Hourly.init) {
+                  JSONObject {
+                    JSONProperty(key: "temperature") {
+                      JSONNumber()
+                    }
+                    .required()
+                    JSONProperty(key: "windSpeed") {
+                      JSONInteger()
+                    }
+                    .required()
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        extension Weather.Forecast.Hourly: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test(arguments: ["struct", "class"]) func extensionDefinedTypeThreeLevelsDeep(
+    declarationType: String
+  ) {
+    assertMacroExpansion(
+      """
+      public extension Weather {
+        \(declarationType) Forecast {
+          \(declarationType) Hourly {
+            @Schemable
+            \(declarationType) Detailed {
+              let temperature: Double
+            }
+          }
+        }
+      }
+      """,
+      expandedSource: """
+        public extension Weather {
+          \(declarationType) Forecast {
+            \(declarationType) Hourly {
+              \(declarationType) Detailed {
+                let temperature: Double
+
+                static var schema: some JSONSchemaComponent<Detailed> {
+                  JSONSchema(Detailed.init) {
+                    JSONObject {
+                      JSONProperty(key: "temperature") {
+                        JSONNumber()
+                      }
+                      .required()
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        extension Weather.Forecast.Hourly.Detailed: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func extensionDefinedTypeWithMixedDeclarationTypes() {
+    assertMacroExpansion(
+      """
+      public extension Weather {
+        class Forecast {
+          @Schemable
+          enum Status {
+            case sunny
+            case cloudy
+          }
+        }
+      }
+      """,
+      expandedSource: """
+        public extension Weather {
+          class Forecast {
+            enum Status {
+              case sunny
+              case cloudy
+
+              static var schema: some JSONSchemaComponent<Status> {
+                JSONString()
+                  .enumValues {
+                    "sunny"
+                    "cloudy"
+                  }
+                  .compactMap {
+                    switch $0 {
+                    case "sunny":
+                      return Self.sunny
+
+                    case "cloudy":
+                      return Self.cloudy
+
+                    default: return nil
+                    }
+                  }
+              }
+            }
+          }
+        }
+
+        extension Weather.Forecast.Status: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test(arguments: ["struct", "class"]) func directlyNestedType(declarationType: String) {
+    assertMacroExpansion(
+      """
+      @Schemable
+      \(declarationType) Weather {
+        @Schemable
+        \(declarationType) Forecast {
+          let temperature: Double
+          let humidity: Int
+        }
+      }
+      """,
+      expandedSource: """
+        \(declarationType) Weather {
+          \(declarationType) Forecast {
+            let temperature: Double
+            let humidity: Int
+
+            static var schema: some JSONSchemaComponent<Forecast> {
+              JSONSchema(Forecast.init) {
+                JSONObject {
+                  JSONProperty(key: "temperature") {
+                    JSONNumber()
+                  }
+                  .required()
+                  JSONProperty(key: "humidity") {
+                    JSONInteger()
+                  }
+                  .required()
+                }
+              }
+            }
+          }
+
+          static var schema: some JSONSchemaComponent<Weather> {
+            JSONSchema(Weather.init) {
+              JSONObject {
+              }
+            }
+          }
+        }
+
+        extension Weather: Schemable {
+        }
+
+        extension Weather.Forecast: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test(arguments: ["struct", "class"]) func directlyNestedTypeTwoLevelsDeep(
+    declarationType: String
+  ) {
+    assertMacroExpansion(
+      """
+      \(declarationType) Weather {
+        \(declarationType) Forecast {
+          @Schemable
+          \(declarationType) Hourly {
+            let temperature: Double
+          }
+        }
+      }
+      """,
+      expandedSource: """
+        \(declarationType) Weather {
+          \(declarationType) Forecast {
+            \(declarationType) Hourly {
+              let temperature: Double
+
+              static var schema: some JSONSchemaComponent<Hourly> {
+                JSONSchema(Hourly.init) {
+                  JSONObject {
+                    JSONProperty(key: "temperature") {
+                      JSONNumber()
+                    }
+                    .required()
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        extension Weather.Forecast.Hourly: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
 }

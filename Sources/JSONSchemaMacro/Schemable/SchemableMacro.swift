@@ -21,6 +21,46 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     .name.text
   }
 
+  /// Get the fully qualified type name, collecting all parent types up to an extension
+  private static func getFullyQualifiedTypeName(
+    for type: some TypeSyntaxProtocol,
+    declaration: some DeclGroupSyntax
+  ) -> String {
+    var parentTypeNames: [String] = []
+    var currentNode: Syntax? = Syntax(declaration)
+
+    // Walk up the syntax tree collecting all parent type names
+    while let parent = currentNode?.parent {
+      if let extensionDecl = parent.as(ExtensionDeclSyntax.self) {
+        // Found an extension, get the extended type and prepend it
+        let extendedTypeName = extensionDecl.extendedType.trimmedDescription
+        parentTypeNames.insert(extendedTypeName, at: 0)
+        break
+      } else if let structDecl = parent.as(StructDeclSyntax.self) {
+        // Collect struct parent name
+        parentTypeNames.insert(structDecl.name.text, at: 0)
+      } else if let classDecl = parent.as(ClassDeclSyntax.self) {
+        // Collect class parent name
+        parentTypeNames.insert(classDecl.name.text, at: 0)
+      } else if let enumDecl = parent.as(EnumDeclSyntax.self) {
+        // Collect enum parent name
+        parentTypeNames.insert(enumDecl.name.text, at: 0)
+      } else if let actorDecl = parent.as(ActorDeclSyntax.self) {
+        // Collect actor parent name
+        parentTypeNames.insert(actorDecl.name.text, at: 0)
+      }
+
+      currentNode = parent
+    }
+
+    // Build the fully qualified name
+    if parentTypeNames.isEmpty {
+      return type.trimmedDescription
+    } else {
+      return parentTypeNames.joined(separator: ".") + "." + type.trimmedDescription
+    }
+  }
+
   public static func expansion(
     of node: AttributeSyntax,
     attachedTo declaration: some DeclGroupSyntax,
@@ -34,10 +74,13 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     }?
     .name.text
 
+    // Get the fully qualified type name (handles extension-defined types)
+    let fullyQualifiedTypeName = getFullyQualifiedTypeName(for: type, declaration: declaration)
+
     // Create extension with access level if present
     let extensionDecl = try ExtensionDeclSyntax(
       """
-      \(raw: accessLevel.map { "\($0) " } ?? "")extension \(type.trimmed): Schemable {}
+      \(raw: accessLevel.map { "\($0) " } ?? "")extension \(raw: fullyQualifiedTypeName): Schemable {}
       """
     )
 
