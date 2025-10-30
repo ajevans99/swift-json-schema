@@ -21,6 +21,41 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     .name.text
   }
 
+  /// Get the effective access level for the schema property, considering enclosing extensions
+  ///
+  /// Swift macros have access to lexical context, which includes parent scopes like extensions.
+  /// We check the lexical context to find if the type is defined inside an extension and
+  /// inherit the extension's access level.
+  private static func effectiveAccessLevel(
+    from declaration: some DeclGroupSyntax,
+    context: some MacroExpansionContext
+  ) -> String? {
+    // First check if the declaration itself has an access modifier
+    if let declAccessLevel = extractAccessLevel(from: declaration) {
+      return declAccessLevel
+    }
+
+    // Check lexical context for parent extension with access modifier
+    let lexicalContext = context.lexicalContext
+
+    // Look for an ExtensionDeclSyntax in the lexical context
+    for contextElement in lexicalContext {
+      if let extensionDecl = contextElement.as(ExtensionDeclSyntax.self) {
+        // Check if the extension has a public/package/internal access modifier
+        let extensionAccessLevel = extensionDecl.modifiers.first { modifier in
+          ["public", "package", "internal"].contains(modifier.name.text)
+        }?
+        .name.text
+
+        if let extensionAccessLevel {
+          return extensionAccessLevel
+        }
+      }
+    }
+
+    return nil
+  }
+
   public static func expansion(
     of node: AttributeSyntax,
     attachedTo declaration: some DeclGroupSyntax,
@@ -50,8 +85,8 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     conformingTo protocols: [TypeSyntax],
     in context: some MacroExpansionContext
   ) throws -> [DeclSyntax] {
-    // Get the access level from the declaration
-    let accessLevel = extractAccessLevel(from: declaration)
+    // Get the effective access level (considering enclosing extensions)
+    let accessLevel = effectiveAccessLevel(from: declaration, context: context)
     let accessModifier = accessLevel.map { "\($0) " } ?? ""
 
     if let structDecl = declaration.as(StructDeclSyntax.self) {
@@ -59,7 +94,11 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
         .as(LabeledExprListSyntax.self)?
         .first(where: { $0.label?.text == "keyStrategy" })?
         .expression
-      let generator = SchemaGenerator(fromStruct: structDecl, keyStrategy: strategyArg)
+      let generator = SchemaGenerator(
+        fromStruct: structDecl,
+        keyStrategy: strategyArg,
+        accessLevel: accessLevel
+      )
       let schemaDecl = generator.makeSchema()
       var decls: [DeclSyntax] = [schemaDecl]
       if let strategyArg {
@@ -74,7 +113,11 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
         .as(LabeledExprListSyntax.self)?
         .first(where: { $0.label?.text == "keyStrategy" })?
         .expression
-      let generator = SchemaGenerator(fromClass: classDecl, keyStrategy: strategyArg)
+      let generator = SchemaGenerator(
+        fromClass: classDecl,
+        keyStrategy: strategyArg,
+        accessLevel: accessLevel
+      )
       let schemaDecl = generator.makeSchema()
       var decls: [DeclSyntax] = [schemaDecl]
       if let strategyArg {
@@ -89,7 +132,7 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
         .as(LabeledExprListSyntax.self)?
         .first(where: { $0.label?.text == "keyStrategy" })?
         .expression
-      let generator = EnumSchemaGenerator(fromEnum: enumDecl)
+      let generator = EnumSchemaGenerator(fromEnum: enumDecl, accessLevel: accessLevel)
       let schemaDecl = generator.makeSchema()
       var decls: [DeclSyntax] = [schemaDecl]
       if let strategyArg {

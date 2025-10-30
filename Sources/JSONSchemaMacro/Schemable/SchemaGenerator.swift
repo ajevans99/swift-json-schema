@@ -7,8 +7,17 @@ struct EnumSchemaGenerator {
   let members: MemberBlockItemListSyntax
   let attributes: AttributeListSyntax
 
-  init(fromEnum enumDecl: EnumDeclSyntax) {
-    declModifier = enumDecl.modifiers.first
+  init(fromEnum enumDecl: EnumDeclSyntax, accessLevel: String? = nil) {
+    // Use provided access level if available, otherwise use the declaration's modifier
+    if let accessLevel {
+      // Create modifier with trailing space for proper formatting
+      declModifier = DeclModifierSyntax(
+        name: .identifier(accessLevel),
+        trailingTrivia: .space
+      )
+    } else {
+      declModifier = enumDecl.modifiers.first
+    }
     name = enumDecl.name.trimmed
     members = enumDecl.memberBlock.members
     attributes = enumDecl.attributes
@@ -93,16 +102,38 @@ struct SchemaGenerator {
   let attributes: AttributeListSyntax
   let keyStrategy: ExprSyntax?
 
-  init(fromClass classDecl: ClassDeclSyntax, keyStrategy: ExprSyntax?) {
-    declModifier = classDecl.modifiers.first
+  init(fromClass classDecl: ClassDeclSyntax, keyStrategy: ExprSyntax?, accessLevel: String? = nil) {
+    // Use provided access level if available, otherwise use the declaration's modifier
+    if let accessLevel {
+      // Create modifier with trailing space for proper formatting
+      declModifier = DeclModifierSyntax(
+        name: .identifier(accessLevel),
+        trailingTrivia: .space
+      )
+    } else {
+      declModifier = classDecl.modifiers.first
+    }
     name = classDecl.name.trimmed
     members = classDecl.memberBlock.members
     attributes = classDecl.attributes
     self.keyStrategy = keyStrategy
   }
 
-  init(fromStruct structDecl: StructDeclSyntax, keyStrategy: ExprSyntax?) {
-    declModifier = structDecl.modifiers.first
+  init(
+    fromStruct structDecl: StructDeclSyntax,
+    keyStrategy: ExprSyntax?,
+    accessLevel: String? = nil
+  ) {
+    // Use provided access level if available, otherwise use the declaration's modifier
+    if let accessLevel {
+      // Create modifier with trailing space for proper formatting
+      declModifier = DeclModifierSyntax(
+        name: .identifier(accessLevel),
+        trailingTrivia: .space
+      )
+    } else {
+      declModifier = structDecl.modifiers.first
+    }
     name = structDecl.name.trimmed
     members = structDecl.memberBlock.members
     attributes = structDecl.attributes
