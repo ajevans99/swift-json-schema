@@ -119,7 +119,11 @@ struct SchemaGenerator {
     self.keyStrategy = keyStrategy
   }
 
-  init(fromStruct structDecl: StructDeclSyntax, keyStrategy: ExprSyntax?, accessLevel: String? = nil) {
+  init(
+    fromStruct structDecl: StructDeclSyntax,
+    keyStrategy: ExprSyntax?,
+    accessLevel: String? = nil
+  ) {
     // Use provided access level if available, otherwise use the declaration's modifier
     if let accessLevel {
       // Create modifier with trailing space for proper formatting

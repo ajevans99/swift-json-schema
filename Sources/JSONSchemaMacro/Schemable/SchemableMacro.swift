@@ -26,7 +26,10 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
   /// Swift macros have access to lexical context, which includes parent scopes like extensions.
   /// We check the lexical context to find if the type is defined inside an extension and
   /// inherit the extension's access level.
-  private static func effectiveAccessLevel(from declaration: some DeclGroupSyntax, context: some MacroExpansionContext) -> String? {
+  private static func effectiveAccessLevel(
+    from declaration: some DeclGroupSyntax,
+    context: some MacroExpansionContext
+  ) -> String? {
     // First check if the declaration itself has an access modifier
     if let declAccessLevel = extractAccessLevel(from: declaration) {
       return declAccessLevel
@@ -41,7 +44,8 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
         // Check if the extension has a public/package/internal access modifier
         let extensionAccessLevel = extensionDecl.modifiers.first { modifier in
           ["public", "package", "internal"].contains(modifier.name.text)
-        }?.name.text
+        }?
+        .name.text
 
         if let extensionAccessLevel {
           return extensionAccessLevel
@@ -90,7 +94,11 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
         .as(LabeledExprListSyntax.self)?
         .first(where: { $0.label?.text == "keyStrategy" })?
         .expression
-      let generator = SchemaGenerator(fromStruct: structDecl, keyStrategy: strategyArg, accessLevel: accessLevel)
+      let generator = SchemaGenerator(
+        fromStruct: structDecl,
+        keyStrategy: strategyArg,
+        accessLevel: accessLevel
+      )
       let schemaDecl = generator.makeSchema()
       var decls: [DeclSyntax] = [schemaDecl]
       if let strategyArg {
@@ -105,7 +113,11 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
         .as(LabeledExprListSyntax.self)?
         .first(where: { $0.label?.text == "keyStrategy" })?
         .expression
-      let generator = SchemaGenerator(fromClass: classDecl, keyStrategy: strategyArg, accessLevel: accessLevel)
+      let generator = SchemaGenerator(
+        fromClass: classDecl,
+        keyStrategy: strategyArg,
+        accessLevel: accessLevel
+      )
       let schemaDecl = generator.makeSchema()
       var decls: [DeclSyntax] = [schemaDecl]
       if let strategyArg {
