@@ -21,35 +21,6 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     .name.text
   }
 
-  /// Get the fully qualified type name, collecting all parent types up to an extension
-  private static func fullyQualifiedTypeName(
-    for type: some TypeSyntaxProtocol,
-    declaration: some DeclGroupSyntax
-  ) -> String {
-    var parentTypeNames: [String] = []
-    var currentNode: Syntax? = Syntax(declaration)
-
-    // Walk up the syntax tree collecting all parent type names
-    while let node = currentNode?.parent {
-      switch node.asProtocol(SyntaxProtocol.self) {
-      case let ext as ExtensionDeclSyntax:
-        parentTypeNames.insert(ext.extendedType.trimmedDescription, at: 0)
-        currentNode = nil  // stop at extension
-      case let decl as (any NamedDeclSyntax):
-        parentTypeNames.insert(decl.name.text, at: 0)
-        currentNode = node
-      default:
-        currentNode = node
-      }
-    }
-
-    // Build the fully qualified name
-    guard parentTypeNames.isEmpty else {
-      return parentTypeNames.joined(separator: ".") + "." + type.trimmedDescription
-    }
-    return type.trimmedDescription
-  }
-
   public static func expansion(
     of node: AttributeSyntax,
     attachedTo declaration: some DeclGroupSyntax,
@@ -63,13 +34,10 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     }?
     .name.text
 
-    // Get the fully qualified type name (handles extension-defined types)
-    let fullyQualifiedTypeName = fullyQualifiedTypeName(for: type, declaration: declaration)
-
     // Create extension with access level if present
     let extensionDecl = try ExtensionDeclSyntax(
       """
-      \(raw: accessLevel.map { "\($0) " } ?? "")extension \(raw: fullyQualifiedTypeName): Schemable {}
+      \(raw: accessLevel.map { "\($0) " } ?? "")extension \(type.trimmed): Schemable {}
       """
     )
 
