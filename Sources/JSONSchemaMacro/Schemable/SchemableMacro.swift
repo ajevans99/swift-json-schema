@@ -22,7 +22,7 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
   }
 
   /// Get the fully qualified type name, collecting all parent types up to an extension
-  private static func getFullyQualifiedTypeName(
+  private static func fullyQualifiedTypeName(
     for type: some TypeSyntaxProtocol,
     declaration: some DeclGroupSyntax
   ) -> String {
@@ -64,7 +64,7 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     .name.text
 
     // Get the fully qualified type name (handles extension-defined types)
-    let fullyQualifiedTypeName = getFullyQualifiedTypeName(for: type, declaration: declaration)
+    let fullyQualifiedTypeName = fullyQualifiedTypeName(for: type, declaration: declaration)
 
     // Create extension with access level if present
     let extensionDecl = try ExtensionDeclSyntax(
