@@ -160,11 +160,18 @@ extension TypeSyntax {
       }
 
       return .primitive(primitive, schema: "\(raw: primitive.schema)()")
+    case .memberType(let memberType):
+      // Handle qualified type names like Weather.Condition
+      let fullTypeName = memberType.trimmed.description
+      return .schemable(
+        fullTypeName,
+        schema: "\(raw: fullTypeName).schema"
+      )
     case .implicitlyUnwrappedOptionalType(let implicitlyUnwrappedOptionalType):
       return implicitlyUnwrappedOptionalType.wrappedType.typeInformation()
     case .optionalType(let optionalType): return optionalType.wrappedType.typeInformation()
     case .someOrAnyType(let someOrAnyType): return someOrAnyType.constraint.typeInformation()
-    case .attributedType, .classRestrictionType, .compositionType, .functionType, .memberType,
+    case .attributedType, .classRestrictionType, .compositionType, .functionType,
       .metatypeType, .missingType, .namedOpaqueReturnType, .packElementType, .packExpansionType,
       .suppressedType, .tupleType:
       return .notSupported
