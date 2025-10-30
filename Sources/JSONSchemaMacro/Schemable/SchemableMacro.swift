@@ -30,35 +30,24 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     var currentNode: Syntax? = Syntax(declaration)
 
     // Walk up the syntax tree collecting all parent type names
-    while let parent = currentNode?.parent {
-      if let extensionDecl = parent.as(ExtensionDeclSyntax.self) {
-        // Found an extension, get the extended type and prepend it
-        let extendedTypeName = extensionDecl.extendedType.trimmedDescription
-        parentTypeNames.insert(extendedTypeName, at: 0)
-        break
-      } else if let structDecl = parent.as(StructDeclSyntax.self) {
-        // Collect struct parent name
-        parentTypeNames.insert(structDecl.name.text, at: 0)
-      } else if let classDecl = parent.as(ClassDeclSyntax.self) {
-        // Collect class parent name
-        parentTypeNames.insert(classDecl.name.text, at: 0)
-      } else if let enumDecl = parent.as(EnumDeclSyntax.self) {
-        // Collect enum parent name
-        parentTypeNames.insert(enumDecl.name.text, at: 0)
-      } else if let actorDecl = parent.as(ActorDeclSyntax.self) {
-        // Collect actor parent name
-        parentTypeNames.insert(actorDecl.name.text, at: 0)
+    while let node = currentNode?.parent {
+      switch node.asProtocol(SyntaxProtocol.self) {
+      case let ext as ExtensionDeclSyntax:
+        parentTypeNames.insert(ext.extendedType.trimmedDescription, at: 0)
+        currentNode = nil  // stop at extension
+      case let decl as (any NamedDeclSyntax):
+        parentTypeNames.insert(decl.name.text, at: 0)
+        currentNode = node
+      default:
+        currentNode = node
       }
-
-      currentNode = parent
     }
 
     // Build the fully qualified name
-    if parentTypeNames.isEmpty {
-      return type.trimmedDescription
-    } else {
+    guard parentTypeNames.isEmpty else {
       return parentTypeNames.joined(separator: ".") + "." + type.trimmedDescription
     }
+    return type.trimmedDescription
   }
 
   public static func expansion(
