@@ -1046,11 +1046,10 @@ struct SchemableExpansionTests {
                     switch $0 {
                     case "sunny":
                       return Self.sunny
-
                     case "cloudy":
                       return Self.cloudy
-
-                    default: return nil
+                    default:
+                      return nil
                     }
                   }
               }
@@ -1107,10 +1106,10 @@ struct SchemableExpansionTests {
           }
         }
 
-        extension Weather: Schemable {
+        extension Weather.Forecast: Schemable {
         }
 
-        extension Weather.Forecast: Schemable {
+        extension Weather: Schemable {
         }
         """,
       macros: testMacros
