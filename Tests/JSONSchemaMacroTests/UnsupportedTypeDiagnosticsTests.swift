@@ -200,7 +200,7 @@ struct UnsupportedTypeDiagnosticsTests {
           line: 5,
           column: 7,
           severity: .warning
-        )
+        ),
       ],
       macros: testMacros
     )

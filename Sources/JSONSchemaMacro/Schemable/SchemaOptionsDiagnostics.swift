@@ -49,7 +49,11 @@ struct SchemaOptionsDiagnostics {
       case .primitive(.int, _), .primitive(.double, _):
         break  // Valid numeric types
       default:
-        emitTypeMismatch(macroName: macroName, expectedType: "numeric (Int, Double, etc.)", actualType: typeInfo)
+        emitTypeMismatch(
+          macroName: macroName,
+          expectedType: "numeric (Int, Double, etc.)",
+          actualType: typeInfo
+        )
       }
 
     case "ArrayOptions":
@@ -78,7 +82,11 @@ struct SchemaOptionsDiagnostics {
     }
   }
 
-  private func emitTypeMismatch(macroName: String, expectedType: String, actualType: TypeSyntax.TypeInformation) {
+  private func emitTypeMismatch(
+    macroName: String,
+    expectedType: String,
+    actualType: TypeSyntax.TypeInformation
+  ) {
     let actualTypeString: String
     switch actualType {
     case .primitive(let primitive, _):
@@ -191,7 +199,8 @@ struct SchemaOptionsDiagnostics {
     constraintType: String
   ) {
     guard let minValue = constraints[minKey],
-          let maxValue = constraints[maxKey] else { return }
+      let maxValue = constraints[maxKey]
+    else { return }
 
     if minValue > maxValue {
       let diagnostic = Diagnostic(
@@ -252,7 +261,8 @@ struct SchemaOptionsDiagnostics {
 
     for option in options {
       guard let functionCall = option.expression.as(FunctionCallExprSyntax.self),
-            let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self) else {
+        let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self)
+      else {
         continue
       }
 
@@ -287,7 +297,8 @@ struct SchemaOptionsDiagnostics {
 
     for option in options {
       guard let functionCall = option.expression.as(FunctionCallExprSyntax.self),
-            let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self) else {
+        let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self)
+      else {
         continue
       }
 
@@ -315,7 +326,8 @@ struct SchemaOptionsDiagnostics {
 
     for option in options {
       guard let functionCall = option.expression.as(FunctionCallExprSyntax.self),
-            let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self) else {
+        let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self)
+      else {
         continue
       }
 
@@ -323,7 +335,8 @@ struct SchemaOptionsDiagnostics {
 
       // Extract numeric value from first argument
       if let firstArg = functionCall.arguments.first,
-         let value = extractNumericValue(from: firstArg.expression) {
+        let value = extractNumericValue(from: firstArg.expression)
+      {
         constraints[constraintName] = value
       }
     }
@@ -334,29 +347,33 @@ struct SchemaOptionsDiagnostics {
   private func extractNumericValue(from expr: ExprSyntax) -> Double? {
     // Try integer literal
     if let intLiteral = expr.as(IntegerLiteralExprSyntax.self),
-       let value = Double(intLiteral.literal.text) {
+      let value = Double(intLiteral.literal.text)
+    {
       return value
     }
 
     // Try float literal
     if let floatLiteral = expr.as(FloatLiteralExprSyntax.self),
-       let value = Double(floatLiteral.literal.text) {
+      let value = Double(floatLiteral.literal.text)
+    {
       return value
     }
 
     // Try negative integer
     if let prefixExpr = expr.as(PrefixOperatorExprSyntax.self),
-       prefixExpr.operator.text == "-",
-       let intLiteral = prefixExpr.expression.as(IntegerLiteralExprSyntax.self),
-       let value = Double(intLiteral.literal.text) {
+      prefixExpr.operator.text == "-",
+      let intLiteral = prefixExpr.expression.as(IntegerLiteralExprSyntax.self),
+      let value = Double(intLiteral.literal.text)
+    {
       return -value
     }
 
     // Try negative float
     if let prefixExpr = expr.as(PrefixOperatorExprSyntax.self),
-       prefixExpr.operator.text == "-",
-       let floatLiteral = prefixExpr.expression.as(FloatLiteralExprSyntax.self),
-       let value = Double(floatLiteral.literal.text) {
+      prefixExpr.operator.text == "-",
+      let floatLiteral = prefixExpr.expression.as(FloatLiteralExprSyntax.self),
+      let value = Double(floatLiteral.literal.text)
+    {
       return -value
     }
 
@@ -379,11 +396,28 @@ struct SchemaOptionsDiagnostics {
 
 /// Diagnostic messages for SchemaOptions mismatches
 enum SchemaOptionsMismatchDiagnostic: DiagnosticMessage {
-  case typeMismatch(macroName: String, propertyName: String, expectedType: String, actualType: String)
-  case minGreaterThanMax(propertyName: String, minKey: String, minValue: Double, maxKey: String, maxValue: Double, constraintType: String)
+  case typeMismatch(
+    macroName: String,
+    propertyName: String,
+    expectedType: String,
+    actualType: String
+  )
+  case minGreaterThanMax(
+    propertyName: String,
+    minKey: String,
+    minValue: Double,
+    maxKey: String,
+    maxValue: Double,
+    constraintType: String
+  )
   case negativeValue(propertyName: String, constraintName: String, value: Double)
   case readOnlyAndWriteOnly(propertyName: String)
-  case conflictingConstraints(propertyName: String, constraint1: String, constraint2: String, suggestion: String)
+  case conflictingConstraints(
+    propertyName: String,
+    constraint1: String,
+    constraint2: String,
+    suggestion: String
+  )
   case duplicateOption(propertyName: String, optionName: String, count: Int)
 
   var message: String {
@@ -393,16 +427,26 @@ enum SchemaOptionsMismatchDiagnostic: DiagnosticMessage {
         @\(macroName) can only be used on \(expectedType) properties, but '\(propertyName)' has type '\(actualType)'
         """
 
-    case .minGreaterThanMax(let propertyName, let minKey, let minValue, let maxKey, let maxValue, let constraintType):
-      let minFormatted = minValue.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(minValue)) : String(minValue)
-      let maxFormatted = maxValue.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(maxValue)) : String(maxValue)
+    case .minGreaterThanMax(
+      let propertyName,
+      let minKey,
+      let minValue,
+      let maxKey,
+      let maxValue,
+      let constraintType
+    ):
+      let minFormatted =
+        minValue.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(minValue)) : String(minValue)
+      let maxFormatted =
+        maxValue.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(maxValue)) : String(maxValue)
       return """
         Property '\(propertyName)' has \(minKey) (\(minFormatted)) greater than \(maxKey) (\(maxFormatted)). \
         This \(constraintType) constraint can never be satisfied.
         """
 
     case .negativeValue(let propertyName, let constraintName, let value):
-      let valueFormatted = value.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(value)) : String(value)
+      let valueFormatted =
+        value.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(value)) : String(value)
       return """
         Property '\(propertyName)' has \(constraintName) with negative value (\(valueFormatted)). \
         This constraint must be non-negative.

@@ -75,7 +75,11 @@ struct SchemableMember {
     }
   }
 
-  func generateSchema(keyStrategy: ExprSyntax?, typeName: String, context: (any MacroExpansionContext)? = nil) -> CodeBlockItemSyntax? {
+  func generateSchema(
+    keyStrategy: ExprSyntax?,
+    typeName: String,
+    context: (any MacroExpansionContext)? = nil
+  ) -> CodeBlockItemSyntax? {
     var codeBlock: CodeBlockItemSyntax
     switch type.typeInformation() {
     case .primitive(_, let code):

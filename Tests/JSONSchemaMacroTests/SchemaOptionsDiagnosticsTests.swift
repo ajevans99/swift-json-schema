@@ -10,7 +10,7 @@ struct SchemaOptionsDiagnosticsTests {
     "StringOptions": StringOptionsMacro.self,
     "NumberOptions": NumberOptionsMacro.self,
     "ArrayOptions": ArrayOptionsMacro.self,
-    "ObjectOptions": ObjectOptionsMacro.self
+    "ObjectOptions": ObjectOptionsMacro.self,
   ]
 
   // MARK: - Type Mismatch Tests
@@ -89,7 +89,8 @@ struct SchemaOptionsDiagnosticsTests {
         """,
       diagnostics: [
         DiagnosticSpec(
-          message: "@NumberOptions can only be used on numeric (Int, Double, etc.) properties, but 'name' has type 'String'",
+          message:
+            "@NumberOptions can only be used on numeric (Int, Double, etc.) properties, but 'name' has type 'String'",
           line: 4,
           column: 7,
           severity: .error
@@ -176,7 +177,8 @@ struct SchemaOptionsDiagnosticsTests {
         """,
       diagnostics: [
         DiagnosticSpec(
-          message: "Property 'username' has minLength (10) greater than maxLength (5). This string length constraint can never be satisfied.",
+          message:
+            "Property 'username' has minLength (10) greater than maxLength (5). This string length constraint can never be satisfied.",
           line: 4,
           column: 7,
           severity: .error
@@ -219,7 +221,8 @@ struct SchemaOptionsDiagnosticsTests {
         """,
       diagnostics: [
         DiagnosticSpec(
-          message: "Property 'celsius' has minimum (100) greater than maximum (50). This value constraint can never be satisfied.",
+          message:
+            "Property 'celsius' has minimum (100) greater than maximum (50). This value constraint can never be satisfied.",
           line: 4,
           column: 7,
           severity: .error
@@ -264,7 +267,8 @@ struct SchemaOptionsDiagnosticsTests {
         """,
       diagnostics: [
         DiagnosticSpec(
-          message: "Property 'items' has minItems (10) greater than maxItems (5). This array size constraint can never be satisfied.",
+          message:
+            "Property 'items' has minItems (10) greater than maxItems (5). This array size constraint can never be satisfied.",
           line: 4,
           column: 7,
           severity: .error
@@ -308,7 +312,8 @@ struct SchemaOptionsDiagnosticsTests {
         """,
       diagnostics: [
         DiagnosticSpec(
-          message: "Property 'text' has minLength with negative value (-5). This constraint must be non-negative.",
+          message:
+            "Property 'text' has minLength with negative value (-5). This constraint must be non-negative.",
           line: 4,
           column: 7,
           severity: .error
@@ -352,7 +357,8 @@ struct SchemaOptionsDiagnosticsTests {
         """,
       diagnostics: [
         DiagnosticSpec(
-          message: "Property 'values' has minItems with negative value (-1). This constraint must be non-negative.",
+          message:
+            "Property 'values' has minItems with negative value (-1). This constraint must be non-negative.",
           line: 4,
           column: 7,
           severity: .error
@@ -442,7 +448,8 @@ struct SchemaOptionsDiagnosticsTests {
         """,
       diagnostics: [
         DiagnosticSpec(
-          message: "Property 'value' has both minimum and exclusiveMinimum specified. Use only one of minimum or exclusiveMinimum.",
+          message:
+            "Property 'value' has both minimum and exclusiveMinimum specified. Use only one of minimum or exclusiveMinimum.",
           line: 4,
           column: 7,
           severity: .warning
@@ -485,7 +492,8 @@ struct SchemaOptionsDiagnosticsTests {
         """,
       diagnostics: [
         DiagnosticSpec(
-          message: "Property 'value' has both maximum and exclusiveMaximum specified. Use only one of maximum or exclusiveMaximum.",
+          message:
+            "Property 'value' has both maximum and exclusiveMaximum specified. Use only one of maximum or exclusiveMaximum.",
           line: 4,
           column: 7,
           severity: .warning
@@ -530,7 +538,8 @@ struct SchemaOptionsDiagnosticsTests {
         """,
       diagnostics: [
         DiagnosticSpec(
-          message: "Property 'text' has minLength specified 2 times. Only the last value will be used.",
+          message:
+            "Property 'text' has minLength specified 2 times. Only the last value will be used.",
           line: 4,
           column: 7,
           severity: .warning

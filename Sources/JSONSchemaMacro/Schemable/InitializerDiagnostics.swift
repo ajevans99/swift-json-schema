@@ -18,13 +18,17 @@ struct InitializerDiagnostics {
 
     // Build expected parameter list from schema members
     let expectedParameters: [(name: String, type: String)] = schemableMembers.map { member in
-      (name: member.identifier.text, type: member.type.description.trimmingCharacters(in: .whitespaces))
+      (
+        name: member.identifier.text,
+        type: member.type.description.trimmingCharacters(in: .whitespaces)
+      )
     }
 
     // Try to find an explicit initializer
     let explicitInits = members.compactMap { $0.decl.as(InitializerDeclSyntax.self) }
 
-    if let memberWiseInit = findMatchingInit(explicitInits, expectedParameters: expectedParameters) {
+    if let memberWiseInit = findMatchingInit(explicitInits, expectedParameters: expectedParameters)
+    {
       // Found a matching explicit init - validate it matches exactly
       validateInitParameters(memberWiseInit, expectedParameters: expectedParameters)
     } else if !explicitInits.isEmpty {
@@ -43,13 +47,13 @@ struct InitializerDiagnostics {
 
   /// Gets all stored properties including those marked with @ExcludeFromSchema
   private func getAllStoredProperties() -> [(name: String, type: String, isExcluded: Bool)] {
-    return members.compactMap { $0.decl.as(VariableDeclSyntax.self) }
+    members.compactMap { $0.decl.as(VariableDeclSyntax.self) }
       .filter { !$0.isStatic }
       .flatMap { variableDecl in
         variableDecl.bindings.compactMap { binding -> (String, String, Bool)? in
           guard let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier,
-                let type = binding.typeAnnotation?.type,
-                binding.isStoredProperty
+            let type = binding.typeAnnotation?.type,
+            binding.isStoredProperty
           else { return nil }
 
           let isExcluded = !variableDecl.shouldExcludeFromSchema
@@ -70,10 +74,11 @@ struct InitializerDiagnostics {
     for initDecl in inits {
       let params = initDecl.signature.parameterClause.parameters
       if params.count == expectedParameters.count {
-        let matches = zip(params, expectedParameters).allSatisfy { param, expected in
-          let paramName = param.secondName?.text ?? param.firstName.text
-          return paramName == expected.name
-        }
+        let matches = zip(params, expectedParameters)
+          .allSatisfy { param, expected in
+            let paramName = param.secondName?.text ?? param.firstName.text
+            return paramName == expected.name
+          }
         if matches {
           return initDecl
         }
@@ -126,14 +131,17 @@ struct InitializerDiagnostics {
     availableInits: [InitializerDeclSyntax],
     excludedProperties: [(name: String, type: String, isExcluded: Bool)]
   ) {
-    let expectedSignature = expectedParameters.map { "\($0.name): \($0.type)" }.joined(separator: ", ")
+    let expectedSignature = expectedParameters.map { "\($0.name): \($0.type)" }
+      .joined(separator: ", ")
 
     let availableSignatures = availableInits.map { initDecl -> String in
-      let params = initDecl.signature.parameterClause.parameters.map { param in
-        let name = param.secondName?.text ?? param.firstName.text
-        let type = param.type.description.trimmingCharacters(in: .whitespaces)
-        return "\(name): \(type)"
-      }.joined(separator: ", ")
+      let params = initDecl.signature.parameterClause.parameters
+        .map { param in
+          let name = param.secondName?.text ?? param.firstName.text
+          let type = param.type.description.trimmingCharacters(in: .whitespaces)
+          return "\(name): \(type)"
+        }
+        .joined(separator: ", ")
       return "init(\(params))"
     }
 
@@ -152,16 +160,14 @@ struct InitializerDiagnostics {
   /// Validates requirements for synthesized memberwise init
   private func validateSynthesizedInitRequirements(schemableMembers: [SchemableMember]) {
     // Check for properties with default values - these won't be in synthesized init
-    for member in schemableMembers {
-      if member.defaultValue != nil {
-        let diagnostic = Diagnostic(
-          node: member.identifier,
-          message: InitializerMismatchDiagnostic.propertyHasDefault(
-            propertyName: member.identifier.text
-          )
+    for member in schemableMembers where member.defaultValue != nil {
+      let diagnostic = Diagnostic(
+        node: member.identifier,
+        message: InitializerMismatchDiagnostic.propertyHasDefault(
+          propertyName: member.identifier.text
         )
-        context.diagnose(diagnostic)
-      }
+      )
+      context.diagnose(diagnostic)
     }
   }
 }
@@ -181,7 +187,8 @@ enum InitializerMismatchDiagnostic: DiagnosticMessage {
   var message: String {
     switch self {
     case .propertyHasDefault(let propertyName):
-      return "Property '\(propertyName)' has a default value which will be excluded from the memberwise initializer"
+      return
+        "Property '\(propertyName)' has a default value which will be excluded from the memberwise initializer"
 
     case .parameterOrderMismatch(let position, let expectedName, let actualName):
       return """
@@ -195,7 +202,12 @@ enum InitializerMismatchDiagnostic: DiagnosticMessage {
         This type mismatch will cause the generated schema to fail.
         """
 
-    case .noMatchingInit(let typeName, let expectedSignature, let availableInits, let excludedProperties):
+    case .noMatchingInit(
+      let typeName,
+      let expectedSignature,
+      let availableInits,
+      let excludedProperties
+    ):
       var msg = """
         Type '\(typeName)' has explicit initializers, but none match the expected schema signature.
 
@@ -212,9 +224,9 @@ enum InitializerMismatchDiagnostic: DiagnosticMessage {
         msg += """
 
 
-        Note: The following properties are excluded from the schema using @ExcludeFromSchema: \(excludedList)
-        These will still be present in the memberwise initializer but not in the schema.
-        """
+          Note: The following properties are excluded from the schema using @ExcludeFromSchema: \(excludedList)
+          These will still be present in the memberwise initializer but not in the schema.
+          """
       }
       msg += """
 

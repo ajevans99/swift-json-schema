@@ -43,7 +43,8 @@ struct InitializerDiagnosticsTests {
         """,
       diagnostics: [
         DiagnosticSpec(
-          message: "Property 'age' has a default value which will be excluded from the memberwise initializer",
+          message:
+            "Property 'age' has a default value which will be excluded from the memberwise initializer",
           line: 4,
           column: 7,
           severity: .warning
@@ -97,23 +98,26 @@ struct InitializerDiagnosticsTests {
         """,
       diagnostics: [
         DiagnosticSpec(
-          message: "Property 'host' has a default value which will be excluded from the memberwise initializer",
+          message:
+            "Property 'host' has a default value which will be excluded from the memberwise initializer",
           line: 3,
           column: 7,
           severity: .warning
         ),
         DiagnosticSpec(
-          message: "Property 'port' has a default value which will be excluded from the memberwise initializer",
+          message:
+            "Property 'port' has a default value which will be excluded from the memberwise initializer",
           line: 4,
           column: 7,
           severity: .warning
         ),
         DiagnosticSpec(
-          message: "Property 'timeout' has a default value which will be excluded from the memberwise initializer",
+          message:
+            "Property 'timeout' has a default value which will be excluded from the memberwise initializer",
           line: 5,
           column: 7,
           severity: .warning
-        )
+        ),
       ],
       macros: testMacros
     )
@@ -202,17 +206,19 @@ struct InitializerDiagnosticsTests {
         """,
       diagnostics: [
         DiagnosticSpec(
-          message: "Initializer parameter at position 1 is 'age' but schema expects 'name'. The schema will generate properties in a different order than the initializer parameters.",
+          message:
+            "Initializer parameter at position 1 is 'age' but schema expects 'name'. The schema will generate properties in a different order than the initializer parameters.",
           line: 6,
           column: 8,
           severity: .error
         ),
         DiagnosticSpec(
-          message: "Initializer parameter at position 2 is 'name' but schema expects 'age'. The schema will generate properties in a different order than the initializer parameters.",
+          message:
+            "Initializer parameter at position 2 is 'name' but schema expects 'age'. The schema will generate properties in a different order than the initializer parameters.",
           line: 6,
           column: 18,
           severity: .error
-        )
+        ),
       ],
       macros: testMacros
     )
@@ -271,17 +277,19 @@ struct InitializerDiagnosticsTests {
         """,
       diagnostics: [
         DiagnosticSpec(
-          message: "Parameter 'price' has type 'Int' but schema expects 'Double'. This type mismatch will cause the generated schema to fail.",
+          message:
+            "Parameter 'price' has type 'Int' but schema expects 'Double'. This type mismatch will cause the generated schema to fail.",
           line: 7,
           column: 29,
           severity: .error
         ),
         DiagnosticSpec(
-          message: "Parameter 'quantity' has type 'Double' but schema expects 'Int'. This type mismatch will cause the generated schema to fail.",
+          message:
+            "Parameter 'quantity' has type 'Double' but schema expects 'Int'. This type mismatch will cause the generated schema to fail.",
           line: 7,
           column: 44,
           severity: .error
-        )
+        ),
       ],
       macros: testMacros
     )
