@@ -46,6 +46,7 @@ struct Invalid: Error {}
 /// Combine values of Validated together into a tuple.
 /// Example:
 /// `zip(Parsed<A, E>, Parsed<B, E>, Parsed<C, E>)` -> `Parsed<(A, B, C), E>`
+@available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
 public func zip<each Value, Error>(
   _ validated: repeat Parsed<each Value, Error>
 ) -> Parsed<(repeat each Value), Error> {
