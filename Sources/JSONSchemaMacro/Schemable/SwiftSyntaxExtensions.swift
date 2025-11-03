@@ -274,12 +274,14 @@ extension MemberBlockItemListSyntax {
         // Check if there's a raw value (string literal)
         if let rawValue = element.rawValue?.value.as(StringLiteralExprSyntax.self) {
           // Extract the string content from the string literal
-          let stringValue = rawValue.segments.compactMap { segment -> String? in
-            if case .stringSegment(let stringSegment) = segment {
-              return stringSegment.content.text
+          let stringValue = rawValue.segments
+            .compactMap { segment -> String? in
+              if case .stringSegment(let stringSegment) = segment {
+                return stringSegment.content.text
+              }
+              return nil
             }
-            return nil
-          }.joined()
+            .joined()
           mapping[caseName] = stringValue
         } else {
           // If no raw value is specified, the case name is the coding key
