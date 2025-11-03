@@ -162,6 +162,11 @@ struct SchemaGenerator {
         context: context
       )
       diagnostics.emitDiagnostics(for: schemableMembers)
+
+      // Validate schema options for each member
+      for member in schemableMembers {
+        member.validateOptions(context: context)
+      }
     }
 
     let statements = schemableMembers.compactMap {

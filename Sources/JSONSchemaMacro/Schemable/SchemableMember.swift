@@ -1,4 +1,5 @@
 import SwiftSyntax
+import SwiftSyntaxMacros
 
 struct SchemableMember {
   let identifier: TokenSyntax
@@ -45,6 +46,32 @@ struct SchemableMember {
       defaultValue: patternBinding.initializer?.value,
       docString: variableDecl.docString
     )
+  }
+
+  /// Validates schema options and emits diagnostics for invalid configurations
+  func validateOptions(context: any MacroExpansionContext) {
+    let diagnostics = SchemaOptionsDiagnostics(
+      propertyName: identifier,
+      propertyType: type,
+      context: context
+    )
+
+    // Validate general SchemaOptions
+    if let schemaOptions = annotationArguments {
+      diagnostics.validateSchemaOptions(schemaOptions)
+    }
+
+    // Validate type-specific options
+    if let typeSpecificOptions = typeSpecificArguments {
+      let typeSpecificMacroNames = [
+        "NumberOptions", "ArrayOptions", "ObjectOptions", "StringOptions",
+      ]
+      for macroName in typeSpecificMacroNames {
+        if let arguments = attributes.arguments(for: macroName) {
+          diagnostics.validateTypeSpecificOptions(arguments, macroName: macroName)
+        }
+      }
+    }
   }
 
   func generateSchema(keyStrategy: ExprSyntax?, typeName: String) -> CodeBlockItemSyntax? {
