@@ -170,7 +170,7 @@ struct SchemaGenerator {
     }
 
     let statements = schemableMembers.compactMap {
-      $0.generateSchema(keyStrategy: keyStrategy, typeName: name.text)
+      $0.generateSchema(keyStrategy: keyStrategy, typeName: name.text, context: context)
     }
 
     var codeBlockItem: CodeBlockItemSyntax =

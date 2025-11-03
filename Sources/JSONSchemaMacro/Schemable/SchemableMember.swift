@@ -1,3 +1,4 @@
+import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxMacros
 
@@ -74,7 +75,7 @@ struct SchemableMember {
     }
   }
 
-  func generateSchema(keyStrategy: ExprSyntax?, typeName: String) -> CodeBlockItemSyntax? {
+  func generateSchema(keyStrategy: ExprSyntax?, typeName: String, context: (any MacroExpansionContext)? = nil) -> CodeBlockItemSyntax? {
     var codeBlock: CodeBlockItemSyntax
     switch type.typeInformation() {
     case .primitive(_, let code):
@@ -89,7 +90,19 @@ struct SchemableMember {
           """
       }
     case .schemable(_, let code): codeBlock = code
-    case .notSupported: return nil
+    case .notSupported:
+      // Emit diagnostic for unsupported types
+      if let context = context {
+        let diagnostic = Diagnostic(
+          node: identifier,
+          message: UnsupportedTypeDiagnostic.propertyTypeNotSupported(
+            propertyName: identifier.text,
+            typeName: type.description.trimmingCharacters(in: .whitespaces)
+          )
+        )
+        context.diagnose(diagnostic)
+      }
+      return nil
     }
 
     var customKey: ExprSyntax?
@@ -168,5 +181,32 @@ struct SchemableMember {
       else { return false }
       return memberAccess.declName.baseName.text == "description"
     }
+  }
+}
+
+/// Diagnostic messages for unsupported types
+enum UnsupportedTypeDiagnostic: DiagnosticMessage {
+  case propertyTypeNotSupported(propertyName: String, typeName: String)
+
+  var message: String {
+    switch self {
+    case .propertyTypeNotSupported(let propertyName, let typeName):
+      return """
+        Property '\(propertyName)' has type '\(typeName)' which is not supported by the @Schemable macro. \
+        This property will be excluded from the generated schema, which may cause the schema to not match \
+        the memberwise initializer.
+        """
+    }
+  }
+
+  var diagnosticID: MessageID {
+    switch self {
+    case .propertyTypeNotSupported:
+      return MessageID(domain: "JSONSchemaMacro", id: "unsupportedType")
+    }
+  }
+
+  var severity: DiagnosticSeverity {
+    .warning
   }
 }
