@@ -97,7 +97,8 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
       let generator = SchemaGenerator(
         fromStruct: structDecl,
         keyStrategy: strategyArg,
-        accessLevel: accessLevel
+        accessLevel: accessLevel,
+        context: context
       )
       let schemaDecl = generator.makeSchema()
       var decls: [DeclSyntax] = [schemaDecl]
@@ -116,7 +117,8 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
       let generator = SchemaGenerator(
         fromClass: classDecl,
         keyStrategy: strategyArg,
-        accessLevel: accessLevel
+        accessLevel: accessLevel,
+        context: context
       )
       let schemaDecl = generator.makeSchema()
       var decls: [DeclSyntax] = [schemaDecl]

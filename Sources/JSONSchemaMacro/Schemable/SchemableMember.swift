@@ -58,7 +58,7 @@ struct SchemableMember {
       if let defaultValue {
         codeBlock = """
           \(codeBlock)
-          .default(\(defaultValue))
+          .default(\(defaultValue.trimmed))
           """
       }
     case .schemable(_, let code): codeBlock = code
