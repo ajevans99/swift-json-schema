@@ -8,7 +8,7 @@ public struct JSONSchema<Components: JSONSchemaComponent, NewOutput>: JSONSchema
     set { components.schemaValue = newValue }
   }
 
-  let transform: @Sendable (Components.Output) -> NewOutput
+  let transform: (Components.Output) -> NewOutput
 
   var components: Components
 
@@ -17,7 +17,7 @@ public struct JSONSchema<Components: JSONSchemaComponent, NewOutput>: JSONSchema
   ///   - transform: The transform to apply to the output.
   ///   - component: The components to group together.
   public init(
-    _ transform: @Sendable @escaping (Components.Output) -> NewOutput,
+    _ transform: @escaping (Components.Output) -> NewOutput,
     @JSONSchemaBuilder component: () -> Components
   ) {
     self.transform = transform
