@@ -1156,4 +1156,49 @@ struct SchemableExpansionTests {
       macros: testMacros
     )
   }
+
+  @Test(arguments: ["struct", "class"]) func staticPropertiesExcluded(declarationType: String) {
+    assertMacroExpansion(
+      """
+      @Schemable
+      \(declarationType) Config {
+        static let version = "1.0.0"
+        static var defaultTimeout: Int = 30
+        static var maxRetries: Int { 5 }
+        static let defaultConfig: Config = Config(apiKey: "default", endpoint: "https://api.example.com")
+        let apiKey: String
+        let endpoint: String
+      }
+      """,
+      expandedSource: """
+        \(declarationType) Config {
+          static let version = "1.0.0"
+          static var defaultTimeout: Int = 30
+          static var maxRetries: Int { 5 }
+          static let defaultConfig: Config = Config(apiKey: "default", endpoint: "https://api.example.com")
+          let apiKey: String
+          let endpoint: String
+
+          static var schema: some JSONSchemaComponent<Config> {
+            JSONSchema(Config.init) {
+              JSONObject {
+                JSONProperty(key: "apiKey") {
+                  JSONString()
+                }
+                .required()
+                JSONProperty(key: "endpoint") {
+                  JSONString()
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension Config: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
 }
