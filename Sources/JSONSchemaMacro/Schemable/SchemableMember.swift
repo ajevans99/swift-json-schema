@@ -63,7 +63,7 @@ struct SchemableMember {
     }
 
     // Validate type-specific options
-    if let typeSpecificOptions = typeSpecificArguments {
+    if typeSpecificArguments != nil {
       let typeSpecificMacroNames = [
         "NumberOptions", "ArrayOptions", "ObjectOptions", "StringOptions",
       ]
