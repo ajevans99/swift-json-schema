@@ -237,18 +237,11 @@ extension VariableDeclSyntax {
     }
     .contains(where: { $0 == "ExcludeFromSchema" })
   }
-
-  var isStatic: Bool {
-    modifiers.contains { modifier in
-      modifier.name.tokenKind == .keyword(.static)
-    }
-  }
 }
 
 extension MemberBlockItemListSyntax {
   func schemableMembers() -> [SchemableMember] {
     self.compactMap { $0.decl.as(VariableDeclSyntax.self) }
-      .filter { !$0.isStatic }
       .flatMap { variableDecl in variableDecl.bindings.map { (variableDecl, $0) } }
       .filter { $0.0.shouldExcludeFromSchema }.filter { $0.1.isStoredProperty }
       .compactMap(SchemableMember.init)
@@ -257,6 +250,45 @@ extension MemberBlockItemListSyntax {
   func schemableEnumCases() -> [SchemableEnumCase] {
     self.compactMap { $0.decl.as(EnumCaseDeclSyntax.self) }
       .flatMap { caseDecl in caseDecl.elements.map { (caseDecl, $0) } }.map(SchemableEnumCase.init)
+  }
+
+  /// Extracts CodingKeys mapping from a CodingKeys enum if present
+  func extractCodingKeys() -> [String: String]? {
+    // Look for an enum named "CodingKeys"
+    guard
+      let codingKeysEnum = self.compactMap({ $0.decl.as(EnumDeclSyntax.self) })
+        .first(where: { $0.name.text == "CodingKeys" })
+    else {
+      return nil
+    }
+
+    var mapping: [String: String] = [:]
+
+    // Iterate through enum cases to extract the mapping
+    for member in codingKeysEnum.memberBlock.members {
+      guard let caseDecl = member.decl.as(EnumCaseDeclSyntax.self) else { continue }
+
+      for element in caseDecl.elements {
+        let caseName = element.name.text
+
+        // Check if there's a raw value (string literal)
+        if let rawValue = element.rawValue?.value.as(StringLiteralExprSyntax.self) {
+          // Extract the string content from the string literal
+          let stringValue = rawValue.segments.compactMap { segment -> String? in
+            if case .stringSegment(let stringSegment) = segment {
+              return stringSegment.content.text
+            }
+            return nil
+          }.joined()
+          mapping[caseName] = stringValue
+        } else {
+          // If no raw value is specified, the case name is the coding key
+          mapping[caseName] = caseName
+        }
+      }
+    }
+
+    return mapping.isEmpty ? nil : mapping
   }
 }
 
