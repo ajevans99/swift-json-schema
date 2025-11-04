@@ -47,7 +47,11 @@ struct SchemableMember {
     )
   }
 
-  func generateSchema(keyStrategy: ExprSyntax?, typeName: String) -> CodeBlockItemSyntax? {
+  func generateSchema(
+    keyStrategy: ExprSyntax?,
+    typeName: String,
+    globalOptionalNulls: Bool = false
+  ) -> CodeBlockItemSyntax? {
     var codeBlock: CodeBlockItemSyntax
     switch type.typeInformation() {
     case .primitive(_, let code):
@@ -66,6 +70,7 @@ struct SchemableMember {
     }
 
     var customKey: ExprSyntax?
+    var orNullStyle: ExprSyntax?
     let options: LabeledExprListSyntax? = annotationArguments.flatMap { args in
       let filtered = args.filter { argument in
         guard let functionCall = argument.expression.as(FunctionCallExprSyntax.self),
@@ -74,6 +79,11 @@ struct SchemableMember {
 
         if memberAccess.declName.baseName.text == "key" {
           customKey = functionCall.arguments.first?.expression
+          return false
+        }
+
+        if memberAccess.declName.baseName.text == "orNull" {
+          orNullStyle = functionCall.arguments.first?.expression
           return false
         }
 
@@ -108,6 +118,38 @@ struct SchemableMember {
         \(raw: docString)
         \"\"\"#)
         """
+    }
+
+    // Apply .orNull() if this is an optional property and:
+    // 1. It has an explicit @SchemaOptions(.orNull(style:)) annotation, OR
+    // 2. The global optionalNulls flag is true
+    if type.isOptional {
+      if let orNullStyle {
+        // Explicit per-property annotation
+        codeBlock = """
+          \(codeBlock)
+          .orNull(style: \(orNullStyle))
+          """
+      } else if globalOptionalNulls {
+        // Global flag - use .type for primitives, .union for complex types
+        let typeInfo = type.typeInformation()
+        let style: String
+        switch typeInfo {
+        case .primitive(let primitive, _):
+          // Use .type for scalar primitives, .union for arrays/dictionaries
+          style = primitive.isScalar ? ".type" : ".union"
+        case .schemable:
+          // Use .union for schemable types (objects)
+          style = ".union"
+        case .notSupported:
+          // Shouldn't reach here, but default to .union
+          style = ".union"
+        }
+        codeBlock = """
+          \(codeBlock)
+          .orNull(style: \(raw: style))
+          """
+      }
     }
 
     let keyExpr: ExprSyntax

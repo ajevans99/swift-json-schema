@@ -101,8 +101,14 @@ struct SchemaGenerator {
   let members: MemberBlockItemListSyntax
   let attributes: AttributeListSyntax
   let keyStrategy: ExprSyntax?
+  let optionalNulls: Bool
 
-  init(fromClass classDecl: ClassDeclSyntax, keyStrategy: ExprSyntax?, accessLevel: String? = nil) {
+  init(
+    fromClass classDecl: ClassDeclSyntax,
+    keyStrategy: ExprSyntax?,
+    optionalNulls: Bool = false,
+    accessLevel: String? = nil
+  ) {
     // Use provided access level if available, otherwise use the declaration's modifier
     if let accessLevel {
       // Create modifier with trailing space for proper formatting
@@ -117,11 +123,13 @@ struct SchemaGenerator {
     members = classDecl.memberBlock.members
     attributes = classDecl.attributes
     self.keyStrategy = keyStrategy
+    self.optionalNulls = optionalNulls
   }
 
   init(
     fromStruct structDecl: StructDeclSyntax,
     keyStrategy: ExprSyntax?,
+    optionalNulls: Bool = false,
     accessLevel: String? = nil
   ) {
     // Use provided access level if available, otherwise use the declaration's modifier
@@ -138,13 +146,18 @@ struct SchemaGenerator {
     members = structDecl.memberBlock.members
     attributes = structDecl.attributes
     self.keyStrategy = keyStrategy
+    self.optionalNulls = optionalNulls
   }
 
   func makeSchema() -> DeclSyntax {
     let schemableMembers = members.schemableMembers()
 
     let statements = schemableMembers.compactMap {
-      $0.generateSchema(keyStrategy: keyStrategy, typeName: name.text)
+      $0.generateSchema(
+        keyStrategy: keyStrategy,
+        typeName: name.text,
+        globalOptionalNulls: optionalNulls
+      )
     }
 
     var codeBlockItem: CodeBlockItemSyntax =

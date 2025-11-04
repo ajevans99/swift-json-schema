@@ -17,4 +17,14 @@ enum SupportedPrimitive: String, CaseIterable {
     case .dictionary: "JSONObject"
     }
   }
+
+  /// Returns true if this is a scalar primitive (not array or dictionary)
+  var isScalar: Bool {
+    switch self {
+    case .double, .float, .string, .int, .bool:
+      return true
+    case .array, .dictionary:
+      return false
+    }
+  }
 }

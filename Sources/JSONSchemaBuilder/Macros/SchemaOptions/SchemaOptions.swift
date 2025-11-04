@@ -54,4 +54,8 @@ extension SchemaTrait where Self == SchemaOptionsTrait {
   public static func customSchema<S: Schemable>(_ conversion: S.Type) -> SchemaOptionsTrait {
     fatalError(SchemaOptionsTrait.errorMessage)
   }
+
+  public static func orNull(style: OrNullStyle) -> SchemaOptionsTrait {
+    fatalError(SchemaOptionsTrait.errorMessage)
+  }
 }
