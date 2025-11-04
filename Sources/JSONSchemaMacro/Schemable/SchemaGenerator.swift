@@ -80,7 +80,8 @@ struct EnumSchemaGenerator {
     let statements = casesWithoutAssociatedValues.compactMap { $0.generateSchema() }
     let statementList = CodeBlockItemListSyntax(statements, separator: .newline)
 
-    var switchCases = casesWithoutAssociatedValues
+    var switchCases =
+      casesWithoutAssociatedValues
       .map { enumCase -> SwitchCaseSyntax in
         // Use raw value if present, otherwise use case name (without backticks)
         let matchValue = enumCase.rawValue ?? enumCase.identifier.text.trimmingBackticks()

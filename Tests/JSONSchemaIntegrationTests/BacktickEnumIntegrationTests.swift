@@ -45,8 +45,8 @@ import Testing
     // Should have enum values using raw values
     let enumValues = try #require(jsonValue["enum"] as? [String])
     #expect(enumValues.contains("default_value"))  // Custom raw value
-    #expect(enumValues.contains("public"))         // Implicit raw value
-    #expect(enumValues.contains("normal"))         // Implicit raw value
+    #expect(enumValues.contains("public"))  // Implicit raw value
+    #expect(enumValues.contains("normal"))  // Implicit raw value
 
     // Should NOT contain backticks or case names for custom raw value
     #expect(!enumValues.contains("`default`"))
