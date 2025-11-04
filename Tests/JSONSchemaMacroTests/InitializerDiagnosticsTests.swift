@@ -304,12 +304,12 @@ struct InitializerDiagnosticsTests {
         let port: Int
 
         @ExcludeFromSchema
-        let internal: Bool
+        let internalFlag: Bool
 
-        init(host: String, port: Int, internal: Bool) {
+        init(host: String, port: Int, internalFlag: Bool) {
           self.host = host
           self.port = port
-          self.internal = internal
+          self.internalFlag = internalFlag
         }
       }
       """,
@@ -319,12 +319,12 @@ struct InitializerDiagnosticsTests {
           let port: Int
 
           @ExcludeFromSchema
-          let internal: Bool
+          let internalFlag: Bool
 
-          init(host: String, port: Int, internal: Bool) {
+          init(host: String, port: Int, internalFlag: Bool) {
             self.host = host
             self.port = port
-            self.internal = internal
+            self.internalFlag = internalFlag
           }
 
           static var schema: some JSONSchemaComponent<Config> {
@@ -354,9 +354,9 @@ struct InitializerDiagnosticsTests {
             Expected: init(host: String, port: Int)
 
             Available initializers:
-              - init(host: String, port: Int, internal: Bool)
+              - init(host: String, port: Int, internalFlag: Bool)
 
-            Note: The following properties are excluded from the schema using @ExcludeFromSchema: 'internal'
+            Note: The following properties are excluded from the schema using @ExcludeFromSchema: 'internalFlag'
             These will still be present in the memberwise initializer but not in the schema.
 
             The generated schema expects JSONSchema(Config.init) to use an initializer that matches all schema properties. Consider adding a matching initializer or adjusting the schema properties.
@@ -379,7 +379,7 @@ struct InitializerDiagnosticsTests {
         let port: Int
 
         @ExcludeFromSchema
-        let internal: Bool = false
+        let internalFlag: Bool = false
 
         init(host: String, port: Int) {
           self.host = host
@@ -393,7 +393,7 @@ struct InitializerDiagnosticsTests {
           let port: Int
 
           @ExcludeFromSchema
-          let internal: Bool = false
+          let internalFlag: Bool = false
 
           init(host: String, port: Int) {
             self.host = host
