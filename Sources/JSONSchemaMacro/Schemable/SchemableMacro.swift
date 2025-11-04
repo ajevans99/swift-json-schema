@@ -100,13 +100,7 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
         accessLevel: accessLevel
       )
       let schemaDecl = generator.makeSchema()
-      var decls: [DeclSyntax] = []
-
-      let wrappedSchema: DeclSyntax = """
-        @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
-        \(schemaDecl)
-        """
-      decls.append(wrappedSchema)
+      var decls: [DeclSyntax] = [schemaDecl]
 
       if let strategyArg {
         let property: DeclSyntax = """
@@ -127,13 +121,7 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
         accessLevel: accessLevel
       )
       let schemaDecl = generator.makeSchema()
-      var decls: [DeclSyntax] = []
-
-      let wrappedSchema: DeclSyntax = """
-        @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
-        \(schemaDecl)
-        """
-      decls.append(wrappedSchema)
+      var decls: [DeclSyntax] = [schemaDecl]
 
       if let strategyArg {
         let property: DeclSyntax = """
@@ -150,13 +138,7 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
         .expression
       let generator = EnumSchemaGenerator(fromEnum: enumDecl, accessLevel: accessLevel)
       let schemaDecl = generator.makeSchema()
-      var decls: [DeclSyntax] = []
-
-      let wrappedSchema: DeclSyntax = """
-        @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
-        \(schemaDecl)
-        """
-      decls.append(wrappedSchema)
+      var decls: [DeclSyntax] = [schemaDecl]
 
       if let strategyArg {
         let property: DeclSyntax = """
