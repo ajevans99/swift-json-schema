@@ -2,24 +2,57 @@ import Foundation
 
 /// Container for information used when validating a schema.
 public final class Context: Sendable {
-  var dialect: Dialect
+  private let lockedDialect: LockIsolated<Dialect>
+  var dialect: Dialect {
+    get { lockedDialect.withLock { $0 } }
+    set { lockedDialect.withLock { $0 = newValue } }
+  }
 
-  var rootRawSchema: JSONValue?
+  private let lockedRootRawSchema: LockIsolated<JSONValue?>
+  var rootRawSchema: JSONValue? {
+    get { lockedRootRawSchema.withLock { $0 } }
+    set { lockedRootRawSchema.withLock { $0 = newValue } }
+  }
 
-  var identifierRegistry: [URL: JSONPointer] = [:]
+  private let lockedIdentifierRegistry: LockIsolated<[URL: JSONPointer]>
+  var identifierRegistry: [URL: JSONPointer] {
+    get { lockedIdentifierRegistry.withLock { $0 } }
+    set { lockedIdentifierRegistry.withLock { $0 = newValue } }
+  }
 
-  var remoteSchemaStorage: [String: JSONValue] = [:]
-  var schemaCache = [String: Schema]()
+  private let lockedRemoteSchemaStorage: LockIsolated<[String: JSONValue]>
+  var remoteSchemaStorage: [String: JSONValue] {
+    get { lockedRemoteSchemaStorage.withLock { $0 } }
+    set { lockedRemoteSchemaStorage.withLock { $0 = newValue } }
+  }
 
-  var anchors = [URL: JSONPointer]()
+  private let lockedSchemaCache: LockIsolated<[String: Schema]>
+  var schemaCache: [String: Schema] {
+    get { lockedSchemaCache.withLock { $0 } }
+    set { lockedSchemaCache.withLock { $0 = newValue } }
+  }
+
+  private let lockedAnchors: LockIsolated<[URL: JSONPointer]>
+  var anchors: [URL: JSONPointer] {
+    get { lockedAnchors.withLock { $0 } }
+    set { lockedAnchors.withLock { $0 = newValue } }
+  }
 
   /// Stack of dynamic scopes used to resolve ``$dynamicRef`` references.
   /// Each scope maps an anchor name to the schema location pointer and its
   /// associated base URI.
-  var dynamicScopes: [[String: (pointer: JSONPointer, baseURI: URL)]] = []
+  private let lockedDynamicScopes: LockIsolated<[[String: (pointer: JSONPointer, baseURI: URL)]]>
+  var dynamicScopes: [[String: (pointer: JSONPointer, baseURI: URL)]] {
+    get { lockedDynamicScopes.withLock { $0 } }
+    set { lockedDynamicScopes.withLock { $0 = newValue } }
+  }
 
   /// Validators used when the ``Keywords.Format`` keyword is present.
-  var formatValidators: [String: any FormatValidator] = [:]
+  private let lockedFormatValidators: LockIsolated<[String: any FormatValidator]>
+  var formatValidators: [String: any FormatValidator] {
+    get { lockedFormatValidators.withLock { $0 } }
+    set { lockedFormatValidators.withLock { $0 = newValue } }
+  }
 
   /// A dictionary that tracks whether the `minContains` constraint is effectively zero
   /// for specific schema locations.
@@ -30,7 +63,11 @@ public final class Context: Sendable {
   ///   at the specified schema location. A value of `true` means that the constraint
   ///   is effectively zero, allowing for validation to pass even if no instances match
   ///   the `contains` keyword.
-  var minContainsIsZero = [JSONPointer: Bool]()
+  private let lockedMinContainsIsZero: LockIsolated<[JSONPointer: Bool]>
+  var minContainsIsZero: [JSONPointer: Bool] {
+    get { lockedMinContainsIsZero.withLock { $0 } }
+    set { lockedMinContainsIsZero.withLock { $0 = newValue } }
+  }
 
   /// A dictionary that stores the results of conditional validations within a schema.
   ///
@@ -38,17 +75,28 @@ public final class Context: Sendable {
   ///   path to the "if", "else", or "then" conditions.
   /// - Value: An optional `ValidationResult` that represents the outcome of the
   ///   conditional validation at the specified schema location.
-  var ifConditionalResults = [JSONPointer: ValidationResult]()
+  private let lockedIfConditionalResults: LockIsolated<[JSONPointer: ValidationResult]>
+  var ifConditionalResults: [JSONPointer: ValidationResult] {
+    get { lockedIfConditionalResults.withLock { $0 } }
+    set { lockedIfConditionalResults.withLock { $0 = newValue } }
+  }
 
   public init(
     dialect: Dialect,
     remoteSchema: [String: JSONValue] = [:],
     formatValidators: [any FormatValidator] = []
   ) {
-    self.dialect = dialect
-    self.remoteSchemaStorage = remoteSchema
-    self.formatValidators = Dictionary(
-      uniqueKeysWithValues: formatValidators.map { ($0.formatName, $0) }
+    self.lockedDialect = LockIsolated(dialect)
+    self.lockedRootRawSchema = LockIsolated(nil)
+    self.lockedIdentifierRegistry = LockIsolated([:])
+    self.lockedRemoteSchemaStorage = LockIsolated(remoteSchema)
+    self.lockedSchemaCache = LockIsolated([:])
+    self.lockedAnchors = LockIsolated([:])
+    self.lockedDynamicScopes = LockIsolated([])
+    self.lockedFormatValidators = LockIsolated(
+      Dictionary(uniqueKeysWithValues: formatValidators.map { ($0.formatName, $0) })
     )
+    self.lockedMinContainsIsZero = LockIsolated([:])
+    self.lockedIfConditionalResults = LockIsolated([:])
   }
 }
