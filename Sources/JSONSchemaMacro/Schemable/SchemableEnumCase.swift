@@ -3,16 +3,33 @@ import SwiftSyntax
 struct SchemableEnumCase {
   let identifier: TokenSyntax
   let associatedValues: EnumCaseParameterListSyntax?
+  let rawValue: String?
 
   init(enumCaseDecl: EnumCaseDeclSyntax, caseElement: EnumCaseElementSyntax) {
     identifier = caseElement.name.trimmed
     associatedValues = caseElement.parameterClause?.parameters
+
+    // Extract raw value if present (for String-backed enums)
+    if let rawValueExpr = caseElement.rawValue?.value.as(StringLiteralExprSyntax.self) {
+      rawValue = rawValueExpr.segments
+        .compactMap { segment -> String? in
+          if case .stringSegment(let stringSegment) = segment {
+            return stringSegment.content.text
+          }
+          return nil
+        }
+        .joined()
+    } else {
+      rawValue = nil
+    }
   }
 
   func generateSchema() -> CodeBlockItemSyntax? {
     guard let associatedValues else {
+      // Use raw value if present, otherwise use case name
+      let enumValue = rawValue ?? identifier.text
       return """
-        "\(identifier)"
+        "\(raw: enumValue)"
         """
     }
     let properties: [CodeBlockItemSyntax] = associatedValues.enumerated()

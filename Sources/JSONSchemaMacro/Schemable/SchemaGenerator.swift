@@ -70,19 +70,21 @@ struct EnumSchemaGenerator {
     let statements = casesWithoutAssociatedValues.compactMap { $0.generateSchema() }
     let statementList = CodeBlockItemListSyntax(statements, separator: .newline)
 
-    var switchCases = casesWithoutAssociatedValues.map(\.identifier)
-      .map { identifier -> SwitchCaseSyntax in
-        """
-        case \"\(identifier)\":
-          return Self.\(identifier)
+    var switchCases = casesWithoutAssociatedValues
+      .map { enumCase -> SwitchCaseSyntax in
+        // Use raw value if present, otherwise use case name
+        let matchValue = enumCase.rawValue ?? enumCase.identifier.text
+        return """
+          case "\(raw: matchValue)":
+            return Self.\(enumCase.identifier)
 
-        """
+          """
       }
     switchCases.append("default: return nil")
     let switchCaseList = SwitchCaseListSyntax(switchCases.map { .switchCase($0) })
 
     return """
-      JSONString()  
+      JSONString()
         .enumValues {
           \(statementList)
         }

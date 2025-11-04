@@ -43,10 +43,10 @@
                   "properties" : {
                     "ageRating" : {
                       "enum" : [
-                        "g",
-                        "pg",
-                        "pg13",
-                        "r"
+                        "General Audience",
+                        "Parental Guidance Suggested",
+                        "Parental Guidance Suggested 13+",
+                        "Restricted"
                       ],
                       "type" : "string"
                     },
