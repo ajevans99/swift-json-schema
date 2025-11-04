@@ -203,4 +203,83 @@ struct DocumentationExampleTests {
       Issue.record("Parsing failed with errors: \(errors)")
     }
   }
+
+  // MARK: - CodingKeys Examples from Macros.md docc
+
+  @Schemable
+  struct User {
+    let firstName: String
+    let lastName: String
+    let emailAddress: String
+
+    enum CodingKeys: String, CodingKey {
+      case firstName = "first_name"
+      case lastName = "last_name"
+      case emailAddress = "email"
+    }
+  }
+
+  @Test func doccExampleCodingKeys() {
+    let schema = User.schema.schemaValue
+    let properties = schema["properties"]?.object
+
+    // Verify CodingKeys are used for property names
+    #expect(properties?["first_name"] != nil)
+    #expect(properties?["last_name"] != nil)
+    #expect(properties?["email"] != nil)
+
+    // Verify original property names are not used
+    #expect(properties?["firstName"] == nil)
+    #expect(properties?["lastName"] == nil)
+    #expect(properties?["emailAddress"] == nil)
+  }
+
+  @Schemable
+  struct Product {
+    let name: String
+    let productId: Int
+
+    enum CodingKeys: String, CodingKey {
+      case productId = "product_id"
+    }
+  }
+
+  @Test func doccExamplePartialCodingKeys() {
+    let schema = Product.schema.schemaValue
+    let properties = schema["properties"]?.object
+
+    // Property with CodingKeys entry uses custom name
+    #expect(properties?["product_id"] != nil)
+
+    // Property without CodingKeys entry uses property name
+    #expect(properties?["name"] != nil)
+  }
+
+  @Schemable(keyStrategy: .snakeCase)
+  struct Customer {
+    let firstName: String
+    @SchemaOptions(.key("surname"))
+    let lastName: String
+    let middleName: String
+
+    enum CodingKeys: String, CodingKey {
+      case firstName = "first_name"
+      case lastName = "last_name"
+    }
+  }
+
+  @Test func doccExampleKeyPriority() {
+    let schema = Customer.schema.schemaValue
+    let properties = schema["properties"]?.object
+
+    // CodingKeys takes priority over keyStrategy
+    #expect(properties?["first_name"] != nil)
+
+    // @SchemaOptions takes priority over CodingKeys
+    #expect(properties?["surname"] != nil)
+    #expect(properties?["last_name"] == nil)
+
+    // No CodingKeys entry, falls back to keyStrategy
+    #expect(properties?["middle_name"] != nil)
+  }
 }

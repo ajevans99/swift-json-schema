@@ -143,9 +143,10 @@ struct SchemaGenerator {
 
   func makeSchema() -> DeclSyntax {
     let schemableMembers = members.schemableMembers()
+    let codingKeys = members.extractCodingKeys()
 
     let statements = schemableMembers.compactMap {
-      $0.generateSchema(keyStrategy: keyStrategy, typeName: name.text)
+      $0.generateSchema(keyStrategy: keyStrategy, typeName: name.text, codingKeys: codingKeys)
     }
 
     var codeBlockItem: CodeBlockItemSyntax =

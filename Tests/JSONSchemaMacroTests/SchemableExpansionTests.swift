@@ -1183,37 +1183,46 @@ struct SchemableExpansionTests {
     )
   }
 
-  @Test(arguments: ["struct", "class"]) func staticPropertiesExcluded(declarationType: String) {
+  @Test(arguments: ["struct", "class"]) func customCodingKeys(declarationType: String) {
     assertMacroExpansion(
       """
       @Schemable
-      \(declarationType) Config {
-        static let version = "1.0.0"
-        static var defaultTimeout: Int = 30
-        static var maxRetries: Int { 5 }
-        static let defaultConfig: Config = Config(apiKey: "default", endpoint: "https://api.example.com")
-        let apiKey: String
-        let endpoint: String
+      \(declarationType) Person {
+        let firstName: String
+        let lastName: String
+        let emailAddress: String
+
+        enum CodingKeys: String, CodingKey {
+          case firstName = "first_name"
+          case lastName = "last_name"
+          case emailAddress = "email"
+        }
       }
       """,
       expandedSource: """
-        \(declarationType) Config {
-          static let version = "1.0.0"
-          static var defaultTimeout: Int = 30
-          static var maxRetries: Int { 5 }
-          static let defaultConfig: Config = Config(apiKey: "default", endpoint: "https://api.example.com")
-          let apiKey: String
-          let endpoint: String
+        \(declarationType) Person {
+          let firstName: String
+          let lastName: String
+          let emailAddress: String
 
-          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
-          static var schema: some JSONSchemaComponent<Config> {
-            JSONSchema(Config.init) {
+          enum CodingKeys: String, CodingKey {
+            case firstName = "first_name"
+            case lastName = "last_name"
+            case emailAddress = "email"
+          }
+
+          static var schema: some JSONSchemaComponent<Person> {
+            JSONSchema(Person.init) {
               JSONObject {
-                JSONProperty(key: "apiKey") {
+                JSONProperty(key: "first_name") {
                   JSONString()
                 }
                 .required()
-                JSONProperty(key: "endpoint") {
+                JSONProperty(key: "last_name") {
+                  JSONString()
+                }
+                .required()
+                JSONProperty(key: "email") {
                   JSONString()
                 }
                 .required()
@@ -1222,7 +1231,120 @@ struct SchemableExpansionTests {
           }
         }
 
-        extension Config: Schemable {
+        extension Person: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test(arguments: ["struct", "class"]) func customCodingKeysWithSchemaOptionsOverride(
+    declarationType: String
+  ) {
+    assertMacroExpansion(
+      """
+      @Schemable
+      \(declarationType) Person {
+        let firstName: String
+        @SchemaOptions(.key("surname"))
+        let lastName: String
+
+        enum CodingKeys: String, CodingKey {
+          case firstName = "first_name"
+          case lastName = "last_name"
+        }
+      }
+      """,
+      expandedSource: """
+        \(declarationType) Person {
+          let firstName: String
+          @SchemaOptions(.key("surname"))
+          let lastName: String
+
+          enum CodingKeys: String, CodingKey {
+            case firstName = "first_name"
+            case lastName = "last_name"
+          }
+
+          static var schema: some JSONSchemaComponent<Person> {
+            JSONSchema(Person.init) {
+              JSONObject {
+                JSONProperty(key: "first_name") {
+                  JSONString()
+                }
+                .required()
+                JSONProperty(key: "surname") {
+                  JSONString()
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension Person: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test(arguments: ["struct", "class"]) func customCodingKeysWithKeyStrategy(
+    declarationType: String
+  ) {
+    assertMacroExpansion(
+      """
+      @Schemable(keyStrategy: .snakeCase)
+      \(declarationType) Person {
+        let firstName: String
+        let middleName: String
+        let lastName: String
+
+        enum CodingKeys: String, CodingKey {
+          case firstName = "given_name"
+          case middleName
+          case lastName = "family_name"
+        }
+      }
+      """,
+      expandedSource: """
+        \(declarationType) Person {
+          let firstName: String
+          let middleName: String
+          let lastName: String
+
+          enum CodingKeys: String, CodingKey {
+            case firstName = "given_name"
+            case middleName
+            case lastName = "family_name"
+          }
+
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+          static var schema: some JSONSchemaComponent<Person> {
+            JSONSchema(Person.init) {
+              JSONObject {
+                JSONProperty(key: "given_name") {
+                  JSONString()
+                }
+                .required()
+                JSONProperty(key: "middleName") {
+                  JSONString()
+                }
+                .required()
+                JSONProperty(key: "family_name") {
+                  JSONString()
+                }
+                .required()
+              }
+            }
+          }
+
+          static var keyEncodingStrategy: KeyEncodingStrategies {
+            .snakeCase
+          }
+        }
+
+        extension Person: Schemable {
         }
         """,
       macros: testMacros
