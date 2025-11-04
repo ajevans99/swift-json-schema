@@ -92,8 +92,10 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     if let structDecl = declaration.as(StructDeclSyntax.self) {
       let arguments = node.arguments?.as(LabeledExprListSyntax.self)
       let strategyArg = arguments?.first(where: { $0.label?.text == "keyStrategy" })?.expression
-      let optionalNullsArg = arguments?.first(where: { $0.label?.text == "optionalNulls" })?.expression
-      let optionalNulls = optionalNullsArg?.as(BooleanLiteralExprSyntax.self)?.literal.text == "true"
+      let optionalNullsArg = arguments?.first(where: { $0.label?.text == "optionalNulls" })?
+        .expression
+      let optionalNulls =
+        optionalNullsArg?.as(BooleanLiteralExprSyntax.self)?.literal.text == "true"
       let generator = SchemaGenerator(
         fromStruct: structDecl,
         keyStrategy: strategyArg,
@@ -112,8 +114,10 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     } else if let classDecl = declaration.as(ClassDeclSyntax.self) {
       let arguments = node.arguments?.as(LabeledExprListSyntax.self)
       let strategyArg = arguments?.first(where: { $0.label?.text == "keyStrategy" })?.expression
-      let optionalNullsArg = arguments?.first(where: { $0.label?.text == "optionalNulls" })?.expression
-      let optionalNulls = optionalNullsArg?.as(BooleanLiteralExprSyntax.self)?.literal.text == "true"
+      let optionalNullsArg = arguments?.first(where: { $0.label?.text == "optionalNulls" })?
+        .expression
+      let optionalNulls =
+        optionalNullsArg?.as(BooleanLiteralExprSyntax.self)?.literal.text == "true"
       let generator = SchemaGenerator(
         fromClass: classDecl,
         keyStrategy: strategyArg,

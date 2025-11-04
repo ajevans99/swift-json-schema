@@ -35,7 +35,8 @@ extension JSONSchemaComponent {
 }
 
 /// Implementation using type array
-private struct OrNullTypeComponent<WrappedValue, Wrapped: JSONSchemaComponent>: JSONSchemaComponent where Wrapped.Output == WrappedValue {
+private struct OrNullTypeComponent<WrappedValue, Wrapped: JSONSchemaComponent>: JSONSchemaComponent
+where Wrapped.Output == WrappedValue {
   typealias Output = WrappedValue?
 
   var wrapped: Wrapped
@@ -46,12 +47,15 @@ private struct OrNullTypeComponent<WrappedValue, Wrapped: JSONSchemaComponent>: 
 
       // If there's already a type keyword, convert it to an array with null
       if case .object(var obj) = schema,
-         let typeValue = obj[Keywords.TypeKeyword.name] {
+        let typeValue = obj[Keywords.TypeKeyword.name]
+      {
 
         // Convert single type to array with null
         switch typeValue {
         case .string(let typeStr):
-          obj[Keywords.TypeKeyword.name] = .array([.string(typeStr), .string(JSONType.null.rawValue)])
+          obj[Keywords.TypeKeyword.name] = .array([
+            .string(typeStr), .string(JSONType.null.rawValue),
+          ])
         case .array(var types):
           // Add null if not already present
           let nullValue = JSONValue.string(JSONType.null.rawValue)
@@ -83,7 +87,8 @@ private struct OrNullTypeComponent<WrappedValue, Wrapped: JSONSchemaComponent>: 
 }
 
 /// Implementation using oneOf composition
-private struct OrNullUnionComponent<WrappedValue, Wrapped: JSONSchemaComponent>: JSONSchemaComponent where Wrapped.Output == WrappedValue {
+private struct OrNullUnionComponent<WrappedValue, Wrapped: JSONSchemaComponent>: JSONSchemaComponent
+where Wrapped.Output == WrappedValue {
   typealias Output = WrappedValue?
 
   var wrapped: Wrapped
@@ -93,7 +98,7 @@ private struct OrNullUnionComponent<WrappedValue, Wrapped: JSONSchemaComponent>:
       .object([
         Keywords.OneOf.name: .array([
           wrapped.schemaValue.value,
-          JSONNull().schemaValue.value
+          JSONNull().schemaValue.value,
         ])
       ])
     }
