@@ -19,6 +19,8 @@ extension JSONSchemaComponent {
   ///   - `.type`: Uses type array `["integer", "null"]` - best for primitives
   ///   - `.union`: Uses oneOf composition - required for complex types
   ///
+  /// - Returns: A component that accepts either the original type or null, returning an optional value
+  ///
   /// Example:
   /// ```swift
   /// JSONInteger()
