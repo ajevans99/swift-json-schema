@@ -429,17 +429,84 @@ struct Weather {
 
 #### Key encoding strategies
 
-You can override a property's JSON key using ``SchemaOptions/key(_:)`` or apply a
-type-wide strategy by providing ``@Schemable(keyStrategy:)``. Strategies are
-represented by ``KeyEncodingStrategies`` which offers built-in ``.identity`` and
-``.snakeCase`` options but can also wrap custom types conforming to
-``KeyEncodingStrategy``.
+You can customize JSON property names in three ways: using a `CodingKeys` enum,
+overriding individual properties with ``SchemaOptions/key(_:)``, or applying a
+type-wide strategy with ``@Schemable(keyStrategy:)``.
+
+##### CodingKeys Support
+
+If your type defines a `CodingKeys` enum (typically for `Codable` conformance), the
+macro will automatically use those custom names in the generated schema:
+
+```swift
+@Schemable
+struct User {
+  let firstName: String
+  let lastName: String
+  let emailAddress: String
+
+  enum CodingKeys: String, CodingKey {
+    case firstName = "first_name"
+    case lastName = "last_name"
+    case emailAddress = "email"
+  }
+}
+```
+
+This generates a schema with properties: `"first_name"`, `"last_name"`, and `"email"`.
+
+Properties without corresponding `CodingKeys` entries fall back to using their property
+name as-is:
+
+```swift
+@Schemable
+struct Product {
+  let name: String           // Uses "name" (no CodingKeys entry)
+  let productId: Int         // Uses "product_id" (from CodingKeys)
+
+  enum CodingKeys: String, CodingKey {
+    case productId = "product_id"
+  }
+}
+```
+
+##### Key Strategies
+
+Alternatively, you can apply a type-wide key encoding strategy using
+``@Schemable(keyStrategy:)``. Strategies are represented by ``KeyEncodingStrategies``
+which offers built-in ``.identity`` and ``.snakeCase`` options but can also wrap custom
+types conforming to ``KeyEncodingStrategy``.
 
 ```swift
 @Schemable(keyStrategy: .snakeCase)
 struct Person {
-  let firstName: String
-  @SchemaOptions(.key("last-name"))
-  let lastName: String
+  let firstName: String      // Becomes "first_name"
+  let lastName: String       // Becomes "last_name"
+}
+```
+
+##### Priority Order
+
+When multiple key customization methods are used, they follow this priority order (highest to lowest):
+
+1. ``SchemaOptions/key(_:)`` - Explicit per-property override
+2. `CodingKeys` enum - Custom coding keys
+3. `keyStrategy` - Type-wide transformation strategy
+4. Property name - Default (no transformation)
+
+Example showing priority:
+
+```swift
+@Schemable(keyStrategy: .snakeCase)
+struct Customer {
+  let firstName: String      // Uses "first_name" from CodingKeys
+  @SchemaOptions(.key("surname"))
+  let lastName: String       // Uses "surname" (highest priority)
+  let middleName: String     // Uses "middle_name" from keyStrategy
+
+  enum CodingKeys: String, CodingKey {
+    case firstName = "first_name"
+    case lastName = "last_name"  // Overridden by @SchemaOptions
+  }
 }
 ```
