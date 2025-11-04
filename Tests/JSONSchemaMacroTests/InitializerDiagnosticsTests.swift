@@ -75,17 +75,17 @@ struct InitializerDiagnosticsTests {
               JSONObject {
                 JSONProperty(key: "host") {
                   JSONString()
-                    .default("localhost")
+                  .default("localhost")
                 }
                 .required()
                 JSONProperty(key: "port") {
                   JSONInteger()
-                    .default(8080)
+                  .default(8080)
                 }
                 .required()
                 JSONProperty(key: "timeout") {
                   JSONNumber()
-                    .default(30.0)
+                  .default(30.0)
                 }
                 .required()
               }

@@ -89,9 +89,9 @@ struct SchemableMember {
       // In the future, JSONValue types should also be allowed to apply default value
       if let defaultValue {
         codeBlock = """
-          \(codeBlock)
-          .default(\(defaultValue.trimmed))
-          """
+\(codeBlock)
+.default(\(defaultValue.trimmed))
+"""
       }
     case .schemable(_, let code): codeBlock = code
     case .notSupported:
