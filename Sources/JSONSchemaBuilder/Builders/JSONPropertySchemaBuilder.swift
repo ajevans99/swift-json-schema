@@ -35,7 +35,7 @@ import JSONSchema
   }
 }
 
-public protocol PropertyCollection: Sendable {
+public protocol PropertyCollection {
   associatedtype Output
 
   var schemaValue: SchemaValue { get }

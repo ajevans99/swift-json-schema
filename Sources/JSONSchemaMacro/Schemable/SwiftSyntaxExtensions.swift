@@ -160,11 +160,18 @@ extension TypeSyntax {
       }
 
       return .primitive(primitive, schema: "\(raw: primitive.schema)()")
+    case .memberType(let memberType):
+      // Handle qualified type names like Weather.Condition
+      let fullTypeName = memberType.trimmed.description
+      return .schemable(
+        fullTypeName,
+        schema: "\(raw: fullTypeName).schema"
+      )
     case .implicitlyUnwrappedOptionalType(let implicitlyUnwrappedOptionalType):
       return implicitlyUnwrappedOptionalType.wrappedType.typeInformation()
     case .optionalType(let optionalType): return optionalType.wrappedType.typeInformation()
     case .someOrAnyType(let someOrAnyType): return someOrAnyType.constraint.typeInformation()
-    case .attributedType, .classRestrictionType, .compositionType, .functionType, .memberType,
+    case .attributedType, .classRestrictionType, .compositionType, .functionType,
       .metatypeType, .missingType, .namedOpaqueReturnType, .packElementType, .packExpansionType,
       .suppressedType, .tupleType:
       return .notSupported
@@ -237,11 +244,18 @@ extension VariableDeclSyntax {
     }
     .contains(where: { $0 == "ExcludeFromSchema" })
   }
+
+  var isStatic: Bool {
+    modifiers.contains { modifier in
+      modifier.name.tokenKind == .keyword(.static)
+    }
+  }
 }
 
 extension MemberBlockItemListSyntax {
   func schemableMembers() -> [SchemableMember] {
     self.compactMap { $0.decl.as(VariableDeclSyntax.self) }
+      .filter { !$0.isStatic }
       .flatMap { variableDecl in variableDecl.bindings.map { (variableDecl, $0) } }
       .filter { $0.0.shouldExcludeFromSchema }.filter { $0.1.isStoredProperty }
       .compactMap(SchemableMember.init)
