@@ -44,9 +44,9 @@ enum SchemaOptionsGenerator {
       return applyClosureBasedOption(optionName, closure: closure, to: codeBlockItem)
     } else if let value = functionCall.arguments.first {
       return """
-\(codeBlockItem)
-.\(raw: optionName)(\(value))
-"""
+        \(codeBlockItem)
+        .\(raw: optionName)(\(value))
+        """
     }
 
     return codeBlockItem
@@ -65,24 +65,24 @@ enum SchemaOptionsGenerator {
         let bool = expr.as(BooleanLiteralExprSyntax.self)
       {
         return """
-\(codeBlockItem)
-.additionalProperties(\(raw: bool.literal.text))
-"""
+          \(codeBlockItem)
+          .additionalProperties(\(raw: bool.literal.text))
+          """
       }
       // Intentionally fall through to "patternProperties" to handle shared logic.
       fallthrough
     case "patternProperties", "propertyNames":
       return """
-\(codeBlockItem)
-.\(raw: optionName) { \(closure.statements) }
-// Drop the parse information. Use custom builder if needed.
-.map { $0.0 }
-"""
+        \(codeBlockItem)
+        .\(raw: optionName) { \(closure.statements) }
+        // Drop the parse information. Use custom builder if needed.
+        .map { $0.0 }
+        """
     default:
       return """
-\(codeBlockItem)
-.\(raw: optionName) { \(closure.statements) }
-"""
+        \(codeBlockItem)
+        .\(raw: optionName) { \(closure.statements) }
+        """
     }
   }
 }
