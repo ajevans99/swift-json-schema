@@ -46,21 +46,19 @@ struct InitializerDiagnostics {
   }
 
   /// Gets all stored properties including those marked with @ExcludeFromSchema
-  private func getAllStoredProperties() -> [(name: String, type: String, isExcluded: Bool)] {
+  private func getAllStoredProperties() -> [(name: String, type: String)] {
     members.compactMap { $0.decl.as(VariableDeclSyntax.self) }
       .filter { !$0.isStatic }
       .flatMap { variableDecl in
-        variableDecl.bindings.compactMap { binding -> (String, String, Bool)? in
+        variableDecl.bindings.compactMap { binding -> (String, String)? in
           guard let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier,
             let type = binding.typeAnnotation?.type,
             binding.isStoredProperty
           else { return nil }
 
-          let isExcluded = !variableDecl.shouldExcludeFromSchema
           return (
             name: identifier.text,
-            type: type.description.trimmingCharacters(in: .whitespaces),
-            isExcluded: isExcluded
+            type: type.description.trimmingCharacters(in: .whitespaces)
           )
         }
       }
@@ -130,7 +128,7 @@ struct InitializerDiagnostics {
   private func emitNoMatchingInitWarning(
     expectedParameters: [(name: String, type: String)],
     availableInits: [InitializerDeclSyntax],
-    excludedProperties: [(name: String, type: String, isExcluded: Bool)]
+    excludedProperties: [(name: String, type: String)]
   ) {
     let expectedSignature = expectedParameters.map { "\($0.name): \($0.type)" }
       .joined(separator: ", ")
