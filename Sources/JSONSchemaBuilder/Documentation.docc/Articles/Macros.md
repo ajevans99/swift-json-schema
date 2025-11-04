@@ -443,3 +443,36 @@ struct Person {
   let lastName: String
 }
 ```
+
+#### Optional properties and null values
+
+By default, optional properties (`Int?`, `String?`, etc.) accept **missing** fields but **reject explicit `null` values**. This keeps schemas minimal. To allow explicit `null` values, use the `.orNull(style:)` option:
+
+**Per-property opt-in:**
+```swift
+@Schemable
+struct User {
+  let name: String
+
+  @SchemaOptions(.orNull(style: .type))
+  let age: Int?  // Accepts null
+
+  let email: String?  // Does NOT accept null (default)
+}
+```
+
+**Global opt-in:**
+```swift
+@Schemable(optionalNulls: true)
+struct User {
+  let name: String
+  let age: Int?      // Accepts null
+  let email: String? // Accepts null
+}
+```
+
+The `.orNull()` modifier supports two styles:
+- `.type`: Uses type array `["integer", "null"]` - best for scalar primitives, produces clearer validation errors
+- `.union`: Uses oneOf composition - required for complex types (objects, arrays)
+
+When using the global `optionalNulls` flag, the appropriate style is automatically selected based on the property type.
