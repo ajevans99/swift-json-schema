@@ -123,7 +123,8 @@ struct SchemableMember {
     // Apply .orNull() if this is an optional property and:
     // 1. It has an explicit @SchemaOptions(.orNull(style:)) annotation, OR
     // 2. The global optionalNulls flag is true
-    if type.isOptional {
+    let hasOrNull = type.isOptional && (orNullStyle != nil || globalOptionalNulls)
+    if hasOrNull {
       if let orNullStyle {
         // Explicit per-property annotation
         codeBlock = """
@@ -164,6 +165,16 @@ struct SchemableMember {
     var block: CodeBlockItemSyntax = """
       JSONProperty(key: \(keyExpr)) { \(codeBlock) }
       """
+
+    // When a property is optional AND has .orNull() applied, the output type becomes T??
+    // because JSONProperty wraps the output in Optional, and .orNull() already returns Optional.
+    // We need to flatten the double-optional with .flatMapOptional() to get back to T?
+    if hasOrNull {
+      block = """
+        \(block)
+        .flatMapOptional()
+        """
+    }
 
     if !type.isOptional {
       block = """

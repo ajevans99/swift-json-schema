@@ -42,6 +42,7 @@ struct OptionalNullsExpansionTests {
                   JSONInteger()
                   .orNull(style: .type)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "email") {
                   JSONString()
                 }
@@ -83,6 +84,7 @@ struct OptionalNullsExpansionTests {
                   }
                   .orNull(style: .union)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "metadata") {
                   JSONObject()
                   .additionalProperties {
@@ -92,6 +94,7 @@ struct OptionalNullsExpansionTests {
                   .map(\\.matches)
                   .orNull(style: .union)
                 }
+                .flatMapOptional()
               }
             }
           }
@@ -132,12 +135,14 @@ struct OptionalNullsExpansionTests {
                   JSONInteger()
                   .orNull(style: .type)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "items") {
                   JSONArray {
                     JSONString()
                   }
                   .orNull(style: .union)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "description") {
                   JSONString()
                 }
@@ -186,18 +191,22 @@ struct OptionalNullsExpansionTests {
                   JSONNumber()
                   .orNull(style: .type)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "humidity") {
                   JSONInteger()
                   .orNull(style: .type)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "isRaining") {
                   JSONBoolean()
                   .orNull(style: .type)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "windSpeed") {
                   JSONNumber()
                   .orNull(style: .type)
                 }
+                .flatMapOptional()
               }
             }
           }
@@ -241,6 +250,7 @@ struct OptionalNullsExpansionTests {
                   }
                   .orNull(style: .union)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "metadata") {
                   JSONObject()
                   .additionalProperties {
@@ -250,12 +260,14 @@ struct OptionalNullsExpansionTests {
                   .map(\\.matches)
                   .orNull(style: .union)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "relatedProducts") {
                   JSONArray {
                     Product.schema
                   }
                   .orNull(style: .union)
                 }
+                .flatMapOptional()
               }
             }
           }
@@ -301,16 +313,19 @@ struct OptionalNullsExpansionTests {
                   JSONInteger()
                   .orNull(style: .type)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "tags") {
                   JSONArray {
                     JSONString()
                   }
                   .orNull(style: .union)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "score") {
                   JSONNumber()
                   .orNull(style: .type)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "metadata") {
                   JSONObject()
                   .additionalProperties {
@@ -320,10 +335,12 @@ struct OptionalNullsExpansionTests {
                   .map(\\.matches)
                   .orNull(style: .union)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "active") {
                   JSONBoolean()
                   .orNull(style: .type)
                 }
+                .flatMapOptional()
               }
             }
           }
@@ -410,6 +427,7 @@ struct OptionalNullsExpansionTests {
                   .default(nil)
                   .orNull(style: .type)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "tags") {
                   JSONArray {
                     JSONString()
@@ -418,6 +436,7 @@ struct OptionalNullsExpansionTests {
                   .description("User tags")
                   .orNull(style: .union)
                 }
+                .flatMapOptional()
               }
             }
           }
@@ -453,11 +472,13 @@ struct OptionalNullsExpansionTests {
                   JSONInteger()
                   .orNull(style: .type)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "score") {
                   JSONNumber()
                   .description("Explicitly styled")
                   .orNull(style: .type)
                 }
+                .flatMapOptional()
               }
             }
           }
@@ -536,10 +557,12 @@ struct OptionalNullsExpansionTests {
                   JSONString()
                   .orNull(style: .type)
                 }
+                .flatMapOptional()
                 JSONProperty(key: SnakeCaseOptionals.keyEncodingStrategy.encode("lastName")) {
                   JSONString()
                   .orNull(style: .type)
                 }
+                .flatMapOptional()
               }
             }
           }
@@ -575,6 +598,7 @@ struct OptionalNullsExpansionTests {
                   CustomData.schema
                   .orNull(style: .union)
                 }
+                .flatMapOptional()
               }
             }
           }
@@ -610,6 +634,7 @@ struct OptionalNullsExpansionTests {
                   }
                   .orNull(style: .union)
                 }
+                .flatMapOptional()
               }
             }
           }
@@ -642,6 +667,7 @@ struct OptionalNullsExpansionTests {
                   JSONNumber()
                   .orNull(style: .type)
                 }
+                .flatMapOptional()
               }
             }
           }
