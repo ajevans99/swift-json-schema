@@ -26,7 +26,6 @@ struct SchemaOptionsDiagnosticsTests {
       """,
       expandedSource: """
         struct Person {
-          @StringOptions(.minLength(5))
           let age: Int
 
           static var schema: some JSONSchemaComponent<Person> {
@@ -34,7 +33,7 @@ struct SchemaOptionsDiagnosticsTests {
               JSONObject {
                 JSONProperty(key: "age") {
                   JSONInteger()
-                    .minLength(5)
+                  .minLength(5)
                 }
                 .required()
               }
@@ -68,7 +67,6 @@ struct SchemaOptionsDiagnosticsTests {
       """,
       expandedSource: """
         struct Product {
-          @NumberOptions(.minimum(0))
           let name: String
 
           static var schema: some JSONSchemaComponent<Product> {
@@ -76,7 +74,7 @@ struct SchemaOptionsDiagnosticsTests {
               JSONObject {
                 JSONProperty(key: "name") {
                   JSONString()
-                    .minimum(0)
+                  .minimum(0)
                 }
                 .required()
               }
@@ -111,7 +109,6 @@ struct SchemaOptionsDiagnosticsTests {
       """,
       expandedSource: """
         struct Data {
-          @ArrayOptions(.minItems(1))
           let count: Int
 
           static var schema: some JSONSchemaComponent<Data> {
@@ -119,7 +116,7 @@ struct SchemaOptionsDiagnosticsTests {
               JSONObject {
                 JSONProperty(key: "count") {
                   JSONInteger()
-                    .minItems(1)
+                  .minItems(1)
                 }
                 .required()
               }
@@ -155,7 +152,6 @@ struct SchemaOptionsDiagnosticsTests {
       """,
       expandedSource: """
         struct User {
-          @StringOptions(.minLength(10), .maxLength(5))
           let username: String
 
           static var schema: some JSONSchemaComponent<User> {
@@ -163,8 +159,8 @@ struct SchemaOptionsDiagnosticsTests {
               JSONObject {
                 JSONProperty(key: "username") {
                   JSONString()
-                    .minLength(10)
-                    .maxLength(5)
+                  .minLength(10)
+                  .maxLength(5)
                 }
                 .required()
               }
@@ -199,7 +195,6 @@ struct SchemaOptionsDiagnosticsTests {
       """,
       expandedSource: """
         struct Temperature {
-          @NumberOptions(.minimum(100), .maximum(50))
           let celsius: Double
 
           static var schema: some JSONSchemaComponent<Temperature> {
@@ -207,8 +202,8 @@ struct SchemaOptionsDiagnosticsTests {
               JSONObject {
                 JSONProperty(key: "celsius") {
                   JSONNumber()
-                    .minimum(100)
-                    .maximum(50)
+                  .minimum(100)
+                  .maximum(50)
                 }
                 .required()
               }
@@ -243,7 +238,6 @@ struct SchemaOptionsDiagnosticsTests {
       """,
       expandedSource: """
         struct Collection {
-          @ArrayOptions(.minItems(10), .maxItems(5))
           let items: [String]
 
           static var schema: some JSONSchemaComponent<Collection> {
@@ -253,8 +247,8 @@ struct SchemaOptionsDiagnosticsTests {
                   JSONArray {
                     JSONString()
                   }
-                    .minItems(10)
-                    .maxItems(5)
+                  .minItems(10)
+                  .maxItems(5)
                 }
                 .required()
               }
@@ -291,7 +285,6 @@ struct SchemaOptionsDiagnosticsTests {
       """,
       expandedSource: """
         struct Data {
-          @StringOptions(.minLength(-5))
           let text: String
 
           static var schema: some JSONSchemaComponent<Data> {
@@ -299,7 +292,7 @@ struct SchemaOptionsDiagnosticsTests {
               JSONObject {
                 JSONProperty(key: "text") {
                   JSONString()
-                    .minLength(-5)
+                  .minLength(-5)
                 }
                 .required()
               }
@@ -334,7 +327,6 @@ struct SchemaOptionsDiagnosticsTests {
       """,
       expandedSource: """
         struct List {
-          @ArrayOptions(.minItems(-1))
           let values: [Int]
 
           static var schema: some JSONSchemaComponent<List> {
@@ -344,7 +336,7 @@ struct SchemaOptionsDiagnosticsTests {
                   JSONArray {
                     JSONInteger()
                   }
-                    .minItems(-1)
+                  .minItems(-1)
                 }
                 .required()
               }
@@ -381,7 +373,6 @@ struct SchemaOptionsDiagnosticsTests {
       """,
       expandedSource: """
         struct Data {
-          @SchemaOptions(.readOnly(true), .writeOnly(true))
           let value: String
 
           static var schema: some JSONSchemaComponent<Data> {
@@ -389,10 +380,10 @@ struct SchemaOptionsDiagnosticsTests {
               JSONObject {
                 JSONProperty(key: "value") {
                   JSONString()
-                }
-                .required()
                   .readOnly(true)
                   .writeOnly(true)
+                }
+                .required()
               }
             }
           }
@@ -426,7 +417,6 @@ struct SchemaOptionsDiagnosticsTests {
       """,
       expandedSource: """
         struct Range {
-          @NumberOptions(.minimum(0), .exclusiveMinimum(0))
           let value: Double
 
           static var schema: some JSONSchemaComponent<Range> {
@@ -434,8 +424,8 @@ struct SchemaOptionsDiagnosticsTests {
               JSONObject {
                 JSONProperty(key: "value") {
                   JSONNumber()
-                    .minimum(0)
-                    .exclusiveMinimum(0)
+                  .minimum(0)
+                  .exclusiveMinimum(0)
                 }
                 .required()
               }
@@ -470,7 +460,6 @@ struct SchemaOptionsDiagnosticsTests {
       """,
       expandedSource: """
         struct Range {
-          @NumberOptions(.maximum(100), .exclusiveMaximum(100))
           let value: Double
 
           static var schema: some JSONSchemaComponent<Range> {
@@ -478,8 +467,8 @@ struct SchemaOptionsDiagnosticsTests {
               JSONObject {
                 JSONProperty(key: "value") {
                   JSONNumber()
-                    .maximum(100)
-                    .exclusiveMaximum(100)
+                  .maximum(100)
+                  .exclusiveMaximum(100)
                 }
                 .required()
               }
@@ -516,7 +505,6 @@ struct SchemaOptionsDiagnosticsTests {
       """,
       expandedSource: """
         struct Data {
-          @StringOptions(.minLength(5), .minLength(10))
           let text: String
 
           static var schema: some JSONSchemaComponent<Data> {
@@ -524,8 +512,8 @@ struct SchemaOptionsDiagnosticsTests {
               JSONObject {
                 JSONProperty(key: "text") {
                   JSONString()
-                    .minLength(5)
-                    .minLength(10)
+                  .minLength(5)
+                  .minLength(10)
                 }
                 .required()
               }
@@ -562,7 +550,6 @@ struct SchemaOptionsDiagnosticsTests {
       """,
       expandedSource: """
         struct User {
-          @StringOptions(.minLength(5), .maxLength(20))
           let username: String
 
           static var schema: some JSONSchemaComponent<User> {
@@ -570,8 +557,8 @@ struct SchemaOptionsDiagnosticsTests {
               JSONObject {
                 JSONProperty(key: "username") {
                   JSONString()
-                    .minLength(5)
-                    .maxLength(20)
+                  .minLength(5)
+                  .maxLength(20)
                 }
                 .required()
               }
@@ -598,7 +585,6 @@ struct SchemaOptionsDiagnosticsTests {
       """,
       expandedSource: """
         struct Product {
-          @NumberOptions(.minimum(0), .maximum(100))
           let price: Double
 
           static var schema: some JSONSchemaComponent<Product> {
@@ -606,8 +592,8 @@ struct SchemaOptionsDiagnosticsTests {
               JSONObject {
                 JSONProperty(key: "price") {
                   JSONNumber()
-                    .minimum(0)
-                    .maximum(100)
+                  .minimum(0)
+                  .maximum(100)
                 }
                 .required()
               }
