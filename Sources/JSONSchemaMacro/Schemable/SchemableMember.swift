@@ -78,7 +78,7 @@ struct SchemableMember {
   func generateSchema(
     keyStrategy: ExprSyntax?,
     typeName: String,
-    codingKeys: [String: String]? = nil
+    codingKeys: [String: String]? = nil,
     context: (any MacroExpansionContext)? = nil
   ) -> CodeBlockItemSyntax? {
     var codeBlock: CodeBlockItemSyntax
