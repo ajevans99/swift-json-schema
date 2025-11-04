@@ -2,7 +2,7 @@ import Foundation
 import JSONSchema
 
 /// A component for use in ``JSONSchemaBuilder`` to build, annotate, and validate schemas.
-public protocol JSONSchemaComponent<Output>: Sendable {
+public protocol JSONSchemaComponent<Output> {
   associatedtype Output
 
   var schemaValue: SchemaValue { get set }
@@ -10,7 +10,7 @@ public protocol JSONSchemaComponent<Output>: Sendable {
   /// Parse a JSON instance into a Swift type using the schema.
   /// - Parameter value: The value (aka instance or document) to validate.
   /// - Returns: A validated output or error messages.
-  @Sendable func parse(_ value: JSONValue) -> Parsed<Output, ParseIssue>
+  func parse(_ value: JSONValue) -> Parsed<Output, ParseIssue>
 }
 
 extension JSONSchemaComponent {
