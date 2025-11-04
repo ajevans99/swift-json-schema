@@ -26,8 +26,8 @@ struct SchemableEnumCase {
 
   func generateSchema() -> CodeBlockItemSyntax? {
     guard let associatedValues else {
-      // Use raw value if present, otherwise use case name
-      let enumValue = rawValue ?? identifier.text
+      // Use raw value if present, otherwise use case name (without backticks)
+      let enumValue = rawValue ?? identifier.text.trimmingBackticks()
       return """
         "\(raw: enumValue)"
         """

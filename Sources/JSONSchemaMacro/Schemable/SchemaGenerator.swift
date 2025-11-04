@@ -1,6 +1,16 @@
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
+extension String {
+  /// Removes backticks from Swift identifiers (e.g., "`default`" → "default")
+  func trimmingBackticks() -> String {
+    if self.hasPrefix("`") && self.hasSuffix("`") {
+      return String(self.dropFirst().dropLast())
+    }
+    return self
+  }
+}
+
 struct EnumSchemaGenerator {
   let declModifier: DeclModifierSyntax?
   let name: TokenSyntax
@@ -72,8 +82,8 @@ struct EnumSchemaGenerator {
 
     var switchCases = casesWithoutAssociatedValues
       .map { enumCase -> SwitchCaseSyntax in
-        // Use raw value if present, otherwise use case name
-        let matchValue = enumCase.rawValue ?? enumCase.identifier.text
+        // Use raw value if present, otherwise use case name (without backticks)
+        let matchValue = enumCase.rawValue ?? enumCase.identifier.text.trimmingBackticks()
         return """
           case "\(raw: matchValue)":
             return Self.\(enumCase.identifier)
