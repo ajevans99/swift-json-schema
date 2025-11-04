@@ -74,12 +74,12 @@ struct InitializerDiagnostics {
     for initDecl in inits {
       let params = initDecl.signature.parameterClause.parameters
       if params.count == expectedParameters.count {
-        let matches = zip(params, expectedParameters)
-          .allSatisfy { param, expected in
-            let paramName = param.secondName?.text ?? param.firstName.text
-            return paramName == expected.name
-          }
-        if matches {
+        // Check if all expected parameter names exist (regardless of order)
+        let paramNames = Set(params.map { $0.secondName?.text ?? $0.firstName.text })
+        let expectedNames = Set(expectedParameters.map { $0.name })
+
+        if paramNames == expectedNames {
+          // Found an init with the right parameters (possibly wrong order)
           return initDecl
         }
       }
@@ -108,19 +108,20 @@ struct InitializerDiagnostics {
           )
         )
         context.diagnose(diagnostic)
-      }
-
-      // Check if types are obviously different (note: this is string comparison, not semantic)
-      if paramType != expected.type {
-        let diagnostic = Diagnostic(
-          node: param.type,
-          message: InitializerMismatchDiagnostic.parameterTypeMismatch(
-            parameterName: paramName,
-            expectedType: expected.type,
-            actualType: paramType
+      } else {
+        // Only check types when names match (otherwise type comparison is meaningless)
+        // Check if types are obviously different (note: this is string comparison, not semantic)
+        if paramType != expected.type {
+          let diagnostic = Diagnostic(
+            node: param.type,
+            message: InitializerMismatchDiagnostic.parameterTypeMismatch(
+              parameterName: paramName,
+              expectedType: expected.type,
+              actualType: paramType
+            )
           )
-        )
-        context.diagnose(diagnostic)
+          context.diagnose(diagnostic)
+        }
       }
     }
   }
@@ -160,14 +161,22 @@ struct InitializerDiagnostics {
   /// Validates requirements for synthesized memberwise init
   private func validateSynthesizedInitRequirements(schemableMembers: [SchemableMember]) {
     // Check for properties with default values - these won't be in synthesized init
-    for member in schemableMembers where member.defaultValue != nil {
-      let diagnostic = Diagnostic(
-        node: member.identifier,
-        message: InitializerMismatchDiagnostic.propertyHasDefault(
-          propertyName: member.identifier.text
+    // Only warn if there's a MIX of properties with and without defaults
+    // (if ALL have defaults, the init() with no params is intentional and fine)
+    let membersWithDefaults = schemableMembers.filter { $0.defaultValue != nil }
+    let membersWithoutDefaults = schemableMembers.filter { $0.defaultValue == nil }
+
+    // Only emit diagnostic if there are BOTH properties with defaults AND without
+    if !membersWithDefaults.isEmpty && !membersWithoutDefaults.isEmpty {
+      for member in membersWithDefaults {
+        let diagnostic = Diagnostic(
+          node: member.identifier,
+          message: InitializerMismatchDiagnostic.propertyHasDefault(
+            propertyName: member.identifier.text
+          )
         )
-      )
-      context.diagnose(diagnostic)
+        context.diagnose(diagnostic)
+      }
     }
   }
 }

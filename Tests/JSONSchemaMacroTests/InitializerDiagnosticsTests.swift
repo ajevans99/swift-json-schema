@@ -31,6 +31,7 @@ struct InitializerDiagnosticsTests {
                 .required()
                 JSONProperty(key: "age") {
                   JSONInteger()
+                  .default(0)
                 }
                 .required()
               }
@@ -54,7 +55,9 @@ struct InitializerDiagnosticsTests {
     )
   }
 
-  @Test func multiplePropertiesWithDefaultValuesEmitsDiagnostic() {
+  @Test func allPropertiesWithDefaultValuesNoDiagnostic() {
+    // When ALL properties have default values, the synthesized init() with no
+    // parameters is intentional and valid, so no diagnostic should be emitted
     assertMacroExpansion(
       """
       @Schemable
@@ -96,29 +99,6 @@ struct InitializerDiagnosticsTests {
         extension Config: Schemable {
         }
         """,
-      diagnostics: [
-        DiagnosticSpec(
-          message:
-            "Property 'host' has a default value which will be excluded from the memberwise initializer",
-          line: 3,
-          column: 7,
-          severity: .warning
-        ),
-        DiagnosticSpec(
-          message:
-            "Property 'port' has a default value which will be excluded from the memberwise initializer",
-          line: 4,
-          column: 7,
-          severity: .warning
-        ),
-        DiagnosticSpec(
-          message:
-            "Property 'timeout' has a default value which will be excluded from the memberwise initializer",
-          line: 5,
-          column: 7,
-          severity: .warning
-        ),
-      ],
       macros: testMacros
     )
   }
@@ -361,8 +341,8 @@ struct InitializerDiagnosticsTests {
 
             The generated schema expects JSONSchema(Config.init) to use an initializer that matches all schema properties. Consider adding a matching initializer or adjusting the schema properties.
             """,
-          line: 2,
-          column: 8,
+          line: 1,
+          column: 1,
           severity: .error
         )
       ],
