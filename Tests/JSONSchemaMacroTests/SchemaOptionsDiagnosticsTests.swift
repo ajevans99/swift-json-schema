@@ -28,6 +28,7 @@ struct SchemaOptionsDiagnosticsTests {
         struct Person {
           let age: Int
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Person> {
             JSONSchema(Person.init) {
               JSONObject {
@@ -69,6 +70,7 @@ struct SchemaOptionsDiagnosticsTests {
         struct Product {
           let name: String
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Product> {
             JSONSchema(Product.init) {
               JSONObject {
@@ -111,6 +113,7 @@ struct SchemaOptionsDiagnosticsTests {
         struct Data {
           let count: Int
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Data> {
             JSONSchema(Data.init) {
               JSONObject {
@@ -154,6 +157,7 @@ struct SchemaOptionsDiagnosticsTests {
         struct User {
           let username: String
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<User> {
             JSONSchema(User.init) {
               JSONObject {
@@ -197,6 +201,7 @@ struct SchemaOptionsDiagnosticsTests {
         struct Temperature {
           let celsius: Double
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Temperature> {
             JSONSchema(Temperature.init) {
               JSONObject {
@@ -240,6 +245,7 @@ struct SchemaOptionsDiagnosticsTests {
         struct Collection {
           let items: [String]
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Collection> {
             JSONSchema(Collection.init) {
               JSONObject {
@@ -287,6 +293,7 @@ struct SchemaOptionsDiagnosticsTests {
         struct Data {
           let text: String
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Data> {
             JSONSchema(Data.init) {
               JSONObject {
@@ -329,6 +336,7 @@ struct SchemaOptionsDiagnosticsTests {
         struct List {
           let values: [Int]
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<List> {
             JSONSchema(List.init) {
               JSONObject {
@@ -375,6 +383,7 @@ struct SchemaOptionsDiagnosticsTests {
         struct Data {
           let value: String
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Data> {
             JSONSchema(Data.init) {
               JSONObject {
@@ -419,6 +428,7 @@ struct SchemaOptionsDiagnosticsTests {
         struct Range {
           let value: Double
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Range> {
             JSONSchema(Range.init) {
               JSONObject {
@@ -462,6 +472,7 @@ struct SchemaOptionsDiagnosticsTests {
         struct Range {
           let value: Double
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Range> {
             JSONSchema(Range.init) {
               JSONObject {
@@ -507,6 +518,7 @@ struct SchemaOptionsDiagnosticsTests {
         struct Data {
           let text: String
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Data> {
             JSONSchema(Data.init) {
               JSONObject {
@@ -552,6 +564,7 @@ struct SchemaOptionsDiagnosticsTests {
         struct User {
           let username: String
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<User> {
             JSONSchema(User.init) {
               JSONObject {
@@ -587,6 +600,7 @@ struct SchemaOptionsDiagnosticsTests {
         struct Product {
           let price: Double
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Product> {
             JSONSchema(Product.init) {
               JSONObject {
