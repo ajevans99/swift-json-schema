@@ -261,9 +261,12 @@ extension MemberBlockItemListSyntax {
       .compactMap(SchemableMember.init)
   }
 
-  func schemableEnumCases() -> [SchemableEnumCase] {
+  func schemableEnumCases(isStringBacked: Bool) -> [SchemableEnumCase] {
     self.compactMap { $0.decl.as(EnumCaseDeclSyntax.self) }
-      .flatMap { caseDecl in caseDecl.elements.map { (caseDecl, $0) } }.map(SchemableEnumCase.init)
+      .flatMap { caseDecl in caseDecl.elements.map { (caseDecl, $0) } }
+      .map {
+        SchemableEnumCase(enumCaseDecl: $0.0, caseElement: $0.1, isStringBacked: isStringBacked)
+      }
   }
 
   /// Extracts CodingKeys mapping from a CodingKeys enum if present

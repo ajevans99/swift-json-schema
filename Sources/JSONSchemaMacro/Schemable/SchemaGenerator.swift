@@ -18,6 +18,7 @@ struct EnumSchemaGenerator {
   let name: TokenSyntax
   let members: MemberBlockItemListSyntax
   let attributes: AttributeListSyntax
+  let isStringBacked: Bool
 
   init(fromEnum enumDecl: EnumDeclSyntax, accessLevel: String? = nil) {
     // Use provided access level if available, otherwise use the declaration's modifier
@@ -33,10 +34,17 @@ struct EnumSchemaGenerator {
     name = enumDecl.name.trimmed
     members = enumDecl.memberBlock.members
     attributes = enumDecl.attributes
+
+    // Check if enum inherits from String
+    isStringBacked =
+      enumDecl.inheritanceClause?.inheritedTypes
+      .contains { type in
+        type.type.as(IdentifierTypeSyntax.self)?.name.text == "String"
+      } ?? false
   }
 
   func makeSchema() -> DeclSyntax {
-    let schemableCases = members.schemableEnumCases()
+    let schemableCases = members.schemableEnumCases(isStringBacked: isStringBacked)
 
     let casesWithoutAssociatedValues = schemableCases.filter { $0.associatedValues == nil }
     let casesWithAssociatedValues = schemableCases.filter { $0.associatedValues != nil }
