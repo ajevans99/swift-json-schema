@@ -51,7 +51,9 @@ struct SchemableExpansionTests {
                 .required()
                 JSONProperty(key: "precipitationAmount") {
                   JSONNumber()
+                  .orNull(style: .type)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "humidity") {
                   JSONNumber()
                 }
@@ -189,10 +191,14 @@ struct SchemableExpansionTests {
               JSONObject {
                 JSONProperty(key: "isRaining") {
                   JSONBoolean()
+                  .orNull(style: .type)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "temperature") {
                   JSONInteger()
+                  .orNull(style: .type)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "location") {
                   JSONString()
                 }
@@ -316,7 +322,9 @@ struct SchemableExpansionTests {
                 JSONProperty(key: "precipitationAmount") {
                   JSONNumber()
                   .default(nil)
+                  .orNull(style: .type)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "humidity") {
                   JSONNumber()
                   .default(0.30)
@@ -610,7 +618,9 @@ struct SchemableExpansionTests {
                   .description(#\"\"\"
                   The amount of precipitation in inches
                   \"\"\"#)
+                  .orNull(style: .type)
                 }
+                .flatMapOptional()
                 JSONProperty(key: "humidity") {
                   JSONNumber()
                   .description(#\"\"\"
