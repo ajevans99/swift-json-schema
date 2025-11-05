@@ -101,8 +101,9 @@ struct DocumentationExampleTests {
   }
 
   @Test func doccExample2() {
-    #expect(Book.schema != nil)
-    #expect(Library.schema != nil)
+    // Test that schemas are generated and accessible
+    _ = Book.schema
+    _ = Library.schema
   }
 
   @Schemable enum TemperatureType {

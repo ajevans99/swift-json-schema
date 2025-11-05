@@ -11,7 +11,7 @@ struct WrapperTests {
     case .valid(let value):
       #expect(value == nil)
     default:
-      #expect(false, "expected valid result")
+      Issue.record("expected valid result")
     }
   }
 

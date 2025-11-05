@@ -59,7 +59,7 @@ struct ParsingTests {
         .propertyNames {
           JSONString()
             .enumValues { Emotion.allCases.map(\.rawValue) }
-            .compactMap(Emotion.init(rawValue:))
+            .compactMap { @Sendable value in Emotion.init(rawValue: value) }
         }
     }
 
