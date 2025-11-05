@@ -78,7 +78,7 @@ struct SchemableMember {
   func generateSchema(
     keyStrategy: ExprSyntax?,
     typeName: String,
-    globalOptionalNulls: Bool = false,
+    globalOptionalNulls: Bool = true,
     codingKeys: [String: String]? = nil,
     context: (any MacroExpansionContext)? = nil
   ) -> CodeBlockItemSyntax? {
@@ -164,7 +164,7 @@ struct SchemableMember {
 
     // Apply .orNull() if this is an optional property and:
     // 1. It has an explicit @SchemaOptions(.orNull(style:)) annotation, OR
-    // 2. The global optionalNulls flag is true
+    // 2. The global optionalNulls flag is true (default behavior)
     let hasOrNull = type.isOptional && (orNullStyle != nil || globalOptionalNulls)
     if hasOrNull {
       if let orNullStyle {
@@ -174,7 +174,7 @@ struct SchemableMember {
           .orNull(style: \(orNullStyle))
           """
       } else if globalOptionalNulls {
-        // Global flag - use .type for primitives, .union for complex types
+        // Global flag is true - use .type for primitives, .union for complex types
         let typeInfo = type.typeInformation()
         let style: String
         switch typeInfo {

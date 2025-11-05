@@ -94,8 +94,13 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
       let strategyArg = arguments?.first(where: { $0.label?.text == "keyStrategy" })?.expression
       let optionalNullsArg = arguments?.first(where: { $0.label?.text == "optionalNulls" })?
         .expression
-      let optionalNulls =
-        optionalNullsArg?.as(BooleanLiteralExprSyntax.self)?.literal.text == "true"
+      // Default to true if not specified, otherwise parse the boolean literal
+      let optionalNulls: Bool
+      if let boolLiteral = optionalNullsArg?.as(BooleanLiteralExprSyntax.self) {
+        optionalNulls = boolLiteral.literal.text == "true"
+      } else {
+        optionalNulls = true  // default
+      }
       let generator = SchemaGenerator(
         fromStruct: structDecl,
         keyStrategy: strategyArg,
@@ -119,8 +124,13 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
       let strategyArg = arguments?.first(where: { $0.label?.text == "keyStrategy" })?.expression
       let optionalNullsArg = arguments?.first(where: { $0.label?.text == "optionalNulls" })?
         .expression
-      let optionalNulls =
-        optionalNullsArg?.as(BooleanLiteralExprSyntax.self)?.literal.text == "true"
+      // Default to true if not specified, otherwise parse the boolean literal
+      let optionalNulls: Bool
+      if let boolLiteral = optionalNullsArg?.as(BooleanLiteralExprSyntax.self) {
+        optionalNulls = boolLiteral.literal.text == "true"
+      } else {
+        optionalNulls = true  // default
+      }
       let generator = SchemaGenerator(
         fromClass: classDecl,
         keyStrategy: strategyArg,

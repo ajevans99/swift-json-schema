@@ -2,7 +2,7 @@ import JSONSchema
 import JSONSchemaBuilder
 import Testing
 
-@Schemable(optionalNulls: true)
+@Schemable
 struct TestStructWithOptionalInt: Codable {
   let required: String
   let optionalInt: Int?

@@ -513,28 +513,38 @@ struct Customer {
 
 #### Optional properties and null values
 
-By default, optional properties (`Int?`, `String?`, etc.) accept **missing** fields but **reject explicit `null` values**. This keeps schemas minimal. To allow explicit `null` values, use the `.orNull(style:)` option:
+By default, optional properties (`Int?`, `String?`, etc.) accept both **missing** fields and **explicit `null` values**. To forbid `null` values (allowing only omission), use `optionalNulls: false`:
 
-**Per-property opt-in:**
+**Default behavior:**
 ```swift
-@Schemable
+@Schemable  // Default: allows null for optional properties
+struct User {
+  let name: String
+  let age: Int?      // Accepts null (default behavior)
+  let email: String? // Accepts null (default behavior)
+}
+```
+
+**Opt-out (forbid null):**
+```swift
+@Schemable(optionalNulls: false)
+struct User {
+  let name: String
+  let age: Int?      // Does NOT accept null (omission only)
+  let email: String? // Does NOT accept null (omission only)
+}
+```
+
+**Per-property override:**
+```swift
+@Schemable(optionalNulls: false)
 struct User {
   let name: String
 
   @SchemaOptions(.orNull(style: .type))
-  let age: Int?  // Accepts null
+  let age: Int?  // Accepts null (overrides global setting)
 
-  let email: String?  // Does NOT accept null (default)
-}
-```
-
-**Global opt-in:**
-```swift
-@Schemable(optionalNulls: true)
-struct User {
-  let name: String
-  let age: Int?      // Accepts null
-  let email: String? // Accepts null
+  let email: String?  // Does NOT accept null (follows global setting)
 }
 ```
 
@@ -542,4 +552,4 @@ The `.orNull()` modifier supports two styles:
 - `.type`: Uses type array `["integer", "null"]` - best for scalar primitives, produces clearer validation errors
 - `.union`: Uses oneOf composition - required for complex types (objects, arrays)
 
-When using the global `optionalNulls` flag, the appropriate style is automatically selected based on the property type.
+When `optionalNulls: true` (the default), the appropriate style is automatically selected based on the property type.

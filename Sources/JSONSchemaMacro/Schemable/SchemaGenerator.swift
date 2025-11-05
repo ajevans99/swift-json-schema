@@ -110,7 +110,7 @@ struct SchemaGenerator {
   init(
     fromClass classDecl: ClassDeclSyntax,
     keyStrategy: ExprSyntax?,
-    optionalNulls: Bool = false,
+    optionalNulls: Bool = true,
     accessLevel: String? = nil,
     context: (any MacroExpansionContext)? = nil
   ) {
@@ -135,7 +135,7 @@ struct SchemaGenerator {
   init(
     fromStruct structDecl: StructDeclSyntax,
     keyStrategy: ExprSyntax?,
-    optionalNulls: Bool = false,
+    optionalNulls: Bool = true,
     accessLevel: String? = nil,
     context: (any MacroExpansionContext)? = nil
   ) {

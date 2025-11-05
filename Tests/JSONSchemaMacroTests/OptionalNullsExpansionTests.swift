@@ -161,12 +161,12 @@ struct OptionalNullsExpansionTests {
     )
   }
 
-  // MARK: - Global opt-in tests
+  // MARK: - Default behavior (null allowed by default)
 
-  @Test func globalOptInScalarPrimitives() {
+  @Test func defaultBehaviorAllowsNull() {
     assertMacroExpansion(
       """
-      @Schemable(optionalNulls: true)
+      @Schemable
       struct Weather {
         let location: String
         let temperature: Double?
@@ -223,10 +223,10 @@ struct OptionalNullsExpansionTests {
     )
   }
 
-  @Test func globalOptInComplexTypes() {
+  @Test func defaultAllowComplexTypes() {
     assertMacroExpansion(
       """
-      @Schemable(optionalNulls: true)
+      @Schemable
       struct Product {
         let name: String
         let tags: [String]?
@@ -285,10 +285,10 @@ struct OptionalNullsExpansionTests {
     )
   }
 
-  @Test func globalOptInMixedTypes() {
+  @Test func defaultAllowMixedTypes() {
     assertMacroExpansion(
       """
-      @Schemable(optionalNulls: true)
+      @Schemable
       struct MixedTypes {
         let id: Int
         let count: Int?
@@ -359,25 +359,25 @@ struct OptionalNullsExpansionTests {
     )
   }
 
-  // MARK: - Default behavior (no null acceptance)
+  // MARK: - Explicit false (opt-out of null acceptance)
 
-  @Test func defaultBehaviorNoNullAcceptance() {
+  @Test func explicitFalsePolicy() {
     assertMacroExpansion(
       """
-      @Schemable
-      struct DefaultBehavior {
+      @Schemable(optionalNulls: false)
+      struct ForbidNull {
         let required: String
         let optional: Int?
       }
       """,
       expandedSource: """
-        struct DefaultBehavior {
+        struct ForbidNull {
           let required: String
           let optional: Int?
 
           @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
-          static var schema: some JSONSchemaComponent<DefaultBehavior> {
-            JSONSchema(DefaultBehavior.init) {
+          static var schema: some JSONSchemaComponent<ForbidNull> {
+            JSONSchema(ForbidNull.init) {
               JSONObject {
                 JSONProperty(key: "required") {
                   JSONString()
@@ -391,7 +391,7 @@ struct OptionalNullsExpansionTests {
           }
         }
 
-        extension DefaultBehavior: Schemable {
+        extension ForbidNull: Schemable {
         }
         """,
       macros: testMacros
@@ -457,10 +457,10 @@ struct OptionalNullsExpansionTests {
     )
   }
 
-  @Test func globalOptInWithPropertyOverride() {
+  @Test func defaultAllowWithPropertyOverride() {
     assertMacroExpansion(
       """
-      @Schemable(optionalNulls: true)
+      @Schemable
       struct OverrideTest {
         let count: Int?
 
@@ -502,10 +502,10 @@ struct OptionalNullsExpansionTests {
 
   // MARK: - Edge cases
 
-  @Test func globalOptInWithNoOptionalProperties() {
+  @Test func defaultAllowWithNoOptionalProperties() {
     assertMacroExpansion(
       """
-      @Schemable(optionalNulls: true)
+      @Schemable
       struct NoOptionals {
         let id: Int
         let name: String
@@ -540,10 +540,10 @@ struct OptionalNullsExpansionTests {
     )
   }
 
-  @Test func globalOptInWithKeyStrategy() {
+  @Test func defaultAllowWithKeyStrategy() {
     assertMacroExpansion(
       """
-      @Schemable(optionalNulls: true, keyStrategy: .snakeCase)
+      @Schemable(keyStrategy: .snakeCase)
       struct SnakeCaseOptionals {
         let userId: Int
         let firstName: String?
@@ -594,7 +594,7 @@ struct OptionalNullsExpansionTests {
   @Test func optionalCustomType() {
     assertMacroExpansion(
       """
-      @Schemable(optionalNulls: true)
+      @Schemable
       struct Container {
         let data: CustomData?
       }
@@ -627,7 +627,7 @@ struct OptionalNullsExpansionTests {
   @Test func nestedOptionalArrays() {
     assertMacroExpansion(
       """
-      @Schemable(optionalNulls: true)
+      @Schemable
       struct NestedArrays {
         let matrix: [[Int]]?
       }
@@ -665,7 +665,7 @@ struct OptionalNullsExpansionTests {
   func accessModifiersWithOptionalNulls(_ modifier: String) {
     assertMacroExpansion(
       """
-      @Schemable(optionalNulls: true)
+      @Schemable
       \(modifier) struct Weather {
         let temperature: Double?
       }
