@@ -46,7 +46,9 @@ struct OptionalNullsExpansionTests {
                 .flatMapOptional()
                 JSONProperty(key: "email") {
                   JSONString()
+                  .orNull(style: .type)
                 }
+                .flatMapOptional()
               }
             }
           }
