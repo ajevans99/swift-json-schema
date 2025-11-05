@@ -244,11 +244,18 @@ extension VariableDeclSyntax {
     }
     .contains(where: { $0 == "ExcludeFromSchema" })
   }
+
+  var isStatic: Bool {
+    modifiers.contains { modifier in
+      modifier.name.tokenKind == .keyword(.static)
+    }
+  }
 }
 
 extension MemberBlockItemListSyntax {
   func schemableMembers() -> [SchemableMember] {
     self.compactMap { $0.decl.as(VariableDeclSyntax.self) }
+      .filter { !$0.isStatic }
       .flatMap { variableDecl in variableDecl.bindings.map { (variableDecl, $0) } }
       .filter { $0.0.shouldExcludeFromSchema }.filter { $0.1.isStoredProperty }
       .compactMap(SchemableMember.init)
