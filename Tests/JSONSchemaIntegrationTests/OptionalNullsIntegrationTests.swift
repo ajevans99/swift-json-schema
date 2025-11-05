@@ -9,7 +9,6 @@ struct TestStructWithOptionalInt: Codable {
   let optionalString: String?
 }
 
-@Suite(.serialized)
 struct OptionalNullsIntegrationTests {
   struct TestError: Error {
     let message: String
