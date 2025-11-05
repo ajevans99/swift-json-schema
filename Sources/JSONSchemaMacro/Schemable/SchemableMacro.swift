@@ -100,12 +100,15 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
         fromStruct: structDecl,
         keyStrategy: strategyArg,
         optionalNulls: optionalNulls,
-        accessLevel: accessLevel
+        accessLevel: accessLevel,
+        context: context
       )
       let schemaDecl = generator.makeSchema()
       var decls: [DeclSyntax] = [schemaDecl]
+
       if let strategyArg {
         let property: DeclSyntax = """
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           \(raw: accessModifier)static var keyEncodingStrategy: KeyEncodingStrategies { \(strategyArg) }
           """
         decls.append(property)
@@ -122,12 +125,15 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
         fromClass: classDecl,
         keyStrategy: strategyArg,
         optionalNulls: optionalNulls,
-        accessLevel: accessLevel
+        accessLevel: accessLevel,
+        context: context
       )
       let schemaDecl = generator.makeSchema()
       var decls: [DeclSyntax] = [schemaDecl]
+
       if let strategyArg {
         let property: DeclSyntax = """
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           \(raw: accessModifier)static var keyEncodingStrategy: KeyEncodingStrategies { \(strategyArg) }
           """
         decls.append(property)
@@ -141,8 +147,10 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
       let generator = EnumSchemaGenerator(fromEnum: enumDecl, accessLevel: accessLevel)
       let schemaDecl = generator.makeSchema()
       var decls: [DeclSyntax] = [schemaDecl]
+
       if let strategyArg {
         let property: DeclSyntax = """
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           \(raw: accessModifier)static var keyEncodingStrategy: KeyEncodingStrategies { \(strategyArg) }
           """
         decls.append(property)

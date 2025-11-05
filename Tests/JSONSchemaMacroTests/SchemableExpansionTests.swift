@@ -29,6 +29,7 @@ struct SchemableExpansionTests {
           let precipitationAmount: Double?
           let humidity: Float
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Weather> {
             JSONSchema(Weather.init) {
               JSONObject {
@@ -83,6 +84,7 @@ struct SchemableExpansionTests {
           let temperatureByLocation: [String: Double?]
           let conditionsByLocation: [String: WeatherCondition]
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Weather> {
             JSONSchema(Weather.init) {
               JSONObject {
@@ -138,6 +140,7 @@ struct SchemableExpansionTests {
           let temperatures: Array<Double>
           let temperatureByLocation: Dictionary<String, Double?>
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Weather> {
             JSONSchema(Weather.init) {
               JSONObject {
@@ -180,6 +183,7 @@ struct SchemableExpansionTests {
         \(declarationType) Weather {
           let isRaining: Bool?, temperature: Int?, location: String
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Weather> {
             JSONSchema(Weather.init) {
               JSONObject {
@@ -237,6 +241,7 @@ struct SchemableExpansionTests {
 
           var isCold: Bool { temperature < 50 }
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Weather> {
             JSONSchema(Weather.init) {
               JSONObject {
@@ -280,6 +285,7 @@ struct SchemableExpansionTests {
           let precipitationAmount: Double? = nil
           let humidity: Float = 0.30
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Weather> {
             JSONSchema(Weather.init) {
               JSONObject {
@@ -343,6 +349,7 @@ struct SchemableExpansionTests {
           let temperature: Double
           let units: TemperatureType
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Weather> {
             JSONSchema(Weather.init) {
               JSONObject {
@@ -378,6 +385,7 @@ struct SchemableExpansionTests {
           let id: Int
           let name: String
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Item> {
             JSONSchema(Item.init) {
               JSONObject {
@@ -415,6 +423,7 @@ struct SchemableExpansionTests {
           let firstName: String
           let lastName: String
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Person> {
             JSONSchema(Person.init) {
               JSONObject {
@@ -430,6 +439,7 @@ struct SchemableExpansionTests {
             }
           }
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var keyEncodingStrategy: KeyEncodingStrategies {
             .snakeCase
           }
@@ -455,6 +465,7 @@ struct SchemableExpansionTests {
         \(modifier) struct Weather {
           let temperature: Double
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           \(modifier) static var schema: some JSONSchemaComponent<Weather> {
             JSONSchema(Weather.init) {
               JSONObject {
@@ -489,6 +500,7 @@ struct SchemableExpansionTests {
           let firstName: String
           let lastName: String
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           \(modifier) static var schema: some JSONSchemaComponent<Person> {
             JSONSchema(Person.init) {
               JSONObject {
@@ -504,6 +516,7 @@ struct SchemableExpansionTests {
             }
           }
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           \(modifier) static var keyEncodingStrategy: KeyEncodingStrategies {
             .snakeCase
           }
@@ -560,6 +573,7 @@ struct SchemableExpansionTests {
           /// The relative humidity as a percentage
           let humidity: Float
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Weather> {
             JSONSchema(Weather.init) {
               JSONObject {
@@ -638,6 +652,7 @@ struct SchemableExpansionTests {
           /// The city name where the weather is being reported
           let location: String
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Weather> {
             JSONSchema(Weather.init) {
               JSONObject {
@@ -697,6 +712,7 @@ struct SchemableExpansionTests {
            */
           let location: String
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Weather> {
             JSONSchema(Weather.init) {
               JSONObject {
@@ -762,6 +778,7 @@ struct SchemableExpansionTests {
           /// And some `inline code` as well.
           let complexProperty: String
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<ComplexDocstring> {
             JSONSchema(ComplexDocstring.init) {
               JSONObject {
@@ -806,6 +823,7 @@ struct SchemableExpansionTests {
           let emotions: [TestEmotion: Int]
           let analysisNotes: String
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<TestPerson> {
             JSONSchema(TestPerson.init) {
               JSONObject {
@@ -859,6 +877,7 @@ struct SchemableExpansionTests {
         struct SimpleStringIntDict {
           let emotions: [String: Int]
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<SimpleStringIntDict> {
             JSONSchema(SimpleStringIntDict.init) {
               JSONObject {
@@ -900,6 +919,7 @@ struct SchemableExpansionTests {
             let temperature: Double
             let humidity: Int
 
+            @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
             public static var schema: some JSONSchemaComponent<Forecast> {
               JSONSchema(Forecast.init) {
                 JSONObject {
@@ -946,6 +966,7 @@ struct SchemableExpansionTests {
               let temperature: Double
               let windSpeed: Int
 
+              @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
               public static var schema: some JSONSchemaComponent<Hourly> {
                 JSONSchema(Hourly.init) {
                   JSONObject {
@@ -994,6 +1015,7 @@ struct SchemableExpansionTests {
               \(declarationType) Detailed {
                 let temperature: Double
 
+                @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
                 public static var schema: some JSONSchemaComponent<Detailed> {
                   JSONSchema(Detailed.init) {
                     JSONObject {
@@ -1036,6 +1058,7 @@ struct SchemableExpansionTests {
               case sunny
               case cloudy
 
+              @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
               public static var schema: some JSONSchemaComponent<Status> {
                 JSONString()
                   .enumValues {
@@ -1082,6 +1105,7 @@ struct SchemableExpansionTests {
             let temperature: Double
             let humidity: Int
 
+            @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
             static var schema: some JSONSchemaComponent<Forecast> {
               JSONSchema(Forecast.init) {
                 JSONObject {
@@ -1098,6 +1122,7 @@ struct SchemableExpansionTests {
             }
           }
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Weather> {
             JSONSchema(Weather.init) {
               JSONObject {
@@ -1136,6 +1161,7 @@ struct SchemableExpansionTests {
             \(declarationType) Hourly {
               let temperature: Double
 
+              @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
               static var schema: some JSONSchemaComponent<Hourly> {
                 JSONSchema(Hourly.init) {
                   JSONObject {
@@ -1157,36 +1183,47 @@ struct SchemableExpansionTests {
     )
   }
 
-  @Test(arguments: ["struct", "class"]) func staticPropertiesExcluded(declarationType: String) {
+  @Test(arguments: ["struct", "class"]) func customCodingKeys(declarationType: String) {
     assertMacroExpansion(
       """
       @Schemable
-      \(declarationType) Config {
-        static let version = "1.0.0"
-        static var defaultTimeout: Int = 30
-        static var maxRetries: Int { 5 }
-        static let defaultConfig: Config = Config(apiKey: "default", endpoint: "https://api.example.com")
-        let apiKey: String
-        let endpoint: String
+      \(declarationType) Person {
+        let firstName: String
+        let lastName: String
+        let emailAddress: String
+
+        enum CodingKeys: String, CodingKey {
+          case firstName = "first_name"
+          case lastName = "last_name"
+          case emailAddress = "email"
+        }
       }
       """,
       expandedSource: """
-        \(declarationType) Config {
-          static let version = "1.0.0"
-          static var defaultTimeout: Int = 30
-          static var maxRetries: Int { 5 }
-          static let defaultConfig: Config = Config(apiKey: "default", endpoint: "https://api.example.com")
-          let apiKey: String
-          let endpoint: String
+        \(declarationType) Person {
+          let firstName: String
+          let lastName: String
+          let emailAddress: String
 
-          static var schema: some JSONSchemaComponent<Config> {
-            JSONSchema(Config.init) {
+          enum CodingKeys: String, CodingKey {
+            case firstName = "first_name"
+            case lastName = "last_name"
+            case emailAddress = "email"
+          }
+
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+          static var schema: some JSONSchemaComponent<Person> {
+            JSONSchema(Person.init) {
               JSONObject {
-                JSONProperty(key: "apiKey") {
+                JSONProperty(key: "first_name") {
                   JSONString()
                 }
                 .required()
-                JSONProperty(key: "endpoint") {
+                JSONProperty(key: "last_name") {
+                  JSONString()
+                }
+                .required()
+                JSONProperty(key: "email") {
                   JSONString()
                 }
                 .required()
@@ -1195,7 +1232,122 @@ struct SchemableExpansionTests {
           }
         }
 
-        extension Config: Schemable {
+        extension Person: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test(arguments: ["struct", "class"]) func customCodingKeysWithSchemaOptionsOverride(
+    declarationType: String
+  ) {
+    assertMacroExpansion(
+      """
+      @Schemable
+      \(declarationType) Person {
+        let firstName: String
+        @SchemaOptions(.key("surname"))
+        let lastName: String
+
+        enum CodingKeys: String, CodingKey {
+          case firstName = "first_name"
+          case lastName = "last_name"
+        }
+      }
+      """,
+      expandedSource: """
+        \(declarationType) Person {
+          let firstName: String
+          @SchemaOptions(.key("surname"))
+          let lastName: String
+
+          enum CodingKeys: String, CodingKey {
+            case firstName = "first_name"
+            case lastName = "last_name"
+          }
+
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+          static var schema: some JSONSchemaComponent<Person> {
+            JSONSchema(Person.init) {
+              JSONObject {
+                JSONProperty(key: "first_name") {
+                  JSONString()
+                }
+                .required()
+                JSONProperty(key: "surname") {
+                  JSONString()
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension Person: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test(arguments: ["struct", "class"]) func customCodingKeysWithKeyStrategy(
+    declarationType: String
+  ) {
+    assertMacroExpansion(
+      """
+      @Schemable(keyStrategy: .snakeCase)
+      \(declarationType) Person {
+        let firstName: String
+        let middleName: String
+        let lastName: String
+
+        enum CodingKeys: String, CodingKey {
+          case firstName = "given_name"
+          case middleName
+          case lastName = "family_name"
+        }
+      }
+      """,
+      expandedSource: """
+        \(declarationType) Person {
+          let firstName: String
+          let middleName: String
+          let lastName: String
+
+          enum CodingKeys: String, CodingKey {
+            case firstName = "given_name"
+            case middleName
+            case lastName = "family_name"
+          }
+
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+          static var schema: some JSONSchemaComponent<Person> {
+            JSONSchema(Person.init) {
+              JSONObject {
+                JSONProperty(key: "given_name") {
+                  JSONString()
+                }
+                .required()
+                JSONProperty(key: "middleName") {
+                  JSONString()
+                }
+                .required()
+                JSONProperty(key: "family_name") {
+                  JSONString()
+                }
+                .required()
+              }
+            }
+          }
+
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+          static var keyEncodingStrategy: KeyEncodingStrategies {
+            .snakeCase
+          }
+        }
+
+        extension Person: Schemable {
         }
         """,
       macros: testMacros

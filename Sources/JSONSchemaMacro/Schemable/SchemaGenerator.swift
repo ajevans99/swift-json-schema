@@ -1,5 +1,7 @@
+import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxBuilder
+import SwiftSyntaxMacros
 
 struct EnumSchemaGenerator {
   let declModifier: DeclModifierSyntax?
@@ -55,6 +57,7 @@ struct EnumSchemaGenerator {
     }
 
     let variableDecl: DeclSyntax = """
+      @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
       \(declModifier)static var schema: some JSONSchemaComponent<\(name)> {
         \(codeBlockItem)
       }
@@ -102,12 +105,14 @@ struct SchemaGenerator {
   let attributes: AttributeListSyntax
   let keyStrategy: ExprSyntax?
   let optionalNulls: Bool
+  let context: (any MacroExpansionContext)?
 
   init(
     fromClass classDecl: ClassDeclSyntax,
     keyStrategy: ExprSyntax?,
     optionalNulls: Bool = false,
-    accessLevel: String? = nil
+    accessLevel: String? = nil,
+    context: (any MacroExpansionContext)? = nil
   ) {
     // Use provided access level if available, otherwise use the declaration's modifier
     if let accessLevel {
@@ -124,13 +129,15 @@ struct SchemaGenerator {
     attributes = classDecl.attributes
     self.keyStrategy = keyStrategy
     self.optionalNulls = optionalNulls
+    self.context = context
   }
 
   init(
     fromStruct structDecl: StructDeclSyntax,
     keyStrategy: ExprSyntax?,
     optionalNulls: Bool = false,
-    accessLevel: String? = nil
+    accessLevel: String? = nil,
+    context: (any MacroExpansionContext)? = nil
   ) {
     // Use provided access level if available, otherwise use the declaration's modifier
     if let accessLevel {
@@ -147,16 +154,35 @@ struct SchemaGenerator {
     attributes = structDecl.attributes
     self.keyStrategy = keyStrategy
     self.optionalNulls = optionalNulls
+    self.context = context
   }
 
   func makeSchema() -> DeclSyntax {
     let schemableMembers = members.schemableMembers()
+    let codingKeys = members.extractCodingKeys()
+
+    // Emit diagnostics for potential memberwise init mismatches
+    if let context = context {
+      let diagnostics = InitializerDiagnostics(
+        typeName: name,
+        members: members,
+        context: context
+      )
+      diagnostics.emitDiagnostics(for: schemableMembers)
+
+      // Validate schema options for each member
+      for member in schemableMembers {
+        member.validateOptions(context: context)
+      }
+    }
 
     let statements = schemableMembers.compactMap {
       $0.generateSchema(
         keyStrategy: keyStrategy,
         typeName: name.text,
-        globalOptionalNulls: optionalNulls
+        globalOptionalNulls: optionalNulls,
+        codingKeys: codingKeys,
+        context: context
       )
     }
 
@@ -180,6 +206,7 @@ struct SchemaGenerator {
     }
 
     let variableDecl: DeclSyntax = """
+      @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
       \(declModifier)static var schema: some JSONSchemaComponent<\(name)> {
         JSONSchema(\(name).init) { \(codeBlockItem) }
       }

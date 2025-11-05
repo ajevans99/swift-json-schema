@@ -6,10 +6,12 @@ import JSONSchema
   public static func buildBlock<Component: PropertyCollection>(_ component: Component) -> Component
   { component }
 
+  @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
   public static func buildBlock<Component: JSONPropertyComponent>(
     _ component: Component
   ) -> PropertyTuple<Component> { .init(property: component) }
 
+  @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
   public static func buildBlock<each Component: JSONPropertyComponent>(
     _ component: repeat each Component
   ) -> PropertyTuple<repeat each Component> { .init(property: (repeat each component)) }
@@ -48,6 +50,7 @@ public struct EmptyPropertyCollection: PropertyCollection {
   public func validate(_ dictionary: [String: JSONValue]) -> Parsed<Void, ParseIssue> { .valid(()) }
 }
 
+@available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
 public struct PropertyTuple<each Property: JSONPropertyComponent>: PropertyCollection {
   let property: (repeat each Property)
 
