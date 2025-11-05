@@ -32,9 +32,9 @@ import Testing
               .compactMap {
                 switch $0 {
                 case "default":
-                  return Self.default
+                  return Self.`default`
                 case "public":
-                  return Self.public
+                  return Self.`public`
                 case "normal":
                   return Self.normal
                 default:
@@ -78,9 +78,9 @@ import Testing
               .compactMap {
                 switch $0 {
                 case "default_value":
-                  return Self.default
+                  return Self.`default`
                 case "public":
-                  return Self.public
+                  return Self.`public`
                 case "normal":
                   return Self.normal
                 default:
