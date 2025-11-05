@@ -22,6 +22,7 @@ struct InitializerDiagnosticsTests {
           let name: String
           let age: Int = 0
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Person> {
             JSONSchema(Person.init) {
               JSONObject {
@@ -73,6 +74,7 @@ struct InitializerDiagnosticsTests {
           let port: Int = 8080
           let timeout: Double = 30.0
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Config> {
             JSONSchema(Config.init) {
               JSONObject {
@@ -117,6 +119,7 @@ struct InitializerDiagnosticsTests {
           let name: String
           let age: Int
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Person> {
             JSONSchema(Person.init) {
               JSONObject {
@@ -165,6 +168,7 @@ struct InitializerDiagnosticsTests {
             self.age = age
           }
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Person> {
             JSONSchema(Person.init) {
               JSONObject {
@@ -232,6 +236,7 @@ struct InitializerDiagnosticsTests {
             self.quantity = Int(quantity)
           }
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Product> {
             JSONSchema(Product.init) {
               JSONObject {
@@ -307,6 +312,7 @@ struct InitializerDiagnosticsTests {
             self.internalFlag = internalFlag
           }
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Config> {
             JSONSchema(Config.init) {
               JSONObject {
@@ -380,6 +386,7 @@ struct InitializerDiagnosticsTests {
             self.port = port
           }
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Config> {
             JSONSchema(Config.init) {
               JSONObject {

@@ -22,6 +22,7 @@ struct UnsupportedTypeDiagnosticsTests {
           let name: String
           let callback: () -> Void
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Handler> {
             JSONSchema(Handler.init) {
               JSONObject {
@@ -67,6 +68,7 @@ struct UnsupportedTypeDiagnosticsTests {
           let name: String
           let position: (x: Int, y: Int)
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Coordinates> {
             JSONSchema(Coordinates.init) {
               JSONObject {
@@ -112,6 +114,7 @@ struct UnsupportedTypeDiagnosticsTests {
           let name: String
           let type: Any.Type
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Container> {
             JSONSchema(Container.init) {
               JSONObject {
@@ -161,6 +164,7 @@ struct UnsupportedTypeDiagnosticsTests {
           let position: (Int, Int)
           let age: Int
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Mixed> {
             JSONSchema(Mixed.init) {
               JSONObject {
@@ -224,6 +228,7 @@ struct UnsupportedTypeDiagnosticsTests {
           let score: Double
           let tags: [String]
 
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
           static var schema: some JSONSchemaComponent<Person> {
             JSONSchema(Person.init) {
               JSONObject {
