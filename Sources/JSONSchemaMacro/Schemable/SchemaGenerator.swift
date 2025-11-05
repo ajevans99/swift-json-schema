@@ -125,11 +125,13 @@ struct SchemaGenerator {
   let members: MemberBlockItemListSyntax
   let attributes: AttributeListSyntax
   let keyStrategy: ExprSyntax?
+  let optionalNulls: Bool
   let context: (any MacroExpansionContext)?
 
   init(
     fromClass classDecl: ClassDeclSyntax,
     keyStrategy: ExprSyntax?,
+    optionalNulls: Bool = true,
     accessLevel: String? = nil,
     context: (any MacroExpansionContext)? = nil
   ) {
@@ -147,12 +149,14 @@ struct SchemaGenerator {
     members = classDecl.memberBlock.members
     attributes = classDecl.attributes
     self.keyStrategy = keyStrategy
+    self.optionalNulls = optionalNulls
     self.context = context
   }
 
   init(
     fromStruct structDecl: StructDeclSyntax,
     keyStrategy: ExprSyntax?,
+    optionalNulls: Bool = true,
     accessLevel: String? = nil,
     context: (any MacroExpansionContext)? = nil
   ) {
@@ -170,6 +174,7 @@ struct SchemaGenerator {
     members = structDecl.memberBlock.members
     attributes = structDecl.attributes
     self.keyStrategy = keyStrategy
+    self.optionalNulls = optionalNulls
     self.context = context
   }
 
@@ -196,6 +201,7 @@ struct SchemaGenerator {
       $0.generateSchema(
         keyStrategy: keyStrategy,
         typeName: name.text,
+        globalOptionalNulls: optionalNulls,
         codingKeys: codingKeys,
         context: context
       )

@@ -97,7 +97,14 @@ struct DocumentationExampleTests {
 
   @Schemable struct Library {
     let name: String
-    var books: [Book] = []
+
+    @SchemaOptions(.default([]))
+    var books: [Book]
+
+    init(name: String, books: [Book] = []) {
+      self.name = name
+      self.books = books
+    }
   }
 
   @Test func doccExample2() {

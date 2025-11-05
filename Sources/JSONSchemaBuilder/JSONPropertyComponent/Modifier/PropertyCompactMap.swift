@@ -5,7 +5,7 @@ extension JSONPropertyComponent {
   /// This effectively transforms the validation output to be non-optional and therefore marks the property as required.
   /// - Parameter transform: The transform to apply to the output.
   /// - Returns: A new component that applies the transform.
-  func compactMap<NewOutput>(
+  public func compactMap<NewOutput>(
     _ transform: @Sendable @escaping (Output) -> NewOutput?
   ) -> JSONPropertyComponents.CompactMap<Self, NewOutput> {
     .init(upstream: self, transform: transform)

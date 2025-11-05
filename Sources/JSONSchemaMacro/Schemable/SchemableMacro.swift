@@ -90,13 +90,21 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
     let accessModifier = accessLevel.map { "\($0) " } ?? ""
 
     if let structDecl = declaration.as(StructDeclSyntax.self) {
-      let strategyArg = node.arguments?
-        .as(LabeledExprListSyntax.self)?
-        .first(where: { $0.label?.text == "keyStrategy" })?
+      let arguments = node.arguments?.as(LabeledExprListSyntax.self)
+      let strategyArg = arguments?.first(where: { $0.label?.text == "keyStrategy" })?.expression
+      let optionalNullsArg = arguments?.first(where: { $0.label?.text == "optionalNulls" })?
         .expression
+      // Default to true if not specified, otherwise parse the boolean literal
+      let optionalNulls: Bool
+      if let boolLiteral = optionalNullsArg?.as(BooleanLiteralExprSyntax.self) {
+        optionalNulls = boolLiteral.literal.text == "true"
+      } else {
+        optionalNulls = true  // default
+      }
       let generator = SchemaGenerator(
         fromStruct: structDecl,
         keyStrategy: strategyArg,
+        optionalNulls: optionalNulls,
         accessLevel: accessLevel,
         context: context
       )
@@ -112,13 +120,21 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
       }
       return decls
     } else if let classDecl = declaration.as(ClassDeclSyntax.self) {
-      let strategyArg = node.arguments?
-        .as(LabeledExprListSyntax.self)?
-        .first(where: { $0.label?.text == "keyStrategy" })?
+      let arguments = node.arguments?.as(LabeledExprListSyntax.self)
+      let strategyArg = arguments?.first(where: { $0.label?.text == "keyStrategy" })?.expression
+      let optionalNullsArg = arguments?.first(where: { $0.label?.text == "optionalNulls" })?
         .expression
+      // Default to true if not specified, otherwise parse the boolean literal
+      let optionalNulls: Bool
+      if let boolLiteral = optionalNullsArg?.as(BooleanLiteralExprSyntax.self) {
+        optionalNulls = boolLiteral.literal.text == "true"
+      } else {
+        optionalNulls = true  // default
+      }
       let generator = SchemaGenerator(
         fromClass: classDecl,
         keyStrategy: strategyArg,
+        optionalNulls: optionalNulls,
         accessLevel: accessLevel,
         context: context
       )

@@ -134,12 +134,18 @@
     "description" : {
       "description" : "Optional description of the poll",
       "maxLength" : 500,
-      "type" : "string"
+      "type" : [
+        "string",
+        "null"
+      ]
     },
     "expiresAt" : {
       "description" : "Optional expiration timestamp for the poll",
       "format" : "date-time",
-      "type" : "string"
+      "type" : [
+        "string",
+        "null"
+      ]
     },
     "id" : {
       "description" : "Unique identifier for the poll",
@@ -186,21 +192,28 @@
       "uniqueItems" : true
     },
     "settings" : {
-      "properties" : {
-        "allowMultipleVotes" : {
-          "default" : true,
-          "type" : "boolean"
+      "oneOf" : [
+        {
+          "properties" : {
+            "allowMultipleVotes" : {
+              "default" : true,
+              "type" : "boolean"
+            },
+            "requireAuthentication" : {
+              "default" : false,
+              "type" : "boolean"
+            }
+          },
+          "required" : [
+            "allowMultipleVotes",
+            "requireAuthentication"
+          ],
+          "type" : "object"
         },
-        "requireAuthentication" : {
-          "default" : false,
-          "type" : "boolean"
+        {
+          "type" : "null"
         }
-      },
-      "required" : [
-        "allowMultipleVotes",
-        "requireAuthentication"
-      ],
-      "type" : "object"
+      ]
     },
     "title" : {
       "description" : "The title of the poll",
