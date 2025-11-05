@@ -28,8 +28,8 @@ struct Poll {
   @StringOptions(.format("date-time"))
   let expiresAt: String?
 
-  @SchemaOptions(.description("Whether the poll is currently active"))
-  var isActive: Bool = true
+  @SchemaOptions(.description("Whether the poll is currently active"), .default(true))
+  var isActive: Bool
 
   @SchemaOptions(.description("List of options available in the poll"))
   @ArrayOptions(.minItems(2), .uniqueItems(true))
@@ -39,6 +39,28 @@ struct Poll {
   let category: Category
 
   let settings: Settings?
+
+  init(
+    id: Int,
+    title: String,
+    description: String?,
+    createdAt: String,
+    expiresAt: String?,
+    isActive: Bool = true,
+    options: [Option],
+    category: Category,
+    settings: Settings?
+  ) {
+    self.id = id
+    self.title = title
+    self.description = description
+    self.createdAt = createdAt
+    self.expiresAt = expiresAt
+    self.isActive = isActive
+    self.options = options
+    self.category = category
+    self.settings = settings
+  }
 
   @Schemable
   @ObjectOptions(.additionalProperties { false })
@@ -51,9 +73,15 @@ struct Poll {
     @StringOptions(.minLength(1), .maxLength(100))
     let text: String
 
-    @SchemaOptions(.description("Number of votes received"))
+    @SchemaOptions(.description("Number of votes received"), .default(0))
     @NumberOptions(.minimum(0))
-    var voteCount: Int = 0
+    var voteCount: Int
+
+    init(id: Int, text: String, voteCount: Int = 0) {
+      self.id = id
+      self.text = text
+      self.voteCount = voteCount
+    }
   }
 
   @Schemable
@@ -73,8 +101,16 @@ struct Poll {
 
   @Schemable
   struct Settings {
-    var allowMultipleVotes: Bool = true
-    var requireAuthentication: Bool = false
+    @SchemaOptions(.default(true))
+    var allowMultipleVotes: Bool
+
+    @SchemaOptions(.default(false))
+    var requireAuthentication: Bool
+
+    init(allowMultipleVotes: Bool = true, requireAuthentication: Bool = false) {
+      self.allowMultipleVotes = allowMultipleVotes
+      self.requireAuthentication = requireAuthentication
+    }
   }
 }
 
