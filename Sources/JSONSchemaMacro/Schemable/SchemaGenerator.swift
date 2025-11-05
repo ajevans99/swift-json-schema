@@ -3,11 +3,22 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
+extension String {
+  /// Removes backticks from Swift identifiers (e.g., "`default`" → "default")
+  func trimmingBackticks() -> String {
+    if self.hasPrefix("`") && self.hasSuffix("`") {
+      return String(self.dropFirst().dropLast())
+    }
+    return self
+  }
+}
+
 struct EnumSchemaGenerator {
   let declModifier: DeclModifierSyntax?
   let name: TokenSyntax
   let members: MemberBlockItemListSyntax
   let attributes: AttributeListSyntax
+  let isStringBacked: Bool
 
   init(fromEnum enumDecl: EnumDeclSyntax, accessLevel: String? = nil) {
     // Use provided access level if available, otherwise use the declaration's modifier
@@ -23,10 +34,17 @@ struct EnumSchemaGenerator {
     name = enumDecl.name.trimmed
     members = enumDecl.memberBlock.members
     attributes = enumDecl.attributes
+
+    // Check if enum inherits from String
+    isStringBacked =
+      enumDecl.inheritanceClause?.inheritedTypes
+      .contains { type in
+        type.type.as(IdentifierTypeSyntax.self)?.name.text == "String"
+      } ?? false
   }
 
   func makeSchema() -> DeclSyntax {
-    let schemableCases = members.schemableEnumCases()
+    let schemableCases = members.schemableEnumCases(isStringBacked: isStringBacked)
 
     let casesWithoutAssociatedValues = schemableCases.filter { $0.associatedValues == nil }
     let casesWithAssociatedValues = schemableCases.filter { $0.associatedValues != nil }
@@ -73,19 +91,22 @@ struct EnumSchemaGenerator {
     let statements = casesWithoutAssociatedValues.compactMap { $0.generateSchema() }
     let statementList = CodeBlockItemListSyntax(statements, separator: .newline)
 
-    var switchCases = casesWithoutAssociatedValues.map(\.identifier)
-      .map { identifier -> SwitchCaseSyntax in
-        """
-        case \"\(identifier)\":
-          return Self.\(identifier)
+    var switchCases =
+      casesWithoutAssociatedValues
+      .map { enumCase -> SwitchCaseSyntax in
+        // Use raw value if present, otherwise use case name (without backticks)
+        let matchValue = enumCase.rawValue ?? enumCase.identifier.text.trimmingBackticks()
+        return """
+          case "\(raw: matchValue)":
+            return Self.\(enumCase.identifier)
 
-        """
+          """
       }
     switchCases.append("default: return nil")
     let switchCaseList = SwitchCaseListSyntax(switchCases.map { .switchCase($0) })
 
     return """
-      JSONString()  
+      JSONString()
         .enumValues {
           \(statementList)
         }

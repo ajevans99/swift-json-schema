@@ -263,9 +263,13 @@ Computed properties are not included in generated schemas.
 
 The ``Schemable()`` macro can also be applied to Swift enums. The enum cases will be expanded as string literals in the schema. Only strings are supported in macro generation currently. To support other types, you must manually implement the schema.
 
+#### Simple Enums
+
+For enums without raw values, the schema uses the case names:
+
 ```swift
 @Schemable
-enum TemperatureType: String {
+enum TemperatureType {
   case fahrenheit
   case celsius
   case kelvin
@@ -275,7 +279,7 @@ enum TemperatureType: String {
 will expand to:
 
 ```swift
-enum TemperatureType: String {
+enum TemperatureType {
   case fahrenheit
   case celsius
   case kelvin
@@ -299,6 +303,51 @@ enum TemperatureType: String {
   }
 }
 ```
+
+#### String-Backed Enums
+
+For enums with String raw values, the schema uses the **raw values**, ensuring compatibility with Swift's `Codable`:
+
+```swift
+@Schemable
+enum Size: String {
+  case small = "sm"
+  case medium = "md"
+  case large = "lg"
+}
+```
+
+will expand to:
+
+```swift
+enum Size: String {
+  case small = "sm"
+  case medium = "md"
+  case large = "lg"
+
+  // Auto-generated schema ↴
+  static var schema: some JSONSchemaComponent<Size> {
+    JSONString()
+      .enumValues {
+        "sm"
+        "md"
+        "lg"
+      }
+      .compactMap { string in
+        switch string {
+        case "sm": return Size.small
+        case "md": return Size.medium
+        case "lg": return Size.large
+        default: return nil
+        }
+      }
+  }
+}
+```
+
+This behavior matches Swift's `Codable`, which encodes and decodes using the raw values. The generated schema will correctly validate JSON data that can be decoded with Swift's standard `JSONDecoder`.
+
+#### Enums with Associated Values
 
 If any of the enum cases have an associated value, the macro will instead expand using the `OneOf` ``JSONComposition/OneOf/init(_:)`` builder.
 

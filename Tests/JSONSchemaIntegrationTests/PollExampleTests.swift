@@ -182,7 +182,7 @@ struct PollExampleTests {
             "entertainment": {
               "_0": {
                 "genre": "movies",
-                "ageRating": "pg13"
+                "ageRating": "Parental Guidance Suggested 13+"
               }
             }
           }
