@@ -1,5 +1,7 @@
+import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxBuilder
+import SwiftSyntaxMacros
 
 struct EnumSchemaGenerator {
   let declModifier: DeclModifierSyntax?
@@ -102,8 +104,14 @@ struct SchemaGenerator {
   let members: MemberBlockItemListSyntax
   let attributes: AttributeListSyntax
   let keyStrategy: ExprSyntax?
+  let context: (any MacroExpansionContext)?
 
-  init(fromClass classDecl: ClassDeclSyntax, keyStrategy: ExprSyntax?, accessLevel: String? = nil) {
+  init(
+    fromClass classDecl: ClassDeclSyntax,
+    keyStrategy: ExprSyntax?,
+    accessLevel: String? = nil,
+    context: (any MacroExpansionContext)? = nil
+  ) {
     // Use provided access level if available, otherwise use the declaration's modifier
     if let accessLevel {
       // Create modifier with trailing space for proper formatting
@@ -118,12 +126,14 @@ struct SchemaGenerator {
     members = classDecl.memberBlock.members
     attributes = classDecl.attributes
     self.keyStrategy = keyStrategy
+    self.context = context
   }
 
   init(
     fromStruct structDecl: StructDeclSyntax,
     keyStrategy: ExprSyntax?,
-    accessLevel: String? = nil
+    accessLevel: String? = nil,
+    context: (any MacroExpansionContext)? = nil
   ) {
     // Use provided access level if available, otherwise use the declaration's modifier
     if let accessLevel {
@@ -139,14 +149,35 @@ struct SchemaGenerator {
     members = structDecl.memberBlock.members
     attributes = structDecl.attributes
     self.keyStrategy = keyStrategy
+    self.context = context
   }
 
   func makeSchema() -> DeclSyntax {
     let schemableMembers = members.schemableMembers()
     let codingKeys = members.extractCodingKeys()
 
+    // Emit diagnostics for potential memberwise init mismatches
+    if let context = context {
+      let diagnostics = InitializerDiagnostics(
+        typeName: name,
+        members: members,
+        context: context
+      )
+      diagnostics.emitDiagnostics(for: schemableMembers)
+
+      // Validate schema options for each member
+      for member in schemableMembers {
+        member.validateOptions(context: context)
+      }
+    }
+
     let statements = schemableMembers.compactMap {
-      $0.generateSchema(keyStrategy: keyStrategy, typeName: name.text, codingKeys: codingKeys)
+      $0.generateSchema(
+        keyStrategy: keyStrategy,
+        typeName: name.text,
+        codingKeys: codingKeys,
+        context: context
+      )
     }
 
     var codeBlockItem: CodeBlockItemSyntax =

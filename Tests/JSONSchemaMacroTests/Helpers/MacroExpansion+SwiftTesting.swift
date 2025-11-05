@@ -6,6 +6,7 @@ import Testing
 func assertMacroExpansion(
   _ originalSource: String,
   expandedSource expectedExpandedSource: String,
+  diagnostics expectedDiagnostics: [DiagnosticSpec] = [],
   macros: [String: Macro.Type],
   fileID: StaticString = #fileID,
   filePath: StaticString = #filePath,
@@ -15,6 +16,7 @@ func assertMacroExpansion(
   assertMacroExpansion(
     originalSource,
     expandedSource: expectedExpandedSource,
+    diagnostics: expectedDiagnostics,
     macroSpecs: macros.mapValues { MacroSpec(type: $0) },
     indentationWidth: .spaces(2),
     failureHandler: { spec in
