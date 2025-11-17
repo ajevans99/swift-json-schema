@@ -12,7 +12,7 @@ extension ApplicatorKeyword {
   }
 }
 
-protocol UnevaluatedKeyword: AnnotationProducingKeyword {}
+protocol UnevaluatedKeyword: ApplicatorKeyword {}
 
 extension UnevaluatedKeyword {
   package static var vocabulary: String {

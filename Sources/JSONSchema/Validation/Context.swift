@@ -110,7 +110,11 @@ public final class Context: Sendable {
   /// Set of active vocabularies that should be applied when creating schemas.
   /// If nil, all dialect keywords are available. If set, only keywords from
   /// these vocabularies will be processed.
-  var activeVocabularies: Set<String>? = nil
+  private let lockedActiveVocabularies: LockIsolated<Set<String>?>
+  var activeVocabularies: Set<String>? {
+    get { lockedActiveVocabularies.withLock { $0 } }
+    set { lockedActiveVocabularies.withLock { $0 = newValue } }
+  }
 
   public init(
     dialect: Dialect,
@@ -131,5 +135,6 @@ public final class Context: Sendable {
     )
     self.lockedMinContainsIsZero = LockIsolated([:])
     self.lockedIfConditionalResults = LockIsolated([:])
+    self.lockedActiveVocabularies = LockIsolated(nil)
   }
 }

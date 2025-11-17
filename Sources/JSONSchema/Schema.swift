@@ -142,12 +142,12 @@ package struct ObjectSchema: ValidatableSchema {
     context: Context,
     baseURI: URL = URL(fileURLWithPath: #file),
     documentURL: URL = URL(fileURLWithPath: #file)
-  ) {
+  ) throws(SchemaIssue) {
     self.schemaValue = schemaValue
     self.location = location
     self.context = context
     self.documentURL = documentURL
-    let (processedURI, keywords, dynamicAnchorInfo) = Self.collectKeywords(
+    let (processedURI, keywords, dynamicAnchorInfo) = try Self.collectKeywords(
       from: schemaValue,
       location: location,
       context: context,
@@ -174,6 +174,9 @@ package struct ObjectSchema: ValidatableSchema {
     var dynamicAnchorInfo: (name: String, baseURI: URL)? = nil
 
     var didProcessIdentiferKeyword = false
+
+    let previousVocabularies = context.activeVocabularies
+    defer { context.activeVocabularies = previousVocabularies }
 
     // First pass: Process vocabulary keyword to determine active vocabularies
     if let vocabularyValue = schemaValue[Keywords.Vocabulary.name] {
