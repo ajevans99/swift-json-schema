@@ -34,9 +34,10 @@ public final class Context: Sendable {
   }
 
   /// Per-document map of `$dynamicAnchor` names to their location and base URI.
-  private let lockedDocumentDynamicAnchors: LockIsolated<
-    [URL: [String: (pointer: JSONPointer, baseURI: URL)]]
-  >
+  private let lockedDocumentDynamicAnchors:
+    LockIsolated<
+      [URL: [String: (pointer: JSONPointer, baseURI: URL)]]
+    >
   var documentDynamicAnchors: [URL: [String: (pointer: JSONPointer, baseURI: URL)]] {
     get { lockedDocumentDynamicAnchors.withLock { $0 } }
     set { lockedDocumentDynamicAnchors.withLock { $0 = newValue } }
@@ -65,9 +66,10 @@ public final class Context: Sendable {
   /// associated base URI.
   /// Stack of `$dynamicScope`s used during validation; each push records the
   /// active anchors for the current schema/document so `$dynamicRef` can walk outwards.
-  private let lockedDynamicScopes: LockIsolated<
-    [[String: (document: URL, pointer: JSONPointer, baseURI: URL)]]
-  >
+  private let lockedDynamicScopes:
+    LockIsolated<
+      [[String: (document: URL, pointer: JSONPointer, baseURI: URL)]]
+    >
   var dynamicScopes: [[String: (document: URL, pointer: JSONPointer, baseURI: URL)]] {
     get { lockedDynamicScopes.withLock { $0 } }
     set { lockedDynamicScopes.withLock { $0 = newValue } }
