@@ -154,7 +154,9 @@ struct ReferenceResolver {
       let anchor = fragment
       for scope in context.dynamicScopes.reversed() {
         if let entry = scope[anchor] {
-          guard let raw = context.rootRawSchema?.value(at: entry.pointer) else {
+          guard let document = context.documentCache[entry.document],
+            let raw = document.value(at: entry.pointer)
+          else {
             break
           }
           return try Schema(
@@ -218,15 +220,17 @@ struct ReferenceResolver {
   }
 
   private func resolveIdentifier(for referenceURL: URL) throws -> Schema? {
-    guard let schemaLocation = context.identifierRegistry[referenceURL] else { return nil }
-    guard let value = context.rootRawSchema?.value(at: schemaLocation) else {
+    guard let identifierLocation = context.identifierRegistry[referenceURL] else { return nil }
+    guard let document = context.documentCache[identifierLocation.document],
+      let value = document.value(at: identifierLocation.pointer)
+    else {
       throw ReferenceResolverError.unresolvedReference(referenceURL)
     }
     let schema = try Schema(
       rawSchema: value,
-      location: schemaLocation,
+      location: identifierLocation.pointer,
       context: context,
-      baseURI: baseURI
+      baseURI: identifierLocation.document
     )
     context.schemaCache[referenceURL.absoluteString] = schema
     return schema
@@ -238,7 +242,7 @@ struct ReferenceResolver {
     }
     let schema = try Schema(
       rawSchema: rawSchema,
-      location: location,
+      location: .init(),
       context: context,
       baseURI: referenceURL
     )
@@ -251,16 +255,17 @@ struct ReferenceResolver {
     guard referenceURL.scheme == "urn",
       referenceURI.hasPrefix("#") || referenceURI.hasPrefix(baseURI.absoluteString)
     else { return nil }
-    guard let pointer = context.identifierRegistry[baseURI],
-      let value = context.rootRawSchema?.value(at: pointer)
+    guard let identifierLocation = context.identifierRegistry[baseURI],
+      let document = context.documentCache[identifierLocation.document],
+      let value = document.value(at: identifierLocation.pointer)
     else {
       throw ReferenceResolverError.unresolvedReference(referenceURL)
     }
     let schema = try Schema(
       rawSchema: value,
-      location: location,
+      location: identifierLocation.pointer,
       context: context,
-      baseURI: baseURI
+      baseURI: identifierLocation.document
     )
     context.schemaCache[referenceURL.absoluteString] = schema
     return schema

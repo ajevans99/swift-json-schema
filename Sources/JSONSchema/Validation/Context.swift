@@ -14,10 +14,32 @@ public final class Context: Sendable {
     set { lockedRootRawSchema.withLock { $0 = newValue } }
   }
 
-  private let lockedIdentifierRegistry: LockIsolated<[URL: JSONPointer]>
-  var identifierRegistry: [URL: JSONPointer] {
+  /// Identifies where a `$id` lives: which document and what JSON pointer inside it.
+  struct IdentifierLocation: Sendable {
+    let document: URL
+    let pointer: JSONPointer
+  }
+
+  private let lockedIdentifierRegistry: LockIsolated<[URL: IdentifierLocation]>
+  var identifierRegistry: [URL: IdentifierLocation] {
     get { lockedIdentifierRegistry.withLock { $0 } }
     set { lockedIdentifierRegistry.withLock { $0 = newValue } }
+  }
+
+  /// Cache of every raw schema document we've loaded, keyed by canonical document URL.
+  private let lockedDocumentCache: LockIsolated<[URL: SchemaDocument]>
+  var documentCache: [URL: SchemaDocument] {
+    get { lockedDocumentCache.withLock { $0 } }
+    set { lockedDocumentCache.withLock { $0 = newValue } }
+  }
+
+  /// Per-document map of `$dynamicAnchor` names to their location and base URI.
+  private let lockedDocumentDynamicAnchors: LockIsolated<
+    [URL: [String: (pointer: JSONPointer, baseURI: URL)]]
+  >
+  var documentDynamicAnchors: [URL: [String: (pointer: JSONPointer, baseURI: URL)]] {
+    get { lockedDocumentDynamicAnchors.withLock { $0 } }
+    set { lockedDocumentDynamicAnchors.withLock { $0 = newValue } }
   }
 
   private let lockedRemoteSchemaStorage: LockIsolated<[String: JSONValue]>
@@ -41,8 +63,12 @@ public final class Context: Sendable {
   /// Stack of dynamic scopes used to resolve ``$dynamicRef`` references.
   /// Each scope maps an anchor name to the schema location pointer and its
   /// associated base URI.
-  private let lockedDynamicScopes: LockIsolated<[[String: (pointer: JSONPointer, baseURI: URL)]]>
-  var dynamicScopes: [[String: (pointer: JSONPointer, baseURI: URL)]] {
+  /// Stack of `$dynamicScope`s used during validation; each push records the
+  /// active anchors for the current schema/document so `$dynamicRef` can walk outwards.
+  private let lockedDynamicScopes: LockIsolated<
+    [[String: (document: URL, pointer: JSONPointer, baseURI: URL)]]
+  >
+  var dynamicScopes: [[String: (document: URL, pointer: JSONPointer, baseURI: URL)]] {
     get { lockedDynamicScopes.withLock { $0 } }
     set { lockedDynamicScopes.withLock { $0 = newValue } }
   }
@@ -89,6 +115,8 @@ public final class Context: Sendable {
     self.lockedDialect = LockIsolated(dialect)
     self.lockedRootRawSchema = LockIsolated(nil)
     self.lockedIdentifierRegistry = LockIsolated([:])
+    self.lockedDocumentCache = LockIsolated([:])
+    self.lockedDocumentDynamicAnchors = LockIsolated([:])
     self.lockedRemoteSchemaStorage = LockIsolated(remoteSchema)
     self.lockedSchemaCache = LockIsolated([:])
     self.lockedAnchors = LockIsolated([:])

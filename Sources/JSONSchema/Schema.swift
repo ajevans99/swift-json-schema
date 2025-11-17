@@ -4,6 +4,7 @@ public struct Schema: ValidatableSchema {
   let schema: any ValidatableSchema
   let location: JSONPointer
   let context: Context
+  let documentURL: URL
 
   public init(
     rawSchema: JSONValue,
@@ -18,6 +19,12 @@ public struct Schema: ValidatableSchema {
       self.context.rootRawSchema = rawSchema
     }
 
+    let documentURL = baseURI.withoutFragment ?? baseURI
+    self.documentURL = documentURL
+    if self.context.documentCache[documentURL] == nil {
+      self.context.documentCache[documentURL] = SchemaDocument(url: documentURL, rawSchema: rawSchema)
+    }
+
     switch rawSchema {
     case .boolean(let boolValue):
       self.schema = BooleanSchema(
@@ -30,7 +37,8 @@ public struct Schema: ValidatableSchema {
         schemaValue: schemaDict,
         location: location,
         context: context,
-        baseURI: baseURI
+        baseURI: baseURI,
+        documentURL: documentURL
       )
     default:
       throw .schemaShouldBeBooleanOrObject
@@ -55,10 +63,16 @@ public struct Schema: ValidatableSchema {
     )
   }
 
-  init(schema: any ValidatableSchema, location: JSONPointer, context: Context) {
+  init(
+    schema: any ValidatableSchema,
+    location: JSONPointer,
+    context: Context,
+    documentURL: URL = URL(fileURLWithPath: #file)
+  ) {
     self.schema = schema
     self.location = location
     self.context = context
+    self.documentURL = documentURL
   }
 
   public func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
@@ -115,6 +129,7 @@ package struct ObjectSchema: ValidatableSchema {
   let context: Context
   let keywords: [any Keyword]
   let uri: URL?
+  let documentURL: URL
   /// Name and base URI for any `$dynamicAnchor` declared on this schema.
   let dynamicAnchorInfo: (name: String, baseURI: URL)?
 
@@ -122,11 +137,13 @@ package struct ObjectSchema: ValidatableSchema {
     schemaValue: [String: JSONValue],
     location: JSONPointer,
     context: Context,
-    baseURI: URL = URL(fileURLWithPath: #file)
+    baseURI: URL = URL(fileURLWithPath: #file),
+    documentURL: URL = URL(fileURLWithPath: #file)
   ) {
     self.schemaValue = schemaValue
     self.location = location
     self.context = context
+    self.documentURL = documentURL
     let (processedURI, keywords, dynamicAnchorInfo) = Self.collectKeywords(
       from: schemaValue,
       location: location,
@@ -178,7 +195,11 @@ package struct ObjectSchema: ValidatableSchema {
     }
 
     if location.isRoot && !didProcessIdentiferKeyword {
-      context.identifierRegistry[baseURI] = location
+      let documentURL = baseURI.withoutFragment ?? baseURI
+      context.identifierRegistry[baseURI] = .init(
+        document: documentURL,
+        pointer: location
+      )
     }
 
     return (processedURI, keywords, dynamicAnchorInfo)
@@ -195,10 +216,20 @@ package struct ObjectSchema: ValidatableSchema {
     annotations: inout AnnotationContainer
   ) -> ValidationResult {
     var errors: [ValidationError] = []
+    // Push every document-wide `$dynamicAnchor` so this schema inherits the surrounding scope.
+    let documentAnchors = context.documentDynamicAnchors[documentURL] ?? [:]
+    context.dynamicScopes.append(
+      documentAnchors.mapValues { (document: documentURL, pointer: $0.pointer, baseURI: $0.baseURI) }
+    )
+    defer {
+      _ = context.dynamicScopes.popLast()
+    }
 
     if let dynamicAnchorInfo {
+      // A schema-level `$dynamicAnchor` overrides the document entry while this schema validates.
       context.dynamicScopes.append([
         dynamicAnchorInfo.name: (
+          document: self.documentURL,
           pointer: self.location,
           baseURI: dynamicAnchorInfo.baseURI
         )
