@@ -17,19 +17,30 @@ extension JSONSchemaComponent {
   public func definition(context: Context = .init(dialect: .draft2020_12)) -> Schema {
     switch schemaValue {
     case .boolean(let bool):
-      BooleanSchema(
+      return BooleanSchema(
         schemaValue: bool,
         location: .init(),
         context: context
       )
       .asSchema()
     case .object(let dict):
-      ObjectSchema(
-        schemaValue: dict,
-        location: .init(),
-        context: context
-      )
-      .asSchema()
+      do {
+        return try ObjectSchema(
+          schemaValue: dict,
+          location: .init(),
+          context: .init(dialect: .draft2020_12)
+        )
+        .asSchema()
+      } catch {
+        // If vocabulary validation fails, fall back to a false schema
+        // This is a conservative approach for schema generation
+        return BooleanSchema(
+          schemaValue: false,
+          location: .init(),
+          context: .init(dialect: .draft2020_12)
+        )
+        .asSchema()
+      }
     }
   }
 

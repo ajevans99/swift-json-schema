@@ -1,6 +1,14 @@
 import Foundation
 
-protocol IdentifierKeyword: Keyword {
+protocol CoreKeyword: Keyword {}
+
+extension CoreKeyword {
+  package static var vocabulary: String {
+    "https://json-schema.org/draft/2020-12/vocab/core"
+  }
+}
+
+protocol IdentifierKeyword: CoreKeyword {
   func processIdentifier()
 }
 
@@ -20,13 +28,29 @@ extension Keywords {
     func processIdentifier() {}
 
     func processSubschema(baseURI: URL) -> URL {
-      if let string = value.string, let newURL = URL(string: string, relativeTo: baseURI) {
-        if !context.context.identifierRegistry.keys.contains(newURL.absoluteURL) {
-          context.context.identifierRegistry[newURL.absoluteURL] = context.location.dropLast()
-        }
-        return newURL.absoluteURL
+      guard let string = value.string, let newURL = URL(string: string, relativeTo: baseURI) else {
+        return baseURI
       }
-      return baseURI
+
+      if !context.context.identifierRegistry.keys.contains(newURL.absoluteURL) {
+        let documentURL = context.uri.withoutFragment ?? context.uri
+        context.context.identifierRegistry[newURL.absoluteURL] = .init(
+          document: documentURL,
+          pointer: context.location.dropLast()
+        )
+
+        let newDocumentURL = newURL.absoluteURL.withoutFragment ?? newURL.absoluteURL
+        if context.context.documentCache[newDocumentURL] == nil,
+          let existingDocument = context.context.documentCache[documentURL]
+        {
+          context.context.documentCache[newDocumentURL] = SchemaDocument(
+            url: newDocumentURL,
+            rawSchema: existingDocument.rawSchema
+          )
+        }
+      }
+
+      return newURL.absoluteURL
     }
   }
 
@@ -98,6 +122,13 @@ extension Keywords {
       let location = context.location.dropLast()
       if !context.context.anchors.keys.contains(newURL) {
         context.context.anchors[newURL] = location
+      }
+
+      let documentURL = context.uri.withoutFragment ?? context.uri
+      var anchors = context.context.documentDynamicAnchors[documentURL] ?? [:]
+      if anchors[anchorName] == nil {
+        anchors[anchorName] = (pointer: location, baseURI: context.uri)
+        context.context.documentDynamicAnchors[documentURL] = anchors
       }
     }
   }

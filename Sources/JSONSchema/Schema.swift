@@ -4,6 +4,7 @@ public struct Schema: ValidatableSchema {
   let schema: any ValidatableSchema
   let location: JSONPointer
   let context: Context
+  let documentURL: URL
 
   public init(
     rawSchema: JSONValue,
@@ -18,6 +19,15 @@ public struct Schema: ValidatableSchema {
       self.context.rootRawSchema = rawSchema
     }
 
+    let documentURL = baseURI.withoutFragment ?? baseURI
+    self.documentURL = documentURL
+    if self.context.documentCache[documentURL] == nil {
+      self.context.documentCache[documentURL] = SchemaDocument(
+        url: documentURL,
+        rawSchema: rawSchema
+      )
+    }
+
     switch rawSchema {
     case .boolean(let boolValue):
       self.schema = BooleanSchema(
@@ -26,11 +36,12 @@ public struct Schema: ValidatableSchema {
         context: context
       )
     case .object(let schemaDict):
-      self.schema = ObjectSchema(
+      self.schema = try ObjectSchema(
         schemaValue: schemaDict,
         location: location,
         context: context,
-        baseURI: baseURI
+        baseURI: baseURI,
+        documentURL: documentURL
       )
     default:
       throw .schemaShouldBeBooleanOrObject
@@ -55,10 +66,16 @@ public struct Schema: ValidatableSchema {
     )
   }
 
-  init(schema: any ValidatableSchema, location: JSONPointer, context: Context) {
+  init(
+    schema: any ValidatableSchema,
+    location: JSONPointer,
+    context: Context,
+    documentURL: URL = URL(fileURLWithPath: #file)
+  ) {
     self.schema = schema
     self.location = location
     self.context = context
+    self.documentURL = documentURL
   }
 
   public func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
@@ -115,6 +132,7 @@ package struct ObjectSchema: ValidatableSchema {
   let context: Context
   let keywords: [any Keyword]
   let uri: URL?
+  let documentURL: URL
   /// Name and base URI for any `$dynamicAnchor` declared on this schema.
   let dynamicAnchorInfo: (name: String, baseURI: URL)?
 
@@ -122,12 +140,14 @@ package struct ObjectSchema: ValidatableSchema {
     schemaValue: [String: JSONValue],
     location: JSONPointer,
     context: Context,
-    baseURI: URL = URL(fileURLWithPath: #file)
-  ) {
+    baseURI: URL = URL(fileURLWithPath: #file),
+    documentURL: URL = URL(fileURLWithPath: #file)
+  ) throws(SchemaIssue) {
     self.schemaValue = schemaValue
     self.location = location
     self.context = context
-    let (processedURI, keywords, dynamicAnchorInfo) = Self.collectKeywords(
+    self.documentURL = documentURL
+    let (processedURI, keywords, dynamicAnchorInfo) = try Self.collectKeywords(
       from: schemaValue,
       location: location,
       context: context,
@@ -143,7 +163,7 @@ package struct ObjectSchema: ValidatableSchema {
     location: JSONPointer,
     context: Context,
     baseURI: URL
-  ) -> (
+  ) throws(SchemaIssue) -> (
     processedURI: URL?,
     keywords: [any Keyword],
     dynamicAnchorInfo: (name: String, baseURI: URL)?
@@ -155,7 +175,52 @@ package struct ObjectSchema: ValidatableSchema {
 
     var didProcessIdentiferKeyword = false
 
-    for keywordType in context.dialect.keywords where schemaValue.keys.contains(keywordType.name) {
+    let previousVocabularies = context.activeVocabularies
+    defer { context.activeVocabularies = previousVocabularies }
+
+    // First pass: Process $schema to inherit metaschema vocabularies
+    if let schemaKeywordValue = schemaValue[Keywords.SchemaKeyword.name] {
+      let keywordLocation = location.appending(.key(Keywords.SchemaKeyword.name))
+      let schemaKeyword = Keywords.SchemaKeyword(
+        value: schemaKeywordValue,
+        context: .init(location: keywordLocation, context: context, uri: processedURI)
+      )
+      keywords.append(schemaKeyword)
+
+      if let vocabularies = schemaKeyword.resolvedVocabularies() {
+        context.activeVocabularies = vocabularies
+      }
+    }
+
+    // Next, process vocabulary keyword to determine active vocabularies declared on schema
+    if let vocabularyValue = schemaValue[Keywords.Vocabulary.name] {
+      let keywordLocation = location.appending(.key(Keywords.Vocabulary.name))
+      let vocabulary = Keywords.Vocabulary(
+        value: vocabularyValue,
+        context: .init(location: keywordLocation, context: context, uri: processedURI)
+      )
+      keywords.append(vocabulary)
+
+      // Validate vocabularies
+      try vocabulary.validateVocabularies()
+
+      // Set active vocabularies in the context for sub-schemas
+      context.activeVocabularies = vocabulary.getActiveVocabularies()
+    }
+
+    // Get keywords filtered by active vocabularies (either from $vocabulary or context)
+    let activeVocabs = context.activeVocabularies
+    let availableKeywords = context.dialect.keywords(activeVocabularies: activeVocabs)
+
+    // Second pass: Process all other keywords using filtered keyword list
+    for keywordType in availableKeywords where schemaValue.keys.contains(keywordType.name) {
+      // Skip vocabulary keyword as it's already processed
+      if keywordType.name == Keywords.Vocabulary.name
+        || keywordType.name == Keywords.SchemaKeyword.name
+      {
+        continue
+      }
+
       let value = schemaValue[keywordType.name]!
       let keywordLocation = location.appending(.key(keywordType.name))
       let keyword = keywordType.init(
@@ -178,7 +243,11 @@ package struct ObjectSchema: ValidatableSchema {
     }
 
     if location.isRoot && !didProcessIdentiferKeyword {
-      context.identifierRegistry[baseURI] = location
+      let documentURL = baseURI.withoutFragment ?? baseURI
+      context.identifierRegistry[baseURI] = .init(
+        document: documentURL,
+        pointer: location
+      )
     }
 
     return (processedURI, keywords, dynamicAnchorInfo)
@@ -195,10 +264,22 @@ package struct ObjectSchema: ValidatableSchema {
     annotations: inout AnnotationContainer
   ) -> ValidationResult {
     var errors: [ValidationError] = []
+    // Push every document-wide `$dynamicAnchor` so this schema inherits the surrounding scope.
+    let documentAnchors = context.documentDynamicAnchors[documentURL] ?? [:]
+    context.dynamicScopes.append(
+      documentAnchors.mapValues {
+        (document: documentURL, pointer: $0.pointer, baseURI: $0.baseURI)
+      }
+    )
+    defer {
+      _ = context.dynamicScopes.popLast()
+    }
 
     if let dynamicAnchorInfo {
+      // A schema-level `$dynamicAnchor` overrides the document entry while this schema validates.
       context.dynamicScopes.append([
         dynamicAnchorInfo.name: (
+          document: self.documentURL,
           pointer: self.location,
           baseURI: dynamicAnchorInfo.baseURI
         )

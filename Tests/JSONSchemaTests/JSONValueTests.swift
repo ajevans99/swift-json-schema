@@ -90,4 +90,13 @@ struct JSONValueTests {
     #expect(inner?["a"] == .string("a"))
     #expect(inner?["b"] == .string("b"))
   }
+
+  @Test
+  func stringEqualityIsScalarExact() {
+    let composed: JSONValue = .string("ä")  // U+00E4
+    let decomposed: JSONValue = .string("a\u{0308}")  // U+0061 U+0308
+
+    #expect(composed != decomposed)
+    #expect(JSONValue.string("hello") == JSONValue.string("hello"))
+  }
 }

@@ -6,8 +6,24 @@ package protocol AssertionKeyword: Keyword {
   ) throws(ValidationIssue)
 }
 
+protocol ValidationKeyword: AssertionKeyword {}
+
+extension ValidationKeyword {
+  package static var vocabulary: String {
+    "https://json-schema.org/draft/2020-12/vocab/validation"
+  }
+}
+
+protocol FormatKeyword: AssertionKeyword {}
+
+extension FormatKeyword {
+  package static var vocabulary: String {
+    "https://json-schema.org/draft/2020-12/vocab/format-annotation"
+  }
+}
+
 extension Keywords {
-  package struct TypeKeyword: AssertionKeyword {
+  package struct TypeKeyword: ValidationKeyword {
     package static let name = "type"
 
     package let value: JSONValue
@@ -52,7 +68,7 @@ extension Keywords {
     }
   }
 
-  package struct Enum: AssertionKeyword {
+  package struct Enum: ValidationKeyword {
     package static let name = "enum"
 
     package let value: JSONValue
@@ -77,7 +93,7 @@ extension Keywords {
     }
   }
 
-  package struct Constant: AssertionKeyword {
+  package struct Constant: ValidationKeyword {
     package static let name = "const"
 
     package let value: JSONValue
@@ -104,7 +120,7 @@ extension Keywords {
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-multipleof
-  package struct MultipleOf: AssertionKeyword {
+  package struct MultipleOf: ValidationKeyword {
     package static let name = "multipleOf"
 
     package let value: JSONValue
@@ -140,7 +156,7 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-maximum
-  package struct Maximum: AssertionKeyword {
+  package struct Maximum: ValidationKeyword {
     package static let name = "maximum"
 
     package let value: JSONValue
@@ -165,7 +181,7 @@ extension Keywords {
     }
   }
 
-  package struct ExclusiveMaximum: AssertionKeyword {
+  package struct ExclusiveMaximum: ValidationKeyword {
     package static let name = "exclusiveMaximum"
 
     package let value: JSONValue
@@ -191,7 +207,7 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-minimum
-  package struct Minimum: AssertionKeyword {
+  package struct Minimum: ValidationKeyword {
     package static let name = "minimum"
 
     package let value: JSONValue
@@ -216,7 +232,7 @@ extension Keywords {
     }
   }
 
-  package struct ExclusiveMinimum: AssertionKeyword {
+  package struct ExclusiveMinimum: ValidationKeyword {
     package static let name = "exclusiveMinimum"
 
     package let value: JSONValue
@@ -246,7 +262,7 @@ extension Keywords {
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-maxlength
-  package struct MaxLength: AssertionKeyword {
+  package struct MaxLength: ValidationKeyword {
     package static let name = "maxLength"
 
     package let value: JSONValue
@@ -272,7 +288,7 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-minlength
-  package struct MinLength: AssertionKeyword {
+  package struct MinLength: ValidationKeyword {
     package static let name = "minLength"
 
     package let value: JSONValue
@@ -298,7 +314,7 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-pattern
-  package struct Pattern: AssertionKeyword {
+  package struct Pattern: ValidationKeyword {
     package static let name = "pattern"
 
     package let value: JSONValue
@@ -331,7 +347,7 @@ extension Keywords {
     }
   }
 
-  package struct Format: AssertionKeyword {
+  package struct Format: FormatKeyword {
     package static let name = "format"
 
     package let value: JSONValue
@@ -364,7 +380,7 @@ extension Keywords {
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-maxitems
-  package struct MaxItems: AssertionKeyword {
+  package struct MaxItems: ValidationKeyword {
     package static let name = "maxItems"
 
     package let value: JSONValue
@@ -390,7 +406,7 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-minitems
-  package struct MinItems: AssertionKeyword {
+  package struct MinItems: ValidationKeyword {
     package static let name = "minItems"
 
     package let value: JSONValue
@@ -416,7 +432,7 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-uniqueitems
-  package struct UniqueItems: AssertionKeyword {
+  package struct UniqueItems: ValidationKeyword {
     package static let name = "uniqueItems"
 
     package let value: JSONValue
@@ -445,7 +461,7 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-maxcontains
-  package struct MaxContains: AssertionKeyword {
+  package struct MaxContains: ValidationKeyword {
     package static let name = "maxContains"
 
     package let value: JSONValue
@@ -490,7 +506,7 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-mincontains
-  package struct MinContains: AssertionKeyword {
+  package struct MinContains: ValidationKeyword {
     package static let name = "minContains"
 
     package let value: JSONValue
@@ -543,7 +559,7 @@ extension Keywords {
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-maxproperties
-  package struct MaxProperties: AssertionKeyword {
+  package struct MaxProperties: ValidationKeyword {
     package static let name = "maxProperties"
 
     package let value: JSONValue
@@ -574,7 +590,7 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-minproperties
-  package struct MinProperties: AssertionKeyword {
+  package struct MinProperties: ValidationKeyword {
     package static let name = "minProperties"
 
     package let value: JSONValue
@@ -602,7 +618,7 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-required
-  package struct Required: AssertionKeyword {
+  package struct Required: ValidationKeyword {
     package static let name = "required"
 
     package let value: JSONValue
@@ -630,7 +646,7 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-validation#name-dependentrequired
-  package struct DependentRequired: AssertionKeyword {
+  package struct DependentRequired: ValidationKeyword {
     package static let name = "dependentRequired"
 
     package let value: JSONValue

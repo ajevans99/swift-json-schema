@@ -40,7 +40,10 @@ public enum JSONValue: Hashable, Equatable, Sendable {
   public static func == (lhs: JSONValue, rhs: JSONValue) -> Bool {
     switch (lhs, rhs) {
     case (.string(let lhsValue), .string(let rhsValue)):
-      return lhsValue == rhsValue
+      // Swift uses canonical equality for strings, but JSON string equality is based on Unicode scalar equality.
+      // For example, "ä" (U+00E4) and "ä" (U+0061 U+0308) are canonically equal in Swift, but not in JSON.
+      // See `const.json` test cases in JSON Schema Test Suite for more details.
+      return lhsValue.unicodeScalars.elementsEqual(rhsValue.unicodeScalars)
     case (.number(let lhsValue), .number(let rhsValue)):
       return lhsValue == rhsValue
     case (.integer(let lhsValue), .integer(let rhsValue)):
