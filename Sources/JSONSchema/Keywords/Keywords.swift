@@ -13,6 +13,16 @@ package enum Keywords {
     }
 
     func processIdentifier(into context: inout Context) { context.dialect = .draft2020_12 }
+
+    func resolvedVocabularies() -> Set<String>? {
+      guard let schemaURI = value.string else { return nil }
+      if let rawSchema = context.context.remoteSchemaStorage[schemaURI],
+        let vocabObject = rawSchema.object?[Vocabulary.name]?.object
+      {
+        return Set(vocabObject.keys)
+      }
+      return nil
+    }
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-the-vocabulary-keyword

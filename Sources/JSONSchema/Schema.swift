@@ -178,7 +178,21 @@ package struct ObjectSchema: ValidatableSchema {
     let previousVocabularies = context.activeVocabularies
     defer { context.activeVocabularies = previousVocabularies }
 
-    // First pass: Process vocabulary keyword to determine active vocabularies
+    // First pass: Process $schema to inherit metaschema vocabularies
+    if let schemaKeywordValue = schemaValue[Keywords.SchemaKeyword.name] {
+      let keywordLocation = location.appending(.key(Keywords.SchemaKeyword.name))
+      let schemaKeyword = Keywords.SchemaKeyword(
+        value: schemaKeywordValue,
+        context: .init(location: keywordLocation, context: context, uri: processedURI)
+      )
+      keywords.append(schemaKeyword)
+
+      if let vocabularies = schemaKeyword.resolvedVocabularies() {
+        context.activeVocabularies = vocabularies
+      }
+    }
+
+    // Next, process vocabulary keyword to determine active vocabularies declared on schema
     if let vocabularyValue = schemaValue[Keywords.Vocabulary.name] {
       let keywordLocation = location.appending(.key(Keywords.Vocabulary.name))
       let vocabulary = Keywords.Vocabulary(
@@ -201,7 +215,9 @@ package struct ObjectSchema: ValidatableSchema {
     // Second pass: Process all other keywords using filtered keyword list
     for keywordType in availableKeywords where schemaValue.keys.contains(keywordType.name) {
       // Skip vocabulary keyword as it's already processed
-      if keywordType.name == Keywords.Vocabulary.name {
+      if keywordType.name == Keywords.Vocabulary.name
+        || keywordType.name == Keywords.SchemaKeyword.name
+      {
         continue
       }
 
