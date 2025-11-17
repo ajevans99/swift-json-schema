@@ -6,6 +6,20 @@ package protocol ApplicatorKeyword: AnnotationProducingKeyword {
   ) throws(ValidationIssue)
 }
 
+extension ApplicatorKeyword {
+  package static var vocabulary: String {
+    "https://json-schema.org/draft/2020-12/vocab/applicator"
+  }
+}
+
+protocol UnevaluatedKeyword: ApplicatorKeyword {}
+
+extension UnevaluatedKeyword {
+  package static var vocabulary: String {
+    "https://json-schema.org/draft/2020-12/vocab/unevaluated"
+  }
+}
+
 // MARK: - Arrays
 
 extension Keywords {
@@ -706,7 +720,7 @@ extension Keywords {
 
 extension Keywords {
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-unevaluateditems
-  package struct UnevaluatedItems: ApplicatorKeyword {
+  package struct UnevaluatedItems: UnevaluatedKeyword {
     package static let name = "unevaluatedItems"
 
     package let value: JSONValue
@@ -786,7 +800,7 @@ extension Keywords {
   }
 
   /// https://json-schema.org/draft/2020-12/json-schema-core#name-unevaluatedproperties
-  package struct UnevaluatedProperties: ApplicatorKeyword {
+  package struct UnevaluatedProperties: UnevaluatedKeyword {
     package static let name = "unevaluatedProperties"
 
     package let value: JSONValue

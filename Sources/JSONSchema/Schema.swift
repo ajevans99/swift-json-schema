@@ -22,7 +22,10 @@ public struct Schema: ValidatableSchema {
     let documentURL = baseURI.withoutFragment ?? baseURI
     self.documentURL = documentURL
     if self.context.documentCache[documentURL] == nil {
-      self.context.documentCache[documentURL] = SchemaDocument(url: documentURL, rawSchema: rawSchema)
+      self.context.documentCache[documentURL] = SchemaDocument(
+        url: documentURL,
+        rawSchema: rawSchema
+      )
     }
 
     switch rawSchema {
@@ -33,7 +36,7 @@ public struct Schema: ValidatableSchema {
         context: context
       )
     case .object(let schemaDict):
-      self.schema = ObjectSchema(
+      self.schema = try ObjectSchema(
         schemaValue: schemaDict,
         location: location,
         context: context,
@@ -139,12 +142,12 @@ package struct ObjectSchema: ValidatableSchema {
     context: Context,
     baseURI: URL = URL(fileURLWithPath: #file),
     documentURL: URL = URL(fileURLWithPath: #file)
-  ) {
+  ) throws(SchemaIssue) {
     self.schemaValue = schemaValue
     self.location = location
     self.context = context
     self.documentURL = documentURL
-    let (processedURI, keywords, dynamicAnchorInfo) = Self.collectKeywords(
+    let (processedURI, keywords, dynamicAnchorInfo) = try Self.collectKeywords(
       from: schemaValue,
       location: location,
       context: context,
@@ -160,7 +163,7 @@ package struct ObjectSchema: ValidatableSchema {
     location: JSONPointer,
     context: Context,
     baseURI: URL
-  ) -> (
+  ) throws(SchemaIssue) -> (
     processedURI: URL?,
     keywords: [any Keyword],
     dynamicAnchorInfo: (name: String, baseURI: URL)?
@@ -172,7 +175,36 @@ package struct ObjectSchema: ValidatableSchema {
 
     var didProcessIdentiferKeyword = false
 
-    for keywordType in context.dialect.keywords where schemaValue.keys.contains(keywordType.name) {
+    let previousVocabularies = context.activeVocabularies
+    defer { context.activeVocabularies = previousVocabularies }
+
+    // First pass: Process vocabulary keyword to determine active vocabularies
+    if let vocabularyValue = schemaValue[Keywords.Vocabulary.name] {
+      let keywordLocation = location.appending(.key(Keywords.Vocabulary.name))
+      let vocabulary = Keywords.Vocabulary(
+        value: vocabularyValue,
+        context: .init(location: keywordLocation, context: context, uri: processedURI)
+      )
+      keywords.append(vocabulary)
+
+      // Validate vocabularies
+      try vocabulary.validateVocabularies()
+
+      // Set active vocabularies in the context for sub-schemas
+      context.activeVocabularies = vocabulary.getActiveVocabularies()
+    }
+
+    // Get keywords filtered by active vocabularies (either from $vocabulary or context)
+    let activeVocabs = context.activeVocabularies
+    let availableKeywords = context.dialect.keywords(activeVocabularies: activeVocabs)
+
+    // Second pass: Process all other keywords using filtered keyword list
+    for keywordType in availableKeywords where schemaValue.keys.contains(keywordType.name) {
+      // Skip vocabulary keyword as it's already processed
+      if keywordType.name == Keywords.Vocabulary.name {
+        continue
+      }
+
       let value = schemaValue[keywordType.name]!
       let keywordLocation = location.appending(.key(keywordType.name))
       let keyword = keywordType.init(
@@ -219,7 +251,9 @@ package struct ObjectSchema: ValidatableSchema {
     // Push every document-wide `$dynamicAnchor` so this schema inherits the surrounding scope.
     let documentAnchors = context.documentDynamicAnchors[documentURL] ?? [:]
     context.dynamicScopes.append(
-      documentAnchors.mapValues { (document: documentURL, pointer: $0.pointer, baseURI: $0.baseURI) }
+      documentAnchors.mapValues {
+        (document: documentURL, pointer: $0.pointer, baseURI: $0.baseURI)
+      }
     )
     defer {
       _ = context.dynamicScopes.popLast()

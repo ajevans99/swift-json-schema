@@ -1,5 +1,13 @@
 protocol ReservedKeyword: Keyword {}
 
+extension ReservedKeyword {
+  package static var vocabulary: String {
+    // These are not part of any specific vocabulary in 2020-12
+    // They are legacy keywords that may not have vocabulary restrictions
+    ""
+  }
+}
+
 extension Keywords {
   package struct Defintions: ReservedKeyword {
     package static let name = "defintions"

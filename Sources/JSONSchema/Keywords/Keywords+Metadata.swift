@@ -1,6 +1,20 @@
 /// https://json-schema.org/draft/2020-12/meta/meta-data
 protocol MetadataKeyword: Keyword {}
 
+extension MetadataKeyword {
+  package static var vocabulary: String {
+    "https://json-schema.org/draft/2020-12/vocab/meta-data"
+  }
+}
+
+protocol ContentKeyword: Keyword {}
+
+extension ContentKeyword {
+  package static var vocabulary: String {
+    "https://json-schema.org/draft/2020-12/vocab/content"
+  }
+}
+
 extension Keywords {
   package struct Title: MetadataKeyword {
     package static let name = "title"
@@ -88,7 +102,7 @@ extension Keywords {
 }
 
 extension Keywords {
-  package struct ContentEncoding: MetadataKeyword {
+  package struct ContentEncoding: ContentKeyword {
     package static let name = "contentEncoding"
 
     package let value: JSONValue
@@ -100,7 +114,7 @@ extension Keywords {
     }
   }
 
-  package struct ContentMediaType: MetadataKeyword {
+  package struct ContentMediaType: ContentKeyword {
     package static let name = "contentMediaType"
 
     package let value: JSONValue
@@ -112,7 +126,7 @@ extension Keywords {
     }
   }
 
-  package struct ContentSchema: MetadataKeyword {
+  package struct ContentSchema: ContentKeyword {
     package static let name = "contentSchema"
 
     package let value: JSONValue

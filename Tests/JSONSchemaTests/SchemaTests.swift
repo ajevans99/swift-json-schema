@@ -149,7 +149,9 @@ struct SchemaTests {
   }
 
   @Test func validationMetaRejectsBadTypeKeyword() throws {
-    let path = URL(fileURLWithPath: "Sources/JSONSchema/Resources/draft2020-12/meta/validation.json")
+    let path = URL(
+      fileURLWithPath: "Sources/JSONSchema/Resources/draft2020-12/meta/validation.json"
+    )
     let data = try Data(contentsOf: path)
     let rawSchema = try JSONDecoder().decode(JSONValue.self, from: data)
     let schema = try Schema(
