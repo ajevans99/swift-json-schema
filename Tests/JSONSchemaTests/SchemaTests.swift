@@ -130,4 +130,64 @@ struct SchemaTests {
     #expect(schema.validate(valid).isValid)
     #expect(schema.validate(invalid).isValid == false)
   }
+
+  @Test func metaschemaRejectsInvalidDefinitions() throws {
+    let metaschema = try Dialect.draft2020_12.loadMetaSchema()
+    let metaURL = try #require(URL(string: "https://json-schema.org/draft/2020-12/schema"))
+    let metaAnchor = try #require(metaschema.context.documentDynamicAnchors[metaURL]?["meta"])
+    #expect(metaAnchor.pointer == JSONPointer())
+    let invalid: JSONValue = [
+      "$defs": [
+        "foo": [
+          "type": 1
+        ]
+      ]
+    ]
+
+    let result = metaschema.validate(invalid)
+    #expect(result.isValid == false, "\(result)")
+  }
+
+  @Test func validationMetaRejectsBadTypeKeyword() throws {
+    let path = URL(fileURLWithPath: "Sources/JSONSchema/Resources/draft2020-12/meta/validation.json")
+    let data = try Data(contentsOf: path)
+    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: data)
+    let schema = try Schema(
+      rawSchema: rawSchema,
+      context: Context(dialect: .draft2020_12),
+      baseURI: URL(string: "https://json-schema.org/draft/2020-12/meta/validation")!
+    )
+
+    let result = schema.validate(["type": 1])
+    #expect(result.isValid == false, "\(result)")
+  }
+
+  @Test func dynamicRefMetaValidationRejectsBadType() throws {
+    let metaschema = try Dialect.draft2020_12.loadMetaSchema()
+    let baseURL = try #require(URL(string: "https://json-schema.org/draft/2020-12/schema"))
+    let dynamicRefSchema = try Schema(
+      rawSchema: ["$dynamicRef": "#meta"],
+      context: metaschema.context,
+      baseURI: baseURL
+    )
+
+    let result = dynamicRefSchema.validate(["type": 1])
+    #expect(result.isValid == false, "\(result)")
+  }
+
+  @Test func defsSchemaRejectsInvalidEntry() throws {
+    let data = try Data(
+      contentsOf: URL(fileURLWithPath: "Sources/JSONSchema/Resources/draft2020-12/meta/core.json")
+    )
+    let raw = try JSONDecoder().decode(JSONValue.self, from: data)
+    let defsSchema = try #require(raw.object?["properties"]?.object?["$defs"])
+    let schema = try Schema(
+      rawSchema: defsSchema,
+      context: Context(dialect: .draft2020_12),
+      baseURI: URL(string: "https://json-schema.org/draft/2020-12/meta/core")!
+    )
+
+    let result = schema.validate(["foo": ["type": 1]])
+    #expect(result.isValid == false, "\(result)")
+  }
 }

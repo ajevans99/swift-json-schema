@@ -152,7 +152,7 @@ struct ReferenceResolver {
 
     if isDynamic, let fragment = refURL.fragment, !fragment.isEmpty {
       let anchor = fragment
-      for scope in context.dynamicScopes.reversed() {
+      for scope in context.dynamicScopes {
         if let entry = scope[anchor] {
           guard let document = context.documentCache[entry.document],
             let raw = document.value(at: entry.pointer)
