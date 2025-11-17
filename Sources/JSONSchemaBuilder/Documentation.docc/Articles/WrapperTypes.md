@@ -18,3 +18,6 @@ The builder provides several wrappers that can modify or combine components.
 | ``JSONSchema`` | Groups several components together and optionally maps them to a new type. |
 | ``RuntimeComponent`` | Wraps a runtime ``Schema`` and validates returning the raw ``JSONValue``. |
 | ``JSONAnyValue`` init | `init(_:)` copies schema metadata from any component without validation. |
+
+You can also use ``JSONValue`` directly inside a schema or macro expansion via ``JSONValue/schema``,
+which simply wraps ``JSONAnyValue`` so the generated schema accepts and returns any JSON document.

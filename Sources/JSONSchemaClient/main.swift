@@ -84,6 +84,13 @@ struct TestPerson {
   let analysisNotes: String
 }
 
+@Schemable
+struct Update {
+  let path: String
+  let value: JSONValue
+  let meta: [String: JSONValue]
+}
+
 struct AntherTestPerson: Schemable {
   let emotions: [String: Int]
   let analysisNotes: String
@@ -197,6 +204,7 @@ func runDemo() {
   }
 
   printSchema(TestPerson.schema)
+
 }
 
 if #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *) {
