@@ -173,6 +173,55 @@ struct SchemableExpansionTests {
     )
   }
 
+  @Test func jsonValueProperties() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct Update {
+        let path: String
+        let value: JSONValue
+        let meta: [String: JSONValue]
+      }
+      """,
+      expandedSource: """
+        struct Update {
+          let path: String
+          let value: JSONValue
+          let meta: [String: JSONValue]
+
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+          static var schema: some JSONSchemaComponent<Update> {
+            JSONSchema(Update.init) {
+              JSONObject {
+                JSONProperty(key: "path") {
+                  JSONString()
+                }
+                .required()
+                JSONProperty(key: "value") {
+                  JSONValue.schema
+                }
+                .required()
+                JSONProperty(key: "meta") {
+                  JSONObject()
+                  .additionalProperties {
+                    JSONValue.schema
+                  }
+                  .map(\\.1)
+                  .map(\\.matches)
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension Update: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
   @Test(arguments: ["struct", "class"]) func multipleBindings(declarationType: String) {
     assertMacroExpansion(
       """

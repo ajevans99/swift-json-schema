@@ -36,4 +36,73 @@ struct WrapperTests {
     let any = JSONAnyValue(JSONString())
     #expect(any.schemaValue.object?[Keywords.TypeKeyword.name] == .string("string"))
   }
+
+  @Test func jsonValueSchemaPassesThroughInput() {
+    let schema = JSONValue.schema
+    let input: JSONValue = [
+      "message": "hi",
+      "numbers": [1, 2, 3],
+      "nested": [
+        "flag": true
+      ],
+    ]
+
+    #expect(schema.parse(input).value == input)
+  }
+
+  @Test func jsonValueInObjectSchema() {
+    struct Update: Equatable {
+      let path: String
+      let value: JSONValue
+      let meta: [String: JSONValue]
+    }
+
+    let schema = JSONSchema(Update.init) {
+      JSONObject {
+        JSONProperty(key: "path") {
+          JSONString()
+        }
+        .required()
+        JSONProperty(key: "value") {
+          JSONValue.schema
+        }
+        .required()
+        JSONProperty(key: "meta") {
+          JSONObject()
+            .additionalProperties {
+              JSONValue.schema
+            }
+            .map(\.1)
+            .map(\.matches)
+        }
+        .required()
+      }
+    }
+
+    let input: JSONValue = [
+      "path": "config.value",
+      "value": [
+        "operation": "replace",
+        "data": ["count": 2],
+      ],
+      "meta": [
+        "attempts": 1,
+        "confirmed": true,
+      ],
+    ]
+
+    let expected = Update(
+      path: "config.value",
+      value: [
+        "operation": "replace",
+        "data": ["count": 2],
+      ],
+      meta: [
+        "attempts": 1,
+        "confirmed": true,
+      ]
+    )
+
+    #expect(schema.parse(input).value == expected)
+  }
 }
