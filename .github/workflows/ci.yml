@@ -8,13 +8,11 @@ on:
 
 jobs:
   build_and_test:
-    runs-on: macos-15
+    runs-on: macos-26-xlarge
 
-    name: Build and Test on macOS with Swift 6.0
+    name: Test on macOS
     steps:
-    - uses: actions/checkout@v4
-    - name: Xcode setup
-      uses: ./.github/actions/xcode-setup
+    - uses: actions/checkout@v5
     - name: Xcode version
       run: xcodebuild -version
       if: ${{ always() }}
@@ -34,7 +32,7 @@ jobs:
     name: Build on Linux
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Get swift version
       run: swift --version
     - name: Delete Package.resolved
@@ -44,15 +42,13 @@ jobs:
 
   build_apple_platforms:
     name: Build on Apple Platforms
-    runs-on: macos-15
+    runs-on: macos-26-xlarge
     strategy:
         fail-fast: false
         matrix:
             platform: [macOS, iOS, watchOS, tvOS, visionOS]
     steps:
-    - uses: actions/checkout@v4
-    - name: Xcode setup
-      uses: ./.github/actions/xcode-setup
+    - uses: actions/checkout@v5
     - name: Get swift version
       run: swift --version
     - name: Get Xcode version
