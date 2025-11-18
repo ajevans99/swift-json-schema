@@ -113,28 +113,35 @@ extension JSONSchemaTest: CustomTestStringConvertible {
 }
 
 extension Encodable {
-  fileprivate func toJsonString() throws -> String {
+  func toJsonString() throws -> String {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     let data = try encoder.encode(self)
     return String(decoding: data, as: UTF8.self)
   }
+
+  func toJSONValue() throws -> JSONValue {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys]
+    let data = try encoder.encode(self)
+    return try JSONDecoder().decode(JSONValue.self, from: data)
+  }
 }
 
 extension Schema {
-  fileprivate func json() throws -> String {
+  func json() throws -> String {
     try toJsonString()
   }
 }
 
 extension JSONValue {
-  fileprivate func json() throws -> String {
+  func json() throws -> String {
     try toJsonString()
   }
 }
 
 extension ValidationResult {
-  fileprivate func json() throws -> String {
+  func json() throws -> String {
     try toJsonString()
   }
 }
