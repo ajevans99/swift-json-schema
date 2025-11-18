@@ -71,4 +71,4 @@ jobs:
     - name: Lint
       id: lint 
       run: |
-        swift lint --strict --parallel --recursive Sources/ Tests/
+        swift format lint --strict --parallel --recursive Sources/ Tests/
