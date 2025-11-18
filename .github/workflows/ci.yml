@@ -26,7 +26,7 @@ jobs:
     - name: Upload coverage reports to Codecov
       uses: vapor/swift-codecov-action@v0.3.2
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        codecov_token: ${{ secrets.CODECOV_TOKEN }}
   
   build_linux:
     name: Build on Linux
