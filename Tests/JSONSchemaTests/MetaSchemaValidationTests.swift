@@ -24,7 +24,7 @@ struct MetaSchemaValidationTests {
     let rawSchema: JSONValue = [
       "type": 123,  // type should be a string or array, not a number
       "properties": [
-        "name": ["type": "string"],
+        "name": ["type": "string"]
       ],
     ]
 
