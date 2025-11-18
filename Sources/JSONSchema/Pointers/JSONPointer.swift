@@ -105,8 +105,26 @@ extension JSONPointer {
 }
 
 extension JSONPointer: CustomStringConvertible, CustomDebugStringConvertible {
+  /// A JSON Pointer string as defined by RFC 6901 (no leading `#`).
+  public var jsonPointerString: String {
+    guard path.isEmpty == false else { return "" }
+
+    return path.reduce(into: "") { partialResult, component in
+      partialResult += "/"
+      switch component {
+      case .index(let int):
+        partialResult += String(int)
+      case .key(let string):
+        partialResult +=
+          string
+          .replacingOccurrences(of: "~", with: "~0")
+          .replacingOccurrences(of: "/", with: "~1")
+      }
+    }
+  }
+
   public var description: String {
-    JSONPointer.fragment(fromEncodedTokens: path.map { $0.encodedFragment })
+    "#" + jsonPointerString
   }
 
   public var debugDescription: String { description }
@@ -132,7 +150,7 @@ extension JSONPointer: Codable {
 
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
-    try container.encode(description)
+    try container.encode(jsonPointerString)
   }
 }
 
