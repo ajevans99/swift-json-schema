@@ -236,7 +236,7 @@ struct SchemaGenerator {
     if usesSelfReference {
       codeBlockItem = """
         \(codeBlockItem)
-        .dynamicAnchor("\(raw: anchorName)")
+        .dynamicAnchor(Self.defaultAnchor)
         """
     }
 

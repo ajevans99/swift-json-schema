@@ -54,7 +54,8 @@ extension TypeSyntax {
           return .notSupported
         }
         guard
-          let codeBlock = elementType
+          let codeBlock =
+            elementType
             .typeInformation(selfTypeName: selfTypeName, selfAnchor: selfAnchor)
             .codeBlock
         else {
@@ -141,10 +142,11 @@ extension TypeSyntax {
           #else
             let arrayType = ArrayTypeSyntax(element: generic.arguments.first!.argument)
           #endif
-          return TypeSyntax(arrayType).typeInformation(
-            selfTypeName: selfTypeName,
-            selfAnchor: selfAnchor
-          )
+          return TypeSyntax(arrayType)
+            .typeInformation(
+              selfTypeName: selfTypeName,
+              selfAnchor: selfAnchor
+            )
         }
 
         guard identifierType.name.text != "Dictionary" else {
@@ -165,10 +167,11 @@ extension TypeSyntax {
               value: test[1].argument
             )
           #endif
-          return TypeSyntax(dictionaryType).typeInformation(
-            selfTypeName: selfTypeName,
-            selfAnchor: selfAnchor
-          )
+          return TypeSyntax(dictionaryType)
+            .typeInformation(
+              selfTypeName: selfTypeName,
+              selfAnchor: selfAnchor
+            )
         }
       }
 
@@ -176,15 +179,11 @@ extension TypeSyntax {
 
       if let selfTypeName,
         identifierName == selfTypeName || identifierName == "Self",
-        let selfAnchor
+        selfAnchor != nil
       {
-  let typeExpression = identifierType.trimmed.description
         return .schemable(
           selfTypeName,
-          schema: selfDynamicReferenceSchema(
-            anchorName: selfAnchor,
-            typeExpression: typeExpression
-          )
+          schema: selfDynamicReferenceSchema()
         )
       }
 
@@ -201,16 +200,13 @@ extension TypeSyntax {
       let fullTypeName = memberType.trimmed.description
 
       if let selfTypeName,
-        (fullTypeName == selfTypeName
-          || memberType.name.text.trimmingBackticks() == selfTypeName),
-        let selfAnchor
+        fullTypeName == selfTypeName
+          || memberType.name.text.trimmingBackticks() == selfTypeName,
+        selfAnchor != nil
       {
         return .schemable(
           selfTypeName,
-          schema: selfDynamicReferenceSchema(
-            anchorName: selfAnchor,
-            typeExpression: memberType.trimmed.description
-          )
+          schema: selfDynamicReferenceSchema()
         )
       }
 
@@ -246,7 +242,9 @@ extension TypeSyntax {
       return arrayType.element.referencesType(named: target)
     #if canImport(SwiftSyntax602)
       case .inlineArrayType(let inlineArrayType):
-        if case GenericArgumentSyntax.Argument.type(let elementType) = inlineArrayType.element.argument {
+        if case GenericArgumentSyntax.Argument.type(let elementType) = inlineArrayType.element
+          .argument
+        {
           return elementType.referencesType(named: target)
         }
         return false
@@ -292,13 +290,9 @@ extension TypeSyntax {
     }
   }
 
-  private func selfDynamicReferenceSchema(
-    anchorName: String,
-    typeExpression: String
-  ) -> CodeBlockItemSyntax {
-    let trimmedType = typeExpression.trimmingCharacters(in: .whitespacesAndNewlines)
-    return """
-    JSONDynamicReference<\(raw: trimmedType)>(anchor: "\(raw: anchorName)")
+  private func selfDynamicReferenceSchema() -> CodeBlockItemSyntax {
+    """
+    JSONDynamicReference<Self>()
     """
   }
 }

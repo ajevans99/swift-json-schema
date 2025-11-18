@@ -144,12 +144,12 @@ struct SchemableExpansionTests {
               JSONObject {
                 JSONProperty(key: "children") {
                   JSONArray {
-                    JSONDynamicReference<Tree>(anchor: "Tree")
+                    JSONDynamicReference<Self>()
                   }
                 }
                 .required()
               }
-              .dynamicAnchor("Tree")
+              .dynamicAnchor(Self.defaultAnchor)
             }
           }
         }

@@ -21,13 +21,40 @@ public struct JSONReference<T: Schemable>: JSONSchemaComponent {
     self.schemaValue = .object([Keywords.Reference.name: .string(uri)])
   }
 
+  /// Creates a reference using a prebuilt ``SchemaReferenceURI`` helper.
+  public init(uri: SchemaReferenceURI) {
+    self.init(uri: uri.rawValue)
+  }
+
+  /// References a schema stored under `#/currentDocument/$defs/<name>` (or legacy `definitions`).
+  public static func definition(
+    named name: String,
+    location: SchemaReferenceURI.LocalLocation = .defs
+  ) -> JSONReference<T> {
+    JSONReference(uri: SchemaReferenceURI.definition(named: name, location: location))
+  }
+
+  /// References a schema inside the current document via a JSON Pointer.
+  public static func documentPointer(_ pointer: JSONPointer) -> JSONReference<T> {
+    JSONReference(uri: SchemaReferenceURI.documentPointer(pointer))
+  }
+
+  /// References a remote schema, optionally targeting a JSON Pointer inside it.
+  public static func remote(
+    _ uri: String,
+    pointer: JSONPointer? = nil
+  ) -> JSONReference<T> {
+    JSONReference(uri: SchemaReferenceURI.remote(uri, pointer: pointer))
+  }
+
   /// Parses the referenced schema by delegating back to `T.schema`.
   public func parse(_ value: JSONValue) -> Parsed<T, ParseIssue> {
-    T.schema.parse(value).flatMap { output in
-      guard let typedOutput = output as? T else {
-        return .invalid([.compactMapValueNil(value: value)])
+    T.schema.parse(value)
+      .flatMap { output in
+        guard let typedOutput = output as? T else {
+          return .invalid([.compactMapValueNil(value: value)])
+        }
+        return .valid(typedOutput)
       }
-      return .valid(typedOutput)
-    }
   }
 }

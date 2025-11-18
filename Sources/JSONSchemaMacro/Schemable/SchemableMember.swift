@@ -212,7 +212,7 @@ struct SchemableMember {
       }
     }
 
-  let keyExpr: ExprSyntax
+    let keyExpr: ExprSyntax
     if let customKey {
       // Custom key from @SchemaOptions(.key(...)) takes highest priority
       keyExpr = customKey

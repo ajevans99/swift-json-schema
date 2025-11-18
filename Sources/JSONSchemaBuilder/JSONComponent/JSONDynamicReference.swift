@@ -23,14 +23,21 @@ public struct JSONDynamicReference<T: Schemable>: JSONSchemaComponent {
     self.schemaValue = .object([Keywords.DynamicReference.name: .string("#\(anchor)")])
   }
 
+  /// Creates a dynamic reference that automatically resolves its anchor name from the
+  /// referenced type using `String(reflecting:)`.
+  public init() {
+    self.init(anchor: T.defaultAnchor)
+  }
+
   /// Parses the incoming value using `T`'s schema so the caller continues to work with strongly
   /// typed Swift values.
   public func parse(_ value: JSONValue) -> Parsed<T, ParseIssue> {
-    T.schema.parse(value).flatMap { output in
-      guard let typedOutput = output as? T else {
-        return .invalid([.compactMapValueNil(value: value)])
+    T.schema.parse(value)
+      .flatMap { output in
+        guard let typedOutput = output as? T else {
+          return .invalid([.compactMapValueNil(value: value)])
+        }
+        return .valid(typedOutput)
       }
-      return .valid(typedOutput)
-    }
   }
 }

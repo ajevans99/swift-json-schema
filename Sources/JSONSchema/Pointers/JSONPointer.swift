@@ -80,17 +80,47 @@ extension JSONPointer: ExpressibleByStringLiteral {
   public init(stringLiteral value: String) { self.init(from: value) }
 }
 
+extension JSONPointer {
+  /// Creates a pointer from raw path components, performing the necessary escaping.
+  public init(tokens: [String]) {
+    self.init(from: JSONPointer.pointerString(from: tokens))
+  }
+
+  /// Builds a `#/...` fragment string from raw path components.
+  public static func pointerString(from tokens: [String]) -> String {
+    fragment(fromEncodedTokens: tokens.map(JSONPointer.escapeToken))
+  }
+
+  /// Escapes a single JSON Pointer token according to RFC 6901.
+  public static func escapeToken(_ token: String) -> String {
+    token
+      .replacingOccurrences(of: "~", with: "~0")
+      .replacingOccurrences(of: "/", with: "~1")
+  }
+
+  private static func fragment(fromEncodedTokens tokens: [String]) -> String {
+    guard !tokens.isEmpty else { return "#" }
+    return "#/" + tokens.joined(separator: "/")
+  }
+}
+
 extension JSONPointer: CustomStringConvertible, CustomDebugStringConvertible {
   public var description: String {
-    path.reduce(into: "#") { partialResult, component in
-      switch component {
-      case .index(let int): partialResult += "/\(int)"
-      case .key(let string): partialResult += "/\(string)"
-      }
-    }
+    JSONPointer.fragment(fromEncodedTokens: path.map { $0.encodedFragment })
   }
 
   public var debugDescription: String { description }
+}
+
+extension JSONPointer.Component {
+  fileprivate var encodedFragment: String {
+    switch self {
+    case .index(let int):
+      return String(int)
+    case .key(let string):
+      return JSONPointer.escapeToken(string)
+    }
+  }
 }
 
 extension JSONPointer: Codable {
