@@ -26,7 +26,7 @@ public struct JSONReference<T: Schemable>: JSONSchemaComponent {
     self.init(uri: uri.rawValue)
   }
 
-  /// References a schema stored under `#/currentDocument/$defs/<name>` (or legacy `definitions`).
+  /// References a schema stored under `#/$defs/<name>` (or legacy `#/definitions/<name>`).
   public static func definition(
     named name: String,
     location: SchemaReferenceURI.LocalLocation = .defs
