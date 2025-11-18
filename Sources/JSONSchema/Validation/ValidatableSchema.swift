@@ -18,4 +18,25 @@ extension ValidatableSchema {
     let data = try decoder.decode(JSONValue.self, from: Data(instance.utf8))
     return validate(data, at: location)
   }
+
+  /// Validates the instance and renders the result into a spec-compliant validation output document.
+  public func validate(
+    _ instance: JSONValue,
+    at location: JSONPointer = .init(),
+    output configuration: ValidationOutputConfiguration
+  ) throws -> JSONValue {
+    let result = validate(instance, at: location)
+    return try result.renderedOutput(configuration: configuration)
+  }
+
+  /// Convenience for producing validation outputs from `String` instances.
+  public func validate(
+    instance: String,
+    using decoder: JSONDecoder = .init(),
+    at location: JSONPointer = .init(),
+    output configuration: ValidationOutputConfiguration
+  ) throws -> JSONValue {
+    let data = try decoder.decode(JSONValue.self, from: Data(instance.utf8))
+    return try validate(data, at: location, output: configuration)
+  }
 }
