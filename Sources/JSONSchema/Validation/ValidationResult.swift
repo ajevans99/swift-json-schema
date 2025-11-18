@@ -9,7 +9,7 @@ public struct ValidationResult: Sendable, Encodable, Equatable {
   init(
     valid: Bool,
     keywordLocation: JSONPointer,
-    absoluteKeywordLocation: String?,
+    absoluteKeywordLocation: String? = nil,
     instanceLocation: JSONPointer,
     errors: [ValidationError]? = nil,
     annotations: [AnyAnnotation]? = nil
@@ -38,13 +38,10 @@ public struct ValidationResult: Sendable, Encodable, Equatable {
     try container.encodeIfPresent(absoluteKeywordLocation, forKey: .absoluteKeywordLocation)
     try container.encode(instanceLocation, forKey: .instanceLocation)
     try container.encodeIfPresent(errors, forKey: .errors)
-    if isValid,
-      let annotations,
-      !annotations.isEmpty
-    {
-      let wrapped = annotations.map { AnyAnnotationWrapper(annotation: $0) }
-      try container.encode(wrapped, forKey: .annotations)
-    }
+    try container.encodeIfPresent(
+      annotations?.map { AnyAnnotationWrapper(annotation: $0) },
+      forKey: .annotations
+    )
   }
 
   public static func == (lhs: ValidationResult, rhs: ValidationResult) -> Bool {
@@ -68,7 +65,7 @@ public struct ValidationError: Sendable, Codable, Equatable {
     keyword: String,
     message: String,
     keywordLocation: JSONPointer,
-    absoluteKeywordLocation: String?,
+    absoluteKeywordLocation: String? = nil,
     instanceLocation: JSONPointer,
     errors: [ValidationError]? = nil
   ) {
