@@ -18,7 +18,7 @@ jobs:
     steps:
     - name: Checkout for internal PR
       if: ${{ github.event.pull_request.head.repo.owner.login == github.repository_owner }}
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         # Use PAT which has write access
         token: ${{ secrets.PAT }}
@@ -26,13 +26,10 @@ jobs:
 
     - name: Checkout for external PR
       if: ${{ github.event.pull_request.head.repo.owner.login != github.repository_owner }}
-      uses: actions/checkout@v4
-    
-    - name: Install swift-format
-      run: brew install swift-format
+      uses: actions/checkout@v5
 
     - name: Format
-      run: swift-format format --in-place --parallel --recursive Sources/ Tests/
+      run: swift format --in-place --parallel --recursive Sources/ Tests/
     
     - name: Check for formatting changes
       id: check_changes
@@ -42,7 +39,7 @@ jobs:
 
     - name: Check if PR has a specific label
       id: check_label
-      uses: actions/github-script@v6
+      uses: actions/github-script@v8
       with:
         result-encoding: string
         script: |
@@ -55,7 +52,7 @@ jobs:
         steps.check_changes.outcome == 'failure' &&
         steps.check_label.outputs.result == 'true' &&
         github.event.pull_request.head.repo.owner.login == github.repository_owner
-      uses: stefanzweifel/git-auto-commit-action@v5
+      uses: stefanzweifel/git-auto-commit-action@v7
       with:
         commit_message: Apply auto-formatting
 
@@ -68,10 +65,10 @@ jobs:
         )
       run: |
         echo "::error::Formatting issues detected. Please fix them."
-        echo "Run 'swift-format format --in-place --parallel --recursive Sources/ Tests/' locally to fix formatting."
+        echo "Run 'swift format --in-place --parallel --recursive Sources/ Tests/' locally to fix formatting."
         exit 1
 
     - name: Lint
       id: lint 
       run: |
-        swift-format lint --strict --parallel --recursive Sources/ Tests/
+        swift format lint --strict --parallel --recursive Sources/ Tests/

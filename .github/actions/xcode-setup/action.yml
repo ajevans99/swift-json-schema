@@ -1,9 +1,0 @@
-name: 'Xcode Setup'
-description: 'Sets up the correct Xcode version'
-runs:
-  using: 'composite'
-  steps:
-    - name: Xcode setup
-      shell: bash
-      run: |
-        sudo xcode-select -s /Applications/Xcode_16.3.app
