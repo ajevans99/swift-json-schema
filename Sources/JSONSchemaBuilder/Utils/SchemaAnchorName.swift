@@ -6,7 +6,7 @@ import Foundation
 public enum SchemaAnchorName {
   private static let allowedCharacters: CharacterSet = {
     var set = CharacterSet()
-    set.insert(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._:/")
+    set.insert(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._")
     return set
   }()
 
