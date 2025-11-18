@@ -15,6 +15,9 @@ public protocol Schemable {
 
     @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
     static var keyEncodingStrategy: KeyEncodingStrategies { get }
+
+    @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+    static var defaultAnchor: String { get }
   #endif
 }
 
@@ -22,5 +25,9 @@ public protocol Schemable {
   @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
   extension Schemable {
     public static var keyEncodingStrategy: KeyEncodingStrategies { .identity }
+
+    public static var defaultAnchor: String {
+      SchemaAnchorName.sanitized(String(reflecting: Self.self))
+    }
   }
 #endif

@@ -9,8 +9,8 @@ extension ReservedKeyword {
 }
 
 extension Keywords {
-  package struct Defintions: ReservedKeyword {
-    package static let name = "defintions"
+  package struct Definitions: ReservedKeyword {
+    package static let name = "definitions"
 
     package let value: JSONValue
     package let context: KeywordContext

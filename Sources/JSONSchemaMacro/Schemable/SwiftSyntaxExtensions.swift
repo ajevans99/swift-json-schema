@@ -26,10 +26,14 @@ extension TypeSyntax {
     }
   }
 
-  func typeInformation() -> TypeInformation {
+  func typeInformation(selfTypeName: String? = nil, selfAnchor: String? = nil) -> TypeInformation {
     switch self.as(TypeSyntaxEnum.self) {
     case .arrayType(let arrayType):
-      guard let codeBlock = arrayType.element.typeInformation().codeBlock else {
+      guard
+        let codeBlock = arrayType.element
+          .typeInformation(selfTypeName: selfTypeName, selfAnchor: selfAnchor)
+          .codeBlock
+      else {
         return .notSupported
       }
       return .primitive(
@@ -49,7 +53,12 @@ extension TypeSyntax {
           // The other enum value `.expr` requires an @spi(ExperimentalLanguageFeature) import of SwiftSyntax
           return .notSupported
         }
-        guard let codeBlock = elementType.typeInformation().codeBlock else {
+        guard
+          let codeBlock =
+            elementType
+            .typeInformation(selfTypeName: selfTypeName, selfAnchor: selfAnchor)
+            .codeBlock
+        else {
           return .notSupported
         }
         return .primitive(
@@ -62,8 +71,14 @@ extension TypeSyntax {
         )
     #endif
     case .dictionaryType(let dictionaryType):
-      let keyTypeInfo = dictionaryType.key.typeInformation()
-      let valueTypeInfo = dictionaryType.value.typeInformation()
+      let keyTypeInfo = dictionaryType.key.typeInformation(
+        selfTypeName: selfTypeName,
+        selfAnchor: selfAnchor
+      )
+      let valueTypeInfo = dictionaryType.value.typeInformation(
+        selfTypeName: selfTypeName,
+        selfAnchor: selfAnchor
+      )
       guard let valueCodeBlock = valueTypeInfo.codeBlock else { return .notSupported }
 
       switch keyTypeInfo {
@@ -127,7 +142,11 @@ extension TypeSyntax {
           #else
             let arrayType = ArrayTypeSyntax(element: generic.arguments.first!.argument)
           #endif
-          return TypeSyntax(arrayType).typeInformation()
+          return TypeSyntax(arrayType)
+            .typeInformation(
+              selfTypeName: selfTypeName,
+              selfAnchor: selfAnchor
+            )
         }
 
         guard identifierType.name.text != "Dictionary" else {
@@ -148,11 +167,27 @@ extension TypeSyntax {
               value: test[1].argument
             )
           #endif
-          return TypeSyntax(dictionaryType).typeInformation()
+          return TypeSyntax(dictionaryType)
+            .typeInformation(
+              selfTypeName: selfTypeName,
+              selfAnchor: selfAnchor
+            )
         }
       }
 
-      guard let primitive = SupportedPrimitive(rawValue: identifierType.name.text) else {
+      let identifierName = identifierType.name.text.trimmingBackticks()
+
+      if let selfTypeName,
+        identifierName == selfTypeName || identifierName == "Self",
+        selfAnchor != nil
+      {
+        return .schemable(
+          selfTypeName,
+          schema: selfDynamicReferenceSchema()
+        )
+      }
+
+      guard let primitive = SupportedPrimitive(rawValue: identifierName) else {
         return .schemable(
           identifierType.name.text,
           schema: "\(raw: identifierType.name.text).schema"
@@ -163,19 +198,102 @@ extension TypeSyntax {
     case .memberType(let memberType):
       // Handle qualified type names like Weather.Condition
       let fullTypeName = memberType.trimmed.description
+
+      if let selfTypeName,
+        fullTypeName == selfTypeName
+          || memberType.name.text.trimmingBackticks() == selfTypeName,
+        selfAnchor != nil
+      {
+        return .schemable(
+          selfTypeName,
+          schema: selfDynamicReferenceSchema()
+        )
+      }
+
       return .schemable(
         fullTypeName,
         schema: "\(raw: fullTypeName).schema"
       )
     case .implicitlyUnwrappedOptionalType(let implicitlyUnwrappedOptionalType):
-      return implicitlyUnwrappedOptionalType.wrappedType.typeInformation()
-    case .optionalType(let optionalType): return optionalType.wrappedType.typeInformation()
-    case .someOrAnyType(let someOrAnyType): return someOrAnyType.constraint.typeInformation()
+      return implicitlyUnwrappedOptionalType.wrappedType.typeInformation(
+        selfTypeName: selfTypeName,
+        selfAnchor: selfAnchor
+      )
+    case .optionalType(let optionalType):
+      return optionalType.wrappedType.typeInformation(
+        selfTypeName: selfTypeName,
+        selfAnchor: selfAnchor
+      )
+    case .someOrAnyType(let someOrAnyType):
+      return someOrAnyType.constraint.typeInformation(
+        selfTypeName: selfTypeName,
+        selfAnchor: selfAnchor
+      )
     case .attributedType, .classRestrictionType, .compositionType, .functionType,
       .metatypeType, .missingType, .namedOpaqueReturnType, .packElementType, .packExpansionType,
       .suppressedType, .tupleType:
       return .notSupported
     }
+  }
+
+  func referencesType(named target: String) -> Bool {
+    switch self.as(TypeSyntaxEnum.self) {
+    case .arrayType(let arrayType):
+      return arrayType.element.referencesType(named: target)
+    #if canImport(SwiftSyntax602)
+      case .inlineArrayType(let inlineArrayType):
+        if case GenericArgumentSyntax.Argument.type(let elementType) = inlineArrayType.element
+          .argument
+        {
+          return elementType.referencesType(named: target)
+        }
+        return false
+    #endif
+    case .dictionaryType(let dictionaryType):
+      return dictionaryType.key.referencesType(named: target)
+        || dictionaryType.value.referencesType(named: target)
+    case .identifierType(let identifierType):
+      let identifierName = identifierType.name.text.trimmingBackticks()
+      if identifierName == target || identifierName == "Self" { return true }
+      if let genericArguments = identifierType.genericArgumentClause {
+        return genericArguments.arguments.contains { argument in
+          if case GenericArgumentSyntax.Argument.type(let type) = argument.argument {
+            return type.referencesType(named: target)
+          }
+          return false
+        }
+      }
+      return false
+    case .memberType(let memberType):
+      if memberType.baseType.referencesType(named: target) { return true }
+      if memberType.name.text.trimmingBackticks() == target { return true }
+      if let genericArguments = memberType.genericArgumentClause {
+        return genericArguments.arguments.contains { argument in
+          if case GenericArgumentSyntax.Argument.type(let type) = argument.argument {
+            return type.referencesType(named: target)
+          }
+          return false
+        }
+      }
+      return false
+    case .implicitlyUnwrappedOptionalType(let implicitlyUnwrappedOptionalType):
+      return implicitlyUnwrappedOptionalType.wrappedType.referencesType(named: target)
+    case .optionalType(let optionalType):
+      return optionalType.wrappedType.referencesType(named: target)
+    case .someOrAnyType(let someOrAnyType):
+      return someOrAnyType.constraint.referencesType(named: target)
+    case .attributedType(let attributedType):
+      return attributedType.baseType.referencesType(named: target)
+    case .classRestrictionType, .compositionType, .functionType, .metatypeType, .missingType,
+      .namedOpaqueReturnType, .packElementType, .packExpansionType, .suppressedType, .tupleType:
+      return false
+    }
+  }
+
+  private func selfDynamicReferenceSchema() -> CodeBlockItemSyntax {
+    """
+    JSONDynamicReference<Self>()
+    """
   }
 }
 

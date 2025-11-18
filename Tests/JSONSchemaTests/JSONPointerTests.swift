@@ -30,6 +30,15 @@ struct JSONPointerTests {
     #expect(location.path == [.key("foo"), .index(0)])
   }
 
+  @Test func descriptionEscapesTokens() {
+    let pointer = JSONPointer(tokens: ["properties", "foo/bar", "tilde~value"])
+    #expect(pointer.description == "#/properties/foo~1bar/tilde~0value")
+  }
+
+  @Test func pointerStringHandlesEmptyTokens() {
+    #expect(JSONPointer.pointerString(from: []) == "#")
+  }
+
   static let exampleDocument1: JSONValue = [
     "foo": ["bar", "baz"],
     "": 0,

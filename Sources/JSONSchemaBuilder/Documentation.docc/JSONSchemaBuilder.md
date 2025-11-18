@@ -31,6 +31,16 @@ To get started generating JSON schemas with result builders, import the `JSONSch
 
 Result builders enable composition of schemas, better readability, and validation directly into Swift types.
 
+## Reusing existing schemas with references
+
+When you need to point at another schema fragment—either a local anchor or a remote definition—you can
+stay within the builder DSL while keeping strong typing:
+
+- ``JSONReference`` emits the standard ``$ref`` keyword and is ideal for definitions stored elsewhere in your document or an external file.
+- ``JSONDynamicReference`` emits ``$dynamicRef`` so it can resolve against the nearest matching ``JSONSchemaComponent/dynamicAnchor(_:)`` in scope, which is what the ``@Schemable`` macro now generates for recursive properties.
+
+Both components delegate validation back through ``Schemable/schema`` for the referenced type, so parsing results remain strongly typed.
+
 ## Pattern Properties and Additional Properties
 
 The library supports two powerful features for object validation: pattern properties and additional properties.

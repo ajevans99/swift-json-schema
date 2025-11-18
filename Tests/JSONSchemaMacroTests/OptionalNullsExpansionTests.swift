@@ -272,12 +272,13 @@ struct OptionalNullsExpansionTests {
                 .flatMapOptional()
                 JSONProperty(key: "relatedProducts") {
                   JSONArray {
-                    Product.schema
+                    JSONDynamicReference<Self>()
                   }
                   .orNull(style: .union)
                 }
                 .flatMapOptional()
               }
+              .dynamicAnchor(Self.defaultAnchor)
             }
           }
         }

@@ -121,7 +121,7 @@ public enum Dialect: String, Hashable, Sendable {
         Keywords.UnevaluatedItems.self,
         Keywords.UnevaluatedProperties.self,
 
-        Keywords.Defintions.self,
+        Keywords.Definitions.self,
         Keywords.Dependencies.self,
         Keywords.RecursiveAnchor.self,
         Keywords.RecursiveReference.self,
