@@ -325,3 +325,42 @@ struct JSONMapModifierBehaviorTests {
     )
   }
 }
+
+struct JSONPropertyCollectionBuilderTests {
+  @Test func propertyArrayMergesSchemasFromLoops() throws {
+    let schema = JSONObject {
+      for suffix in ["One", "Two"] {
+        JSONProperty(key: "value\(suffix)") { JSONInteger() }
+      }
+    }
+
+    let parseResult = schema.parse(
+      .object(["valueOne": .integer(1), "valueTwo": .integer(2)])
+    )
+    #expect(parseResult.errors == nil)
+
+    let properties = try #require(
+      schema.schemaValue.object?[Keywords.Properties.name]?.object
+    )
+    #expect(properties.keys.sorted() == ["valueOne", "valueTwo"])
+  }
+
+  @Test func propertyConditionalChoosesCorrectBranch() throws {
+    let usePrimary = false
+    let schema = JSONObject {
+      if usePrimary {
+        JSONProperty(key: "primary") { JSONInteger() }
+      } else {
+        JSONProperty(key: "secondary") { JSONInteger() }
+      }
+    }
+
+    let properties = try #require(
+      schema.schemaValue.object?[Keywords.Properties.name]?.object
+    )
+    #expect(properties.keys.sorted() == ["secondary"])
+
+    let parseResult = schema.parse(.object(["secondary": .integer(42)]))
+    #expect(parseResult.errors == nil)
+  }
+}

@@ -141,3 +141,51 @@ struct ParsingTests {
     #expect(person.analysisNotes == "hi")
   }
 }
+
+struct JSONPrimitiveParsingTests {
+  @Test func jsonNullParsesOnlyNull() {
+    let schema = JSONNull()
+    #expect(schema.parse(.null).value != nil)
+    let invalid = schema.parse(.string("nope"))
+    #expect(
+      invalid.errors == [.typeMismatch(expected: .null, actual: .string("nope"))]
+    )
+  }
+
+  @Test func jsonBooleanParsesTrueFalse() {
+    let schema = JSONBoolean()
+    #expect(schema.parse(.boolean(true)) == .valid(true))
+    #expect(
+      schema.parse(.integer(1))
+        == .invalid([.typeMismatch(expected: .boolean, actual: .integer(1))])
+    )
+  }
+
+  @Test func jsonIntegerParsesOnlyIntegers() {
+    let schema = JSONInteger()
+    #expect(schema.parse(.integer(42)) == .valid(42))
+    #expect(
+      schema.parse(.string("42"))
+        == .invalid([.typeMismatch(expected: .integer, actual: .string("42"))])
+    )
+  }
+
+  @Test func jsonNumberAcceptsIntegersAndDoubles() {
+    let schema = JSONNumber()
+    #expect(schema.parse(.integer(2)) == .valid(2))
+    #expect(schema.parse(.number(3.14)) == .valid(3.14))
+    #expect(
+      schema.parse(.boolean(false))
+        == .invalid([.typeMismatch(expected: .number, actual: .boolean(false))])
+    )
+  }
+
+  @Test func jsonStringParsesOnlyStrings() {
+    let schema = JSONString()
+    #expect(schema.parse(.string("ok")) == .valid("ok"))
+    #expect(
+      schema.parse(.null)
+        == .invalid([.typeMismatch(expected: .string, actual: .null)])
+    )
+  }
+}
