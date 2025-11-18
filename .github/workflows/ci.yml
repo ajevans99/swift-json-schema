@@ -2,56 +2,56 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build_and_test:
-    runs-on: macos-latest
+    runs-on: macos-26-xlarge
 
     name: Test on macOS
     steps:
-    - uses: actions/checkout@v5
-    - name: Xcode version
-      run: xcodebuild -version
-      if: ${{ always() }}
-    - name: Log Xcode versions
-      run: ls -l /Applications/Xcode*
-      if: ${{ failure() }}
-    - name: Get swift version
-      run: swift --version
-    - name: Run tests
-      run: swift test --enable-code-coverage
-    - name: Upload coverage reports to Codecov
-      uses: vapor/swift-codecov-action@v0.3.2
-      with:
-        codecov_token: ${{ secrets.CODECOV_TOKEN }}
-  
+      - uses: actions/checkout@v5
+      - name: Xcode version
+        run: xcodebuild -version
+        if: ${{ always() }}
+      - name: Log Xcode versions
+        run: ls -l /Applications/Xcode*
+        if: ${{ failure() }}
+      - name: Get swift version
+        run: swift --version
+      - name: Run tests
+        run: swift test --enable-code-coverage
+      - name: Upload coverage reports to Codecov
+        uses: vapor/swift-codecov-action@v0.3.2
+        with:
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+
   build_linux:
     name: Build on Linux
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
-    - name: Get swift version
-      run: swift --version
-    - name: Delete Package.resolved
-      run: rm -f Package.resolved
-    - name: Build
-      run: swift build -v
+      - uses: actions/checkout@v5
+      - name: Get swift version
+        run: swift --version
+      - name: Delete Package.resolved
+        run: rm -f Package.resolved
+      - name: Build
+        run: swift build -v
 
   build_apple_platforms:
     name: Build on Apple Platforms
     runs-on: macos-26-xlarge
     strategy:
-        fail-fast: false
-        matrix:
-            platform: [macOS, iOS, watchOS, tvOS, visionOS]
+      fail-fast: false
+      matrix:
+        platform: [macOS, iOS, watchOS, tvOS, visionOS]
     steps:
-    - uses: actions/checkout@v5
-    - name: Get swift version
-      run: swift --version
-    - name: Get Xcode version
-      run: xcodebuild -version
-    - name: Build ${{ matrix.platform }}
-      run: set -o pipefail && xcodebuild build -destination generic/platform=${{ matrix.platform }} -scheme swift-json-schema-Package | xcbeautify --renderer github-actions
+      - uses: actions/checkout@v5
+      - name: Get swift version
+        run: swift --version
+      - name: Get Xcode version
+        run: xcodebuild -version
+      - name: Build ${{ matrix.platform }}
+        run: set -o pipefail && xcodebuild build -destination generic/platform=${{ matrix.platform }} -scheme swift-json-schema-Package | xcbeautify --renderer github-actions
