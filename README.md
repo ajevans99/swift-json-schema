@@ -309,20 +309,6 @@ dump(result2, name: "Instance 2 Validation Result")
 </details>
 <br/>
 
-### Validation Output Levels
-
-`ValidationResult` can render the JSON Schema specification's four output formats so you can choose the right level of detail for downstream tooling.
-
-```swift
-let result = schema.validate(instance2)
-let verboseJSON = try result.renderedOutput(level: .verbose)
-
-// or use a configuration wrapper
-let detailedJSON = try result.renderedOutput(configuration: .detailed)
-```
-
-The levels follow the [JSON Schema output specification](https://json-schema.org/draft/2020-12/output/schema).
-
 ## Parsing
 
 When using [builders](#schema-generation) or [macros](#macros), you can also parse JSON instances into Swift types.
