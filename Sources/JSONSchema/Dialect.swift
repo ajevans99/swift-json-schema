@@ -165,16 +165,16 @@ public enum Dialect: String, Hashable, Sendable {
     let metaDictionary: [String: JSONValue] =
       try metaURLs?
       .reduce(into: [:]) { result, url in
-        #if os(Linux) || os(WASI)
-          guard url.lastPathComponent?.hasPrefix("schema") == false else { return }
-          let value = try jsonValue(from: url as URL)
-          let uriString =
-            "meta/\(url.lastPathComponent?.replacingOccurrences(of: ".json", with: "") ?? "")"
-        #else
+        #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
           guard !url.lastPathComponent.hasPrefix("schema") else { return }
           let value = try jsonValue(from: url)
           let uriString =
             "meta/\(url.lastPathComponent.replacingOccurrences(of: ".json", with: ""))"
+        #else
+          guard url.lastPathComponent?.hasPrefix("schema") == false else { return }
+          let value = try jsonValue(from: url as URL)
+          let uriString =
+            "meta/\(url.lastPathComponent?.replacingOccurrences(of: ".json", with: "") ?? "")"
         #endif
         if let key = URL(string: uriString, relativeTo: baseURI)?.absoluteString {
           result[key] = value
