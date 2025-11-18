@@ -38,6 +38,12 @@ public struct JSONPointer: Sendable, Hashable {
     return pointer
   }
 
+  /// Returns a new pointer created by appending the path components of another pointer.
+  func appending(pointer other: JSONPointer) -> JSONPointer {
+    guard !other.path.isEmpty else { return self }
+    return JSONPointer(path: self.path + other.path)
+  }
+
   func dropLast() -> JSONPointer {
     guard path.count > 0 else { return self }
 
