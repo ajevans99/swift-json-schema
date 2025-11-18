@@ -22,7 +22,34 @@ jobs:
       - name: Get swift version
         run: swift --version
       - name: Run tests
-        run: swift test -v
+        run: |
+          set -o pipefail
+          swift test -v 2>&1 | tee swift-test.log
+      - name: Upload Swift test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: swift-test-log-macos
+          path: swift-test.log
+          if-no-files-found: ignore
+      - name: Collect diagnostic reports
+        if: failure()
+        run: |
+          mkdir -p diagnostics
+          if [ -d "$HOME/Library/Logs/DiagnosticReports" ]; then
+            find "$HOME/Library/Logs/DiagnosticReports" -type f \
+              \( -name "*.crash" -o -name "*.ips" -o -name "*.diag" \) \
+              -print -exec cp {} diagnostics/ \;
+          else
+            echo "No diagnostic reports directory found"
+          fi
+      - name: Upload diagnostic reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostic-reports
+          path: diagnostics
+          if-no-files-found: ignore
       - name: Upload coverage reports to Codecov
         uses: vapor/swift-codecov-action@v0.3.2
         with:
