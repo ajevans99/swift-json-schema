@@ -947,7 +947,12 @@ extension JSONValue {
       context: context.context,
       baseURI: context.uri
     ))
-      ?? BooleanSchema(schemaValue: true, location: context.location, context: context.context)
+      ?? BooleanSchema(
+        schemaValue: true,
+        location: context.location,
+        context: context.context,
+        documentURL: context.uri
+      )
       .asSchema()
   }
 }
@@ -975,6 +980,7 @@ struct ValidationResultBuilder {
             keyword: type(of: keyword).name,
             message: "Validation failed",
             keywordLocation: keyword.context.location,
+            absoluteKeywordLocation: keyword.context.absoluteKeywordLocation(),
             instanceLocation: instanceLocation
           )
         )

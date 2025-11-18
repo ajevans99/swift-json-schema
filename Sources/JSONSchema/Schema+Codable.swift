@@ -1,11 +1,23 @@
+import Foundation
+
 extension Schema: Codable {
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
 
     if let bool = try? container.decode(BooleanSchema.self) {
-      self.init(schema: bool, location: .init(), context: Context(dialect: .draft2020_12))
+      self.init(
+        schema: bool,
+        location: .init(),
+        context: Context(dialect: .draft2020_12),
+        documentURL: URL(fileURLWithPath: #file)
+      )
     } else if let schema = try? container.decode(ObjectSchema.self) {
-      self.init(schema: schema, location: .init(), context: Context(dialect: .draft2020_12))
+      self.init(
+        schema: schema,
+        location: .init(),
+        context: Context(dialect: .draft2020_12),
+        documentURL: URL(fileURLWithPath: #file)
+      )
     } else {
       throw DecodingError.dataCorruptedError(
         in: container,
@@ -35,7 +47,12 @@ extension BooleanSchema: Codable {
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
     let bool = try container.decode(Bool.self)
-    self.init(schemaValue: bool, location: .init(), context: Context(dialect: .draft2020_12))
+    self.init(
+      schemaValue: bool,
+      location: .init(),
+      context: Context(dialect: .draft2020_12),
+      documentURL: URL(fileURLWithPath: #file)
+    )
   }
 
   public func encode(to encoder: any Encoder) throws {

@@ -1,9 +1,16 @@
 /// https://json-schema.org/draft/2020-12/meta/meta-data
-protocol MetadataKeyword: Keyword {}
+protocol MetadataKeyword: Keyword, AnnotationProducingKeyword where AnnotationValue == JSONValue {}
 
 extension MetadataKeyword {
   package static var vocabulary: String {
     "https://json-schema.org/draft/2020-12/vocab/meta-data"
+  }
+
+  package func recordAnnotation(
+    at instanceLocation: JSONPointer,
+    using annotations: inout AnnotationContainer
+  ) {
+    annotations.insert(keyword: self, at: instanceLocation, value: value)
   }
 }
 

@@ -29,7 +29,7 @@ struct OutputTestSuite {
 
     for test in testDocument.tests {
       let validationResult = schema.validate(test.data)
-      let validationValue = try validationResult.toJSONValue()
+      let validationValue = try validationResult.renderedOutput(level: .basic)
 
       for (format, outputSchemaJSON) in test.output {
         guard Self.supportedFormats.contains(format) else { continue }

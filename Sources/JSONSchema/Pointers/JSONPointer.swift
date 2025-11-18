@@ -1,3 +1,5 @@
+import Foundation
+
 ///  JSON Pointer defines a string syntax for identifying a specific value within a JavaScript Object Notation (JSON) document.
 /// https://datatracker.ietf.org/doc/html/rfc6901
 public struct JSONPointer: Sendable, Hashable {
@@ -73,6 +75,13 @@ public struct JSONPointer: Sendable, Hashable {
     }
 
     return JSONPointer(path: Array(path.dropFirst(base.path.count)))
+  }
+
+  func absoluteLocation(relativeTo baseURL: URL) -> String? {
+    let base = baseURL.withoutFragment ?? baseURL
+    var components = URLComponents(url: base, resolvingAgainstBaseURL: true)
+    components?.fragment = jsonPointerString
+    return components?.url?.absoluteString
   }
 }
 

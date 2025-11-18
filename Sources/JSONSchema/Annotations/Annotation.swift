@@ -2,14 +2,14 @@ struct Annotation<Keyword: AnnotationProducingKeyword>: Sendable {
   let keyword: KeywordIdentifier
   let instanceLocation: JSONPointer
   let schemaLocation: JSONPointer
-  let absoluteSchemaLocation: JSONPointer?
+  let absoluteSchemaLocation: String?
   let value: Keyword.AnnotationValue
 
   init(
     keyword: KeywordIdentifier,
     instanceLocation: JSONPointer,
     schemaLocation: JSONPointer,
-    absoluteSchemaLocation: JSONPointer? = nil,
+    absoluteSchemaLocation: String? = nil,
     value: Keyword.AnnotationValue
   ) {
     self.keyword = keyword
@@ -23,7 +23,7 @@ struct Annotation<Keyword: AnnotationProducingKeyword>: Sendable {
     self.keyword = type(of: keyword).name
     self.instanceLocation = instanceLocation
     self.schemaLocation = keyword.context.location
-    self.absoluteSchemaLocation = nil
+    self.absoluteSchemaLocation = keyword.context.absoluteKeywordLocation()
     self.value = value
   }
 }
@@ -32,7 +32,7 @@ public protocol AnyAnnotation: Sendable {
   var keyword: KeywordIdentifier { get }
   var instanceLocation: JSONPointer { get }
   var schemaLocation: JSONPointer { get }
-  var absoluteSchemaLocation: JSONPointer? { get }
+  var absoluteSchemaLocation: String? { get }
   var jsonValue: JSONValue { get }
 
   func merged(with other: AnyAnnotation) -> AnyAnnotation?
@@ -56,6 +56,7 @@ extension Annotation {
       keyword: self.keyword,
       instanceLocation: self.instanceLocation,
       schemaLocation: self.schemaLocation,
+      absoluteSchemaLocation: self.absoluteSchemaLocation,
       value: mergedValue
     )
   }
