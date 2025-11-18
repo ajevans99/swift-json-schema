@@ -2,8 +2,8 @@ import Foundation
 
 private final class JSONSchemaBundleFinder {}
 
-public extension Bundle {
-  static var jsonSchemaResources: Bundle {
+extension Bundle {
+  public static var jsonSchemaResources: Bundle {
     #if SWIFT_PACKAGE
       return .module
     #else

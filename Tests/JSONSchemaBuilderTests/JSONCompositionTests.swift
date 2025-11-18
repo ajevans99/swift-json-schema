@@ -145,15 +145,16 @@ struct JSONCompositionTests {
 
     #expect(schema.parse(.string("AZ")) == .valid("AZ"))
     #expect(
-      schema.parse(.string("AX")) == .invalid([
-        .compositionFailure(
-          type: .allOf,
-          reason: "did not match all",
-          nestedErrors: [
-            .compositionFailure(type: .allOf, reason: "Must end with Z", nestedErrors: [])
-          ]
-        )
-      ])
+      schema.parse(.string("AX"))
+        == .invalid([
+          .compositionFailure(
+            type: .allOf,
+            reason: "did not match all",
+            nestedErrors: [
+              .compositionFailure(type: .allOf, reason: "Must end with Z", nestedErrors: [])
+            ]
+          )
+        ])
     )
   }
 
@@ -184,13 +185,14 @@ struct JSONCompositionTests {
 
     #expect(schema.parse(.integer(1)) == .valid(.integer(1)))
     #expect(
-      schema.parse(.string("fail")) == .invalid([
-        .compositionFailure(
-          type: .not,
-          reason: "valid against not schema",
-          nestedErrors: []
-        )
-      ])
+      schema.parse(.string("fail"))
+        == .invalid([
+          .compositionFailure(
+            type: .not,
+            reason: "valid against not schema",
+            nestedErrors: []
+          )
+        ])
     )
   }
 }
