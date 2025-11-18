@@ -52,9 +52,14 @@ extension Keywords {
       var refAnnotations = AnnotationContainer()
       let result = schema.validate(input, at: instanceLocation, annotations: &refAnnotations)
       if !result.isValid {
+        let prefixedErrors =
+          result.errors?
+          .map {
+            $0.prefixedKeywordLocation(with: self.context.location, removingBase: schema.location)
+          } ?? []
         throw ValidationIssue.referenceValidationFailure(
           ref: referenceURI,
-          errors: result.errors ?? []
+          errors: prefixedErrors
         )
       }
       annotations.merge(refAnnotations)
@@ -102,9 +107,14 @@ extension Keywords {
       var refAnnotations = AnnotationContainer()
       let result = schema.validate(input, at: instanceLocation, annotations: &refAnnotations)
       if !result.isValid {
+        let prefixedErrors =
+          result.errors?
+          .map {
+            $0.prefixedKeywordLocation(with: self.context.location, removingBase: schema.location)
+          } ?? []
         throw ValidationIssue.referenceValidationFailure(
           ref: referenceURI,
-          errors: result.errors ?? []
+          errors: prefixedErrors
         )
       }
       annotations.merge(refAnnotations)
@@ -300,7 +310,7 @@ struct ReferenceResolver {
     }
     return try Schema(
       rawSchema: subRawSchema,
-      location: location,
+      location: pointer,
       context: context,
       baseURI: referenceURL
     )

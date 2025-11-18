@@ -75,7 +75,7 @@ extension JSONSchemaComponent {
   }
 }
 
-public enum ParseAndValidateIssue: Error {
+public indirect enum ParseAndValidateIssue: Error {
   case decodingFailed(Error)
   case parsingFailed([ParseIssue])
   case validationFailed(ValidationResult)

@@ -56,6 +56,7 @@ extension ValidationIssue {
   func makeValidationError(
     keyword: String,
     keywordLocation: JSONPointer,
+    absoluteKeywordLocation: String?,
     instanceLocation: JSONPointer
   ) -> ValidationError {
     switch self {
@@ -64,6 +65,7 @@ extension ValidationIssue {
         keyword: keyword,
         message: "Validation failed for keyword '\(keyword)'",
         keywordLocation: keywordLocation,
+        absoluteKeywordLocation: absoluteKeywordLocation,
         instanceLocation: instanceLocation,
         errors: errors
       )
@@ -72,6 +74,7 @@ extension ValidationIssue {
         keyword: keyword,
         message: "Validation failed during reference validation '\(ref)'",
         keywordLocation: keywordLocation,
+        absoluteKeywordLocation: absoluteKeywordLocation,
         instanceLocation: instanceLocation,
         errors: errors
       )
@@ -80,6 +83,7 @@ extension ValidationIssue {
         keyword: keyword,
         message: description,
         keywordLocation: keywordLocation,
+        absoluteKeywordLocation: absoluteKeywordLocation,
         instanceLocation: instanceLocation
       )
     }

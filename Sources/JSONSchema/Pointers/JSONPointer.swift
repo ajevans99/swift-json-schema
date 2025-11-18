@@ -1,3 +1,5 @@
+import Foundation
+
 ///  JSON Pointer defines a string syntax for identifying a specific value within a JavaScript Object Notation (JSON) document.
 /// https://datatracker.ietf.org/doc/html/rfc6901
 public struct JSONPointer: Sendable, Hashable {
@@ -34,6 +36,12 @@ public struct JSONPointer: Sendable, Hashable {
     var pointer = self
     pointer.append(component)
     return pointer
+  }
+
+  /// Returns a new pointer created by appending the path components of another pointer.
+  func appending(pointer other: JSONPointer) -> JSONPointer {
+    guard !other.path.isEmpty else { return self }
+    return JSONPointer(path: self.path + other.path)
   }
 
   func dropLast() -> JSONPointer {
@@ -74,6 +82,13 @@ public struct JSONPointer: Sendable, Hashable {
 
     return JSONPointer(path: Array(path.dropFirst(base.path.count)))
   }
+
+  func absoluteLocation(relativeTo baseURL: URL) -> String? {
+    let base = baseURL.withoutFragment ?? baseURL
+    var components = URLComponents(url: base, resolvingAgainstBaseURL: true)
+    components?.fragment = jsonPointerString
+    return components?.url?.absoluteString
+  }
 }
 
 extension JSONPointer: ExpressibleByStringLiteral {
@@ -105,8 +120,26 @@ extension JSONPointer {
 }
 
 extension JSONPointer: CustomStringConvertible, CustomDebugStringConvertible {
+  /// A JSON Pointer string as defined by RFC 6901 (no leading `#`).
+  public var jsonPointerString: String {
+    guard path.isEmpty == false else { return "" }
+
+    return path.reduce(into: "") { partialResult, component in
+      partialResult += "/"
+      switch component {
+      case .index(let int):
+        partialResult += String(int)
+      case .key(let string):
+        partialResult +=
+          string
+          .replacingOccurrences(of: "~", with: "~0")
+          .replacingOccurrences(of: "/", with: "~1")
+      }
+    }
+  }
+
   public var description: String {
-    JSONPointer.fragment(fromEncodedTokens: path.map { $0.encodedFragment })
+    "#" + jsonPointerString
   }
 
   public var debugDescription: String { description }
@@ -132,7 +165,7 @@ extension JSONPointer: Codable {
 
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
-    try container.encode(description)
+    try container.encode(jsonPointerString)
   }
 }
 
