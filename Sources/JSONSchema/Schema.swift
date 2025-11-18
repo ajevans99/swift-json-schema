@@ -90,6 +90,36 @@ public struct Schema: ValidatableSchema {
     (schema as? ObjectSchema)?.validate(instance, at: location, annotations: &annotations)
       ?? schema.validate(instance, at: location)
   }
+
+  /// Validates this schema against its dialect's meta-schema.
+  ///
+  /// This method loads the meta-schema for the dialect used by this schema
+  /// and validates the schema's raw JSON representation against it.
+  ///
+  /// - Returns: A `ValidationResult` indicating whether the schema is valid
+  ///   according to its meta-schema.
+  /// - Throws: An error if the meta-schema cannot be loaded.
+  ///
+  /// Example:
+  /// ```swift
+  /// let schema = try Schema(instance: """
+  ///   {
+  ///     "type": "object",
+  ///     "properties": {
+  ///       "name": { "type": "string" }
+  ///     }
+  ///   }
+  ///   """)
+  /// let result = try schema.validateAgainstMetaSchema()
+  /// print(result.isValid) // true
+  /// ```
+  public func validateAgainstMetaSchema() throws -> ValidationResult {
+    let metaSchema = try context.dialect.loadMetaSchema()
+    guard let rawSchema = context.rootRawSchema else {
+      throw SchemaIssue.missingRootRawSchema
+    }
+    return metaSchema.validate(rawSchema)
+  }
 }
 
 package struct BooleanSchema: ValidatableSchema {

@@ -129,7 +129,15 @@ public enum Dialect: String, Hashable, Sendable {
     }
   }
 
-  func loadMetaSchema() throws -> Schema {
+  /// Loads the meta-schema for this dialect.
+  ///
+  /// The meta-schema is a schema that describes the structure and rules for
+  /// schemas in this dialect. It can be used to validate whether a schema
+  /// document is well-formed according to the dialect's specification.
+  ///
+  /// - Returns: A `Schema` representing the meta-schema for this dialect.
+  /// - Throws: `MetaSchemaError` if the meta-schema cannot be loaded.
+  public func loadMetaSchema() throws -> Schema {
     let jsonDecoder = JSONDecoder()
     func jsonValue(from url: URL) throws -> JSONValue {
       let data = try Data(contentsOf: url)
@@ -178,9 +186,35 @@ public enum Dialect: String, Hashable, Sendable {
       baseURI: baseURI
     )
   }
+
+  /// Validates a raw schema against this dialect's meta-schema.
+  ///
+  /// This method loads the meta-schema for the dialect and validates the provided
+  /// schema against it to ensure the schema is well-formed according to the
+  /// dialect's specification.
+  ///
+  /// - Parameter schema: The raw schema to validate, represented as a `JSONValue`.
+  /// - Returns: A `ValidationResult` indicating whether the schema is valid.
+  /// - Throws: An error if the meta-schema cannot be loaded.
+  ///
+  /// Example:
+  /// ```swift
+  /// let rawSchema: JSONValue = [
+  ///   "type": "object",
+  ///   "properties": [
+  ///     "name": ["type": "string"]
+  ///   ]
+  /// ]
+  /// let result = try Dialect.draft2020_12.validateSchema(rawSchema)
+  /// print(result.isValid) // true
+  /// ```
+  public func validateSchema(_ schema: JSONValue) throws -> ValidationResult {
+    let metaSchema = try loadMetaSchema()
+    return metaSchema.validate(schema)
+  }
 }
 
-enum MetaSchemaError: Error {
+public enum MetaSchemaError: Error {
   case invalidBaseURI
   case missingResource
 }
