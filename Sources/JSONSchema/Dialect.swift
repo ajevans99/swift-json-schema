@@ -150,7 +150,7 @@ public enum Dialect: String, Hashable, Sendable {
     }
 
     guard
-      let schemaURL = Bundle.module.url(
+      let schemaURL = Bundle.jsonSchemaResources.url(
         forResource: "schema",
         withExtension: "json"
       )
@@ -158,7 +158,7 @@ public enum Dialect: String, Hashable, Sendable {
       throw MetaSchemaError.missingResource
     }
 
-    let metaURLs = Bundle.module.urls(
+    let metaURLs = Bundle.jsonSchemaResources.urls(
       forResourcesWithExtension: "json",
       subdirectory: nil
     )

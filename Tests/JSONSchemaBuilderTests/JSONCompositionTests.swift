@@ -2,6 +2,24 @@ import JSONSchema
 import JSONSchemaBuilder
 import Testing
 
+private struct StringPredicateComponent: JSONSchemaComponent {
+  var schemaValue = JSONString().schemaValue
+  let reason: String
+  let predicate: @Sendable (String) -> Bool
+
+  func parse(_ value: JSONValue) -> Parsed<String, ParseIssue> {
+    guard case .string(let string) = value else {
+      return .invalid([.typeMismatch(expected: .string, actual: value)])
+    }
+    guard predicate(string) else {
+      return .invalid([
+        .compositionFailure(type: .allOf, reason: reason, nestedErrors: [])
+      ])
+    }
+    return .valid(string)
+  }
+}
+
 struct JSONCompositionTests {
   @Test func anyOfComposition() {
     @JSONSchemaBuilder var sample: some JSONSchemaComponent {
@@ -116,6 +134,65 @@ struct JSONCompositionTests {
 
     #expect(
       sample.schemaValue.object?[Keywords.AllOf.name]?.array?.count == (bool ? 1 : 0)
+    )
+  }
+
+  @Test func allOfParsingRequiresAllComponents() {
+    let schema = JSONComposition.AllOf {
+      StringPredicateComponent(reason: "Must begin with A") { $0.hasPrefix("A") }
+      StringPredicateComponent(reason: "Must end with Z") { $0.hasSuffix("Z") }
+    }
+
+    #expect(schema.parse(.string("AZ")) == .valid("AZ"))
+    #expect(
+      schema.parse(.string("AX"))
+        == .invalid([
+          .compositionFailure(
+            type: .allOf,
+            reason: "did not match all",
+            nestedErrors: [
+              .compositionFailure(type: .allOf, reason: "Must end with Z", nestedErrors: [])
+            ]
+          )
+        ])
+    )
+  }
+
+  @Test func anyOfParsingReturnsFirstValidResult() {
+    let schema = JSONComposition.AnyOf {
+      StringPredicateComponent(reason: "Must be HELLO") { $0 == "HELLO" }
+      StringPredicateComponent(reason: "Must end with !") { $0.hasSuffix("!") }
+    }
+
+    #expect(schema.parse(.string("HELLO")).value == "HELLO")
+    #expect(schema.parse(.string("HI!")).value == "HI!")
+    #expect(
+      schema.parse(.string("nope")).errors == [
+        .compositionFailure(
+          type: .anyOf,
+          reason: "did not match any",
+          nestedErrors: [
+            .compositionFailure(type: .allOf, reason: "Must be HELLO", nestedErrors: []),
+            .compositionFailure(type: .allOf, reason: "Must end with !", nestedErrors: []),
+          ]
+        )
+      ]
+    )
+  }
+
+  @Test func notCompositionRejectsMatchingInstances() {
+    let schema = JSONComposition.Not { JSONString() }
+
+    #expect(schema.parse(.integer(1)) == .valid(.integer(1)))
+    #expect(
+      schema.parse(.string("fail"))
+        == .invalid([
+          .compositionFailure(
+            type: .not,
+            reason: "valid against not schema",
+            nestedErrors: []
+          )
+        ])
     )
   }
 }

@@ -1,6 +1,17 @@
 import Foundation
+import JSONSchema
 import JSONSchemaBuilder
 import Testing
+
+@Schemable
+struct SnakeCaseOverride {
+  let displayName: String
+  let postalCode: Int
+}
+
+extension SnakeCaseOverride {
+  static var keyEncodingStrategy: KeyEncodingStrategies { .snakeCase }
+}
 
 struct KeyEncodingStrategyTests {
   @Test func identityStrategy() {
@@ -37,5 +48,13 @@ struct KeyEncodingStrategyTests {
     #expect(strategy.encode("helloWorld") == "HELLOWORLD")
     #expect(strategy.encode("JSONSchema") == "JSONSCHEMA")
     #expect(strategy.encode("userID") == "USERID")
+  }
+
+  @Test func schemableRespectsCustomKeyEncodingStrategy() throws {
+    guard #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *) else { return }
+
+    let strategy = SnakeCaseOverride.keyEncodingStrategy
+    #expect(strategy.encode("displayName") == "display_name")
+    #expect(strategy.encode("postalCode") == "postal_code")
   }
 }
