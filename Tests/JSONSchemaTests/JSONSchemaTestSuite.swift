@@ -113,7 +113,7 @@ extension JSONSchemaTest: CustomTestStringConvertible {
 }
 
 extension Encodable {
-  func toJsonString() throws -> String {
+  func toJSONString() throws -> String {
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
     let data = try encoder.encode(self)
@@ -130,18 +130,18 @@ extension Encodable {
 
 extension Schema {
   func json() throws -> String {
-    try toJsonString()
+    try toJSONString()
   }
 }
 
 extension JSONValue {
   func json() throws -> String {
-    try toJsonString()
+    try toJSONString()
   }
 }
 
 extension ValidationResult {
   func json() throws -> String {
-    try toJsonString()
+    try toJSONString()
   }
 }
