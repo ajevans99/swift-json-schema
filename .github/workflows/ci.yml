@@ -26,7 +26,7 @@ jobs:
     - name: Run tests
       run: swift test --enable-code-coverage
     - name: Upload coverage reports to Codecov
-      uses: vapor/swift-codecov-action@v3
+      uses: vapor/swift-codecov-action@v0.3.2
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
   
