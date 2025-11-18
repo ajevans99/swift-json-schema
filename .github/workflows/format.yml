@@ -29,7 +29,7 @@ jobs:
       uses: actions/checkout@v5
 
     - name: Format
-      run: swift-format format --in-place --parallel --recursive Sources/ Tests/
+      run: swift format --in-place --parallel --recursive Sources/ Tests/
     
     - name: Check for formatting changes
       id: check_changes
@@ -65,10 +65,10 @@ jobs:
         )
       run: |
         echo "::error::Formatting issues detected. Please fix them."
-        echo "Run 'swift-format format --in-place --parallel --recursive Sources/ Tests/' locally to fix formatting."
+        echo "Run 'swift format --in-place --parallel --recursive Sources/ Tests/' locally to fix formatting."
         exit 1
 
     - name: Lint
       id: lint 
       run: |
-        swift-format lint --strict --parallel --recursive Sources/ Tests/
+        swift lint --strict --parallel --recursive Sources/ Tests/
