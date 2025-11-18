@@ -4,7 +4,11 @@ import Testing
 @testable import JSONSchema
 
 struct OutputTestSuite {
-  private static let supportedFormats: Set<String> = ["basic"]
+  private static let supportedFormats: [String: ValidationOutputLevel] = [
+    "basic": .basic,
+    "detailed": .detailed,
+    "verbose": .verbose,
+  ]
 
   static let fileLoader = FileLoader<[OutputTestDocument]>(
     subdirectory: "JSON-Schema-Test-Suite/output-tests/draft2020-12/content"
@@ -29,10 +33,19 @@ struct OutputTestSuite {
 
     for test in testDocument.tests {
       let validationResult = schema.validate(test.data)
-      let validationValue = try validationResult.renderedOutput(level: .basic)
+      var renderedOutputs: [ValidationOutputLevel: JSONValue] = [:]
 
       for (format, outputSchemaJSON) in test.output {
-        guard Self.supportedFormats.contains(format) else { continue }
+        guard let level = Self.supportedFormats[format] else { continue }
+
+        let validationValue: JSONValue
+        if let cached = renderedOutputs[level] {
+          validationValue = cached
+        } else {
+          let rendered = try validationResult.renderedOutput(level: level)
+          renderedOutputs[level] = rendered
+          validationValue = rendered
+        }
 
         let outputSchema = try Schema(
           rawSchema: outputSchemaJSON,

@@ -115,6 +115,33 @@ struct SchemaTests {
     let falseSchema = try Schema(rawSchema: .boolean(false), context: .init(dialect: .draft2020_12))
     let flagOutput = try falseSchema.validate(.string("ok"), output: .flag)
     #expect(flagOutput == .boolean(false))
+
+    let nestedSchema: JSONValue = [
+      "type": "object",
+      "properties": [
+        "name": ["type": "string", "minLength": 2]
+      ],
+    ]
+
+    let nestedInstance: JSONValue = ["name": "a"]
+    let schema = try Schema(rawSchema: nestedSchema, context: .init(dialect: .draft2020_12))
+
+    let detailedOutput = try schema.validate(nestedInstance, output: .detailed)
+    let detailedObject = try #require(detailedOutput.object)
+    let detailedErrors = try #require(detailedObject["errors"]?.array)
+    #expect(detailedErrors.count == 1)
+    let detailedLeaf = try #require(detailedErrors.first?.object)
+    #expect(detailedLeaf["keywordLocation"] == .string("/properties/name/minLength"))
+
+    let verboseOutput = try schema.validate(nestedInstance, output: .verbose)
+    let verboseObject = try #require(verboseOutput.object)
+    let verboseErrors = try #require(verboseObject["errors"]?.array)
+    #expect(verboseErrors.count == 1)
+    let verboseBranch = try #require(verboseErrors.first?.object)
+    #expect(verboseBranch["keywordLocation"] == .string("/properties"))
+    let nestedVerboseErrors = try #require(verboseBranch["errors"]?.array)
+    let nestedVerboseLeaf = try #require(nestedVerboseErrors.first?.object)
+    #expect(nestedVerboseLeaf["keywordLocation"] == .string("/properties/name/minLength"))
   }
 
   @Test func metaSchema() throws {
