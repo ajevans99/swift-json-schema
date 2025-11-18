@@ -126,6 +126,41 @@ struct SchemableExpansionTests {
     )
   }
 
+  @Test(arguments: ["struct", "class"]) func selfReferentialProperty(declarationType: String) {
+    assertMacroExpansion(
+      """
+      @Schemable
+      \(declarationType) Tree {
+        let children: [Tree]
+      }
+      """,
+      expandedSource: """
+        \(declarationType) Tree {
+          let children: [Tree]
+
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+          static var schema: some JSONSchemaComponent<Tree> {
+            JSONSchema(Tree.init) {
+              JSONObject {
+                JSONProperty(key: "children") {
+                  JSONArray {
+                    JSONDynamicReference<Tree>(anchor: "Tree")
+                  }
+                }
+                .required()
+              }
+              .dynamicAnchor("Tree")
+            }
+          }
+        }
+
+        extension Tree: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
   @Test(arguments: ["struct", "class"]) func alternativeArraysAndDictionaries(
     declarationType: String
   ) {

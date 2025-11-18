@@ -91,6 +91,11 @@ struct Update {
   let meta: [String: JSONValue]
 }
 
+@Schemable
+struct Tree {
+  let node: [Self]
+}
+
 struct AntherTestPerson: Schemable {
   let emotions: [String: Int]
   let analysisNotes: String

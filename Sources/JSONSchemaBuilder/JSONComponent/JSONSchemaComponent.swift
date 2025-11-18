@@ -15,32 +15,21 @@ public protocol JSONSchemaComponent<Output> {
 
 extension JSONSchemaComponent {
   public func definition(context: Context = .init(dialect: .draft2020_12)) -> Schema {
-    switch schemaValue {
-    case .boolean(let bool):
+    do {
+      return try Schema(
+        rawSchema: schemaValue.value,
+        location: .init(),
+        context: context
+      )
+    } catch {
+      // If schema construction fails (e.g., vocabulary issues), fall back to a false schema.
+      // This conservative default maintains previous behavior.
       return BooleanSchema(
-        schemaValue: bool,
+        schemaValue: false,
         location: .init(),
         context: context
       )
       .asSchema()
-    case .object(let dict):
-      do {
-        return try ObjectSchema(
-          schemaValue: dict,
-          location: .init(),
-          context: .init(dialect: .draft2020_12)
-        )
-        .asSchema()
-      } catch {
-        // If vocabulary validation fails, fall back to a false schema
-        // This is a conservative approach for schema generation
-        return BooleanSchema(
-          schemaValue: false,
-          location: .init(),
-          context: .init(dialect: .draft2020_12)
-        )
-        .asSchema()
-      }
     }
   }
 

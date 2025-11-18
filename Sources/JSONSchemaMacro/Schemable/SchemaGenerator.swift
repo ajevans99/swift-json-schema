@@ -181,6 +181,10 @@ struct SchemaGenerator {
   func makeSchema() -> DeclSyntax {
     let schemableMembers = members.schemableMembers()
     let codingKeys = members.extractCodingKeys()
+    let anchorName = {
+      let trimmed = name.text.trimmingBackticks()
+      return trimmed.isEmpty ? name.text : trimmed
+    }()
 
     // Emit diagnostics for potential memberwise init mismatches
     if let context = context {
@@ -197,13 +201,16 @@ struct SchemaGenerator {
       }
     }
 
+    var usesSelfReference = false
     let statements = schemableMembers.compactMap {
       $0.generateSchema(
         keyStrategy: keyStrategy,
         typeName: name.text,
         globalOptionalNulls: optionalNulls,
         codingKeys: codingKeys,
-        context: context
+        context: context,
+        selfReferenceAnchor: anchorName,
+        didUseSelfReference: &usesSelfReference
       )
     }
 
@@ -224,6 +231,13 @@ struct SchemaGenerator {
         to: codeBlockItem,
         for: "ObjectOptions"
       )
+    }
+
+    if usesSelfReference {
+      codeBlockItem = """
+        \(codeBlockItem)
+        .dynamicAnchor("\(raw: anchorName)")
+        """
     }
 
     let variableDecl: DeclSyntax = """

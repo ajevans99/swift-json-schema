@@ -80,10 +80,27 @@ struct SchemableMember {
     typeName: String,
     globalOptionalNulls: Bool = true,
     codingKeys: [String: String]? = nil,
-    context: (any MacroExpansionContext)? = nil
+    context: (any MacroExpansionContext)? = nil,
+    selfReferenceAnchor: String? = nil,
+    didUseSelfReference: inout Bool
   ) -> CodeBlockItemSyntax? {
+    let sanitizedTypeName = typeName.trimmingBackticks()
+    let referencesSelf =
+      selfReferenceAnchor != nil && type.referencesType(named: sanitizedTypeName)
+
     var codeBlock: CodeBlockItemSyntax
-    switch type.typeInformation() {
+    let typeInfo: TypeSyntax.TypeInformation
+    if referencesSelf, let selfReferenceAnchor {
+      didUseSelfReference = true
+      typeInfo = type.typeInformation(
+        selfTypeName: sanitizedTypeName,
+        selfAnchor: selfReferenceAnchor
+      )
+    } else {
+      typeInfo = type.typeInformation()
+    }
+
+    switch typeInfo {
     case .primitive(_, let code):
       codeBlock = code
       // Only use default value on primitives that can be `ExpressibleBy*Literal` to transform
@@ -195,7 +212,7 @@ struct SchemableMember {
       }
     }
 
-    let keyExpr: ExprSyntax
+  let keyExpr: ExprSyntax
     if let customKey {
       // Custom key from @SchemaOptions(.key(...)) takes highest priority
       keyExpr = customKey
