@@ -99,3 +99,34 @@ public struct AnyAnnotationWrapper: Sendable, Encodable {
     try container.encode(annotation.jsonValue, forKey: .annotation)
   }
 }
+
+extension ValidationError {
+  /// Returns a copy of the error whose `keywordLocation` is rewritten so it appears
+  /// underneath a referencing keyword (for example `$ref`).
+  ///
+  /// - Parameters:
+  ///   - prefix: The pointer belonging to the referencing keyword that should prefix the error.
+  ///   - base: The pointer at which the referenced schema begins; segments before this base are removed.
+  /// - Returns: A cloned `ValidationError` whose `keywordLocation` (and any nested child errors)
+  ///   are rebased beneath the referencing keyword while preserving absolute locations.
+  func prefixedKeywordLocation(
+    with prefix: JSONPointer,
+    removingBase base: JSONPointer
+  ) -> ValidationError {
+    let relativePointer = keywordLocation.relative(toBase: base)
+    let newKeywordLocation = prefix.appending(pointer: relativePointer)
+    let prefixedChildren = errors?
+      .map {
+        $0.prefixedKeywordLocation(with: prefix, removingBase: base)
+      }
+
+    return ValidationError(
+      keyword: keyword,
+      message: message,
+      keywordLocation: newKeywordLocation,
+      absoluteKeywordLocation: absoluteKeywordLocation,
+      instanceLocation: instanceLocation,
+      errors: prefixedChildren
+    )
+  }
+}
