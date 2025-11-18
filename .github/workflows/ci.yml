@@ -2,56 +2,83 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build_and_test:
-    runs-on: macos-latest
+    runs-on: macos-26
 
     name: Test on macOS
     steps:
-    - uses: actions/checkout@v5
-    - name: Xcode version
-      run: xcodebuild -version
-      if: ${{ always() }}
-    - name: Log Xcode versions
-      run: ls -l /Applications/Xcode*
-      if: ${{ failure() }}
-    - name: Get swift version
-      run: swift --version
-    - name: Run tests
-      run: swift test --enable-code-coverage
-    - name: Upload coverage reports to Codecov
-      uses: vapor/swift-codecov-action@v0.3.2
-      with:
-        codecov_token: ${{ secrets.CODECOV_TOKEN }}
-  
+      - uses: actions/checkout@v5
+      - name: Xcode version
+        run: xcodebuild -version
+        if: ${{ always() }}
+      - name: Log Xcode versions
+        run: ls -l /Applications/Xcode*
+        if: ${{ failure() }}
+      - name: Get swift version
+        run: swift --version
+      - name: Run tests
+        run: |
+          set -o pipefail
+          swift test -v 2>&1 | tee swift-test.log
+      - name: Upload Swift test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: swift-test-log-macos
+          path: swift-test.log
+          if-no-files-found: ignore
+      - name: Collect diagnostic reports
+        if: failure()
+        run: |
+          mkdir -p diagnostics
+          if [ -d "$HOME/Library/Logs/DiagnosticReports" ]; then
+            find "$HOME/Library/Logs/DiagnosticReports" -type f \
+              \( -name "*.crash" -o -name "*.ips" -o -name "*.diag" \) \
+              -print -exec cp {} diagnostics/ \;
+          else
+            echo "No diagnostic reports directory found"
+          fi
+      - name: Upload diagnostic reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostic-reports
+          path: diagnostics
+          if-no-files-found: ignore
+      - name: Upload coverage reports to Codecov
+        uses: vapor/swift-codecov-action@v0.3.2
+        with:
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+
   build_linux:
     name: Build on Linux
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
-    - name: Get swift version
-      run: swift --version
-    - name: Delete Package.resolved
-      run: rm -f Package.resolved
-    - name: Build
-      run: swift build -v
+      - uses: actions/checkout@v5
+      - name: Get swift version
+        run: swift --version
+      - name: Delete Package.resolved
+        run: rm -f Package.resolved
+      - name: Build
+        run: swift build -v
 
   build_apple_platforms:
     name: Build on Apple Platforms
-    runs-on: macos-26-xlarge
+    runs-on: macos-26
     strategy:
-        fail-fast: false
-        matrix:
-            platform: [macOS, iOS, watchOS, tvOS, visionOS]
+      fail-fast: false
+      matrix:
+        platform: [macOS, iOS, watchOS, tvOS, visionOS]
     steps:
-    - uses: actions/checkout@v5
-    - name: Get swift version
-      run: swift --version
-    - name: Get Xcode version
-      run: xcodebuild -version
-    - name: Build ${{ matrix.platform }}
-      run: set -o pipefail && xcodebuild build -destination generic/platform=${{ matrix.platform }} -scheme swift-json-schema-Package | xcbeautify --renderer github-actions
+      - uses: actions/checkout@v5
+      - name: Get swift version
+        run: swift --version
+      - name: Get Xcode version
+        run: xcodebuild -version
+      - name: Build ${{ matrix.platform }}
+        run: set -o pipefail && xcodebuild build -destination generic/platform=${{ matrix.platform }} -scheme swift-json-schema-Package | xcbeautify --renderer github-actions
