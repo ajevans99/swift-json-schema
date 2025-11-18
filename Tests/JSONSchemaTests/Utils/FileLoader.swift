@@ -2,11 +2,17 @@ import Foundation
 import JSONSchema
 
 struct FileLoader<T: Decodable> {
-  let subdirectory: String
+  let bundle: Bundle
+  let subdirectory: String?
+
+  init(bundle: Bundle = .module, subdirectory: String? = nil) {
+    self.bundle = bundle
+    self.subdirectory = subdirectory
+  }
 
   func listFiles() -> [URL] {
     guard
-      let fileURLs = Bundle.module.urls(
+      let fileURLs = bundle.urls(
         forResourcesWithExtension: "json",
         subdirectory: subdirectory
       )
@@ -14,11 +20,23 @@ struct FileLoader<T: Decodable> {
       print("Failed to find JSON files")
       return []
     }
-    #if os(Linux)
-      return fileURLs.map { $0 as URL }
-    #else
-      return fileURLs
-    #endif
+    return fileURLs
+  }
+
+  func loadFile(named name: String) -> T? {
+    guard
+      let url = bundle.url(
+        forResource: name,
+        withExtension: "json",
+        subdirectory: subdirectory
+      )
+    else {
+      print("Failed to find file named \(name)")
+      return nil
+    }
+
+    guard let data = readFile(at: url) else { return nil }
+    return decodeFile(from: data)
   }
 
   func readFile(at url: URL) -> Data? {
