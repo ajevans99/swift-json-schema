@@ -22,7 +22,7 @@ jobs:
     - name: Get swift version
       run: swift --version
     - name: Run tests
-      run: swift test --enable-code-coverage
+      run: swift test --enable-code-coverage --code-coverage-path "$RUNNER_TEMP"
     - name: Upload coverage reports to Codecov
       uses: vapor/swift-codecov-action@v0.3.2
       with:
