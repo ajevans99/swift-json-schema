@@ -1,8 +1,22 @@
 import Foundation
 
-public enum ValidationOutputLevel {
+public enum ValidationOutputLevel: Sendable {
   case flag
   case basic
+}
+
+public struct ValidationOutputConfiguration: Sendable, Equatable {
+  public var level: ValidationOutputLevel
+
+  public init(level: ValidationOutputLevel) {
+    self.level = level
+  }
+
+  /// Convenience for producing the spec's "flag" level output, which is a boolean result.
+  public static let flag = ValidationOutputConfiguration(level: .flag)
+
+  /// Convenience for producing the spec's "basic" level output, which is a single result object.
+  public static let basic = ValidationOutputConfiguration(level: .basic)
 }
 
 private struct ValidationOutputUnit: Encodable {
@@ -71,5 +85,9 @@ extension ValidationResult {
     case .basic:
       return try ValidationOutputUnit.jsonValue(from: .make(from: self))
     }
+  }
+
+  public func renderedOutput(configuration: ValidationOutputConfiguration) throws -> JSONValue {
+    try renderedOutput(level: configuration.level)
   }
 }

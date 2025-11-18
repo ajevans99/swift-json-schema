@@ -104,6 +104,19 @@ struct SchemaTests {
     #expect(result.annotations == nil)
   }
 
+  @Test func validationOutputAPI() throws {
+    let trueSchema = try Schema(rawSchema: .boolean(true), context: .init(dialect: .draft2020_12))
+    let basicOutput = try trueSchema.validate(.string("ok"), output: .basic)
+    let outputObject = try #require(basicOutput.object)
+    #expect(outputObject["valid"] == .boolean(true))
+    #expect(outputObject["keywordLocation"] == .string(""))
+    #expect(outputObject["instanceLocation"] == .string(""))
+
+    let falseSchema = try Schema(rawSchema: .boolean(false), context: .init(dialect: .draft2020_12))
+    let flagOutput = try falseSchema.validate(.string("ok"), output: .flag)
+    #expect(flagOutput == .boolean(false))
+  }
+
   @Test func metaSchema() throws {
     let metaSchema = try Dialect.draft2020_12.loadMetaSchema()
     let result = metaSchema.validate(.object(["minLength": 1]))
