@@ -8,7 +8,7 @@ on:
 
 jobs:
   build_and_test:
-    runs-on: macos-26-xlarge
+    runs-on: macos-26
 
     name: Test on macOS
     steps:
@@ -22,7 +22,7 @@ jobs:
       - name: Get swift version
         run: swift --version
       - name: Run tests
-        run: swift test --enable-code-coverage
+        run: swift test --enable-code-coverage -v
       - name: Upload coverage reports to Codecov
         uses: vapor/swift-codecov-action@v0.3.2
         with:
@@ -42,7 +42,7 @@ jobs:
 
   build_apple_platforms:
     name: Build on Apple Platforms
-    runs-on: macos-26-xlarge
+    runs-on: macos-26
     strategy:
       fail-fast: false
       matrix:
