@@ -9,6 +9,10 @@ public enum OrNullStyle {
   /// Uses oneOf composition: {"oneOf": [{"type": "integer"}, {"type": "null"}]}
   /// Required for complex types (objects, arrays, refs)
   case union
+
+  /// Uses anyOf composition: {"anyOf": [{"type": "integer"}, {"type": "null"}]}
+  /// Useful for APIs that expect `anyOf` instead of `oneOf`.
+  case unionAnyOf
 }
 
 extension JSONSchemaComponent {
@@ -17,7 +21,8 @@ extension JSONSchemaComponent {
   ///
   /// - Parameter style: The style to use for null acceptance
   ///   - `.type`: Uses type array `["integer", "null"]` - best for primitives
-  ///   - `.union`: Uses oneOf composition - required for complex types
+  ///   - `.union`: Uses `oneOf` composition - required for complex types
+  ///   - `.unionAnyOf`: Uses `anyOf` composition - useful when targets forbid `oneOf`
   ///
   /// - Returns: A component that accepts either the original type or null, returning an optional value
   ///
@@ -31,7 +36,17 @@ extension JSONSchemaComponent {
     case .type:
       return OrNullTypeComponent<Output, Self>(wrapped: self).eraseToAnySchemaComponent()
     case .union:
-      return OrNullUnionComponent<Output, Self>(wrapped: self).eraseToAnySchemaComponent()
+      return OrNullUnionComponent<Output, Self>(
+        wrapped: self,
+        composition: .oneOf
+      )
+      .eraseToAnySchemaComponent()
+    case .unionAnyOf:
+      return OrNullUnionComponent<Output, Self>(
+        wrapped: self,
+        composition: .anyOf
+      )
+      .eraseToAnySchemaComponent()
     }
   }
 }
@@ -94,11 +109,12 @@ where Wrapped.Output == WrappedValue {
   typealias Output = WrappedValue?
 
   var wrapped: Wrapped
+  var composition: SchemaComposition
 
   public var schemaValue: SchemaValue {
     get {
       .object([
-        Keywords.OneOf.name: .array([
+        composition.keywordName: .array([
           wrapped.schemaValue.value,
           JSONNull().schemaValue.value,
         ])
@@ -115,5 +131,16 @@ where Wrapped.Output == WrappedValue {
       return .valid(nil)
     }
     return wrapped.parse(value).map(Optional.some)
+  }
+}
+
+extension SchemaComposition {
+  fileprivate var keywordName: String {
+    switch self {
+    case .oneOf:
+      return Keywords.OneOf.name
+    case .anyOf:
+      return Keywords.AnyOf.name
+    }
   }
 }

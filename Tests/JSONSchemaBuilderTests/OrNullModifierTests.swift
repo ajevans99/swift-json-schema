@@ -137,6 +137,31 @@ struct OrNullModifierTests {
     #expect(schema.schemaValue == .object(expected))
   }
 
+  @Test func unionAnyOfStyleWithObject() {
+    @JSONSchemaBuilder var schema: some JSONSchemaComponent {
+      JSONObject {
+        JSONProperty(key: "name") {
+          JSONString()
+        }
+      }
+      .orNull(style: .unionAnyOf)
+    }
+
+    let expected: [String: JSONValue] = [
+      "anyOf": [
+        [
+          "type": "object",
+          "properties": [
+            "name": ["type": "string"]
+          ],
+        ],
+        ["type": "null"],
+      ]
+    ]
+
+    #expect(schema.schemaValue == .object(expected))
+  }
+
   // MARK: - Modifier chaining tests
 
   @Test func typeStyleWithOtherModifiers() {
@@ -171,6 +196,24 @@ struct OrNullModifierTests {
       ],
       "title": "Name",
       "description": "User's name",
+    ]
+
+    #expect(schema.schemaValue == .object(expected))
+  }
+
+  @Test func unionAnyOfStyleWithOtherModifiers() {
+    @JSONSchemaBuilder var schema: some JSONSchemaComponent {
+      JSONString()
+        .orNull(style: .unionAnyOf)
+        .title("Alias")
+    }
+
+    let expected: [String: JSONValue] = [
+      "anyOf": [
+        ["type": "string"],
+        ["type": "null"],
+      ],
+      "title": "Alias",
     ]
 
     #expect(schema.schemaValue == .object(expected))

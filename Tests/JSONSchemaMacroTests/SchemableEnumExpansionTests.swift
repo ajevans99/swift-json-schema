@@ -106,6 +106,62 @@ import Testing
     )
   }
 
+  @Test func associatedValuesAnyOfComposition() {
+    assertMacroExpansion(
+      """
+      @Schemable(enumComposition: .anyOf)
+      enum ServiceResponse {
+        case success(message: String)
+        case failure(code: Int)
+      }
+      """,
+      expandedSource: """
+        enum ServiceResponse {
+          case success(message: String)
+          case failure(code: Int)
+
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+          static var schema: some JSONSchemaComponent<ServiceResponse> {
+            JSONComposition.AnyOf(into: ServiceResponse.self) {
+              JSONObject {
+                JSONProperty(key: "success") {
+                  JSONObject {
+                    JSONProperty(key: "message") {
+                      JSONString()
+                    }
+                      .required()
+                  }
+                }
+                  .required()
+              }
+                .map {
+                  Self.success(message: $0)
+                }
+              JSONObject {
+                JSONProperty(key: "failure") {
+                  JSONObject {
+                    JSONProperty(key: "code") {
+                      JSONInteger()
+                    }
+                      .required()
+                  }
+                }
+                  .required()
+              }
+                .map {
+                  Self.failure(code: $0)
+                }
+            }
+          }
+        }
+
+        extension ServiceResponse: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
   @Test func unlabeledAssociatedValues() {
     assertMacroExpansion(
       """

@@ -79,6 +79,7 @@ struct SchemableMember {
     keyStrategy: ExprSyntax?,
     typeName: String,
     globalOptionalNulls: Bool = true,
+    optionalNullUnion: CompositionKeyword,
     codingKeys: [String: String]? = nil,
     context: (any MacroExpansionContext)? = nil,
     selfReferenceAnchor: String? = nil,
@@ -191,19 +192,19 @@ struct SchemableMember {
           .orNull(style: \(orNullStyle))
           """
       } else if globalOptionalNulls {
-        // Global flag is true - use .type for primitives, .union for complex types
+        // Global flag is true - use .type for primitives, configured union style otherwise
         let typeInfo = type.typeInformation()
         let style: String
         switch typeInfo {
         case .primitive(let primitive, _):
           // Use .type for scalar primitives, .union for arrays/dictionaries
-          style = primitive.isScalar ? ".type" : ".union"
+          style = primitive.isScalar ? ".type" : optionalNullUnion.orNullStyleAccessor
         case .schemable:
-          // Use .union for schemable types (objects)
-          style = ".union"
+          // Use union style for schemable types (objects)
+          style = optionalNullUnion.orNullStyleAccessor
         case .notSupported:
-          // Shouldn't reach here, but default to .union
-          style = ".union"
+          // Shouldn't reach here, but default to configured union style
+          style = optionalNullUnion.orNullStyleAccessor
         }
         codeBlock = """
           \(codeBlock)

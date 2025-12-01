@@ -417,6 +417,18 @@ enum TemperatureType {
 
 Notice how unnamed associated values are represented as `_0`, `_1`, etc.
 
+Some consumers (for example, DeepSeek's API) only accept `anyOf` for unions. You can switch the builder that is emitted for associated-value enums by providing the `enumComposition:` argument:
+
+```swift
+@Schemable(enumComposition: .anyOf)
+enum Response {
+  case success(message: String)
+  case failure(code: Int)
+}
+```
+
+This expansion is identical to the previous example except the builder becomes `JSONComposition.AnyOf(into: Response.self)`, keeping the runtime behavior but satisfying downstream constraints.
+
 ### Other Behaviors
 
 #### Default values
@@ -597,8 +609,9 @@ struct User {
 }
 ```
 
-The `.orNull()` modifier supports two styles:
+The `.orNull()` modifier supports three styles:
 - `.type`: Uses type array `["integer", "null"]` - best for scalar primitives, produces clearer validation errors
-- `.union`: Uses oneOf composition - required for complex types (objects, arrays)
+- `.union`: Uses `oneOf` composition - required for complex types (objects, arrays)
+- `.unionAnyOf`: Uses `anyOf` composition - helpful for APIs that forbid `oneOf`.
 
-When `optionalNulls: true` (the default), the appropriate style is automatically selected based on the property type.
+When `optionalNulls: true` (the default), the appropriate style is automatically selected based on the property type. You can influence the composition keyword used for complex types by passing `optionalNullUnion: .anyOf` to `@Schemable`, which will emit `.orNull(style: .unionAnyOf)` for every implicitly-nullable property. This keeps generated schemas compatible with systems (like some LLM APIs) that only support `anyOf`.

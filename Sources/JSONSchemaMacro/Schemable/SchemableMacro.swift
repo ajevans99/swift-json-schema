@@ -94,6 +94,9 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
       let strategyArg = arguments?.first(where: { $0.label?.text == "keyStrategy" })?.expression
       let optionalNullsArg = arguments?.first(where: { $0.label?.text == "optionalNulls" })?
         .expression
+      let optionalNullUnionArg = arguments?
+        .first(where: { $0.label?.text == "optionalNullUnion" })?
+        .expression
       // Default to true if not specified, otherwise parse the boolean literal
       let optionalNulls: Bool
       if let boolLiteral = optionalNullsArg?.as(BooleanLiteralExprSyntax.self) {
@@ -101,12 +104,14 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
       } else {
         optionalNulls = true  // default
       }
+      let optionalNullUnion = CompositionKeyword(argument: optionalNullUnionArg)
       let generator = SchemaGenerator(
         fromStruct: structDecl,
         keyStrategy: strategyArg,
         optionalNulls: optionalNulls,
         accessLevel: accessLevel,
-        context: context
+        context: context,
+        optionalNullUnion: optionalNullUnion
       )
       let schemaDecl = generator.makeSchema()
       var decls: [DeclSyntax] = [schemaDecl]
@@ -124,6 +129,9 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
       let strategyArg = arguments?.first(where: { $0.label?.text == "keyStrategy" })?.expression
       let optionalNullsArg = arguments?.first(where: { $0.label?.text == "optionalNulls" })?
         .expression
+      let optionalNullUnionArg = arguments?
+        .first(where: { $0.label?.text == "optionalNullUnion" })?
+        .expression
       // Default to true if not specified, otherwise parse the boolean literal
       let optionalNulls: Bool
       if let boolLiteral = optionalNullsArg?.as(BooleanLiteralExprSyntax.self) {
@@ -131,12 +139,14 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
       } else {
         optionalNulls = true  // default
       }
+      let optionalNullUnion = CompositionKeyword(argument: optionalNullUnionArg)
       let generator = SchemaGenerator(
         fromClass: classDecl,
         keyStrategy: strategyArg,
         optionalNulls: optionalNulls,
         accessLevel: accessLevel,
-        context: context
+        context: context,
+        optionalNullUnion: optionalNullUnion
       )
       let schemaDecl = generator.makeSchema()
       var decls: [DeclSyntax] = [schemaDecl]
@@ -150,11 +160,18 @@ public struct SchemableMacro: MemberMacro, ExtensionMacro {
       }
       return decls
     } else if let enumDecl = declaration.as(EnumDeclSyntax.self) {
-      let strategyArg = node.arguments?
-        .as(LabeledExprListSyntax.self)?
+      let arguments = node.arguments?.as(LabeledExprListSyntax.self)
+      let strategyArg = arguments?
         .first(where: { $0.label?.text == "keyStrategy" })?
         .expression
-      let generator = EnumSchemaGenerator(fromEnum: enumDecl, accessLevel: accessLevel)
+      let enumCompositionArg = arguments?
+        .first(where: { $0.label?.text == "enumComposition" })?
+        .expression
+      let generator = EnumSchemaGenerator(
+        fromEnum: enumDecl,
+        accessLevel: accessLevel,
+        composition: CompositionKeyword(argument: enumCompositionArg)
+      )
       let schemaDecl = generator.makeSchema()
       var decls: [DeclSyntax] = [schemaDecl]
 

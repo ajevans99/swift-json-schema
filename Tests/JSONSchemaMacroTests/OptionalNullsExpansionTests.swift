@@ -165,6 +165,45 @@ struct OptionalNullsExpansionTests {
     )
   }
 
+  @Test func perPropertyAnyOfStyle() {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct CustomOptional {
+        @SchemaOptions(.orNull(style: .unionAnyOf))
+        let metadata: [String: String]?
+      }
+      """,
+      expandedSource: """
+        struct CustomOptional {
+          let metadata: [String: String]?
+
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+          static var schema: some JSONSchemaComponent<CustomOptional> {
+            JSONSchema(CustomOptional.init) {
+              JSONObject {
+                JSONProperty(key: "metadata") {
+                  JSONObject()
+                  .additionalProperties {
+                    JSONString()
+                  }
+                  .map(\\.1)
+                  .map(\\.matches)
+                  .orNull(style: .unionAnyOf)
+                }
+                .flatMapOptional()
+              }
+            }
+          }
+        }
+
+        extension CustomOptional: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
   // MARK: - Default behavior (null allowed by default)
 
   @Test func defaultBehaviorAllowsNull() {
@@ -221,6 +260,53 @@ struct OptionalNullsExpansionTests {
         }
 
         extension Weather: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test func defaultUnionStyleCanEmitAnyOf() {
+    assertMacroExpansion(
+      """
+      @Schemable(optionalNullUnion: .anyOf)
+      struct FeatureFlag {
+        let tags: [String]?
+        let metadata: [String: String]?
+      }
+      """,
+      expandedSource: """
+        struct FeatureFlag {
+          let tags: [String]?
+          let metadata: [String: String]?
+
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+          static var schema: some JSONSchemaComponent<FeatureFlag> {
+            JSONSchema(FeatureFlag.init) {
+              JSONObject {
+                JSONProperty(key: "tags") {
+                  JSONArray {
+                    JSONString()
+                  }
+                  .orNull(style: .unionAnyOf)
+                }
+                .flatMapOptional()
+                JSONProperty(key: "metadata") {
+                  JSONObject()
+                  .additionalProperties {
+                    JSONString()
+                  }
+                  .map(\\.1)
+                  .map(\\.matches)
+                  .orNull(style: .unionAnyOf)
+                }
+                .flatMapOptional()
+              }
+            }
+          }
+        }
+
+        extension FeatureFlag: Schemable {
         }
         """,
       macros: testMacros

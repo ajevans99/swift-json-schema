@@ -19,8 +19,13 @@ struct EnumSchemaGenerator {
   let members: MemberBlockItemListSyntax
   let attributes: AttributeListSyntax
   let isStringBacked: Bool
+  let composition: CompositionKeyword
 
-  init(fromEnum enumDecl: EnumDeclSyntax, accessLevel: String? = nil) {
+  init(
+    fromEnum enumDecl: EnumDeclSyntax,
+    accessLevel: String? = nil,
+    composition: CompositionKeyword
+  ) {
     // Use provided access level if available, otherwise use the declaration's modifier
     if let accessLevel {
       // Create modifier with trailing space for proper formatting
@@ -34,6 +39,7 @@ struct EnumSchemaGenerator {
     name = enumDecl.name.trimmed
     members = enumDecl.memberBlock.members
     attributes = enumDecl.attributes
+    self.composition = composition
 
     // Check if enum inherits from String
     isStringBacked =
@@ -60,7 +66,8 @@ struct EnumSchemaGenerator {
       if !casesWithoutAssociatedValues.isEmpty {
         codeBlockItemList.append(simpleEnumSchema(for: casesWithoutAssociatedValues))
       }
-      codeBlockItem = "JSONComposition.OneOf(into: \(name).self) { \(codeBlockItemList) }"
+      codeBlockItem =
+        "JSONComposition.\(raw: composition.jsonCompositionBuilderName)(into: \(name).self) { \(codeBlockItemList) }"
     } else {
       // When no case has an associated value, use simple enum schema
       codeBlockItem = simpleEnumSchema(for: casesWithoutAssociatedValues)
@@ -126,6 +133,7 @@ struct SchemaGenerator {
   let attributes: AttributeListSyntax
   let keyStrategy: ExprSyntax?
   let optionalNulls: Bool
+  let optionalNullUnion: CompositionKeyword
   let context: (any MacroExpansionContext)?
 
   init(
@@ -133,7 +141,8 @@ struct SchemaGenerator {
     keyStrategy: ExprSyntax?,
     optionalNulls: Bool = true,
     accessLevel: String? = nil,
-    context: (any MacroExpansionContext)? = nil
+    context: (any MacroExpansionContext)? = nil,
+    optionalNullUnion: CompositionKeyword
   ) {
     // Use provided access level if available, otherwise use the declaration's modifier
     if let accessLevel {
@@ -151,6 +160,7 @@ struct SchemaGenerator {
     self.keyStrategy = keyStrategy
     self.optionalNulls = optionalNulls
     self.context = context
+    self.optionalNullUnion = optionalNullUnion
   }
 
   init(
@@ -158,7 +168,8 @@ struct SchemaGenerator {
     keyStrategy: ExprSyntax?,
     optionalNulls: Bool = true,
     accessLevel: String? = nil,
-    context: (any MacroExpansionContext)? = nil
+    context: (any MacroExpansionContext)? = nil,
+    optionalNullUnion: CompositionKeyword
   ) {
     // Use provided access level if available, otherwise use the declaration's modifier
     if let accessLevel {
@@ -176,6 +187,7 @@ struct SchemaGenerator {
     self.keyStrategy = keyStrategy
     self.optionalNulls = optionalNulls
     self.context = context
+    self.optionalNullUnion = optionalNullUnion
   }
 
   func makeSchema() -> DeclSyntax {
@@ -207,6 +219,7 @@ struct SchemaGenerator {
         keyStrategy: keyStrategy,
         typeName: name.text,
         globalOptionalNulls: optionalNulls,
+        optionalNullUnion: optionalNullUnion,
         codingKeys: codingKeys,
         context: context,
         selfReferenceAnchor: anchorName,
