@@ -198,9 +198,15 @@ extension TypeSyntax {
     case .memberType(let memberType):
       // Handle qualified type names like Weather.Condition
       let fullTypeName = memberType.trimmed.description
+      
+      // Handle backticks in type names by comparing sanitized versions
+      // e.g., "Outer.`Inner`" should match selfTypeName "Inner" when fullTypeName is also "Outer.Inner"
+      let sanitizedFullTypeName = fullTypeName.split(separator: ".").map { 
+        String($0).trimmingBackticks() 
+      }.joined(separator: ".")
 
       if let selfTypeName,
-        fullTypeName == selfTypeName,
+        sanitizedFullTypeName == selfTypeName,
         selfAnchor != nil
       {
         return .schemable(
@@ -265,7 +271,13 @@ extension TypeSyntax {
       return false
     case .memberType(let memberType):
       let fullTypeName = memberType.trimmed.description
-      if fullTypeName == target { return true }
+      
+      // Handle backticks in type names by comparing sanitized versions
+      let sanitizedFullTypeName = fullTypeName.split(separator: ".").map { 
+        String($0).trimmingBackticks() 
+      }.joined(separator: ".")
+      
+      if sanitizedFullTypeName == target { return true }
       if memberType.baseType.referencesType(named: target) { return true }
       if let genericArguments = memberType.genericArgumentClause {
         return genericArguments.arguments.contains { argument in
