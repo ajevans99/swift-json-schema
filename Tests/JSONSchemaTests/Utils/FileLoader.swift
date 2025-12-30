@@ -20,7 +20,7 @@ struct FileLoader<T: Decodable> {
       print("Failed to find JSON files")
       return []
     }
-    return fileURLs.map { $0 as URL }
+    return fileURLs
   }
 
   func loadFile(named name: String) -> T? {
