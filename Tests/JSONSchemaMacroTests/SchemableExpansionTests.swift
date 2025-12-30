@@ -1447,4 +1447,90 @@ struct SchemableExpansionTests {
       macros: testMacros
     )
   }
+
+  @Test func nestedTypesWithSameName() {
+    assertMacroExpansion(
+      """
+      public struct ModelElementType {
+        var v1: Double
+        var v2: Double
+
+        @Schemable
+        struct DTO: Codable {
+          var v1: Double
+          var v2: Double
+        }
+      }
+
+      public struct ModelType {
+        var name: String
+        var value: ModelElementType
+
+        @Schemable
+        public struct DTO: Codable {
+          var name: String
+          var element: ModelElementType.DTO
+        }
+      }
+      """,
+      expandedSource: """
+        public struct ModelElementType {
+          var v1: Double
+          var v2: Double
+          struct DTO: Codable {
+            var v1: Double
+            var v2: Double
+
+            @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+            static var schema: some JSONSchemaComponent<DTO> {
+              JSONSchema(DTO.init) {
+                JSONObject {
+                  JSONProperty(key: "v1") {
+                    JSONNumber()
+                  }
+                  .required()
+                  JSONProperty(key: "v2") {
+                    JSONNumber()
+                  }
+                  .required()
+                }
+              }
+            }
+          }
+        }
+
+        public struct ModelType {
+          var name: String
+          var value: ModelElementType
+          public struct DTO: Codable {
+            var name: String
+            var element: ModelElementType.DTO
+
+            @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+            public static var schema: some JSONSchemaComponent<DTO> {
+              JSONSchema(DTO.init) {
+                JSONObject {
+                  JSONProperty(key: "name") {
+                    JSONString()
+                  }
+                  .required()
+                  JSONProperty(key: "element") {
+                    ModelElementType.DTO.schema
+                  }
+                  .required()
+                }
+              }
+            }
+          }
+        }
+
+        extension ModelElementType.DTO: Schemable {
+        }
+
+        extension ModelType.DTO: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
 }
