@@ -1447,4 +1447,268 @@ struct SchemableExpansionTests {
       macros: testMacros
     )
   }
+
+  @Test func nestedTypesWithSameName() {
+    assertMacroExpansion(
+      """
+      public struct ModelElementType {
+        var v1: Double
+        var v2: Double
+
+        @Schemable
+        struct DTO: Codable {
+          var v1: Double
+          var v2: Double
+        }
+      }
+
+      public struct ModelType {
+        var name: String
+        var value: ModelElementType
+
+        @Schemable
+        public struct DTO: Codable {
+          var name: String
+          var element: ModelElementType.DTO
+        }
+      }
+      """,
+      expandedSource: """
+        public struct ModelElementType {
+          var v1: Double
+          var v2: Double
+          struct DTO: Codable {
+            var v1: Double
+            var v2: Double
+
+            @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+            static var schema: some JSONSchemaComponent<DTO> {
+              JSONSchema(DTO.init) {
+                JSONObject {
+                  JSONProperty(key: "v1") {
+                    JSONNumber()
+                  }
+                  .required()
+                  JSONProperty(key: "v2") {
+                    JSONNumber()
+                  }
+                  .required()
+                }
+              }
+            }
+          }
+        }
+
+        public struct ModelType {
+          var name: String
+          var value: ModelElementType
+          public struct DTO: Codable {
+            var name: String
+            var element: ModelElementType.DTO
+
+            @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+            public static var schema: some JSONSchemaComponent<DTO> {
+              JSONSchema(DTO.init) {
+                JSONObject {
+                  JSONProperty(key: "name") {
+                    JSONString()
+                  }
+                  .required()
+                  JSONProperty(key: "element") {
+                    ModelElementType.DTO.schema
+                  }
+                  .required()
+                }
+              }
+            }
+          }
+        }
+
+        extension ModelElementType.DTO: Schemable {
+        }
+
+        extension ModelType.DTO: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test(arguments: ["struct", "class"]) func backtickTypeNames(declarationType: String) {
+    assertMacroExpansion(
+      """
+      @Schemable
+      \(declarationType) `default` {
+        let value: String
+      }
+      """,
+      expandedSource: """
+        \(declarationType) `default` {
+          let value: String
+
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+          static var schema: some JSONSchemaComponent<`default`> {
+            JSONSchema(`default`.init) {
+              JSONObject {
+                JSONProperty(key: "value") {
+                  JSONString()
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension `default`: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test(arguments: ["struct", "class"]) func nestedBacktickTypeNames(declarationType: String) {
+    assertMacroExpansion(
+      """
+      \(declarationType) Outer {
+        @Schemable
+        \(declarationType) `Inner`: Codable {
+          let value: String
+        }
+      }
+      """,
+      expandedSource: """
+        \(declarationType) Outer {
+          \(declarationType) `Inner`: Codable {
+            let value: String
+
+            @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+            static var schema: some JSONSchemaComponent<`Inner`> {
+              JSONSchema(`Inner`.init) {
+                JSONObject {
+                  JSONProperty(key: "value") {
+                    JSONString()
+                  }
+                  .required()
+                }
+              }
+            }
+          }
+        }
+
+        extension Outer.`Inner`: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test(arguments: ["struct", "class"]) func memberTypeWithBackticks(declarationType: String) {
+    assertMacroExpansion(
+      """
+      \(declarationType) First {
+        @Schemable
+        \(declarationType) `Data`: Codable {
+          let id: Int
+        }
+      }
+
+      \(declarationType) Second {
+        @Schemable
+        \(declarationType) `Data`: Codable {
+          let name: String
+          let other: First.`Data`
+        }
+      }
+      """,
+      expandedSource: """
+        \(declarationType) First {
+          \(declarationType) `Data`: Codable {
+            let id: Int
+
+            @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+            static var schema: some JSONSchemaComponent<`Data`> {
+              JSONSchema(`Data`.init) {
+                JSONObject {
+                  JSONProperty(key: "id") {
+                    JSONInteger()
+                  }
+                  .required()
+                }
+              }
+            }
+          }
+        }
+
+        \(declarationType) Second {
+          \(declarationType) `Data`: Codable {
+            let name: String
+            let other: First.`Data`
+
+            @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+            static var schema: some JSONSchemaComponent<`Data`> {
+              JSONSchema(`Data`.init) {
+                JSONObject {
+                  JSONProperty(key: "name") {
+                    JSONString()
+                  }
+                  .required()
+                  JSONProperty(key: "other") {
+                    First.`Data`.schema
+                  }
+                  .required()
+                }
+              }
+            }
+          }
+        }
+
+        extension First.`Data`: Schemable {
+        }
+
+        extension Second.`Data`: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
+  @Test(arguments: ["struct", "class"]) func selfReferenceWithBackticks(declarationType: String) {
+    assertMacroExpansion(
+      """
+      @Schemable
+      \(declarationType) `Node` {
+        let value: Int
+        let next: `Node`?
+      }
+      """,
+      expandedSource: """
+        \(declarationType) `Node` {
+          let value: Int
+          let next: `Node`?
+
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+          static var schema: some JSONSchemaComponent<`Node`> {
+            JSONSchema(`Node`.init) {
+              JSONObject {
+                JSONProperty(key: "value") {
+                  JSONInteger()
+                }
+                .required()
+                JSONProperty(key: "next") {
+                  JSONDynamicReference<Self>()
+                  .orNull(style: .union)
+                }
+                .flatMapOptional()
+              }
+              .dynamicAnchor(Self.defaultAnchor)
+            }
+          }
+        }
+
+        extension `Node`: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
 }

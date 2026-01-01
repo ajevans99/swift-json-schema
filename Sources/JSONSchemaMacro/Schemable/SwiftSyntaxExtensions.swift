@@ -1,6 +1,18 @@
 import Foundation
 import SwiftSyntax
 
+extension String {
+  /// Sanitizes a qualified type name by removing backticks from all components.
+  /// For example, "Outer.`Inner`" becomes "Outer.Inner".
+  func sanitizingQualifiedTypeName() -> String {
+    self.split(separator: ".")
+      .map {
+        String($0).trimmingBackticks()
+      }
+      .joined(separator: ".")
+  }
+}
+
 extension TypeSyntax {
   var isOptional: Bool {
     // Check for explicit optional like `let snow: Optional<Double>`
@@ -199,9 +211,12 @@ extension TypeSyntax {
       // Handle qualified type names like Weather.Condition
       let fullTypeName = memberType.trimmed.description
 
+      // Handle backticks in type names by comparing sanitized versions
+      // e.g., "Outer.`Inner`" should match selfTypeName "Inner" when fullTypeName is also "Outer.Inner"
+      let sanitizedFullTypeName = fullTypeName.sanitizingQualifiedTypeName()
+
       if let selfTypeName,
-        fullTypeName == selfTypeName
-          || memberType.name.text.trimmingBackticks() == selfTypeName,
+        sanitizedFullTypeName == selfTypeName,
         selfAnchor != nil
       {
         return .schemable(
@@ -265,8 +280,13 @@ extension TypeSyntax {
       }
       return false
     case .memberType(let memberType):
+      let fullTypeName = memberType.trimmed.description
+
+      // Handle backticks in type names by comparing sanitized versions
+      let sanitizedFullTypeName = fullTypeName.sanitizingQualifiedTypeName()
+
+      if sanitizedFullTypeName == target { return true }
       if memberType.baseType.referencesType(named: target) { return true }
-      if memberType.name.text.trimmingBackticks() == target { return true }
       if let genericArguments = memberType.genericArgumentClause {
         return genericArguments.arguments.contains { argument in
           if case GenericArgumentSyntax.Argument.type(let type) = argument.argument {
