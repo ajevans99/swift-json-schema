@@ -1,7 +1,7 @@
 // swift-tools-version: 5.10
 
-import PackageDescription
 import CompilerPluginSupport
+import PackageDescription
 
 let package = Package(
   name: "swift-json-schema",
@@ -33,7 +33,7 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.0.0"),
-    .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.1"..<"700.0.0"),
+    .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.1" ..< "700.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.17.6"),
   ],
   targets: [
@@ -63,7 +63,7 @@ let package = Package(
     .testTarget(
       name: "JSONSchemaBuilderTests",
       dependencies: [
-        "JSONSchemaBuilder",
+        "JSONSchemaBuilder"
       ]
     ),
 
@@ -72,6 +72,8 @@ let package = Package(
       name: "JSONSchemaMacro",
       dependencies: [
         .product(name: "SwiftSyntax", package: "swift-syntax"),
+        .product(name: "SwiftParser", package: "swift-syntax"),
+        .product(name: "SwiftParserDiagnostics", package: "swift-syntax"),
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
@@ -83,6 +85,9 @@ let package = Package(
       name: "JSONSchemaMacroTests",
       dependencies: [
         "JSONSchemaMacro",
+        .product(name: "SwiftSyntax", package: "swift-syntax"),
+        .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
+        .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
         .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),
         .product(name: "SwiftSyntaxMacrosGenericTestSupport", package: "swift-syntax"),
         .product(name: "SwiftParser", package: "swift-syntax"),
@@ -121,7 +126,7 @@ let package = Package(
     .target(
       name: "JSONSchemaConversion",
       dependencies: [
-        
+
         "JSONSchemaBuilder"
       ]
     ),
