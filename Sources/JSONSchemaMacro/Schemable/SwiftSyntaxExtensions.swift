@@ -272,10 +272,14 @@ extension TypeSyntax {
       if identifierName == target || identifierName == "Self" { return true }
       if let genericArguments = identifierType.genericArgumentClause {
         return genericArguments.arguments.contains { argument in
-          if case GenericArgumentSyntax.Argument.type(let type) = argument.argument {
-            return type.referencesType(named: target)
-          }
-          return false
+          #if canImport(SwiftSyntax601)
+            if case GenericArgumentSyntax.Argument.type(let type) = argument.argument {
+              return type.referencesType(named: target)
+            }
+            return false
+          #else
+            return argument.argument.referencesType(named: target)
+          #endif
         }
       }
       return false
@@ -289,10 +293,14 @@ extension TypeSyntax {
       if memberType.baseType.referencesType(named: target) { return true }
       if let genericArguments = memberType.genericArgumentClause {
         return genericArguments.arguments.contains { argument in
-          if case GenericArgumentSyntax.Argument.type(let type) = argument.argument {
-            return type.referencesType(named: target)
-          }
-          return false
+          #if canImport(SwiftSyntax601)
+            if case GenericArgumentSyntax.Argument.type(let type) = argument.argument {
+              return type.referencesType(named: target)
+            }
+            return false
+          #else
+            return argument.argument.referencesType(named: target)
+          #endif
         }
       }
       return false
@@ -380,7 +388,7 @@ extension VariableDeclSyntax {
     !attributes.compactMap {
       $0.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text
     }
-    .contains(where: { $0 == "ExcludeFromSchema" })
+    .contains { $0 == "ExcludeFromSchema" }
   }
 
   var isStatic: Bool {
