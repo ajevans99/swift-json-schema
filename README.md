@@ -351,6 +351,7 @@ Explore these companion repositories to see `swift-json-schema` in action:
 
 - [SwiftFunctionToolsExperiment](https://github.com/ajevans99/SwiftFunctionToolsExperiment) – demonstrates creating type-safe [OpenAI API function tool calls](https://platform.openai.com/docs/guides/function-calling) using schemas built with this library.
 - [swift-mcp-toolkit](https://github.com/ajevans99/swift-mcp-toolkit) – a toolkit built on top of the official Model Context Protocol Swift SDK ([modelcontextprotocol/swift-sdk](https://github.com/modelcontextprotocol/swift-sdk)) that makes it easy to define strongly-typed tools for MCP servers and clients.
+- [swift-json-schema-playground](https://github.com/ajevans99/swift-json-schema-playground) ([live demo](https://ajevans99.github.io/swift-json-schema-playground/)) – an in-browser JSON Schema validation playground that runs `swift-json-schema` compiled to WebAssembly via SwiftWasm, with a Monaco editor UI built on Vite + React.
 
 Have a project of your own? We'd love to showcase it. Open a PR to add your repository to this list.
 
