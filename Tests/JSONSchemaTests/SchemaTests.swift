@@ -271,6 +271,58 @@ struct SchemaTests {
     )
   }
 
+  @Test func chainedRefKeywordLocations() throws {
+    let baseURL = try #require(URL(string: "https://example.com/chained"))
+    let rawSchema: JSONValue = [
+      "$id": JSONValue.string(baseURL.absoluteString),
+      "$defs": [
+        "A": ["$ref": "#/$defs/B"],
+        "B": ["type": "integer"],
+      ],
+      "properties": [
+        "x": ["$ref": "#/$defs/A"]
+      ],
+    ]
+
+    let schema = try Schema(
+      rawSchema: rawSchema,
+      context: Context(dialect: .draft2020_12),
+      baseURI: baseURL
+    )
+
+    let result = schema.validate(["x": "wrong"])
+    #expect(result.isValid == false)
+
+    let propertiesError = try #require(result.errors?.first)
+    #expect(propertiesError.keywordLocation == JSONPointer(tokens: ["properties"]))
+
+    let outerRefError = try #require(propertiesError.errors?.first)
+    #expect(
+      outerRefError.keywordLocation == JSONPointer(tokens: ["properties", "x", "$ref"])
+    )
+
+    // The inner $ref's location must be re-rooted under the outer $ref, not pasted at root.
+    let innerRefError = try #require(outerRefError.errors?.first)
+    #expect(
+      innerRefError.keywordLocation
+        == JSONPointer(tokens: ["properties", "x", "$ref", "$ref"])
+    )
+    #expect(
+      innerRefError.absoluteKeywordLocation
+        == URL(string: "https://example.com/chained#/$defs/A/$ref")
+    )
+
+    let typeError = try #require(innerRefError.errors?.first)
+    #expect(
+      typeError.keywordLocation
+        == JSONPointer(tokens: ["properties", "x", "$ref", "$ref", "type"])
+    )
+    #expect(
+      typeError.absoluteKeywordLocation
+        == URL(string: "https://example.com/chained#/$defs/B/type")
+    )
+  }
+
   @Test func absoluteKeywordLocationRemoteRef() throws {
     let remoteURL = "https://example.com/strings.json"
     let remoteSchema: JSONValue = [
