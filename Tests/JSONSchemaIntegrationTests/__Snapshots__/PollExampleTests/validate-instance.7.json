@@ -1,5 +1,5 @@
 {
-  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#",
+  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#",
   "annotations" : [
     {
       "annotation" : "Poll",
@@ -44,30 +44,30 @@
   ],
   "errors" : [
     {
-      "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties",
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties",
       "errors" : [
         {
-          "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/title\/minLength",
+          "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/title\/minLength",
           "instanceLocation" : "\/title",
           "keyword" : "minLength",
           "keywordLocation" : "\/properties\/title\/minLength",
           "message" : "String '' is shorter than minimum length of 1"
         },
         {
-          "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items",
+          "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items",
           "errors" : [
             {
-              "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/properties",
+              "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/properties",
               "errors" : [
                 {
-                  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/properties\/text\/minLength",
+                  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/properties\/text\/minLength",
                   "instanceLocation" : "\/options\/0\/text",
                   "keyword" : "minLength",
                   "keywordLocation" : "\/properties\/options\/items\/properties\/text\/minLength",
                   "message" : "String '' is shorter than minimum length of 1"
                 },
                 {
-                  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/properties\/voteCount\/minimum",
+                  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/properties\/voteCount\/minimum",
                   "instanceLocation" : "\/options\/0\/voteCount",
                   "keyword" : "minimum",
                   "keywordLocation" : "\/properties\/options\/items\/properties\/voteCount\/minimum",
@@ -80,24 +80,24 @@
               "message" : "Validation failed for keyword 'properties'"
             },
             {
-              "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/additionalProperties",
+              "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/additionalProperties",
               "errors" : [
                 {
-                  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/additionalProperties",
+                  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/additionalProperties",
                   "instanceLocation" : "\/options\/0\/id",
                   "keyword" : "boolean",
                   "keywordLocation" : "\/properties\/options\/items\/additionalProperties",
                   "message" : ""
                 },
                 {
-                  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/additionalProperties",
+                  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/additionalProperties",
                   "instanceLocation" : "\/options\/0\/text",
                   "keyword" : "boolean",
                   "keywordLocation" : "\/properties\/options\/items\/additionalProperties",
                   "message" : ""
                 },
                 {
-                  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/additionalProperties",
+                  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/additionalProperties",
                   "instanceLocation" : "\/options\/0\/voteCount",
                   "keyword" : "boolean",
                   "keywordLocation" : "\/properties\/options\/items\/additionalProperties",

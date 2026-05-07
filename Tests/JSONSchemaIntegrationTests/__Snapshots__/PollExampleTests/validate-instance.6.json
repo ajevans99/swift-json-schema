@@ -1,5 +1,5 @@
 {
-  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#",
+  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#",
   "annotations" : [
     {
       "annotation" : "Poll",
@@ -44,16 +44,16 @@
   ],
   "errors" : [
     {
-      "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties",
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties",
       "errors" : [
         {
-          "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items",
+          "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items",
           "errors" : [
             {
-              "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/properties",
+              "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/properties",
               "errors" : [
                 {
-                  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/properties\/id\/minimum",
+                  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/properties\/id\/minimum",
                   "instanceLocation" : "\/options\/0\/id",
                   "keyword" : "minimum",
                   "keywordLocation" : "\/properties\/options\/items\/properties\/id\/minimum",
@@ -66,24 +66,24 @@
               "message" : "Validation failed for keyword 'properties'"
             },
             {
-              "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/additionalProperties",
+              "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/additionalProperties",
               "errors" : [
                 {
-                  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/additionalProperties",
+                  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/additionalProperties",
                   "instanceLocation" : "\/options\/0\/id",
                   "keyword" : "boolean",
                   "keywordLocation" : "\/properties\/options\/items\/additionalProperties",
                   "message" : ""
                 },
                 {
-                  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/additionalProperties",
+                  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/additionalProperties",
                   "instanceLocation" : "\/options\/0\/text",
                   "keyword" : "boolean",
                   "keywordLocation" : "\/properties\/options\/items\/additionalProperties",
                   "message" : ""
                 },
                 {
-                  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/additionalProperties",
+                  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/additionalProperties",
                   "instanceLocation" : "\/options\/0\/voteCount",
                   "keyword" : "boolean",
                   "keywordLocation" : "\/properties\/options\/items\/additionalProperties",
@@ -102,7 +102,7 @@
           "message" : "Validation failed for keyword 'items'"
         },
         {
-          "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/minItems",
+          "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/minItems",
           "instanceLocation" : "\/options",
           "keyword" : "minItems",
           "keywordLocation" : "\/properties\/options\/minItems",

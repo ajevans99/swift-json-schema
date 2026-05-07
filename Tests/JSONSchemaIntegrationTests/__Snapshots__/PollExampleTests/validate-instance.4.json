@@ -1,5 +1,5 @@
 {
-  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#",
+  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#",
   "annotations" : [
     {
       "annotation" : "Poll",
@@ -77,7 +77,7 @@
   ],
   "errors" : [
     {
-      "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/required",
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/required",
       "instanceLocation" : "",
       "keyword" : "required",
       "keywordLocation" : "\/required",

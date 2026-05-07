@@ -10,7 +10,7 @@ public struct Schema: ValidatableSchema {
     rawSchema: JSONValue,
     location: JSONPointer = .init(),
     context: Context,
-    baseURI: URL = URL(fileURLWithPath: #file)
+    baseURI: URL = URL(string: "https://swift-json-schema.invalid/in-memory")!
   ) throws(SchemaIssue) {
     self.location = location
     self.context = context
@@ -71,7 +71,7 @@ public struct Schema: ValidatableSchema {
     schema: any ValidatableSchema,
     location: JSONPointer,
     context: Context,
-    documentURL: URL = URL(fileURLWithPath: #file)
+    documentURL: URL = URL(string: "https://swift-json-schema.invalid/in-memory")!
   ) {
     self.schema = schema
     self.location = location
@@ -133,7 +133,7 @@ package struct BooleanSchema: ValidatableSchema {
     schemaValue: Bool,
     location: JSONPointer,
     context: Context,
-    documentURL: URL = URL(fileURLWithPath: #file)
+    documentURL: URL = URL(string: "https://swift-json-schema.invalid/in-memory")!
   ) {
     self.schemaValue = schemaValue
     self.location = location
@@ -181,8 +181,8 @@ package struct ObjectSchema: ValidatableSchema {
     schemaValue: [String: JSONValue],
     location: JSONPointer,
     context: Context,
-    baseURI: URL = URL(fileURLWithPath: #file),
-    documentURL: URL = URL(fileURLWithPath: #file)
+    baseURI: URL = URL(string: "https://swift-json-schema.invalid/in-memory")!,
+    documentURL: URL = URL(string: "https://swift-json-schema.invalid/in-memory")!
   ) throws(SchemaIssue) {
     self.schemaValue = schemaValue
     self.location = location

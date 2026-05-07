@@ -1,5 +1,5 @@
 {
-  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#",
+  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#",
   "annotations" : [
     {
       "annotation" : "Poll",
@@ -49,10 +49,10 @@
   ],
   "errors" : [
     {
-      "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties",
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties",
       "errors" : [
         {
-          "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/category\/oneOf",
+          "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/category\/oneOf",
           "instanceLocation" : "\/category",
           "keyword" : "oneOf",
           "keywordLocation" : "\/properties\/category\/oneOf",
