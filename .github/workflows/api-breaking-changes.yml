@@ -1,0 +1,58 @@
+name: API breaking changes
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  detect:
+    name: Detect API breaking changes
+    runs-on: macos-latest
+
+    steps:
+      - name: Check out PR head
+        uses: actions/checkout@v5
+        with:
+          # Need the full history so we can fetch the baseline tag.
+          fetch-depth: 0
+
+      - name: Get Swift version
+        run: swift --version
+
+      - name: Resolve baseline (latest release tag)
+        id: baseline
+        run: |
+          # Find the most recent semver tag (vX.Y.Z); fall back to main if none.
+          BASELINE=$(git tag --sort=-v:refname --list 'v[0-9]*.[0-9]*.[0-9]*' | head -n1)
+          if [ -z "$BASELINE" ]; then
+            BASELINE="origin/main"
+          fi
+          echo "baseline=$BASELINE" >> "$GITHUB_OUTPUT"
+          echo "Comparing against: $BASELINE"
+
+      - name: Diagnose API breaking changes
+        id: diagnose
+        run: |
+          set -o pipefail
+          swift package diagnose-api-breaking-changes \
+            "${{ steps.baseline.outputs.baseline }}" \
+            2>&1 | tee diagnose.log
+
+      - name: Annotate summary
+        if: always()
+        run: |
+          {
+            echo "## API breaking-change scan"
+            echo ""
+            echo "Compared against \`${{ steps.baseline.outputs.baseline }}\`."
+            echo ""
+            if [ -s diagnose.log ]; then
+              echo '```'
+              tail -200 diagnose.log
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
