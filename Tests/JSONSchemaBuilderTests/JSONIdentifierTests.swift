@@ -40,4 +40,26 @@ struct JSONIdentifierBuilderTests {
 
     #expect(sample.schemaValue == .object(expected))
   }
+
+  // Regression for #149 / PR #155: the DSL must preserve the *declared* key
+  // order of `vocabulary(_:)` (and other dictionary-literal accepting helpers)
+  // through to the emitted JSON. KeyValuePairs makes this possible.
+  @Test func vocabularyPreservesDeclarationOrder() throws {
+    @JSONSchemaBuilder var sample: some JSONSchemaComponent {
+      JSONString()
+        .vocabulary([
+          "https://z.example/last": true,
+          "https://m.example/middle": false,
+          "https://a.example/first": true,
+        ])
+    }
+
+    let serialized = try sample.schemaValue.value.serialized()
+    let zIdx = try #require(serialized.range(of: "z.example/last")).lowerBound
+    let mIdx = try #require(serialized.range(of: "m.example/middle")).lowerBound
+    let aIdx = try #require(serialized.range(of: "a.example/first")).lowerBound
+    // Declared order (z, m, a) — *not* alphabetical (a, m, z).
+    #expect(zIdx < mIdx)
+    #expect(mIdx < aIdx)
+  }
 }

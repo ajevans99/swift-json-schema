@@ -14,15 +14,17 @@ extension JSONSchemaComponent {
     return copy
   }
 
-  public func vocabulary(_ mapping: [String: Bool]) -> Self {
+  /// Sets the schema vocabulary mapping.
+  ///
+  /// - Parameter mapping: Vocabulary URIs to enable/disable. Pass a
+  ///   dictionary literal (e.g.
+  ///   `[Vocabularies.Core: true, Vocabularies.Applicator: true]`); the
+  ///   declaration order is preserved on emission.
+  /// - Returns: A copy of this component with the `$vocabulary` keyword set.
+  public func vocabulary(_ mapping: KeyValuePairs<String, Bool>) -> Self {
     var copy = self
-    // Sort keys so emission is deterministic regardless of the input
-    // Dictionary's hash-seed-dependent iteration order. Vocabulary URIs
-    // have no meaningful order in the schema spec.
     copy.schemaValue[Keywords.Vocabulary.name] = .object(
-      OrderedDictionary(
-        uniqueKeysWithValues: mapping.keys.sorted().map { ($0, JSONValue.boolean(mapping[$0]!)) }
-      )
+      OrderedDictionary(uniqueKeysWithValues: mapping.map { ($0.key, JSONValue.boolean($0.value)) })
     )
     return copy
   }

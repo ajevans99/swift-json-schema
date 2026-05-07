@@ -4,20 +4,42 @@ import OrderedCollections
 /// A JSON object value component for use in ``JSONValueBuilder``.
 public struct JSONObjectValue: JSONValueRepresentable {
   public var value: JSONValue {
-    // `properties` is a Dictionary, whose iteration order is not stable
-    // across processes. Sort keys before building the OrderedDictionary
-    // so the emitted JSON is deterministic. Callers that need a specific
-    // key order should use a builder that supplies an ordered source.
-    .object(
-      OrderedDictionary(
-        uniqueKeysWithValues: properties.keys.sorted().map { ($0, properties[$0]!.value) }
-      )
+    .object(properties.mapValues(\.value))
+  }
+
+  let properties: OrderedDictionary<String, JSONValueRepresentable>
+
+  /// Constructs an empty object value.
+  public init() {
+    self.properties = [:]
+  }
+
+  /// Constructs an object value with declared key order preserved on emission.
+  ///
+  /// Pass a dictionary literal — `KeyValuePairs` retains declaration order
+  /// from the literal, unlike Swift's `Dictionary`, whose iteration order is
+  /// hash-seed-dependent.
+  public init(properties: KeyValuePairs<String, JSONValueRepresentable>) {
+    self.properties = OrderedDictionary(
+      uniqueKeysWithValues: properties.map { ($0.key, $0.value) }
     )
   }
 
-  let properties: [String: JSONValueRepresentable]
+  /// Constructs an object value from an already-ordered map of properties.
+  public init(properties: OrderedDictionary<String, JSONValueRepresentable>) {
+    self.properties = properties
+  }
 
-  public init(properties: [String: JSONValueRepresentable] = [:]) { self.properties = properties }
+  /// Constructs an object value from a Swift `Dictionary`.
+  ///
+  /// - Important: Swift `Dictionary` iteration order is hash-seed-dependent,
+  ///   so the resulting JSON key order is **not** stable across processes.
+  ///   Prefer the dictionary-literal initializer for reproducible output.
+  public init(dictionary properties: [String: JSONValueRepresentable]) {
+    self.properties = OrderedDictionary(
+      uniqueKeysWithValues: properties.map { ($0.key, $0.value) }
+    )
+  }
 }
 
 extension JSONObjectValue {
