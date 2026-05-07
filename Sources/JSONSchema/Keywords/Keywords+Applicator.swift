@@ -448,7 +448,14 @@ extension Keywords {
       for subschema in subschemas {
         var subAnnotations = AnnotationContainer()
         let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
-        annotations.merge(subAnnotations)
+        // Per spec §10.2.1.1, allOf produces no annotations of its own, but the
+        // annotations of each successful subschema propagate to the surrounding
+        // schema. A failing subschema's annotations MUST NOT leak through, or
+        // sibling `unevaluatedProperties`/`unevaluatedItems` will treat
+        // properties/indices "matched" by a failed branch as evaluated.
+        if result.isValid {
+          annotations.merge(subAnnotations)
+        }
         builder.merging(result)
       }
 
@@ -484,10 +491,14 @@ extension Keywords {
       for subschema in subschemas {
         var subAnnotations = AnnotationContainer()
         let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+        // Per spec §10.2.1.2, anyOf collects annotations only from MATCHING
+        // (passing) subschemas. Merging from failing branches would cause
+        // sibling `unevaluatedProperties`/`unevaluatedItems` to treat
+        // properties/indices "matched" by a non-applicable branch as evaluated.
         if result.isValid {
           isValid = true
+          annotations.merge(subAnnotations)
         }
-        annotations.merge(subAnnotations)
         builder.merging(result)
       }
 
@@ -708,7 +719,12 @@ extension Keywords {
         var subAnnotations = AnnotationContainer()
         let result = schema.validate(input, at: instanceLocation, annotations: &subAnnotations)
         builder.merging(result)
-        annotations.merge(subAnnotations)
+        // Per spec §10.2.2.4, dependentSchemas collects annotations only from
+        // matching (passing) subschemas — the same rule as in-place applicators
+        // like allOf/anyOf.
+        if result.isValid {
+          annotations.merge(subAnnotations)
+        }
       }
 
       try builder.throwIfErrors()
