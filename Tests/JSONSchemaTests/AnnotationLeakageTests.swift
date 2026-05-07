@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import JSONSchema
 
 /// Regression tests for annotation propagation from in-place applicators
@@ -36,9 +37,10 @@ struct AnnotationLeakageTests {
         "unevaluatedProperties": false
       }
       """
-    let result = try Schema(instance: schemaJSON).validate(
-      instance: #"{"a": "x", "b": "y"}"#
-    )
+    let result = try Schema(instance: schemaJSON)
+      .validate(
+        instance: #"{"a": "x", "b": "y"}"#
+      )
     // With fix: branch 2 fails → its `properties: { b }` annotation does NOT
     // propagate. `b` is then unevaluated → validation fails.
     // With leak: branch 2's annotation leaks → `b` appears evaluated →
@@ -98,9 +100,10 @@ struct AnnotationLeakageTests {
         "unevaluatedProperties": false
       }
       """
-    let result = try Schema(instance: schemaJSON).validate(
-      instance: #"{"trigger": 1, "extra": "leaked?"}"#
-    )
+    let result = try Schema(instance: schemaJSON)
+      .validate(
+        instance: #"{"trigger": 1, "extra": "leaked?"}"#
+      )
     #expect(result.isValid == false)
     #expect(
       anyError(in: result, keyword: "unevaluatedProperties", instanceLocation: "#/extra"),
