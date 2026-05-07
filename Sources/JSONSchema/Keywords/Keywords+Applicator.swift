@@ -264,11 +264,15 @@ extension Keywords {
       var instancePropertyNames: OrderedSet<String> = []
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
-      for (key, value) in instanceObject where schemaMap.keys.contains(key) {
+      for (key, value) in instanceObject {
+        guard let schema = schemaMap[key] else { continue }
         let propertyLocation = instanceLocation.appending(.key(key))
         var subAnnotations = AnnotationContainer()
-        let result = schemaMap[key]!
-          .validate(value, at: propertyLocation, annotations: &subAnnotations)
+        let result = schema.validate(
+          value,
+          at: propertyLocation,
+          annotations: &subAnnotations
+        )
         builder.merging(result)
         annotations.merge(subAnnotations)
         instancePropertyNames.append(key)
@@ -728,7 +732,10 @@ extension Keywords {
 
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
-      for (key, schema) in schemaMap where instanceObject.keys.contains(key) {
+      // Walk schemaMap (in declared order) and consult the instance via O(1)
+      // subscript. `instanceObject.keys.contains(_:)` is also O(1) on
+      // OrderedDictionary, but `instanceObject[key] != nil` is more idiomatic.
+      for (key, schema) in schemaMap where instanceObject[key] != nil {
         var subAnnotations = AnnotationContainer()
         let result = schema.validate(input, at: instanceLocation, annotations: &subAnnotations)
         builder.merging(result)

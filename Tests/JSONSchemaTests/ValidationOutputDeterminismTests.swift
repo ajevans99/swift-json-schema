@@ -20,7 +20,8 @@ struct ValidationOutputDeterminismTests {
     ]
     let schema = try Schema(rawSchema: schemaValue, context: Context(dialect: .draft2020_12))
 
-    // Instance keys in z → m → a order.
+    // Instance keys in gamma → beta → alpha order (intentionally not the
+    // schema's alpha → beta → gamma declared order).
     let instance: JSONValue = [
       "gamma": 3,
       "beta": 2,
@@ -42,24 +43,38 @@ struct ValidationOutputDeterminismTests {
 
   @Test
   func allAnnotationsAreEmittedInDeterministicOrder() throws {
+    // Use multiple annotation-producing keywords so the result has more than
+    // one annotation, and observe that the order matches the validation
+    // traversal: outer keywords first (title, then properties), then inner
+    // keywords (the title inside each property's subschema).
     let schemaValue: JSONValue = [
+      "title": "outer",
       "properties": [
-        "x": ["type": "string"],
-        "y": ["type": "string"],
-      ]
+        "x": ["title": "x-title", "type": "string"],
+        "y": ["title": "y-title", "type": "string"],
+      ],
     ]
     let schema = try Schema(rawSchema: schemaValue, context: Context(dialect: .draft2020_12))
     let instance: JSONValue = ["y": "value", "x": "value"]
 
-    // Validate twice in the same process — collected annotation order should
-    // match exactly. (Hash-randomized Dictionary storage would have given a
-    // different ordering on each insert before Phase 2.)
-    let first = schema.validate(instance).annotations ?? []
-    let second = schema.validate(instance).annotations ?? []
+    let result = schema.validate(instance)
+    let signatures = (result.annotations ?? [])
+      .map {
+        "\($0.keyword)@\($0.instanceLocation.jsonPointerString)"
+      }
 
-    let firstSig = first.map { "\($0.keyword)@\($0.instanceLocation.jsonPointerString)" }
-    let secondSig = second.map { "\($0.keyword)@\($0.instanceLocation.jsonPointerString)" }
-    #expect(firstSig == secondSig)
+    // properties is an applicator — its annotation is recorded *after* it
+    // processes each child schema, so the inner title annotations appear
+    // before the outer properties annotation. The y → x order on the inner
+    // titles reflects the instance's declared key order (Phase 1).
+    #expect(
+      signatures == [
+        "title@",
+        "title@/y",
+        "title@/x",
+        "properties@",
+      ]
+    )
   }
 
   // MARK: - DependentSchemas iterates in declared order
