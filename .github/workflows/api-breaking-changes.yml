@@ -7,11 +7,14 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  issues: write
 
 jobs:
   detect:
     name: Detect API breaking changes
-    runs-on: macos-latest
+    # Match the runner used by the rest of CI so we get the same Swift toolchain
+    # — older toolchains (Swift ≤6.1) produce false positives in the digester.
+    runs-on: macos-26-xlarge
 
     steps:
       - name: Check out PR head
@@ -20,13 +23,15 @@ jobs:
           # Need the full history so we can fetch the baseline tag.
           fetch-depth: 0
 
-      - name: Get Swift version
-        run: swift --version
+      - name: Get Swift / Xcode versions
+        run: |
+          swift --version
+          xcodebuild -version
 
       - name: Resolve baseline (latest release tag)
         id: baseline
         run: |
-          # Find the most recent semver tag (vX.Y.Z); fall back to main if none.
+          # Pick the most recent semver tag (vX.Y.Z); fall back to main if none.
           BASELINE=$(git tag --sort=-v:refname --list 'v[0-9]*.[0-9]*.[0-9]*' | head -n1)
           if [ -z "$BASELINE" ]; then
             BASELINE="origin/main"
@@ -36,23 +41,104 @@ jobs:
 
       - name: Diagnose API breaking changes
         id: diagnose
+        # Don't fail the step on detected breakages — we report and label
+        # instead, so reviewers can intentionally accept the change.
+        continue-on-error: true
         run: |
-          set -o pipefail
+          set +e
           swift package diagnose-api-breaking-changes \
             "${{ steps.baseline.outputs.baseline }}" \
-            2>&1 | tee diagnose.log
+            > diagnose.log 2>&1
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          cat diagnose.log
 
-      - name: Annotate summary
+      - name: Parse breakages
+        id: parse
+        run: |
+          # The digester emits one "💔 API breakage:" line per finding.
+          BREAKAGES=$(grep -c "💔 API breakage:" diagnose.log || true)
+          echo "count=$BREAKAGES" >> "$GITHUB_OUTPUT"
+
+          # Capture findings for the comment body.
+          {
+            echo 'findings<<COMMENT_EOF'
+            grep "💔 API breakage:" diagnose.log | sed 's/.*💔 API breakage: //' || true
+            echo 'COMMENT_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Detected $BREAKAGES API breaking change(s)."
+
+      - name: Build comment body
+        id: comment
+        run: |
+          BASELINE='${{ steps.baseline.outputs.baseline }}'
+          COUNT='${{ steps.parse.outputs.count }}'
+
+          if [ "$COUNT" = "0" ]; then
+            cat > comment.md <<EOF
+          ### ✅ No public API breaking changes
+
+          Compared the public API of this PR against \`$BASELINE\` using
+          \`swift package diagnose-api-breaking-changes\`. No breakages
+          detected in \`JSONSchema\`, \`JSONSchemaBuilder\`, or
+          \`JSONSchemaConversion\`.
+          EOF
+          else
+            {
+              echo "### ⚠️ Public API breaking changes detected ($COUNT)"
+              echo ""
+              echo "Compared against \`$BASELINE\`. The Swift API digester reports the following changes:"
+              echo ""
+              echo '```'
+              grep "💔 API breakage:" diagnose.log | sed 's/.*💔 API breakage: //' || true
+              echo '```'
+              echo ""
+              echo "If these breaks are intentional, no action is needed — they will ship in the next major (or 0.x → 0.y) release. If they're accidental, restore the symbols or add deprecation shims."
+            } > comment.md
+          fi
+
+      - name: Update sticky PR comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: api-breaking-changes
+          path: comment.md
+
+      - name: Add or remove `breaking-change` label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR='${{ github.event.pull_request.number }}'
+          REPO='${{ github.repository }}'
+          COUNT='${{ steps.parse.outputs.count }}'
+
+          # Make sure the label exists (idempotent).
+          gh label create breaking-change \
+            --repo "$REPO" \
+            --color "B60205" \
+            --description "Public API breaking change detected by CI" 2>/dev/null || true
+
+          if [ "$COUNT" = "0" ]; then
+            # Remove if present; ignore 404 if not present.
+            gh pr edit "$PR" --repo "$REPO" --remove-label "breaking-change" 2>/dev/null || true
+          else
+            gh pr edit "$PR" --repo "$REPO" --add-label "breaking-change"
+          fi
+
+      - name: Job summary
         if: always()
         run: |
           {
             echo "## API breaking-change scan"
             echo ""
             echo "Compared against \`${{ steps.baseline.outputs.baseline }}\`."
+            echo "Detected **${{ steps.parse.outputs.count }}** breaking change(s)."
             echo ""
             if [ -s diagnose.log ]; then
+              echo '<details><summary>Full digester output</summary>'
+              echo ""
               echo '```'
-              tail -200 diagnose.log
+              tail -500 diagnose.log
               echo '```'
+              echo '</details>'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
