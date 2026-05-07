@@ -1,15 +1,17 @@
+import Foundation
+
 struct Annotation<Keyword: AnnotationProducingKeyword>: Sendable {
   let keyword: KeywordIdentifier
   let instanceLocation: JSONPointer
   let schemaLocation: JSONPointer
-  let absoluteSchemaLocation: String?
+  let absoluteSchemaLocation: URL?
   let value: Keyword.AnnotationValue
 
   init(
     keyword: KeywordIdentifier,
     instanceLocation: JSONPointer,
     schemaLocation: JSONPointer,
-    absoluteSchemaLocation: String? = nil,
+    absoluteSchemaLocation: URL? = nil,
     value: Keyword.AnnotationValue
   ) {
     self.keyword = keyword
@@ -32,7 +34,7 @@ public protocol AnyAnnotation: Sendable {
   var keyword: KeywordIdentifier { get }
   var instanceLocation: JSONPointer { get }
   var schemaLocation: JSONPointer { get }
-  var absoluteSchemaLocation: String? { get }
+  var absoluteSchemaLocation: URL? { get }
   var jsonValue: JSONValue { get }
 
   func merged(with other: AnyAnnotation) -> AnyAnnotation?

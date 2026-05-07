@@ -399,12 +399,12 @@ package struct ObjectSchema: ValidatableSchema {
     uri ?? documentURL
   }
 
-  private func absoluteKeywordLocation(for keywordName: String) -> String? {
+  private func absoluteKeywordLocation(for keywordName: String) -> URL? {
     let pointer = self.location.appending(.key(keywordName))
     return absoluteKeywordLocation(forPointer: pointer)
   }
 
-  private func absoluteKeywordLocation(forPointer pointer: JSONPointer) -> String? {
+  private func absoluteKeywordLocation(forPointer pointer: JSONPointer) -> URL? {
     pointer.absoluteLocation(relativeTo: baseURIForAbsoluteLocation())
   }
 }

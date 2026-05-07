@@ -267,7 +267,7 @@ struct SchemaTests {
     )
     #expect(
       dereferencedError.absoluteKeywordLocation
-        == "https://example.com/schemas/root#/$defs/nonEmpty/minLength"
+        == URL(string: "https://example.com/schemas/root#/$defs/nonEmpty/minLength")
     )
   }
 
@@ -292,7 +292,7 @@ struct SchemaTests {
     #expect(dereferencedError.keywordLocation == JSONPointer(tokens: ["$ref", "minLength"]))
     #expect(
       dereferencedError.absoluteKeywordLocation
-        == "https://example.com/strings.json#/minLength"
+        == URL(string: "https://example.com/strings.json#/minLength")
     )
   }
 }

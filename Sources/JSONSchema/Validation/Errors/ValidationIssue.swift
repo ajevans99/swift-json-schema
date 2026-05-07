@@ -1,3 +1,5 @@
+import Foundation
+
 public enum ValidationIssue: Error, Codable, Equatable {
   case typeMismatch(expected: [JSONType], actual: JSONType)
   case notEnumCase(value: JSONValue, allowedValues: [JSONValue])
@@ -56,7 +58,7 @@ extension ValidationIssue {
   func makeValidationError(
     keyword: String,
     keywordLocation: JSONPointer,
-    absoluteKeywordLocation: String?,
+    absoluteKeywordLocation: URL?,
     instanceLocation: JSONPointer
   ) -> ValidationError {
     switch self {

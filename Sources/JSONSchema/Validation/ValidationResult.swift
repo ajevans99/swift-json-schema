@@ -1,7 +1,9 @@
+import Foundation
+
 public struct ValidationResult: Sendable, Encodable, Equatable {
   public let isValid: Bool
   public let keywordLocation: JSONPointer
-  public let absoluteKeywordLocation: String?
+  public let absoluteKeywordLocation: URL?
   public let instanceLocation: JSONPointer
   public let errors: [ValidationError]?
   public let annotations: [AnyAnnotation]?
@@ -9,7 +11,7 @@ public struct ValidationResult: Sendable, Encodable, Equatable {
   init(
     valid: Bool,
     keywordLocation: JSONPointer,
-    absoluteKeywordLocation: String? = nil,
+    absoluteKeywordLocation: URL? = nil,
     instanceLocation: JSONPointer,
     errors: [ValidationError]? = nil,
     annotations: [AnyAnnotation]? = nil
@@ -57,7 +59,7 @@ public struct ValidationError: Sendable, Codable, Equatable {
   public let keyword: String
   public let message: String
   public let keywordLocation: JSONPointer
-  public let absoluteKeywordLocation: String?
+  public let absoluteKeywordLocation: URL?
   public let instanceLocation: JSONPointer
   public let errors: [ValidationError]?  // For nested errors
 
@@ -65,7 +67,7 @@ public struct ValidationError: Sendable, Codable, Equatable {
     keyword: String,
     message: String,
     keywordLocation: JSONPointer,
-    absoluteKeywordLocation: String? = nil,
+    absoluteKeywordLocation: URL? = nil,
     instanceLocation: JSONPointer,
     errors: [ValidationError]? = nil
   ) {

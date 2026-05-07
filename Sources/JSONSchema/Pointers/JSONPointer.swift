@@ -83,11 +83,11 @@ public struct JSONPointer: Sendable, Hashable {
     return JSONPointer(path: Array(path.dropFirst(base.path.count)))
   }
 
-  func absoluteLocation(relativeTo baseURL: URL) -> String? {
+  func absoluteLocation(relativeTo baseURL: URL) -> URL? {
     let base = baseURL.withoutFragment ?? baseURL
     var components = URLComponents(url: base, resolvingAgainstBaseURL: true)
     components?.fragment = jsonPointerString
-    return components?.url?.absoluteString
+    return components?.url
   }
 }
 

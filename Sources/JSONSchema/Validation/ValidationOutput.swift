@@ -30,7 +30,7 @@ public struct ValidationOutputConfiguration: Sendable, Equatable {
 private struct ValidationOutputUnit: Encodable {
   let valid: Bool
   let keywordLocation: String
-  let absoluteKeywordLocation: String?
+  let absoluteKeywordLocation: URL?
   let instanceLocation: String
   let error: String?
   let errors: [ValidationOutputUnit]?
