@@ -4,7 +4,15 @@ import OrderedCollections
 /// A JSON object value component for use in ``JSONValueBuilder``.
 public struct JSONObjectValue: JSONValueRepresentable {
   public var value: JSONValue {
-    .object(OrderedDictionary(uniqueKeysWithValues: properties.map { ($0.key, $0.value.value) }))
+    // `properties` is a Dictionary, whose iteration order is not stable
+    // across processes. Sort keys before building the OrderedDictionary
+    // so the emitted JSON is deterministic. Callers that need a specific
+    // key order should use a builder that supplies an ordered source.
+    .object(
+      OrderedDictionary(
+        uniqueKeysWithValues: properties.keys.sorted().map { ($0, properties[$0]!.value) }
+      )
+    )
   }
 
   let properties: [String: JSONValueRepresentable]

@@ -48,7 +48,10 @@ public enum JSONValue: Hashable, Equatable, Sendable {
     switch self {
     case .string(let value):
       hasher.combine(0)
-      // Match the unicode-scalar equality used by `==` so equal strings hash equally.
+      // String equality (below) compares unicode scalars verbatim — *not*
+      // Swift's canonical String equality — so the hash must use the same
+      // representation. Hashing the scalar array preserves the contract
+      // `lhs == rhs` ⇒ `lhs.hashValue == rhs.hashValue`.
       hasher.combine(Array(value.unicodeScalars))
     case .number(let value):
       hasher.combine(1)

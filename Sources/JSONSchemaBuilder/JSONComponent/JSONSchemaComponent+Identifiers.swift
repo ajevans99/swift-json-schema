@@ -16,8 +16,13 @@ extension JSONSchemaComponent {
 
   public func vocabulary(_ mapping: [String: Bool]) -> Self {
     var copy = self
+    // Sort keys so emission is deterministic regardless of the input
+    // Dictionary's hash-seed-dependent iteration order. Vocabulary URIs
+    // have no meaningful order in the schema spec.
     copy.schemaValue[Keywords.Vocabulary.name] = .object(
-      OrderedDictionary(uniqueKeysWithValues: mapping.map { ($0.key, JSONValue.boolean($0.value)) })
+      OrderedDictionary(
+        uniqueKeysWithValues: mapping.keys.sorted().map { ($0, JSONValue.boolean(mapping[$0]!)) }
+      )
     )
     return copy
   }

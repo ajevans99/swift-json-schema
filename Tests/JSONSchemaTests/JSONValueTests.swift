@@ -115,7 +115,7 @@ struct JSONValueTests {
       "required": .array([.string("name"), .string("age")]),
     ]
 
-    let encoded = value.serialized()
+    let encoded = try value.serialized()
 
     let expected =
       "{\"$id\":\"https://example.com/schema\",\"type\":\"object\",\"properties\":"
@@ -125,7 +125,7 @@ struct JSONValueTests {
   }
 
   @Test
-  func serializedIsByteStableAcrossRepeatedCalls() {
+  func serializedIsByteStableAcrossRepeatedCalls() throws {
     let value: JSONValue = [
       "type": "object",
       "properties": [
@@ -136,7 +136,7 @@ struct JSONValueTests {
       "additionalProperties": false,
     ]
 
-    let outputs: [String] = (0 ..< 10).map { _ in value.serialized() }
+    let outputs: [String] = try (0 ..< 10).map { _ in try value.serialized() }
     let first = outputs[0]
     for run in outputs.dropFirst() {
       #expect(run == first, "Encoded bytes should be identical across repeated calls")
@@ -154,9 +154,9 @@ struct JSONValueTests {
   }
 
   @Test
-  func serializedPrettyPrintedRespectsIndent() {
+  func serializedPrettyPrintedRespectsIndent() throws {
     let value: JSONValue = ["a": 1, "b": [.integer(2), .integer(3)]]
-    let encoded = value.serialized(options: .pretty)
+    let encoded = try value.serialized(options: .pretty)
     let expected = """
       {
         "a" : 1,
@@ -167,5 +167,37 @@ struct JSONValueTests {
       }
       """
     #expect(encoded == expected)
+  }
+
+  @Test
+  func serializedThrowsOnNonConformingFloatByDefault() {
+    let value: JSONValue = .number(.nan)
+    #expect(throws: JSONValue.SerializationError.self) {
+      _ = try value.serialized()
+    }
+  }
+
+  @Test
+  func serializedConvertsNonConformingFloatWhenStrategyConfigured() throws {
+    let nan: JSONValue = .number(.nan)
+    let posInf: JSONValue = .number(.infinity)
+    let negInf: JSONValue = .number(-.infinity)
+    let options = JSONValue.SerializationOptions(
+      nonConformingFloatStrategy: .convertToString(
+        positiveInfinity: "+inf",
+        negativeInfinity: "-inf",
+        nan: "nan"
+      )
+    )
+    #expect(try nan.serialized(options: options) == "\"nan\"")
+    #expect(try posInf.serialized(options: options) == "\"+inf\"")
+    #expect(try negInf.serialized(options: options) == "\"-inf\"")
+  }
+
+  @Test
+  func serializedEmitsNullForNonConformingFloatWhenRequested() throws {
+    let value: JSONValue = .object(["x": .number(.nan)])
+    let options = JSONValue.SerializationOptions(nonConformingFloatStrategy: .null)
+    #expect(try value.serialized(options: options) == "{\"x\":null}")
   }
 }

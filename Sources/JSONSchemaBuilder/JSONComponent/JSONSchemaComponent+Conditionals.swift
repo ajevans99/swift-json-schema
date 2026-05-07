@@ -12,11 +12,14 @@ extension JSONSchemaComponent {
   ///   set.
   public func dependentRequired(_ mapping: [String: [String]]) -> Self {
     var copy = self
+    // Sort keys so emission is deterministic regardless of the input
+    // Dictionary's hash-seed-dependent iteration order.
     copy.schemaValue[Keywords.DependentRequired.name] = .object(
       OrderedDictionary(
-        uniqueKeysWithValues: mapping.map { key, array in
-          (key, JSONValue.array(array.map { .string($0) }))
-        }
+        uniqueKeysWithValues: mapping.keys.sorted()
+          .map { key in
+            (key, JSONValue.array(mapping[key]!.map { .string($0) }))
+          }
       )
     )
     return copy
@@ -32,11 +35,14 @@ extension JSONSchemaComponent {
   ///   set.
   public func dependentSchemas(_ mapping: [String: any JSONSchemaComponent]) -> Self {
     var copy = self
+    // Sort keys so emission is deterministic regardless of the input
+    // Dictionary's hash-seed-dependent iteration order.
     copy.schemaValue[Keywords.DependentSchemas.name] = .object(
       OrderedDictionary(
-        uniqueKeysWithValues: mapping.map { key, component in
-          (key, component.schemaValue.value)
-        }
+        uniqueKeysWithValues: mapping.keys.sorted()
+          .map { key in
+            (key, mapping[key]!.schemaValue.value)
+          }
       )
     )
     return copy
