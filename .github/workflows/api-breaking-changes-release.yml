@@ -1,0 +1,87 @@
+name: API breaking changes (release)
+
+# Cumulative API-breaking-change check — compares the current default branch
+# (or any chosen ref) against the previous release tag. Runs on demand so we
+# can audit what's accumulated since the last release before tagging the
+# next one.
+
+on:
+  workflow_dispatch:
+    inputs:
+      head_ref:
+        description: "Ref to compare (defaults to main)"
+        required: false
+        default: "main"
+      baseline_tag:
+        description: "Baseline tag (defaults to latest vX.Y.Z)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  diff:
+    name: Diff ${{ inputs.head_ref }} vs release
+    runs-on: macos-26-xlarge
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.head_ref }}
+          fetch-depth: 0
+
+      - name: Resolve baseline tag
+        id: baseline
+        run: |
+          BASELINE='${{ inputs.baseline_tag }}'
+          if [ -z "$BASELINE" ]; then
+            BASELINE=$(git tag --sort=-v:refname --list 'v[0-9]*.[0-9]*.[0-9]*' | head -n1)
+          fi
+          if [ -z "$BASELINE" ]; then
+            echo "::error::No baseline tag found (no vX.Y.Z tags exist)."
+            exit 1
+          fi
+          echo "baseline=$BASELINE" >> "$GITHUB_OUTPUT"
+          echo "Comparing $(git rev-parse --short HEAD) (${{ inputs.head_ref }}) against $BASELINE"
+
+      - name: Diagnose API breaking changes
+        id: diagnose
+        continue-on-error: true
+        run: |
+          set +e
+          swift package diagnose-api-breaking-changes \
+            "${{ steps.baseline.outputs.baseline }}" \
+            > diagnose.log 2>&1
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          cat diagnose.log
+
+      - name: Job summary
+        if: always()
+        run: |
+          BREAKAGES=$(grep -c "💔 API breakage:" diagnose.log || true)
+          {
+            echo "## Cumulative API breaking-change report"
+            echo ""
+            echo "- **Head**: \`${{ inputs.head_ref }}\` ($(git rev-parse --short HEAD))"
+            echo "- **Baseline**: \`${{ steps.baseline.outputs.baseline }}\`"
+            echo "- **Breakages found**: $BREAKAGES"
+            echo ""
+            if [ "$BREAKAGES" != "0" ]; then
+              echo '```'
+              grep "💔 API breakage:" diagnose.log | sed 's/.*💔 API breakage: //'
+              echo '```'
+              echo ""
+              echo "These represent the cumulative public API changes that would ship in the next release."
+            else
+              echo "_No breaking changes since the baseline._"
+            fi
+            echo ""
+            echo "<details><summary>Full digester output</summary>"
+            echo ""
+            echo '```'
+            tail -500 diagnose.log
+            echo '```'
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
