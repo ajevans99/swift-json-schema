@@ -67,22 +67,16 @@ public func zip<each Value, Error>(
   } catch {
     var errors: [Error] = []
 
-    #if swift(>=6)
-      for validated in repeat each validated {
-        switch validated {
-        case .valid: continue
-        case .invalid(let array): errors.append(contentsOf: array)
-        }
+    // The natural `for x in repeat each validated { … }` form crashes
+    // SwiftPM tests at runtime under Swift 6.1.x (codegen bug, fixed in
+    // 6.3); use the helper-function pack-expansion form instead.
+    func collectErrors<Val>(_ v: Parsed<Val, Error>) {
+      switch v {
+      case .valid: break
+      case .invalid(let array): errors.append(contentsOf: array)
       }
-    #else
-      func collectErrors<Val>(_ v: Parsed<Val, Error>) {
-        switch v {
-        case .valid: break
-        case .invalid(let array): errors.append(contentsOf: array)
-        }
-      }
-      repeat collectErrors(each validated)
-    #endif
+    }
+    repeat collectErrors(each validated)
 
     return .invalid(errors)
   }

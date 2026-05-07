@@ -4,7 +4,7 @@ import Foundation
 
 public struct DateTimeFormatValidator: FormatValidator {
   public let formatName = "date-time"
-  private static let formatter: ISO8601DateFormatter = {
+  nonisolated(unsafe) private static let formatter: ISO8601DateFormatter = {
     let f = ISO8601DateFormatter()
     f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
     return f
@@ -32,7 +32,7 @@ public struct DateFormatValidator: FormatValidator {
 
 public struct TimeFormatValidator: FormatValidator {
   public let formatName = "time"
-  private static let regex = try! Regex(
+  nonisolated(unsafe) private static let regex = try! Regex(
     #"^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):?[0-5]\d)?$"#
   )
 
@@ -45,13 +45,13 @@ public struct TimeFormatValidator: FormatValidator {
 
 public struct EmailFormatValidator: FormatValidator {
   public let formatName = "email"
-  private static let regex = try! Regex(#"^[^@\s]+@[^@\s]+\.[^@\s]+$"#)
+  nonisolated(unsafe) private static let regex = try! Regex(#"^[^@\s]+@[^@\s]+\.[^@\s]+$"#)
   public func validate(_ value: String) -> Bool { value.firstMatch(of: Self.regex) != nil }
 }
 
 public struct HostnameFormatValidator: FormatValidator {
   public let formatName = "hostname"
-  private static let regex = try! Regex(
+  nonisolated(unsafe) private static let regex = try! Regex(
     #"^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)(?:\.(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?))*$"#
   )
   public func validate(_ value: String) -> Bool { value.firstMatch(of: Self.regex) != nil }
@@ -59,7 +59,7 @@ public struct HostnameFormatValidator: FormatValidator {
 
 public struct IPv4FormatValidator: FormatValidator {
   public let formatName = "ipv4"
-  private static let regex = try! Regex(
+  nonisolated(unsafe) private static let regex = try! Regex(
     #"^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$"#
   )
   public func validate(_ value: String) -> Bool { value.firstMatch(of: Self.regex) != nil }
@@ -67,7 +67,9 @@ public struct IPv4FormatValidator: FormatValidator {
 
 public struct IPv6FormatValidator: FormatValidator {
   public let formatName = "ipv6"
-  private static let regex = try! Regex(#"^(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}$"#)
+  nonisolated(unsafe) private static let regex = try! Regex(
+    #"^(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}$"#
+  )
   public func validate(_ value: String) -> Bool { value.firstMatch(of: Self.regex) != nil }
 }
 
