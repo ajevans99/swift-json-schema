@@ -1,3 +1,5 @@
+import OrderedCollections
+
 extension JSONValue: ExpressibleByStringLiteral {
   public init(stringLiteral value: StringLiteralType) { self = .string(value) }
 }
@@ -16,7 +18,11 @@ extension JSONValue: ExpressibleByArrayLiteral {
 
 extension JSONValue: ExpressibleByDictionaryLiteral {
   public init(dictionaryLiteral elements: (String, JSONValue)...) {
-    let dictionary = Dictionary(uniqueKeysWithValues: elements)
+    var dictionary = OrderedDictionary<String, JSONValue>()
+    dictionary.reserveCapacity(elements.count)
+    for (key, value) in elements {
+      dictionary[key] = value
+    }
     self = .object(dictionary)
   }
 }

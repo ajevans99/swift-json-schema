@@ -1,4 +1,5 @@
 import JSONSchema
+import OrderedCollections
 import Testing
 
 @testable import JSONSchemaBuilder
@@ -30,7 +31,7 @@ struct JSONSchemaOptionBuilderTests {
       .additionalProperties { JSONBoolean() }
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "properties": [
         "property0": [
           "type": "string"
@@ -75,7 +76,7 @@ struct JSONSchemaOptionBuilderTests {
       }
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "object",
       "properties": [
         "key1": [
@@ -97,7 +98,7 @@ struct JSONSchemaOptionBuilderTests {
         .additionalProperties { false }
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "object",
       "additionalProperties": false,
       "unevaluatedProperties": [
@@ -117,7 +118,7 @@ struct JSONSchemaOptionBuilderTests {
         .format("uuid")
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "string",
       "minLength": 12,
       "maxLength": 36,
@@ -136,7 +137,7 @@ struct JSONSchemaOptionBuilderTests {
         .exclusiveMaximum(100)
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "integer",
       "multipleOf": 2,
       "minimum": 1,
@@ -154,7 +155,7 @@ struct JSONSchemaOptionBuilderTests {
         .maximum(5000)
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "number",
       "multipleOf": 1,
       "exclusiveMinimum": 0.99,
@@ -170,7 +171,7 @@ struct JSONSchemaOptionBuilderTests {
         .unevaluatedItems { JSONNumber() }
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "array",
       "unevaluatedItems": [
         "type": "number"
@@ -198,7 +199,7 @@ struct JSONSchemaOptionBuilderTests {
         .uniqueItems()
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "array",
       "items": ["type": "number"],
       "prefixItems": [
@@ -243,7 +244,7 @@ struct JSONSchemaAnnotationsBuilderTests {
         .deprecated(false)
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "null",
       "title": "Title",
       "description": "This is the description",
@@ -265,7 +266,7 @@ struct JSONSchemaAnnotationsBuilderTests {
         .examples(["1", nil, false, [1, 2, 3], ["hello": "world"]])
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "null",
       "default": "1",
       "examples": ["1", nil, false, [1, 2, 3], ["hello": "world"]],
@@ -285,7 +286,7 @@ struct JSONSchemaAnnotationsBuilderTests {
       .description("A product from Acme's catalog")
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "object",
       "properties": [
         "productId": ["type": "integer", "description": "The unique identifier for a product"],
@@ -333,7 +334,7 @@ struct JSONAdvancedBuilderTests {
       }
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "object",
       "properties": [
         "foo": ["type": "string"],
@@ -364,7 +365,7 @@ struct JSONSchemaGroupTests {
       typeExtension
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "object",
       "properties": [
         "to": ["type": "string"],

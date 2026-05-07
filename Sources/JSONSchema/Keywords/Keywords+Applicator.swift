@@ -697,11 +697,19 @@ extension Keywords {
       self.value = value
       self.context = context
 
-      self.schemaMap =
-        value.object?
-        .compactMapValues { rawSchema in
-          try? Schema(rawSchema: rawSchema, location: context.location, context: context.context)
-        } ?? [:]
+      self.schemaMap = Dictionary(
+        uniqueKeysWithValues: value.object?
+          .compactMap { (key, rawSchema) -> (String, Schema)? in
+            guard
+              let schema = try? Schema(
+                rawSchema: rawSchema,
+                location: context.location,
+                context: context.context
+              )
+            else { return nil }
+            return (key, schema)
+          } ?? []
+      )
     }
 
     package typealias AnnotationValue = Never

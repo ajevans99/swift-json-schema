@@ -35,11 +35,15 @@ let package = Package(
     .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.0.0"),
     .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.1" ..< "700.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.17.6"),
+    .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.0"),
   ],
   targets: [
     // Library that defines the JSON schema related types.
     .target(
       name: "JSONSchema",
+      dependencies: [
+        .product(name: "OrderedCollections", package: "swift-collections")
+      ],
       resources: [
         .process("Resources")
       ]

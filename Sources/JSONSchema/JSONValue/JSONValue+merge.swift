@@ -1,8 +1,13 @@
+import OrderedCollections
+
 extension JSONValue {
   /// Mutates `self` by merging in values from `other`.
   /// - Arrays are concatenated.
   /// - Objects are merged recursively.
   /// - Scalars are preserved unless `self` is `.null`.
+  ///
+  /// The merged object preserves the key order of `self`, with any new keys
+  /// from `other` appended in their original order.
   public mutating func merge(_ other: JSONValue) {
     switch (self, other) {
     case (.object(var lhsDict), .object(let rhsDict)):

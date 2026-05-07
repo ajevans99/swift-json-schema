@@ -1,4 +1,5 @@
 import JSONSchema
+import OrderedCollections
 import Testing
 
 @testable import JSONSchemaBuilder
@@ -11,7 +12,7 @@ struct ContentMediaTypeBuilderTests {
         .contentMediaType("image/png")
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "string",
       "contentEncoding": "base64",
       "contentMediaType": "image/png",

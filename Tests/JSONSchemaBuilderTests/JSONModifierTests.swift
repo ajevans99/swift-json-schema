@@ -1,5 +1,6 @@
 import JSONSchema
 import JSONSchemaBuilder
+import OrderedCollections
 import Testing
 
 private struct HexColor: Equatable, Sendable {
@@ -66,7 +67,7 @@ struct JSONEnumTests {
         .enumValues { "red" }
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "string",
       "enum": ["red"],
     ]
@@ -84,7 +85,7 @@ struct JSONEnumTests {
         }
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "string",
       "enum": ["red", "amber", "green"],
     ]
@@ -104,7 +105,7 @@ struct JSONEnumTests {
         }
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "enum": ["red", "amber", "green", nil, 42]
     ]
 
@@ -122,7 +123,7 @@ struct JSONEnumTests {
         .title("Color")
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "title": "Color",
       "type": "string",
       "enum": ["red", "amber", "green"],
@@ -139,7 +140,7 @@ struct JSONConstantTests {
         .constant("red")
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "const": "red"
     ]
 
@@ -152,7 +153,7 @@ struct JSONConstantTests {
         .constant("red")
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "string",
       "const": "red",
     ]

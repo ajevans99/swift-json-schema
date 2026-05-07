@@ -1,4 +1,5 @@
 import Foundation
+import OrderedCollections
 
 protocol ReferenceKeyword: CoreKeyword {
   func validate(
@@ -318,7 +319,14 @@ struct ReferenceResolver {
     let adjustedPointer = pointer.relative(toBase: schema.location)
 
     guard let objectSchema = schema.schema as? ObjectSchema else { return nil }
-    guard let subRawSchema = JSONValue.object(objectSchema.schemaValue).value(at: adjustedPointer)
+    guard
+      let subRawSchema =
+        JSONValue.object(
+          OrderedDictionary(
+            uniqueKeysWithValues: objectSchema.schemaValue.map { ($0.key, $0.value) }
+          )
+        )
+        .value(at: adjustedPointer)
     else {
       return nil
     }

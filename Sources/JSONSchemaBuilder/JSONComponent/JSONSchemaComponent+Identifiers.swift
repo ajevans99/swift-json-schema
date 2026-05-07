@@ -1,4 +1,5 @@
 import JSONSchema
+import OrderedCollections
 
 extension JSONSchemaComponent {
   public func id(_ value: String) -> Self {
@@ -13,10 +14,17 @@ extension JSONSchemaComponent {
     return copy
   }
 
-  public func vocabulary(_ mapping: [String: Bool]) -> Self {
+  /// Sets the schema vocabulary mapping.
+  ///
+  /// - Parameter mapping: Vocabulary URIs to enable/disable. Pass a
+  ///   dictionary literal (e.g.
+  ///   `[Vocabularies.Core: true, Vocabularies.Applicator: true]`); the
+  ///   declaration order is preserved on emission.
+  /// - Returns: A copy of this component with the `$vocabulary` keyword set.
+  public func vocabulary(_ mapping: KeyValuePairs<String, Bool>) -> Self {
     var copy = self
     copy.schemaValue[Keywords.Vocabulary.name] = .object(
-      Dictionary(uniqueKeysWithValues: mapping.map { ($0.key, .boolean($0.value)) })
+      OrderedDictionary(uniqueKeysWithValues: mapping.map { ($0.key, JSONValue.boolean($0.value)) })
     )
     return copy
   }

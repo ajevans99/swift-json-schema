@@ -1,4 +1,5 @@
 import JSONSchema
+import OrderedCollections
 import Testing
 
 @testable import JSONSchemaBuilder
@@ -13,7 +14,7 @@ struct JSONConditionalBuilderTests {
       )
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "if": ["type": "string", "minLength": 1],
       "then": ["type": "string", "pattern": "^foo"],
       "else": ["type": "string", "pattern": "^bar"],
@@ -31,7 +32,7 @@ struct JSONConditionalBuilderTests {
       .dependentRequired(["a": ["b"]])
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "object",
       "properties": [
         "a": ["type": "integer"],
@@ -56,7 +57,7 @@ struct JSONConditionalBuilderTests {
       ])
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": "object",
       "properties": [
         "credit_card": ["type": "integer"],

@@ -34,7 +34,7 @@
 
   public static func buildExpression(
     _ expression: [String: JSONValueRepresentable]
-  ) -> JSONObjectValue { JSONObjectValue(properties: expression) }
+  ) -> JSONObjectValue { JSONObjectValue(dictionary: expression) }
 
   // MARK: Additional array type hints
 
@@ -61,25 +61,25 @@
   // MARK: Addition dictionary type hints
 
   public static func buildExpression(_ expression: [String: Int]) -> JSONObjectValue {
-    JSONObjectValue(properties: expression.mapValues { JSONIntegerValue(integer: $0) })
+    JSONObjectValue(dictionary: expression.mapValues { JSONIntegerValue(integer: $0) })
   }
 
   public static func buildExpression(_ expression: [String: Double]) -> JSONObjectValue {
-    JSONObjectValue(properties: expression.mapValues { JSONNumberValue(number: $0) })
+    JSONObjectValue(dictionary: expression.mapValues { JSONNumberValue(number: $0) })
   }
 
   public static func buildExpression(_ expression: [String: Bool]) -> JSONObjectValue {
-    JSONObjectValue(properties: expression.mapValues { JSONBooleanValue(boolean: $0) })
+    JSONObjectValue(dictionary: expression.mapValues { JSONBooleanValue(boolean: $0) })
   }
 
   public static func buildExpression(_ expression: [String: String]) -> JSONObjectValue {
-    JSONObjectValue(properties: expression.mapValues { JSONStringValue(string: $0) })
+    JSONObjectValue(dictionary: expression.mapValues { JSONStringValue(string: $0) })
   }
 
   public static func buildExpression(
     _ expression: [String: JSONValueRepresentable?]
   ) -> JSONObjectValue {
-    JSONObjectValue(properties: expression.mapValues { $0 ?? JSONNullValue() })
+    JSONObjectValue(dictionary: expression.mapValues { $0 ?? JSONNullValue() })
   }
 
   // MARK: Advanced builers

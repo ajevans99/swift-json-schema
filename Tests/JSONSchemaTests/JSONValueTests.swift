@@ -99,4 +99,105 @@ struct JSONValueTests {
     #expect(composed != decomposed)
     #expect(JSONValue.string("hello") == JSONValue.string("hello"))
   }
+
+  // MARK: - Determinism (#149)
+
+  @Test
+  func serializedPreservesObjectKeyInsertionOrder() throws {
+    let value: JSONValue = [
+      "$id": "https://example.com/schema",
+      "type": "object",
+      "properties": [
+        "name": ["type": "string"],
+        "age": ["type": "integer"],
+        "email": ["type": "string"],
+      ],
+      "required": .array([.string("name"), .string("age")]),
+    ]
+
+    let encoded = try value.serialized()
+
+    let expected =
+      "{\"$id\":\"https://example.com/schema\",\"type\":\"object\",\"properties\":"
+      + "{\"name\":{\"type\":\"string\"},\"age\":{\"type\":\"integer\"},\"email\":{\"type\":\"string\"}},"
+      + "\"required\":[\"name\",\"age\"]}"
+    #expect(encoded == expected)
+  }
+
+  @Test
+  func serializedIsByteStableAcrossRepeatedCalls() throws {
+    let value: JSONValue = [
+      "type": "object",
+      "properties": [
+        "alpha": ["type": "string"],
+        "beta": ["type": "integer"],
+        "gamma": ["type": "boolean"],
+      ],
+      "additionalProperties": false,
+    ]
+
+    let outputs: [String] = try (0 ..< 10).map { _ in try value.serialized() }
+    let first = outputs[0]
+    for run in outputs.dropFirst() {
+      #expect(run == first, "Encoded bytes should be identical across repeated calls")
+    }
+  }
+
+  @Test
+  func objectEqualityIsOrderInsensitive() {
+    let a: JSONValue = ["x": 1, "y": 2]
+    let b: JSONValue = ["y": 2, "x": 1]
+    // JSON objects are unordered for equality even though we now preserve
+    // insertion order for emission.
+    #expect(a == b)
+    #expect(a.hashValue == b.hashValue)
+  }
+
+  @Test
+  func serializedPrettyPrintedRespectsIndent() throws {
+    let value: JSONValue = ["a": 1, "b": [.integer(2), .integer(3)]]
+    let encoded = try value.serialized(options: .pretty)
+    let expected = """
+      {
+        "a" : 1,
+        "b" : [
+          2,
+          3
+        ]
+      }
+      """
+    #expect(encoded == expected)
+  }
+
+  @Test
+  func serializedThrowsOnNonConformingFloatByDefault() {
+    let value: JSONValue = .number(.nan)
+    #expect(throws: JSONValue.SerializationError.self) {
+      _ = try value.serialized()
+    }
+  }
+
+  @Test
+  func serializedConvertsNonConformingFloatWhenStrategyConfigured() throws {
+    let nan: JSONValue = .number(.nan)
+    let posInf: JSONValue = .number(.infinity)
+    let negInf: JSONValue = .number(-.infinity)
+    let options = JSONValue.SerializationOptions(
+      nonConformingFloatStrategy: .convertToString(
+        positiveInfinity: "+inf",
+        negativeInfinity: "-inf",
+        nan: "nan"
+      )
+    )
+    #expect(try nan.serialized(options: options) == "\"nan\"")
+    #expect(try posInf.serialized(options: options) == "\"+inf\"")
+    #expect(try negInf.serialized(options: options) == "\"-inf\"")
+  }
+
+  @Test
+  func serializedEmitsNullForNonConformingFloatWhenRequested() throws {
+    let value: JSONValue = .object(["x": .number(.nan)])
+    let options = JSONValue.SerializationOptions(nonConformingFloatStrategy: .null)
+    #expect(try value.serialized(options: options) == "{\"x\":null}")
+  }
 }

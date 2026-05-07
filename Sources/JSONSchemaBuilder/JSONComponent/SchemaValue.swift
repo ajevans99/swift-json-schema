@@ -1,10 +1,28 @@
 import JSONSchema
+import OrderedCollections
 
 public enum SchemaValue: Sendable, Equatable {
   case boolean(Bool)
-  case object([KeywordIdentifier: JSONValue])
+  case object(OrderedDictionary<KeywordIdentifier, JSONValue>)
 
-  public var object: [KeywordIdentifier: JSONValue]? {
+  public static func == (lhs: SchemaValue, rhs: SchemaValue) -> Bool {
+    switch (lhs, rhs) {
+    case (.boolean(let l), .boolean(let r)):
+      return l == r
+    case (.object(let l), .object(let r)):
+      // JSON Schema objects are equal regardless of key order; insertion
+      // order is preserved purely for deterministic emission. See #149.
+      guard l.count == r.count else { return false }
+      for (key, value) in l {
+        guard r[key] == value else { return false }
+      }
+      return true
+    default:
+      return false
+    }
+  }
+
+  public var object: OrderedDictionary<KeywordIdentifier, JSONValue>? {
     switch self {
     case .boolean: return nil
     case .object(let dict): return dict
@@ -64,6 +82,17 @@ public enum SchemaValue: Sendable, Equatable {
   }
 }
 
+extension SchemaValue: ExpressibleByDictionaryLiteral {
+  public init(dictionaryLiteral elements: (KeywordIdentifier, JSONValue)...) {
+    var dictionary = OrderedDictionary<KeywordIdentifier, JSONValue>()
+    dictionary.reserveCapacity(elements.count)
+    for (key, value) in elements {
+      dictionary[key] = value
+    }
+    self = .object(dictionary)
+  }
+}
+
 extension SchemaValue: Encodable {
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
@@ -71,7 +100,7 @@ extension SchemaValue: Encodable {
     case .boolean(let bool):
       try container.encode(bool)
     case .object(let dict):
-      try container.encode(dict)
+      try container.encode(JSONValue.object(dict))
     }
   }
 }

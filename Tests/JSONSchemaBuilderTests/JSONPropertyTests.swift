@@ -121,7 +121,7 @@ struct JSONPropertySchemaTests {
       }
     }
 
-    let firstProperty = try #require(sample.schemaValue.object?.first)
+    let firstProperty = try #require(sample.schemaValue.object?.elements.first)
     #expect(firstProperty.key == (bool ? "prop0" : "prop1"))
   }
 }
