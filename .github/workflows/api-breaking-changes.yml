@@ -28,16 +28,18 @@ jobs:
           swift --version
           xcodebuild -version
 
-      - name: Resolve baseline (latest release tag)
+      - name: Resolve baseline (PR base branch)
         id: baseline
         run: |
-          # Pick the most recent semver tag (vX.Y.Z); fall back to main if none.
-          BASELINE=$(git tag --sort=-v:refname --list 'v[0-9]*.[0-9]*.[0-9]*' | head -n1)
-          if [ -z "$BASELINE" ]; then
-            BASELINE="origin/main"
-          fi
-          echo "baseline=$BASELINE" >> "$GITHUB_OUTPUT"
-          echo "Comparing against: $BASELINE"
+          # Compare against the branch this PR will merge into. This shows
+          # only the breakages this PR *introduces*, not the accumulated
+          # delta between the last release tag and the PR head.
+          #
+          # Cumulative-since-release breakages are checked separately by
+          # the `api-breaking-changes-release.yml` workflow on demand.
+          BASE_REF='origin/${{ github.event.pull_request.base.ref }}'
+          echo "baseline=$BASE_REF" >> "$GITHUB_OUTPUT"
+          echo "Comparing against: $BASE_REF"
 
       - name: Diagnose API breaking changes
         id: diagnose
@@ -76,24 +78,29 @@ jobs:
 
           if [ "$COUNT" = "0" ]; then
             cat > comment.md <<EOF
-          ### ✅ No public API breaking changes
+          ### ✅ No public API breaking changes introduced
 
-          Compared the public API of this PR against \`$BASELINE\` using
+          Compared this PR's head against \`$BASELINE\` using
           \`swift package diagnose-api-breaking-changes\`. No breakages
           detected in \`JSONSchema\`, \`JSONSchemaBuilder\`, or
           \`JSONSchemaConversion\`.
+
+          <sub>This check shows only changes this PR introduces. Cumulative
+          breakages since the last release tag are reviewed at release time.</sub>
           EOF
           else
             {
-              echo "### ⚠️ Public API breaking changes detected ($COUNT)"
+              echo "### ⚠️ Public API breaking changes introduced ($COUNT)"
               echo ""
-              echo "Compared against \`$BASELINE\`. The Swift API digester reports the following changes:"
+              echo "Compared this PR's head against \`$BASELINE\`. The Swift API digester reports the following changes introduced by this PR:"
               echo ""
               echo '```'
               grep "💔 API breakage:" diagnose.log | sed 's/.*💔 API breakage: //' || true
               echo '```'
               echo ""
-              echo "If these breaks are intentional, no action is needed — they will ship in the next major (or 0.x → 0.y) release. If they're accidental, restore the symbols or add deprecation shims."
+              echo "If these breaks are intentional (e.g. preparing a major release), the \`breaking-change\` label has been applied for tracking — no further action needed. If they're accidental, restore the symbols or add deprecation shims."
+              echo ""
+              echo "<sub>This check shows only changes this PR introduces. Cumulative breakages since the last release tag are reviewed at release time.</sub>"
             } > comment.md
           fi
 
