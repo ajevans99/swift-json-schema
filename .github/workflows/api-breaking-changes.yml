@@ -22,6 +22,7 @@ jobs:
         with:
           # Need the full history so we can fetch the baseline tag.
           fetch-depth: 0
+          submodules: recursive
 
       - name: Get Swift / Xcode versions
         run: |
