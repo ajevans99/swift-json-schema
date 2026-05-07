@@ -1,10 +1,15 @@
+import OrderedCollections
+
 package struct AnnotationContainer {
   struct AnnotationKey: Hashable {
     let keywordType: ObjectIdentifier
     let instanceLocation: JSONPointer
   }
 
-  private var storage: [AnnotationKey: AnyAnnotation] = [:]
+  // OrderedDictionary so `allAnnotations()` returns annotations in the
+  // order they were inserted — the validation traversal order — rather
+  // than randomized Dictionary iteration order. Required for #149.
+  private var storage: OrderedDictionary<AnnotationKey, AnyAnnotation> = [:]
 
   package init() {}
 

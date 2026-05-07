@@ -1,4 +1,5 @@
 import Foundation
+import OrderedCollections
 import Testing
 
 @testable import JSONSchema
@@ -689,14 +690,14 @@ struct KeywordTests {
     // MARK: - Objects
 
     @Test(arguments: [
-      (JSONValue.object(["a": 1, "b": 2]), Set(["a", "b"]), true),
+      (JSONValue.object(["a": 1, "b": 2]), OrderedSet(["a", "b"]), true),
       (JSONValue.object(["a": 1, "b": "string"]), nil, false),
-      (JSONValue.object(["a": 1]), Set(["a"]), true),
-      (JSONValue.object(["b": 2]), Set(["b"]), true),
-      (JSONValue.object(["c": 3]), Set([]), true),
+      (JSONValue.object(["a": 1]), OrderedSet(["a"]), true),
+      (JSONValue.object(["b": 2]), OrderedSet(["b"]), true),
+      (JSONValue.object(["c": 3]), OrderedSet([]), true),
       (JSONValue.string("not an object"), nil, true),
     ])
-    func properties(instance: JSONValue, expectedAnnotation: Set<String>?, isValid: Bool) {
+    func properties(instance: JSONValue, expectedAnnotation: OrderedSet<String>?, isValid: Bool) {
       let schemaValue: JSONValue = [
         "a": ["type": "integer"],
         "b": ["type": "integer"],
@@ -721,14 +722,18 @@ struct KeywordTests {
     }
 
     @Test(arguments: [
-      (JSONValue.object(["a1": 1, "b2": 2]), Set(["a1", "b2"]), true),
+      (JSONValue.object(["a1": 1, "b2": 2]), OrderedSet(["a1", "b2"]), true),
       (JSONValue.object(["a1": 1, "b2": "string"]), nil, false),
-      (JSONValue.object(["a1": 1]), Set(["a1"]), true),
-      (JSONValue.object(["b2": 2]), Set(["b2"]), true),
-      (JSONValue.object(["c3": 3]), Set([]), true),
+      (JSONValue.object(["a1": 1]), OrderedSet(["a1"]), true),
+      (JSONValue.object(["b2": 2]), OrderedSet(["b2"]), true),
+      (JSONValue.object(["c3": 3]), OrderedSet([]), true),
       (JSONValue.string("not an object"), nil, true),
     ])
-    func patternProperties(instance: JSONValue, expectedAnnotation: Set<String>?, isValid: Bool) {
+    func patternProperties(
+      instance: JSONValue,
+      expectedAnnotation: OrderedSet<String>?,
+      isValid: Bool
+    ) {
       let schemaValue: JSONValue = [
         "a\\d": ["type": "integer"],
         "b\\d": ["type": "integer"],
@@ -753,14 +758,17 @@ struct KeywordTests {
     }
 
     @Test(arguments: [
-      (JSONValue.object(["a": 1, "b": 2, "c": 3]), Set(["c"]), true),
+      (JSONValue.object(["a": 1, "b": 2, "c": 3]), OrderedSet(["c"]), true),
       (JSONValue.object(["a": 1, "b": 2, "c": "string"]), nil, false),
-      (JSONValue.object(["a": 1, "b": 2]), Set([]), true),
-      (JSONValue.object(["c": 3]), Set(["c"]), true),
+      (JSONValue.object(["a": 1, "b": 2]), OrderedSet([]), true),
+      (JSONValue.object(["c": 3]), OrderedSet(["c"]), true),
       (JSONValue.string("not an object"), nil, true),
     ])
-    func additionalProperties(instance: JSONValue, expectedAnnotation: Set<String>?, isValid: Bool)
-    {
+    func additionalProperties(
+      instance: JSONValue,
+      expectedAnnotation: OrderedSet<String>?,
+      isValid: Bool
+    ) {
       let schemaValue: JSONValue = ["type": "integer"]
 
       var annotations = AnnotationContainer()
