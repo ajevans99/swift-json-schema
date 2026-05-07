@@ -99,4 +99,73 @@ struct JSONValueTests {
     #expect(composed != decomposed)
     #expect(JSONValue.string("hello") == JSONValue.string("hello"))
   }
+
+  // MARK: - Determinism (#149)
+
+  @Test
+  func serializedPreservesObjectKeyInsertionOrder() throws {
+    let value: JSONValue = [
+      "$id": "https://example.com/schema",
+      "type": "object",
+      "properties": [
+        "name": ["type": "string"],
+        "age": ["type": "integer"],
+        "email": ["type": "string"],
+      ],
+      "required": .array([.string("name"), .string("age")]),
+    ]
+
+    let encoded = value.serialized()
+
+    let expected =
+      "{\"$id\":\"https://example.com/schema\",\"type\":\"object\",\"properties\":"
+      + "{\"name\":{\"type\":\"string\"},\"age\":{\"type\":\"integer\"},\"email\":{\"type\":\"string\"}},"
+      + "\"required\":[\"name\",\"age\"]}"
+    #expect(encoded == expected)
+  }
+
+  @Test
+  func serializedIsByteStableAcrossRepeatedCalls() {
+    let value: JSONValue = [
+      "type": "object",
+      "properties": [
+        "alpha": ["type": "string"],
+        "beta": ["type": "integer"],
+        "gamma": ["type": "boolean"],
+      ],
+      "additionalProperties": false,
+    ]
+
+    let outputs: [String] = (0 ..< 10).map { _ in value.serialized() }
+    let first = outputs[0]
+    for run in outputs.dropFirst() {
+      #expect(run == first, "Encoded bytes should be identical across repeated calls")
+    }
+  }
+
+  @Test
+  func objectEqualityIsOrderInsensitive() {
+    let a: JSONValue = ["x": 1, "y": 2]
+    let b: JSONValue = ["y": 2, "x": 1]
+    // JSON objects are unordered for equality even though we now preserve
+    // insertion order for emission.
+    #expect(a == b)
+    #expect(a.hashValue == b.hashValue)
+  }
+
+  @Test
+  func serializedPrettyPrintedRespectsIndent() {
+    let value: JSONValue = ["a": 1, "b": [.integer(2), .integer(3)]]
+    let encoded = value.serialized(options: .pretty)
+    let expected = """
+      {
+        "a" : 1,
+        "b" : [
+          2,
+          3
+        ]
+      }
+      """
+    #expect(encoded == expected)
+  }
 }

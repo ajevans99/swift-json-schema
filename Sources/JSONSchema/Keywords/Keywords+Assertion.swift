@@ -657,8 +657,13 @@ extension Keywords {
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.dependencies =
-        value.object?.compactMapValues { $0.array?.compactMap { $0.string } } ?? [:]
+      self.dependencies = Dictionary(
+        uniqueKeysWithValues: value.object?
+          .compactMap { (key, value) -> (String, [String])? in
+            guard let array = value.array?.compactMap({ $0.string }) else { return nil }
+            return (key, array)
+          } ?? []
+      )
     }
 
     package func validate(

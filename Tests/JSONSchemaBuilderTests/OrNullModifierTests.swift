@@ -1,5 +1,6 @@
 import JSONSchema
 import JSONSchemaBuilder
+import OrderedCollections
 import Testing
 
 /// Tests for the .orNull() modifier
@@ -13,7 +14,7 @@ struct OrNullModifierTests {
         .orNull(style: .type)
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": ["integer", "null"]
     ]
 
@@ -26,7 +27,7 @@ struct OrNullModifierTests {
         .orNull(style: .type)
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": ["string", "null"]
     ]
 
@@ -39,7 +40,7 @@ struct OrNullModifierTests {
         .orNull(style: .type)
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": ["number", "null"]
     ]
 
@@ -52,7 +53,7 @@ struct OrNullModifierTests {
         .orNull(style: .type)
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": ["boolean", "null"]
     ]
 
@@ -65,7 +66,7 @@ struct OrNullModifierTests {
         .orNull(style: .union)
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "oneOf": [
         ["type": "integer"],
         ["type": "null"],
@@ -81,7 +82,7 @@ struct OrNullModifierTests {
         .orNull(style: .union)
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "oneOf": [
         ["type": "string"],
         ["type": "null"],
@@ -99,7 +100,7 @@ struct OrNullModifierTests {
       .orNull(style: .union)
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "oneOf": [
         [
           "type": "array",
@@ -122,7 +123,7 @@ struct OrNullModifierTests {
       .orNull(style: .union)
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "oneOf": [
         [
           "type": "object",
@@ -147,7 +148,7 @@ struct OrNullModifierTests {
       .orNull(style: .unionAnyOf)
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "anyOf": [
         [
           "type": "object",
@@ -172,7 +173,7 @@ struct OrNullModifierTests {
         .description("User's age in years")
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": ["integer", "null"],
       "title": "Age",
       "description": "User's age in years",
@@ -189,7 +190,7 @@ struct OrNullModifierTests {
         .description("User's name")
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "oneOf": [
         ["type": "string"],
         ["type": "null"],
@@ -208,7 +209,7 @@ struct OrNullModifierTests {
         .title("Alias")
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "anyOf": [
         ["type": "string"],
         ["type": "null"],
@@ -227,7 +228,7 @@ struct OrNullModifierTests {
         .orNull(style: .type)
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": ["integer", "null"],
       "minimum": 0,
       "maximum": 100,
@@ -409,7 +410,7 @@ struct OrNullModifierTests {
         .default(nil)
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": ["integer", "null"],
       "default": .null,
     ]
@@ -424,7 +425,7 @@ struct OrNullModifierTests {
         .examples([.number(42), .null, .number(100)])
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": ["integer", "null"],
       "examples": [42, .null, 100],
     ]
@@ -439,7 +440,7 @@ struct OrNullModifierTests {
         .orNull(style: .type)
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "type": ["integer", "null"]
     ]
 

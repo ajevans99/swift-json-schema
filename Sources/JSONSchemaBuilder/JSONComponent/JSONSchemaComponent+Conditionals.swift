@@ -1,4 +1,5 @@
 import JSONSchema
+import OrderedCollections
 
 extension JSONSchemaComponent {
   /// Sets the ``Keywords/DependentRequired`` mapping on the schema.
@@ -12,9 +13,9 @@ extension JSONSchemaComponent {
   public func dependentRequired(_ mapping: [String: [String]]) -> Self {
     var copy = self
     copy.schemaValue[Keywords.DependentRequired.name] = .object(
-      Dictionary(
+      OrderedDictionary(
         uniqueKeysWithValues: mapping.map { key, array in
-          (key, .array(array.map { .string($0) }))
+          (key, JSONValue.array(array.map { .string($0) }))
         }
       )
     )
@@ -32,7 +33,7 @@ extension JSONSchemaComponent {
   public func dependentSchemas(_ mapping: [String: any JSONSchemaComponent]) -> Self {
     var copy = self
     copy.schemaValue[Keywords.DependentSchemas.name] = .object(
-      Dictionary(
+      OrderedDictionary(
         uniqueKeysWithValues: mapping.map { key, component in
           (key, component.schemaValue.value)
         }

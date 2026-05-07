@@ -1,8 +1,11 @@
 import JSONSchema
+import OrderedCollections
 
 /// A JSON object value component for use in ``JSONValueBuilder``.
 public struct JSONObjectValue: JSONValueRepresentable {
-  public var value: JSONValue { .object(properties.mapValues(\.value)) }
+  public var value: JSONValue {
+    .object(OrderedDictionary(uniqueKeysWithValues: properties.map { ($0.key, $0.value.value) }))
+  }
 
   let properties: [String: JSONValueRepresentable]
 

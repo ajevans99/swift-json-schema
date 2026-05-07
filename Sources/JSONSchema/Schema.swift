@@ -37,7 +37,7 @@ public struct Schema: ValidatableSchema {
       )
     case .object(let schemaDict):
       self.schema = try ObjectSchema(
-        schemaValue: schemaDict,
+        schemaValue: Dictionary(uniqueKeysWithValues: schemaDict.map { ($0.key, $0.value) }),
         location: location,
         context: context,
         baseURI: baseURI,

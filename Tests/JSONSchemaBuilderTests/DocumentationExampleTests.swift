@@ -1,4 +1,5 @@
 import JSONSchema
+import OrderedCollections
 import Testing
 
 @testable import JSONSchemaBuilder
@@ -29,7 +30,7 @@ struct DocumentationExampleTests {
       .title("Person")
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "title": "Person",
       "type": "object",
       "required": ["firstName", "age"],
@@ -151,7 +152,9 @@ struct DocumentationExampleTests {
   }
 
   @Test func readMeEnumMacro() {
-    let expected: [String: JSONValue] = ["type": "string", "enum": ["active", "inactive"]]
+    let expected: OrderedDictionary<String, JSONValue> = [
+      "type": "string", "enum": ["active", "inactive"],
+    ]
     #expect(Status.schema.schemaValue == .object(expected))
   }
 

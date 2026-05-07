@@ -32,7 +32,11 @@ public struct JSONObject<Props: PropertyCollection>: JSONSchemaComponent {
   public init() where Props == EmptyPropertyCollection { self.init(with: {}) }
 
   public func parse(_ input: JSONValue) -> Parsed<Props.Output, ParseIssue> {
-    if case .object(let dictionary) = input { return properties.validate(dictionary) }
+    if case .object(let dictionary) = input {
+      return properties.validate(
+        Dictionary(uniqueKeysWithValues: dictionary.map { ($0.key, $0.value) })
+      )
+    }
     return .error(.typeMismatch(expected: .object, actual: input))
   }
 }

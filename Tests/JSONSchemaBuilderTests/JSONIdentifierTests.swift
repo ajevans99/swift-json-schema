@@ -1,4 +1,5 @@
 import JSONSchema
+import OrderedCollections
 import Testing
 
 @testable import JSONSchemaBuilder
@@ -21,7 +22,7 @@ struct JSONIdentifierBuilderTests {
         .recursiveRef("#recAnchor")
     }
 
-    let expected: [String: JSONValue] = [
+    let expected: OrderedDictionary<String, JSONValue> = [
       "$id": "https://example.com/schema",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$vocabulary": [

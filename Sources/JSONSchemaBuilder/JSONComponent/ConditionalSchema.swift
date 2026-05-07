@@ -1,4 +1,5 @@
 import JSONSchema
+import OrderedCollections
 
 // MARK: - Conditional schema component
 public struct ConditionalSchema: JSONSchemaComponent {
@@ -17,7 +18,7 @@ public struct ConditionalSchema: JSONSchemaComponent {
     self.thenSchema = thenSchema
     self.elseSchema = elseSchema
 
-    var dict: [String: JSONValue] = [
+    var dict: OrderedDictionary<String, JSONValue> = [
       Keywords.If.name: ifSchema.schemaValue.value,
       Keywords.Then.name: thenSchema.schemaValue.value,
     ]
