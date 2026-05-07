@@ -143,19 +143,24 @@ extension Encodable {
 }
 
 extension Schema {
+  /// Pretty-printed JSON of this schema in declaration order. Used for
+  /// failure diagnostics in the test-suite drivers; preserves the order
+  /// the schema author wrote keys in (rather than the alphabetical order
+  /// `JSONEncoder.outputFormatting.sortedKeys` would emit), so debugging
+  /// output mirrors what consumers actually see.
   func json() throws -> String {
-    try toJSONString()
+    try (try toJSONValue()).serialized(options: .pretty)
   }
 }
 
 extension JSONValue {
   func json() throws -> String {
-    try toJSONString()
+    try serialized(options: .pretty)
   }
 }
 
 extension ValidationResult {
   func json() throws -> String {
-    try toJSONString()
+    try (try toJSONValue()).serialized(options: .pretty)
   }
 }

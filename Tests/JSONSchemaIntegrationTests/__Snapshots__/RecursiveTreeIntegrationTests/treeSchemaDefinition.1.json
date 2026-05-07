@@ -1,0 +1,19 @@
+{
+  "$dynamicAnchor" : "JSONSchemaIntegrationTests.TreeNode",
+  "properties" : {
+    "children" : {
+      "items" : {
+        "$dynamicRef" : "#JSONSchemaIntegrationTests.TreeNode"
+      },
+      "type" : "array"
+    },
+    "name" : {
+      "type" : "string"
+    }
+  },
+  "required" : [
+    "name",
+    "children"
+  ],
+  "type" : "object"
+}

@@ -1,0 +1,56 @@
+{
+  "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#",
+  "annotations" : [
+    {
+      "annotation" : "Content vocabulary meta-schema",
+      "instanceLocation" : "",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "",
+      "keywordLocation" : "\/properties"
+    }
+  ],
+  "errors" : [
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#\/allOf",
+      "errors" : [
+        {
+          "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#\/allOf\/3\/$ref",
+          "errors" : [
+            {
+              "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties",
+              "errors" : [
+                {
+                  "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties\/minimum\/type",
+                  "instanceLocation" : "\/minimum",
+                  "keyword" : "type",
+                  "keywordLocation" : "\/allOf\/3\/$ref\/properties\/minimum\/type",
+                  "message" : "Expected type '[OrderedJSON.JSONType.number]' but found 'string'"
+                }
+              ],
+              "instanceLocation" : "",
+              "keyword" : "properties",
+              "keywordLocation" : "\/allOf\/3\/$ref\/properties",
+              "message" : "Validation failed for keyword 'properties'"
+            }
+          ],
+          "instanceLocation" : "",
+          "keyword" : "$ref",
+          "keywordLocation" : "\/allOf\/3\/$ref",
+          "message" : "Validation failed during reference validation 'meta\/validation'"
+        }
+      ],
+      "instanceLocation" : "",
+      "keyword" : "allOf",
+      "keywordLocation" : "\/allOf",
+      "message" : "Validation failed for keyword 'allOf'"
+    }
+  ],
+  "instanceLocation" : "",
+  "keywordLocation" : "",
+  "valid" : false
+}

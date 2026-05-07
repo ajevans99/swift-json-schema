@@ -1,0 +1,95 @@
+{
+  "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#",
+  "annotations" : [
+    {
+      "annotation" : "Content vocabulary meta-schema",
+      "instanceLocation" : "",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "annotation" : [
+        "properties"
+      ],
+      "instanceLocation" : "",
+      "keywordLocation" : "\/properties"
+    },
+    {
+      "annotation" : {
+
+      },
+      "instanceLocation" : "\/properties",
+      "keywordLocation" : "\/properties\/properties\/default"
+    },
+    {
+      "annotation" : [
+        "name"
+      ],
+      "instanceLocation" : "\/properties",
+      "keywordLocation" : "\/properties\/properties\/additionalProperties"
+    }
+  ],
+  "errors" : [
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#\/allOf",
+      "errors" : [
+        {
+          "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#\/allOf\/3\/$ref",
+          "errors" : [
+            {
+              "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties",
+              "errors" : [
+                {
+                  "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties\/type\/anyOf",
+                  "errors" : [
+                    {
+                      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties\/type\/anyOf\/0\/$ref",
+                      "errors" : [
+                        {
+                          "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/$defs\/simpleTypes\/enum",
+                          "instanceLocation" : "\/type",
+                          "keyword" : "enum",
+                          "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf\/0\/$ref\/enum",
+                          "message" : "'123' is not one of the allowed values: \"array\", \"boolean\", \"integer\", \"null\", \"number\", \"object\", \"string\""
+                        }
+                      ],
+                      "instanceLocation" : "\/type",
+                      "keyword" : "$ref",
+                      "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf\/0\/$ref",
+                      "message" : "Validation failed during reference validation '#\/$defs\/simpleTypes'"
+                    },
+                    {
+                      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties\/type\/anyOf\/1\/type",
+                      "instanceLocation" : "\/type",
+                      "keyword" : "type",
+                      "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf\/1\/type",
+                      "message" : "Expected type '[OrderedJSON.JSONType.array]' but found 'integer'"
+                    }
+                  ],
+                  "instanceLocation" : "\/type",
+                  "keyword" : "anyOf",
+                  "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf",
+                  "message" : "Validation failed for keyword 'anyOf'"
+                }
+              ],
+              "instanceLocation" : "",
+              "keyword" : "properties",
+              "keywordLocation" : "\/allOf\/3\/$ref\/properties",
+              "message" : "Validation failed for keyword 'properties'"
+            }
+          ],
+          "instanceLocation" : "",
+          "keyword" : "$ref",
+          "keywordLocation" : "\/allOf\/3\/$ref",
+          "message" : "Validation failed during reference validation 'meta\/validation'"
+        }
+      ],
+      "instanceLocation" : "",
+      "keyword" : "allOf",
+      "keywordLocation" : "\/allOf",
+      "message" : "Validation failed for keyword 'allOf'"
+    }
+  ],
+  "instanceLocation" : "",
+  "keywordLocation" : "",
+  "valid" : false
+}

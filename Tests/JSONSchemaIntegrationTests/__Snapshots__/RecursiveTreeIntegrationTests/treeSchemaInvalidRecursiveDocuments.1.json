@@ -1,0 +1,78 @@
+{
+  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#",
+  "errors" : [
+    {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties",
+      "errors" : [
+        {
+          "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/children\/items",
+          "errors" : [
+            {
+              "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/children\/items\/$dynamicRef",
+              "errors" : [
+                {
+                  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties",
+                  "errors" : [
+                    {
+                      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/children\/items",
+                      "errors" : [
+                        {
+                          "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/children\/items\/$dynamicRef",
+                          "errors" : [
+                            {
+                              "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties",
+                              "errors" : [
+                                {
+                                  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/name\/type",
+                                  "instanceLocation" : "\/children\/0\/children\/0\/name",
+                                  "keyword" : "type",
+                                  "keywordLocation" : "\/properties\/children\/items\/$dynamicRef\/properties\/children\/items\/$dynamicRef\/properties\/name\/type",
+                                  "message" : "Expected type '[OrderedJSON.JSONType.string]' but found 'integer'"
+                                }
+                              ],
+                              "instanceLocation" : "\/children\/0\/children\/0",
+                              "keyword" : "properties",
+                              "keywordLocation" : "\/properties\/children\/items\/$dynamicRef\/properties\/children\/items\/$dynamicRef\/properties",
+                              "message" : "Validation failed for keyword 'properties'"
+                            }
+                          ],
+                          "instanceLocation" : "\/children\/0\/children\/0",
+                          "keyword" : "$dynamicRef",
+                          "keywordLocation" : "\/properties\/children\/items\/$dynamicRef\/properties\/children\/items\/$dynamicRef",
+                          "message" : "Validation failed during reference validation '#JSONSchemaIntegrationTests.TreeNode'"
+                        }
+                      ],
+                      "instanceLocation" : "\/children\/0\/children",
+                      "keyword" : "items",
+                      "keywordLocation" : "\/properties\/children\/items\/$dynamicRef\/properties\/children\/items",
+                      "message" : "Validation failed for keyword 'items'"
+                    }
+                  ],
+                  "instanceLocation" : "\/children\/0",
+                  "keyword" : "properties",
+                  "keywordLocation" : "\/properties\/children\/items\/$dynamicRef\/properties",
+                  "message" : "Validation failed for keyword 'properties'"
+                }
+              ],
+              "instanceLocation" : "\/children\/0",
+              "keyword" : "$dynamicRef",
+              "keywordLocation" : "\/properties\/children\/items\/$dynamicRef",
+              "message" : "Validation failed during reference validation '#JSONSchemaIntegrationTests.TreeNode'"
+            }
+          ],
+          "instanceLocation" : "\/children",
+          "keyword" : "items",
+          "keywordLocation" : "\/properties\/children\/items",
+          "message" : "Validation failed for keyword 'items'"
+        }
+      ],
+      "instanceLocation" : "",
+      "keyword" : "properties",
+      "keywordLocation" : "\/properties",
+      "message" : "Validation failed for keyword 'properties'"
+    }
+  ],
+  "instanceLocation" : "",
+  "keywordLocation" : "",
+  "valid" : false
+}
