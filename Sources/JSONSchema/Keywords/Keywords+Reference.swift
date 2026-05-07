@@ -151,20 +151,34 @@ struct ReferenceResolver {
     }
 
     if isDynamic, let fragment = refURL.fragment, !fragment.isEmpty {
-      let anchor = fragment
-      for scope in context.dynamicScopes {
-        if let entry = scope[anchor] {
-          guard let document = context.documentCache[entry.document],
-            let raw = document.value(at: entry.pointer)
-          else {
-            break
+      // Per JSON Schema 2020-12 §8.2.3.2, a `$dynamicRef` only triggers
+      // dynamic-scope traversal if the reference's INITIAL TARGET resource
+      // (the resource that `$dynamicRef` would land in when treated as a
+      // regular `$ref`) also defines a matching `$dynamicAnchor`
+      // ("bookending"). If not, the reference behaves like a regular `$ref`
+      // to a same-named `$anchor`.
+      //
+      // We detect bookending by checking whether the resource identified by
+      // `refURL` (without fragment) registered a `$dynamicAnchor` of this
+      // name in `documentDynamicAnchors`.
+      let targetResourceURL = refURL.withoutFragment ?? refURL
+      let isBookended =
+        context.documentDynamicAnchors[targetResourceURL]?[fragment] != nil
+      if isBookended {
+        for scope in context.dynamicScopes {
+          if let entry = scope[fragment] {
+            guard let document = context.documentCache[entry.document],
+              let raw = document.value(at: entry.pointer)
+            else {
+              break
+            }
+            return try Schema(
+              rawSchema: raw,
+              location: entry.pointer,
+              context: context,
+              baseURI: entry.baseURI
+            )
           }
-          return try Schema(
-            rawSchema: raw,
-            location: entry.pointer,
-            context: context,
-            baseURI: entry.baseURI
-          )
         }
       }
     }
