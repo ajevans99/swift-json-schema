@@ -47,6 +47,15 @@ extension Annotation: AnyAnnotation where Keyword.AnnotationValue: AnnotationVal
 }
 
 extension Annotation {
+  /// Merges two annotations that share an instance location and keyword type.
+  ///
+  /// - Important: When the two annotations originate from different schema
+  ///   locations (for example, sibling branches of an `allOf` that both
+  ///   produce `properties` annotations), the merged annotation keeps
+  ///   `self`'s `schemaLocation` and `absoluteSchemaLocation`. The JSON
+  ///   Schema spec encourages preserving every source for downstream
+  ///   consumers; a future change should switch the annotation container
+  ///   to a multi-value keyed structure so each source survives the merge.
   func merged(with other: AnyAnnotation) -> AnyAnnotation? {
     guard let otherAnnotation = other as? Annotation<Keyword> else {
       return nil

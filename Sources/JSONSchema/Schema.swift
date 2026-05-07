@@ -142,10 +142,11 @@ package struct BooleanSchema: ValidatableSchema {
   }
 
   package func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
-    ValidationResult(
+    let absoluteLocation = self.location.absoluteLocation(relativeTo: documentURL)
+    return ValidationResult(
       valid: schemaValue,
       keywordLocation: self.location,
-      absoluteKeywordLocation: self.location.absoluteLocation(relativeTo: documentURL),
+      absoluteKeywordLocation: absoluteLocation,
       instanceLocation: location,
       errors: schemaValue
         ? []
@@ -154,7 +155,7 @@ package struct BooleanSchema: ValidatableSchema {
             keyword: "boolean",
             message: "",
             keywordLocation: self.location,
-            absoluteKeywordLocation: self.location.absoluteLocation(relativeTo: documentURL),
+            absoluteKeywordLocation: absoluteLocation,
             instanceLocation: location
           )
         ]
