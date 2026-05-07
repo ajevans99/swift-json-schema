@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import JSONSchema
 
 /// Regression tests for `$dynamicRef` bookending semantics
@@ -41,9 +42,10 @@ struct DynamicRefBookendTests {
         }
       }
       """
-    let result = try Schema(instance: schemaJSON).validate(
-      instance: #"["foo", 42]"#
-    )
+    let result = try Schema(instance: schemaJSON)
+      .validate(
+        instance: #"["foo", 42]"#
+      )
     #expect(result.isValid, "without a bookend $dynamicAnchor, $dynamicRef must fall back to $ref")
   }
 
@@ -68,9 +70,10 @@ struct DynamicRefBookendTests {
         }
       }
       """
-    let result = try Schema(instance: schemaJSON).validate(
-      instance: #"["foo", 42]"#
-    )
+    let result = try Schema(instance: schemaJSON)
+      .validate(
+        instance: #"["foo", 42]"#
+      )
     #expect(result.isValid)
   }
 
@@ -101,9 +104,10 @@ struct DynamicRefBookendTests {
         }
       }
       """
-    let result = try Schema(instance: schemaJSON).validate(
-      instance: #"{"foo": "pass", "bar": {"baz": {"foo": "fail"}}}"#
-    )
+    let result = try Schema(instance: schemaJSON)
+      .validate(
+        instance: #"{"foo": "pass", "bar": {"baz": {"foo": "fail"}}}"#
+      )
     // Without bookend: $dynamicRef resolves lexically to extended#meta
     // which has no `properties` constraint on its target → no recursion
     // back to root → "fail" doesn't violate anything → valid.
@@ -133,14 +137,16 @@ struct DynamicRefBookendTests {
       """
     // The outer dynamic scope's $dynamicAnchor "items" (type: string) wins
     // over the inner empty one. Strings pass; numbers fail.
-    let valid = try Schema(instance: schemaJSON).validate(
-      instance: #"["foo", "bar"]"#
-    )
+    let valid = try Schema(instance: schemaJSON)
+      .validate(
+        instance: #"["foo", "bar"]"#
+      )
     #expect(valid.isValid)
 
-    let invalid = try Schema(instance: schemaJSON).validate(
-      instance: #"["foo", 42]"#
-    )
+    let invalid = try Schema(instance: schemaJSON)
+      .validate(
+        instance: #"["foo", 42]"#
+      )
     #expect(invalid.isValid == false)
   }
 }
