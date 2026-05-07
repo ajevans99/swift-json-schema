@@ -1,3 +1,5 @@
+import Foundation
+
 public enum ValidationIssue: Error, Codable, Equatable {
   case typeMismatch(expected: [JSONType], actual: JSONType)
   case notEnumCase(value: JSONValue, allowedValues: [JSONValue])
@@ -56,6 +58,7 @@ extension ValidationIssue {
   func makeValidationError(
     keyword: String,
     keywordLocation: JSONPointer,
+    absoluteKeywordLocation: URL?,
     instanceLocation: JSONPointer
   ) -> ValidationError {
     switch self {
@@ -64,6 +67,7 @@ extension ValidationIssue {
         keyword: keyword,
         message: "Validation failed for keyword '\(keyword)'",
         keywordLocation: keywordLocation,
+        absoluteKeywordLocation: absoluteKeywordLocation,
         instanceLocation: instanceLocation,
         errors: errors
       )
@@ -72,6 +76,7 @@ extension ValidationIssue {
         keyword: keyword,
         message: "Validation failed during reference validation '\(ref)'",
         keywordLocation: keywordLocation,
+        absoluteKeywordLocation: absoluteKeywordLocation,
         instanceLocation: instanceLocation,
         errors: errors
       )
@@ -80,6 +85,7 @@ extension ValidationIssue {
         keyword: keyword,
         message: description,
         keywordLocation: keywordLocation,
+        absoluteKeywordLocation: absoluteKeywordLocation,
         instanceLocation: instanceLocation
       )
     }

@@ -101,11 +101,42 @@ struct RemoteLoader {
 
   func loadSchemas() -> [String: JSONValue] {
     do {
-      return try fetchRemoteSchemas()
+      var remotes = try fetchRemoteSchemas()
+      let outputSchemas = try fetchOutputSchemas()
+      remotes.merge(outputSchemas) { _, new in new }
+      return remotes
     } catch {
       print("Error: \(error)")
       return [:]
     }
+  }
+
+  private func fetchOutputSchemas() throws -> [String: JSONValue] {
+    guard let resourcesURL = Bundle.module.resourceURL else { return [:] }
+    let outputTestsURL = resourcesURL.appendingPathComponent("JSON-Schema-Test-Suite/output-tests")
+
+    let directoryEnumerator = FileManager.default.enumerator(
+      at: outputTestsURL,
+      includingPropertiesForKeys: [.isDirectoryKey],
+      options: [.skipsHiddenFiles]
+    )
+
+    var discoveredSchemas: [String: JSONValue] = [:]
+
+    while let url = directoryEnumerator?.nextObject() as? URL {
+      guard url.lastPathComponent == "output-schema.json" else { continue }
+
+      let data = try Data(contentsOf: url)
+      let schema = try JSONDecoder().decode(JSONValue.self, from: data)
+
+      if case .object(let object) = schema,
+        case .string(let identifier)? = object["$id"]
+      {
+        discoveredSchemas[identifier] = schema
+      }
+    }
+
+    return discoveredSchemas
   }
 }
 

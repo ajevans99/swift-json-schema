@@ -30,3 +30,10 @@ package struct KeywordContext {
     self.uri = uri
   }
 }
+
+extension KeywordContext {
+  func absoluteKeywordLocation(for pointer: JSONPointer? = nil) -> URL? {
+    let pointer = pointer ?? location
+    return pointer.absoluteLocation(relativeTo: uri)
+  }
+}

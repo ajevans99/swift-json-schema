@@ -33,7 +33,8 @@ public struct Schema: ValidatableSchema {
       self.schema = BooleanSchema(
         schemaValue: boolValue,
         location: location,
-        context: context
+        context: context,
+        documentURL: documentURL
       )
     case .object(let schemaDict):
       self.schema = try ObjectSchema(
@@ -126,17 +127,26 @@ package struct BooleanSchema: ValidatableSchema {
   let schemaValue: Bool
   let location: JSONPointer
   let context: Context
+  let documentURL: URL
 
-  package init(schemaValue: Bool, location: JSONPointer, context: Context) {
+  package init(
+    schemaValue: Bool,
+    location: JSONPointer,
+    context: Context,
+    documentURL: URL = URL(fileURLWithPath: #file)
+  ) {
     self.schemaValue = schemaValue
     self.location = location
     self.context = context
+    self.documentURL = documentURL
   }
 
   package func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
-    ValidationResult(
+    let absoluteLocation = self.location.absoluteLocation(relativeTo: documentURL)
+    return ValidationResult(
       valid: schemaValue,
       keywordLocation: self.location,
+      absoluteKeywordLocation: absoluteLocation,
       instanceLocation: location,
       errors: schemaValue
         ? []
@@ -145,6 +155,7 @@ package struct BooleanSchema: ValidatableSchema {
             keyword: "boolean",
             message: "",
             keywordLocation: self.location,
+            absoluteKeywordLocation: absoluteLocation,
             instanceLocation: location
           )
         ]
@@ -152,7 +163,7 @@ package struct BooleanSchema: ValidatableSchema {
   }
 
   package func asSchema() -> Schema {
-    .init(schema: self, location: location, context: context)
+    .init(schema: self, location: location, context: context, documentURL: documentURL)
   }
 }
 
@@ -352,6 +363,8 @@ package struct ObjectSchema: ValidatableSchema {
           try applicator.validate(instance, at: location, using: &annotations)
         case let assertion as any AssertionKeyword:
           try assertion.validate(instance, at: location, using: annotations)
+        case let metadata as any MetadataKeyword:
+          metadata.recordAnnotation(at: location, using: &annotations)
         default:
           continue
         }
@@ -360,6 +373,7 @@ package struct ObjectSchema: ValidatableSchema {
         let validationError = error.makeValidationError(
           keyword: keywordName,
           keywordLocation: self.location.appending(.key(keywordName)),
+          absoluteKeywordLocation: absoluteKeywordLocation(for: keywordName),
           instanceLocation: location
         )
         errors.append(validationError)
@@ -371,6 +385,7 @@ package struct ObjectSchema: ValidatableSchema {
     return ValidationResult(
       valid: errors.isEmpty,
       keywordLocation: self.location,
+      absoluteKeywordLocation: absoluteKeywordLocation(forPointer: self.location),
       instanceLocation: location,
       errors: errors.isEmpty ? nil : errors,
       annotations: collectedAnnotations.isEmpty ? nil : collectedAnnotations
@@ -378,6 +393,19 @@ package struct ObjectSchema: ValidatableSchema {
   }
 
   package func asSchema() -> Schema {
-    .init(schema: self, location: location, context: context)
+    .init(schema: self, location: location, context: context, documentURL: documentURL)
+  }
+
+  private func baseURIForAbsoluteLocation() -> URL {
+    uri ?? documentURL
+  }
+
+  private func absoluteKeywordLocation(for keywordName: String) -> URL? {
+    let pointer = self.location.appending(.key(keywordName))
+    return absoluteKeywordLocation(forPointer: pointer)
+  }
+
+  private func absoluteKeywordLocation(forPointer pointer: JSONPointer) -> URL? {
+    pointer.absoluteLocation(relativeTo: baseURIForAbsoluteLocation())
   }
 }
