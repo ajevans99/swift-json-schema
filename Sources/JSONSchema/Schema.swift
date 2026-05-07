@@ -294,10 +294,25 @@ package struct ObjectSchema: ValidatableSchema {
     annotations: inout AnnotationContainer
   ) -> ValidationResult {
     var errors: [ValidationError] = []
-    // Push every document-wide `$dynamicAnchor` so this schema inherits the surrounding scope.
-    let documentAnchors = context.documentDynamicAnchors[documentURL] ?? [:]
+    // Push the dynamic anchors registered for THIS schema's resource (the
+    // resource it lives in, identified by its `$id`-resolved `uri`, falling
+    // back to the document URL when the schema has no `$id`). This makes the
+    // resource's `$dynamicAnchor`s reachable while the schema is on the
+    // dynamic scope chain. Anchors from sibling resources (entered via a
+    // different `$id`) are NOT visible — that's what the previous
+    // implementation got wrong by keying on `documentURL` (always the root
+    // document), which conflated all resources in a multi-`$id` document.
+    //
+    // The lookup key is normalized to never carry a fragment: if the schema's
+    // `uri` parses cleanly, we strip its fragment; otherwise we fall back to
+    // `documentURL`, which is already fragment-stripped at construction time.
+    // We deliberately do NOT fall back to a fragment-bearing `uri`, because
+    // `documentDynamicAnchors` is keyed on resource URLs without fragments
+    // and a fragment-bearing key would silently miss every anchor.
+    let resourceURL: URL = uri?.withoutFragment ?? documentURL
+    let resourceAnchors = context.documentDynamicAnchors[resourceURL] ?? [:]
     context.dynamicScopes.append(
-      documentAnchors.mapValues {
+      resourceAnchors.mapValues {
         (document: documentURL, pointer: $0.pointer, baseURI: $0.baseURI)
       }
     )
