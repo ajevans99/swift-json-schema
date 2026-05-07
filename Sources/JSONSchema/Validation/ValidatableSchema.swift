@@ -9,13 +9,17 @@ extension ValidatableSchema {
     self.validate(instance, at: .init())
   }
 
-  /// Convenience for validating instances from `String` form. The decoder will first convert to ``JSONValue`` and then pass to standard ``validate(_:at:)``.
+  /// Convenience for validating instances from `String` form. Uses
+  /// ``JSONValue/parse(_:)`` (which preserves declared key order) so that
+  /// the resulting validation output is deterministic across processes —
+  /// `JSONDecoder` does not preserve key order, which would feed
+  /// hash-randomized property order into the validation traversal and
+  /// produce nondeterministic annotation/error sequences (see #149).
   public func validate(
     instance: String,
-    using decoder: JSONDecoder = .init(),
     at location: JSONPointer = .init()
   ) throws -> ValidationResult {
-    let data = try decoder.decode(JSONValue.self, from: Data(instance.utf8))
+    let data = try JSONValue.parse(instance)
     return validate(data, at: location)
   }
 
@@ -30,13 +34,14 @@ extension ValidatableSchema {
   }
 
   /// Convenience for producing validation outputs from `String` instances.
+  /// Uses ``JSONValue/parse(_:)`` (key-order-preserving) for the same
+  /// determinism reasons as ``validate(instance:at:)``.
   public func validate(
     instance: String,
-    using decoder: JSONDecoder = .init(),
     at location: JSONPointer = .init(),
     output configuration: ValidationOutputConfiguration
   ) throws -> JSONValue {
-    let data = try decoder.decode(JSONValue.self, from: Data(instance.utf8))
+    let data = try JSONValue.parse(instance)
     return try validate(data, at: location, output: configuration)
   }
 }

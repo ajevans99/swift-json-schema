@@ -289,7 +289,7 @@ struct PollExampleTests {
               "_0": {
                 "customDescription": "What's your favorite?"
               }
-            },
+            }
           }
         }
         """,
@@ -344,12 +344,14 @@ struct PollExampleTests {
     #expect(instance.shouldParse ? pollResult.value != nil : pollResult.errors?.isEmpty == false)
   }
 
-  @Test(arguments: instances)
+  @Test(.snapshots(record: shouldRecord), arguments: instances)
   func validate(instance: TestInstance) throws {
     let schema = Poll.schema.definition()
     let validationResult = try schema.validate(instance: instance.data)
-    // TODO: The order of errors and annotations arrays are not deterministic so standard JSON comparison does not work here, need a custom `Snapshotting` strategy I think
-    // assertSnapshot(of: validationResult.sorted(), as: .json)
+    // After #149 + the OrderedJSON parser switchover, the validation
+    // output is byte-stable across processes for parsed-from-string
+    // instances, so we can finally lock it in with a snapshot.
+    assertSnapshot(of: validationResult, as: .json, named: instance.id)
     #expect(instance.isValid == validationResult.isValid)
   }
 

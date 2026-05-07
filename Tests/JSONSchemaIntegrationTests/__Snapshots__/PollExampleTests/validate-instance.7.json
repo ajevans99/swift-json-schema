@@ -1,0 +1,128 @@
+{
+  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#",
+  "annotations" : [
+    {
+      "annotation" : "Poll",
+      "instanceLocation" : "",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "annotation" : "A schema for representing a poll with options and metadata.",
+      "instanceLocation" : "",
+      "keywordLocation" : "\/description"
+    },
+    {
+      "annotation" : "Unique identifier for the poll",
+      "instanceLocation" : "\/id",
+      "keywordLocation" : "\/properties\/id\/description"
+    },
+    {
+      "annotation" : "The title of the poll",
+      "instanceLocation" : "\/title",
+      "keywordLocation" : "\/properties\/title\/description"
+    },
+    {
+      "annotation" : "List of options available in the poll",
+      "instanceLocation" : "\/options",
+      "keywordLocation" : "\/properties\/options\/description"
+    },
+    {
+      "annotation" : "Whether the poll is currently active",
+      "instanceLocation" : "\/isActive",
+      "keywordLocation" : "\/properties\/isActive\/description"
+    },
+    {
+      "annotation" : true,
+      "instanceLocation" : "\/isActive",
+      "keywordLocation" : "\/properties\/isActive\/default"
+    },
+    {
+      "annotation" : "Category of the poll, limited to specific types",
+      "instanceLocation" : "\/category",
+      "keywordLocation" : "\/properties\/category\/description"
+    }
+  ],
+  "errors" : [
+    {
+      "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties",
+      "errors" : [
+        {
+          "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/title\/minLength",
+          "instanceLocation" : "\/title",
+          "keyword" : "minLength",
+          "keywordLocation" : "\/properties\/title\/minLength",
+          "message" : "String '' is shorter than minimum length of 1"
+        },
+        {
+          "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items",
+          "errors" : [
+            {
+              "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/properties",
+              "errors" : [
+                {
+                  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/properties\/text\/minLength",
+                  "instanceLocation" : "\/options\/0\/text",
+                  "keyword" : "minLength",
+                  "keywordLocation" : "\/properties\/options\/items\/properties\/text\/minLength",
+                  "message" : "String '' is shorter than minimum length of 1"
+                },
+                {
+                  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/properties\/voteCount\/minimum",
+                  "instanceLocation" : "\/options\/0\/voteCount",
+                  "keyword" : "minimum",
+                  "keywordLocation" : "\/properties\/options\/items\/properties\/voteCount\/minimum",
+                  "message" : "-5.0 is below minimum value of 0.0"
+                }
+              ],
+              "instanceLocation" : "\/options\/0",
+              "keyword" : "properties",
+              "keywordLocation" : "\/properties\/options\/items\/properties",
+              "message" : "Validation failed for keyword 'properties'"
+            },
+            {
+              "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/additionalProperties",
+              "errors" : [
+                {
+                  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/additionalProperties",
+                  "instanceLocation" : "\/options\/0\/id",
+                  "keyword" : "boolean",
+                  "keywordLocation" : "\/properties\/options\/items\/additionalProperties",
+                  "message" : ""
+                },
+                {
+                  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/additionalProperties",
+                  "instanceLocation" : "\/options\/0\/text",
+                  "keyword" : "boolean",
+                  "keywordLocation" : "\/properties\/options\/items\/additionalProperties",
+                  "message" : ""
+                },
+                {
+                  "absoluteKeywordLocation" : "file:\/\/\/Users\/ajevans\/Documents\/swift-json-schema\/Sources\/JSONSchema\/Schema.swift#\/properties\/options\/items\/additionalProperties",
+                  "instanceLocation" : "\/options\/0\/voteCount",
+                  "keyword" : "boolean",
+                  "keywordLocation" : "\/properties\/options\/items\/additionalProperties",
+                  "message" : ""
+                }
+              ],
+              "instanceLocation" : "\/options\/0",
+              "keyword" : "additionalProperties",
+              "keywordLocation" : "\/properties\/options\/items\/additionalProperties",
+              "message" : "Validation failed for keyword 'additionalProperties'"
+            }
+          ],
+          "instanceLocation" : "\/options",
+          "keyword" : "items",
+          "keywordLocation" : "\/properties\/options\/items",
+          "message" : "Validation failed for keyword 'items'"
+        }
+      ],
+      "instanceLocation" : "",
+      "keyword" : "properties",
+      "keywordLocation" : "\/properties",
+      "message" : "Validation failed for keyword 'properties'"
+    }
+  ],
+  "instanceLocation" : "",
+  "keywordLocation" : "",
+  "valid" : false
+}

@@ -1,15 +1,25 @@
 # Variables
 SUBMODULE_DIR = Tests/JSONSchemaTests/JSON-Schema-Test-Suite
+JSON_TEST_SUITE_DIR = Tests/OrderedJSONTests/JSONTestSuite
 
 # Target to initialize and update the submodule
 update-submodule:
 	@git submodule init
 	@git submodule update --remote $(SUBMODULE_DIR)
-	@echo "Submodule $(SUBMODULE_DIR) updated successfully."
+	@git submodule update --remote $(JSON_TEST_SUITE_DIR)
+	@echo "Submodules updated successfully."
 
 format:
-	@swift-format format --in-place --parallel --recursive Sources/ Tests/
-	@swift-format lint --strict --parallel --recursive Sources/ Tests/
+	@find Sources Tests \
+		-name '*.swift' \
+		-not -path '*/JSON-Schema-Test-Suite/*' \
+		-not -path '*/JSONTestSuite/*' \
+		-print0 | xargs -0 swift-format format --in-place --parallel
+	@find Sources Tests \
+		-name '*.swift' \
+		-not -path '*/JSON-Schema-Test-Suite/*' \
+		-not -path '*/JSONTestSuite/*' \
+		-print0 | xargs -0 swift-format lint --strict --parallel
 	@echo "Swift code formatted successfully."
 
 .PHONY: clean-submodule format
