@@ -19,8 +19,8 @@ extension ValidatableSchema {
     instance: String,
     at location: JSONPointer = .init()
   ) throws -> ValidationResult {
-    let data = try JSONValue.parse(instance)
-    return validate(data, at: location)
+    let parsedInstance = try JSONValue.parse(instance)
+    return validate(parsedInstance, at: location)
   }
 
   /// Validates the instance and renders the result into a spec-compliant validation output document.
@@ -41,7 +41,7 @@ extension ValidatableSchema {
     at location: JSONPointer = .init(),
     output configuration: ValidationOutputConfiguration
   ) throws -> JSONValue {
-    let data = try JSONValue.parse(instance)
-    return try validate(data, at: location, output: configuration)
+    let parsedInstance = try JSONValue.parse(instance)
+    return try validate(parsedInstance, at: location, output: configuration)
   }
 }

@@ -1,5 +1,6 @@
 import Foundation
 import OrderedJSON
+import SnapshotTesting
 import Testing
 
 /// Drives the [nst/JSONTestSuite](https://github.com/nst/JSONTestSuite)
@@ -21,13 +22,37 @@ struct JSONTestSuiteConformance {
   }()
 
   private static let allFiles: [URL] = {
-    (try? FileManager.default
-      .contentsOfDirectory(
-        at: suiteRoot,
-        includingPropertiesForKeys: nil
+    do {
+      let files = try FileManager.default
+        .contentsOfDirectory(at: suiteRoot, includingPropertiesForKeys: nil)
+        .filter { $0.pathExtension == "json" }
+        .sorted { $0.lastPathComponent < $1.lastPathComponent }
+      if files.isEmpty {
+        // The suite directory exists but contains no JSON — almost
+        // certainly a test-bundle packaging regression. Fail loudly so
+        // we never silently pass a zero-case parameterized test.
+        fatalError(
+          """
+          JSONTestSuite directory \(suiteRoot.path) is present but contains no \
+          .json files. Re-check the package's resources block and the \
+          submodule contents.
+          """
+        )
+      }
+      return files
+    } catch {
+      // Same intent: failing to find the suite at all (submodule not
+      // initialized, resources not bundled, …) should be a hard CI
+      // failure, not a silent skip. The test bundle is misconfigured.
+      fatalError(
+        """
+        Could not enumerate JSONTestSuite at \(suiteRoot.path): \(error). \
+        Did you `git submodule update --init --recursive`? Is the \
+        Tests/OrderedJSONTests/JSONTestSuite resource being copied into \
+        the test bundle?
+        """
       )
-      .filter { $0.pathExtension == "json" }
-      .sorted { $0.lastPathComponent < $1.lastPathComponent }) ?? []
+    }
   }()
 
   private static let mustAccept = allFiles.filter { $0.lastPathComponent.hasPrefix("y_") }
@@ -67,13 +92,25 @@ struct JSONTestSuiteConformance {
 
   // MARK: - Implementation-defined cases
 
-  /// We don't pin a yes/no for `i_` cases; we just record what we currently
-  /// do so the answer is documented and a future change is intentional.
+  /// Snapshots our current accept/reject decision for each `i_*` file. RFC
+  /// 8259 doesn't pin one — implementations are free to choose — but the
+  /// choice should be **stable** so a regression that flips a previously-
+  /// accepted file to rejected (or vice versa) shows up in CI as a
+  /// snapshot diff.
+  ///
+  /// The snapshot is a one-line `accepted` / `rejected` string per file,
+  /// which keeps the diffs readable.
   @Test(arguments: implementationDefined)
-  func implementationDefinedRunsCleanly(file: URL) throws {
+  func implementationDefinedDecision(file: URL) throws {
     let data = try Data(contentsOf: file)
-    // Should never crash. Acceptance or rejection is both fine.
-    _ = try? JSONValue.parse(data)
+    let decision: String
+    do {
+      _ = try JSONValue.parse(data)
+      decision = "accepted"
+    } catch {
+      decision = "rejected"
+    }
+    assertSnapshot(of: decision, as: .description, named: file.lastPathComponent)
   }
 
   // MARK: - Roundtrip determinism

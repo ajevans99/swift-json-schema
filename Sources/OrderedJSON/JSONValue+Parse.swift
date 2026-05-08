@@ -7,9 +7,15 @@ public struct JSONParseError: Error, Equatable, Sendable {
   public let message: String
   /// The byte offset (0-based) where the error was detected.
   public let byteOffset: Int
-  /// The 1-based line number where the error was detected.
+  /// The 1-based line number where the error was detected. Lines are
+  /// counted in UTF-8 bytes; both `\n` and `\r\n` advance the counter
+  /// (the latter is treated as a single newline so `column` is computed
+  /// from the byte after the `\n`).
   public let line: Int
-  /// The 1-based column number (in code units) where the error was detected.
+  /// The 1-based column number where the error was detected, measured in
+  /// UTF-8 *bytes* — not Unicode scalars or grapheme clusters. This
+  /// matches the byte-offset semantics of `byteOffset` and is the cheapest
+  /// thing to compute from the parser's position.
   public let column: Int
 
   public init(message: String, byteOffset: Int, line: Int, column: Int) {
@@ -38,7 +44,9 @@ extension JSONValue {
   ///   `.integer(Int)` when the value fits in `Int`; otherwise as
   ///   `.number(Double)`.
   /// - Duplicate keys in an object are accepted; the **last** occurrence
-  ///   wins (matching Foundation's behavior and most other parsers).
+  ///   wins on value *and* on position — the late-bound key appears at
+  ///   the end of the iteration order, matching what a strict
+  ///   "last-write-wins" implementation would emit.
   /// - The byte stream must be valid UTF-8. Other encodings or BOMs are
   ///   rejected.
   ///
@@ -46,14 +54,20 @@ extension JSONValue {
   /// - Returns: The parsed value.
   /// - Throws: ``JSONParseError`` on malformed input.
   public static func parse(_ data: Data) throws -> JSONValue {
-    var parser = JSONParser(bytes: Array(data))
-    let value = try parser.parseDocument()
-    return value
+    try data.withUnsafeBytes { rawBuffer -> JSONValue in
+      let buffer = rawBuffer.bindMemory(to: UInt8.self)
+      var parser = JSONParser(bytes: buffer)
+      return try parser.parseDocument()
+    }
   }
 
   /// Convenience overload for parsing a JSON `String` directly.
   public static func parse(_ string: String) throws -> JSONValue {
-    try parse(Data(string.utf8))
+    var copy = string
+    return try copy.withUTF8 { utf8 -> JSONValue in
+      var parser = JSONParser(bytes: utf8)
+      return try parser.parseDocument()
+    }
   }
 }
 
@@ -65,8 +79,12 @@ extension JSONValue {
 /// bytes once, building values as it goes. Object keys are appended to an
 /// `OrderedDictionary` in source order, so the resulting value reflects the
 /// document's declared structure exactly.
+///
+/// The parser borrows its input as an `UnsafeBufferPointer<UInt8>` so the
+/// caller controls the storage lifetime and we avoid copying the whole
+/// document into an `Array` — relevant for large payloads.
 struct JSONParser {
-  let bytes: [UInt8]
+  let bytes: UnsafeBufferPointer<UInt8>
   var index: Int = 0
 
   /// Hard limit on the depth of nested objects/arrays. Prevents stack
@@ -142,11 +160,6 @@ struct JSONParser {
     index < bytes.count ? bytes[index] : nil
   }
 
-  private mutating func advance() -> UInt8 {
-    defer { index += 1 }
-    return bytes[index]
-  }
-
   private mutating func expect(_ byte: UInt8) throws {
     guard index < bytes.count else {
       throw error("Unexpected end of input")
@@ -202,6 +215,14 @@ struct JSONParser {
       skipWhitespace()
       try expect(Self.colon)
       let value = try parseValue()
+      // For duplicate keys: remove the previous entry first, then insert.
+      // OrderedDictionary's subscript-set updates the existing slot in
+      // place, which would leave the late-bound key at its original
+      // position. The documented behavior is "last occurrence wins on
+      // value AND position", so re-insert.
+      if dict[key] != nil {
+        dict.removeValue(forKey: key)
+      }
       dict[key] = value
       skipWhitespace()
       switch peek() {
@@ -462,10 +483,14 @@ struct JSONParser {
       while let b = peek(), b >= Self.zero, b <= Self.nine { index += 1 }
     }
 
-    let slice = bytes[start ..< index]
-    guard let str = String(bytes: slice, encoding: .utf8) else {
-      throw error("Invalid number encoding")
-    }
+    let length = index - start
+    let str = String(
+      unsafeUninitializedCapacity: length,
+      initializingUTF8With: { buffer in
+        for i in 0 ..< length { buffer[i] = bytes[start + i] }
+        return length
+      }
+    )
     if isInteger, let int = Int(str) {
       return .integer(int)
     }
@@ -482,17 +507,30 @@ struct JSONParser {
     return JSONParseError(message: message, byteOffset: index, line: line, column: column)
   }
 
+  /// Computes the 1-based line and 1-based byte-column for a given byte
+  /// offset. Both `\n` and `\r\n` advance the line counter and reset the
+  /// column. A bare `\r` (Mac-classic) is treated as a newline too.
   private func positionForOffset(_ offset: Int) -> (line: Int, column: Int) {
     var line = 1
     var column = 1
     let limit = min(offset, bytes.count)
-    for i in 0 ..< limit {
-      if bytes[i] == Self.lf {
+    var i = 0
+    while i < limit {
+      let b = bytes[i]
+      if b == Self.cr {
+        line += 1
+        column = 1
+        // Treat \r\n as a single newline.
+        if i + 1 < limit, bytes[i + 1] == Self.lf {
+          i += 1
+        }
+      } else if b == Self.lf {
         line += 1
         column = 1
       } else {
         column += 1
       }
+      i += 1
     }
     return (line, column)
   }
