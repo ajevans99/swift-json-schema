@@ -1,3 +1,6 @@
 [submodule "Tests/JSONValidationTests/JSON-Schema-Test-Suite"]
 	path = Tests/JSONSchemaTests/JSON-Schema-Test-Suite
 	url = https://github.com/json-schema-org/JSON-Schema-Test-Suite.git
+[submodule "Tests/OrderedJSONTests/JSONTestSuite"]
+	path = Tests/OrderedJSONTests/JSONTestSuite
+	url = https://github.com/nst/JSONTestSuite

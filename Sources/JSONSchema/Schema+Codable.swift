@@ -9,14 +9,14 @@ extension Schema: Codable {
         schema: bool,
         location: .init(),
         context: Context(dialect: .draft2020_12),
-        documentURL: URL(fileURLWithPath: #file)
+        documentURL: URL(string: "https://swift-json-schema.invalid/in-memory")!
       )
     } else if let schema = try? container.decode(ObjectSchema.self) {
       self.init(
         schema: schema,
         location: .init(),
         context: Context(dialect: .draft2020_12),
-        documentURL: URL(fileURLWithPath: #file)
+        documentURL: URL(string: "https://swift-json-schema.invalid/in-memory")!
       )
     } else {
       throw DecodingError.dataCorruptedError(
@@ -51,7 +51,7 @@ extension BooleanSchema: Codable {
       schemaValue: bool,
       location: .init(),
       context: Context(dialect: .draft2020_12),
-      documentURL: URL(fileURLWithPath: #file)
+      documentURL: URL(string: "https://swift-json-schema.invalid/in-memory")!
     )
   }
 

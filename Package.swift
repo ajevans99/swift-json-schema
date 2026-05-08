@@ -15,6 +15,10 @@ let package = Package(
   ],
   products: [
     .library(
+      name: "OrderedJSON",
+      targets: ["OrderedJSON"]
+    ),
+    .library(
       name: "JSONSchema",
       targets: ["JSONSchema"]
     ),
@@ -38,11 +42,29 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.0"),
   ],
   targets: [
+    // Ordered, RFC-8259-conformant JSON value type, parser, and serializer.
+    // Self-contained and reusable independently of JSON Schema. Eligible
+    // for promotion to a separate package if outside demand materializes.
+    .target(
+      name: "OrderedJSON",
+      dependencies: [
+        .product(name: "OrderedCollections", package: "swift-collections")
+      ]
+    ),
+    .testTarget(
+      name: "OrderedJSONTests",
+      dependencies: ["OrderedJSON"],
+      resources: [
+        .copy("JSONTestSuite")
+      ]
+    ),
+
     // Library that defines the JSON schema related types.
     .target(
       name: "JSONSchema",
       dependencies: [
-        .product(name: "OrderedCollections", package: "swift-collections")
+        "OrderedJSON",
+        .product(name: "OrderedCollections", package: "swift-collections"),
       ],
       resources: [
         .process("Resources")

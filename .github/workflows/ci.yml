@@ -13,6 +13,8 @@ jobs:
     name: Test on macOS
     steps:
     - uses: actions/checkout@v5
+      with:
+        submodules: recursive
     - name: Xcode version
       run: xcodebuild -version
       if: ${{ always() }}
@@ -33,6 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
+      with:
+        submodules: recursive
     - name: Get swift version
       run: swift --version
     - name: Delete Package.resolved
@@ -49,6 +53,8 @@ jobs:
             platform: [macOS, iOS, watchOS, tvOS, visionOS]
     steps:
     - uses: actions/checkout@v5
+      with:
+        submodules: recursive
     - name: Get swift version
       run: swift --version
     - name: Get Xcode version

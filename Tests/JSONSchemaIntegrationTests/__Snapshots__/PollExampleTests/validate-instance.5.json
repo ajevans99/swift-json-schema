@@ -1,0 +1,71 @@
+{
+  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#",
+  "annotations" : [
+    {
+      "annotation" : "Poll",
+      "instanceLocation" : "",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "annotation" : "A schema for representing a poll with options and metadata.",
+      "instanceLocation" : "",
+      "keywordLocation" : "\/description"
+    },
+    {
+      "annotation" : "Unique identifier for the poll",
+      "instanceLocation" : "\/id",
+      "keywordLocation" : "\/properties\/id\/description"
+    },
+    {
+      "annotation" : "The title of the poll",
+      "instanceLocation" : "\/title",
+      "keywordLocation" : "\/properties\/title\/description"
+    },
+    {
+      "annotation" : "List of options available in the poll",
+      "instanceLocation" : "\/options",
+      "keywordLocation" : "\/properties\/options\/description"
+    },
+    {
+      "annotation" : true,
+      "instanceLocation" : "\/options",
+      "keywordLocation" : "\/properties\/options\/items"
+    },
+    {
+      "annotation" : "Whether the poll is currently active",
+      "instanceLocation" : "\/isActive",
+      "keywordLocation" : "\/properties\/isActive\/description"
+    },
+    {
+      "annotation" : true,
+      "instanceLocation" : "\/isActive",
+      "keywordLocation" : "\/properties\/isActive\/default"
+    },
+    {
+      "annotation" : "Category of the poll, limited to specific types",
+      "instanceLocation" : "\/category",
+      "keywordLocation" : "\/properties\/category\/description"
+    }
+  ],
+  "errors" : [
+    {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties",
+      "errors" : [
+        {
+          "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/category\/oneOf",
+          "instanceLocation" : "\/category",
+          "keyword" : "oneOf",
+          "keywordLocation" : "\/properties\/category\/oneOf",
+          "message" : "Failed to satisfy exactly one schema: "
+        }
+      ],
+      "instanceLocation" : "",
+      "keyword" : "properties",
+      "keywordLocation" : "\/properties",
+      "message" : "Validation failed for keyword 'properties'"
+    }
+  ],
+  "instanceLocation" : "",
+  "keywordLocation" : "",
+  "valid" : false
+}
