@@ -1,6 +1,5 @@
 import Foundation
 import OrderedJSON
-import SnapshotTesting
 import Testing
 
 /// Drives the [nst/JSONTestSuite](https://github.com/nst/JSONTestSuite)
@@ -11,8 +10,9 @@ import Testing
 /// - `y_*` — must accept (well-formed JSON, RFC 8259)
 /// - `n_*` — must reject (ill-formed JSON)
 /// - `i_*` — implementation-defined; either accept or reject is allowed,
-///   but behavior should be stable run-to-run. We snapshot the current
-///   accept/reject decision per file so future drift is caught at PR time.
+///   but behavior should be stable across runs. We pin the current decision
+///   per file in ``expectedImplementationDefinedDecisions`` so any future
+///   parser change that flips a yes/no shows up as a failing test.
 @Suite("JSONTestSuite parser conformance")
 struct JSONTestSuiteConformance {
   // MARK: - Discovery
@@ -61,6 +61,57 @@ struct JSONTestSuiteConformance {
     $0.lastPathComponent.hasPrefix("i_")
   }
 
+  // MARK: - Implementation-defined decision contract
+  //
+  // RFC 8259 leaves these cases up to the parser. Each entry below records
+  // the choice OrderedJSON's parser currently makes. A future change that
+  // intentionally flips a decision should update the corresponding entry;
+  // an unintentional flip is a regression and the test fails.
+
+  enum Decision: String, CustomStringConvertible {
+    case accepted
+    case rejected
+    var description: String { rawValue }
+  }
+
+  private static let expectedImplementationDefinedDecisions: [String: Decision] = [
+    "i_number_double_huge_neg_exp.json": .accepted,
+    "i_number_huge_exp.json": .accepted,
+    "i_number_neg_int_huge_exp.json": .accepted,
+    "i_number_pos_double_huge_exp.json": .accepted,
+    "i_number_real_neg_overflow.json": .accepted,
+    "i_number_real_pos_overflow.json": .accepted,
+    "i_number_real_underflow.json": .accepted,
+    "i_number_too_big_neg_int.json": .accepted,
+    "i_number_too_big_pos_int.json": .accepted,
+    "i_number_very_big_negative_int.json": .accepted,
+    "i_object_key_lone_2nd_surrogate.json": .rejected,
+    "i_string_1st_surrogate_but_2nd_missing.json": .rejected,
+    "i_string_1st_valid_surrogate_2nd_invalid.json": .rejected,
+    "i_string_UTF-16LE_with_BOM.json": .rejected,
+    "i_string_UTF-8_invalid_sequence.json": .rejected,
+    "i_string_UTF8_surrogate_U+D800.json": .rejected,
+    "i_string_incomplete_surrogate_and_escape_valid.json": .rejected,
+    "i_string_incomplete_surrogate_pair.json": .rejected,
+    "i_string_incomplete_surrogates_escape_valid.json": .rejected,
+    "i_string_invalid_lonely_surrogate.json": .rejected,
+    "i_string_invalid_surrogate.json": .rejected,
+    "i_string_invalid_utf-8.json": .rejected,
+    "i_string_inverted_surrogates_U+1D11E.json": .rejected,
+    "i_string_iso_latin_1.json": .rejected,
+    "i_string_lone_second_surrogate.json": .rejected,
+    "i_string_lone_utf8_continuation_byte.json": .rejected,
+    "i_string_not_in_unicode_range.json": .rejected,
+    "i_string_overlong_sequence_2_bytes.json": .rejected,
+    "i_string_overlong_sequence_6_bytes.json": .rejected,
+    "i_string_overlong_sequence_6_bytes_null.json": .rejected,
+    "i_string_truncated-utf-8.json": .rejected,
+    "i_string_utf16BE_no_BOM.json": .rejected,
+    "i_string_utf16LE_no_BOM.json": .rejected,
+    "i_structure_500_nested_arrays.json": .rejected,
+    "i_structure_UTF-8_BOM_empty_object.json": .rejected,
+  ]
+
   // MARK: - "Must accept" cases
 
   @Test(arguments: mustAccept)
@@ -92,25 +143,28 @@ struct JSONTestSuiteConformance {
 
   // MARK: - Implementation-defined cases
 
-  /// Snapshots our current accept/reject decision for each `i_*` file. RFC
-  /// 8259 doesn't pin one — implementations are free to choose — but the
-  /// choice should be **stable** so a regression that flips a previously-
-  /// accepted file to rejected (or vice versa) shows up in CI as a
-  /// snapshot diff.
-  ///
-  /// The snapshot is a one-line `accepted` / `rejected` string per file,
-  /// which keeps the diffs readable.
   @Test(arguments: implementationDefined)
   func implementationDefinedDecision(file: URL) throws {
     let data = try Data(contentsOf: file)
-    let decision: String
-    do {
-      _ = try JSONValue.parse(data)
-      decision = "accepted"
-    } catch {
-      decision = "rejected"
+    let actual: Decision = (try? JSONValue.parse(data)) != nil ? .accepted : .rejected
+    let name = file.lastPathComponent
+    guard let expected = Self.expectedImplementationDefinedDecisions[name] else {
+      Issue.record(
+        """
+        i_ case \(name) is not pinned in `expectedImplementationDefinedDecisions`. \
+        OrderedJSON \(actual) it on this run; please add the corresponding entry \
+        so the decision is locked in for future runs.
+        """
+      )
+      return
     }
-    assertSnapshot(of: decision, as: .description, named: file.lastPathComponent)
+    #expect(
+      actual == expected,
+      """
+      Decision for \(name) drifted from \(expected) to \(actual). \
+      If intentional, update `expectedImplementationDefinedDecisions`.
+      """
+    )
   }
 
   // MARK: - Roundtrip determinism

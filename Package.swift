@@ -53,13 +53,7 @@ let package = Package(
     ),
     .testTarget(
       name: "OrderedJSONTests",
-      dependencies: [
-        "OrderedJSON",
-        .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
-      ],
-      exclude: [
-        "__Snapshots__"
-      ],
+      dependencies: ["OrderedJSON"],
       resources: [
         .copy("JSONTestSuite")
       ]
