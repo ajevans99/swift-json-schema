@@ -57,7 +57,7 @@ struct RecursiveTreeIntegrationTests {
     #expect(result.isValid == false)
     // Lock in the actual error tree for the deepest failure — proves we
     // don't just say "invalid" but pinpoint that the `name` at
-    // /children/0/children/0/children/0/name is the wrong type.
+    // /children/0/children/0/name is the wrong type.
     assertSnapshot(of: result, as: .json)
   }
 }
