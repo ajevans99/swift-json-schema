@@ -1,11 +1,11 @@
-import Foundation
+import JSONSchema
+import SnapshotTesting
 import Testing
 
-@testable import JSONSchema
-
 struct MetaSchemaValidationTests {
+  // MARK: - Passing cases (boolean isValid is the only assertion that matters)
+
   @Test func validateValidSchemaAgainstMetaSchema() throws {
-    // A valid schema should pass meta-schema validation
     let rawSchema: JSONValue = [
       "type": "object",
       "properties": [
@@ -19,23 +19,7 @@ struct MetaSchemaValidationTests {
     #expect(result.isValid, "Valid schema should pass meta-schema validation")
   }
 
-  @Test func validateInvalidSchemaAgainstMetaSchema() throws {
-    // A schema with an invalid type value should fail meta-schema validation
-    let rawSchema: JSONValue = [
-      "type": 123,  // type should be a string or array, not a number
-      "properties": [
-        "name": ["type": "string"]
-      ],
-    ]
-
-    let schema = try Schema(rawSchema: rawSchema, context: Context(dialect: .draft2020_12))
-    let result = try schema.validateAgainstMetaSchema()
-    #expect(result.isValid == false, "Invalid schema should fail meta-schema validation")
-    #expect(result.errors != nil, "Invalid schema should have validation errors")
-  }
-
   @Test func dialectValidateSchemaValid() throws {
-    // Test the convenience method on Dialect
     let rawSchema: JSONValue = [
       "type": "string",
       "minLength": 1,
@@ -46,19 +30,7 @@ struct MetaSchemaValidationTests {
     #expect(result.isValid, "Valid schema should pass meta-schema validation")
   }
 
-  @Test func dialectValidateSchemaInvalid() throws {
-    // Test the convenience method on Dialect with an invalid schema
-    let rawSchema: JSONValue = [
-      "type": ["not", "a", "valid", "type", "array"],  // Invalid enum values
-      "minLength": "not a number",  // minLength should be a number
-    ]
-
-    let result = try Dialect.draft2020_12.validateSchema(rawSchema)
-    #expect(result.isValid == false, "Invalid schema should fail meta-schema validation")
-  }
-
   @Test func validateComplexSchemaAgainstMetaSchema() throws {
-    // Test a more complex valid schema
     let rawSchema: JSONValue = [
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://example.com/person.schema.json",
@@ -88,7 +60,6 @@ struct MetaSchemaValidationTests {
   }
 
   @Test func validateBooleanSchemaAgainstMetaSchema() throws {
-    // Boolean schemas are valid schemas
     let trueSchema: JSONValue = .boolean(true)
     let falseSchema: JSONValue = .boolean(false)
 
@@ -101,25 +72,62 @@ struct MetaSchemaValidationTests {
     #expect(result2.isValid, "Boolean false schema should pass meta-schema validation")
   }
 
-  @Test func validateSchemaWithInvalidMinimumType() throws {
-    // Schema with invalid minimum value (should be a number, not a string)
+  // MARK: - Failure cases (snapshot the actual error structure)
+  //
+  // Now that #149 makes validation output deterministic across processes,
+  // these snapshots can lock in the exact error tree the meta-schema
+  // produces — both as regression coverage and as documentation of what
+  // a meta-schema failure looks like to downstream consumers.
+
+  @Test func validateInvalidSchemaAgainstMetaSchema() throws {
+    // type: 123 is not a string or array of strings.
     let rawSchema: JSONValue = [
-      "type": "integer",
-      "minimum": "10",  // Should be a number, not a string
+      "type": 123,
+      "properties": [
+        "name": ["type": "string"]
+      ],
+    ]
+
+    let schema = try Schema(rawSchema: rawSchema, context: Context(dialect: .draft2020_12))
+    let result = try schema.validateAgainstMetaSchema()
+    #expect(result.isValid == false)
+    assertSnapshot(of: result, as: .json)
+  }
+
+  @Test func dialectValidateSchemaInvalid() throws {
+    // Both "type" (invalid enum values) and "minLength" (string instead
+    // of number) violate meta-schema rules.
+    let rawSchema: JSONValue = [
+      "type": ["not", "a", "valid", "type", "array"],
+      "minLength": "not a number",
     ]
 
     let result = try Dialect.draft2020_12.validateSchema(rawSchema)
-    #expect(result.isValid == false, "Schema with invalid minimum type should fail")
+    #expect(result.isValid == false)
+    assertSnapshot(of: result, as: .json)
+  }
+
+  @Test func validateSchemaWithInvalidMinimumType() throws {
+    // minimum should be a number, not a string.
+    let rawSchema: JSONValue = [
+      "type": "integer",
+      "minimum": "10",
+    ]
+
+    let result = try Dialect.draft2020_12.validateSchema(rawSchema)
+    #expect(result.isValid == false)
+    assertSnapshot(of: result, as: .json)
   }
 
   @Test func validateSchemaWithInvalidProperties() throws {
-    // Schema with invalid properties value (should be an object)
+    // properties should be an object whose values are schemas.
     let rawSchema: JSONValue = [
       "type": "object",
-      "properties": "not an object",  // Should be an object
+      "properties": "not an object",
     ]
 
     let result = try Dialect.draft2020_12.validateSchema(rawSchema)
-    #expect(result.isValid == false, "Schema with invalid properties should fail")
+    #expect(result.isValid == false)
+    assertSnapshot(of: result, as: .json)
   }
 }

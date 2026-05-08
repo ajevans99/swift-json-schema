@@ -1,0 +1,56 @@
+{
+  "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#",
+  "annotations" : [
+    {
+      "annotation" : "Content vocabulary meta-schema",
+      "instanceLocation" : "",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "annotation" : [
+        "type"
+      ],
+      "instanceLocation" : "",
+      "keywordLocation" : "\/properties"
+    }
+  ],
+  "errors" : [
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#\/allOf",
+      "errors" : [
+        {
+          "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#\/allOf\/1\/$ref",
+          "errors" : [
+            {
+              "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/applicator#\/properties",
+              "errors" : [
+                {
+                  "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/applicator#\/properties\/properties\/type",
+                  "instanceLocation" : "\/properties",
+                  "keyword" : "type",
+                  "keywordLocation" : "\/allOf\/1\/$ref\/properties\/properties\/type",
+                  "message" : "Expected type '[OrderedJSON.JSONType.object]' but found 'string'"
+                }
+              ],
+              "instanceLocation" : "",
+              "keyword" : "properties",
+              "keywordLocation" : "\/allOf\/1\/$ref\/properties",
+              "message" : "Validation failed for keyword 'properties'"
+            }
+          ],
+          "instanceLocation" : "",
+          "keyword" : "$ref",
+          "keywordLocation" : "\/allOf\/1\/$ref",
+          "message" : "Validation failed during reference validation 'meta\/applicator'"
+        }
+      ],
+      "instanceLocation" : "",
+      "keyword" : "allOf",
+      "keywordLocation" : "\/allOf",
+      "message" : "Validation failed for keyword 'allOf'"
+    }
+  ],
+  "instanceLocation" : "",
+  "keywordLocation" : "",
+  "valid" : false
+}

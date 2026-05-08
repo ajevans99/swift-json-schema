@@ -1,0 +1,172 @@
+{
+  "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#",
+  "annotations" : [
+    {
+      "annotation" : "Content vocabulary meta-schema",
+      "instanceLocation" : "",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "",
+      "keywordLocation" : "\/properties"
+    }
+  ],
+  "errors" : [
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#\/allOf",
+      "errors" : [
+        {
+          "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#\/allOf\/3\/$ref",
+          "errors" : [
+            {
+              "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties",
+              "errors" : [
+                {
+                  "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties\/type\/anyOf",
+                  "errors" : [
+                    {
+                      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties\/type\/anyOf\/0\/$ref",
+                      "errors" : [
+                        {
+                          "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/$defs\/simpleTypes\/enum",
+                          "instanceLocation" : "\/type",
+                          "keyword" : "enum",
+                          "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf\/0\/$ref\/enum",
+                          "message" : "'[\"not\", \"a\", \"valid\", \"type\", \"array\"]' is not one of the allowed values: \"array\", \"boolean\", \"integer\", \"null\", \"number\", \"object\", \"string\""
+                        }
+                      ],
+                      "instanceLocation" : "\/type",
+                      "keyword" : "$ref",
+                      "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf\/0\/$ref",
+                      "message" : "Validation failed during reference validation '#\/$defs\/simpleTypes'"
+                    },
+                    {
+                      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties\/type\/anyOf\/1\/items",
+                      "errors" : [
+                        {
+                          "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties\/type\/anyOf\/1\/items\/$ref",
+                          "errors" : [
+                            {
+                              "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/$defs\/simpleTypes\/enum",
+                              "instanceLocation" : "\/type\/0",
+                              "keyword" : "enum",
+                              "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf\/1\/items\/$ref\/enum",
+                              "message" : "'\"not\"' is not one of the allowed values: \"array\", \"boolean\", \"integer\", \"null\", \"number\", \"object\", \"string\""
+                            }
+                          ],
+                          "instanceLocation" : "\/type\/0",
+                          "keyword" : "$ref",
+                          "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf\/1\/items\/$ref",
+                          "message" : "Validation failed during reference validation '#\/$defs\/simpleTypes'"
+                        },
+                        {
+                          "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties\/type\/anyOf\/1\/items\/$ref",
+                          "errors" : [
+                            {
+                              "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/$defs\/simpleTypes\/enum",
+                              "instanceLocation" : "\/type\/1",
+                              "keyword" : "enum",
+                              "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf\/1\/items\/$ref\/enum",
+                              "message" : "'\"a\"' is not one of the allowed values: \"array\", \"boolean\", \"integer\", \"null\", \"number\", \"object\", \"string\""
+                            }
+                          ],
+                          "instanceLocation" : "\/type\/1",
+                          "keyword" : "$ref",
+                          "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf\/1\/items\/$ref",
+                          "message" : "Validation failed during reference validation '#\/$defs\/simpleTypes'"
+                        },
+                        {
+                          "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties\/type\/anyOf\/1\/items\/$ref",
+                          "errors" : [
+                            {
+                              "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/$defs\/simpleTypes\/enum",
+                              "instanceLocation" : "\/type\/2",
+                              "keyword" : "enum",
+                              "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf\/1\/items\/$ref\/enum",
+                              "message" : "'\"valid\"' is not one of the allowed values: \"array\", \"boolean\", \"integer\", \"null\", \"number\", \"object\", \"string\""
+                            }
+                          ],
+                          "instanceLocation" : "\/type\/2",
+                          "keyword" : "$ref",
+                          "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf\/1\/items\/$ref",
+                          "message" : "Validation failed during reference validation '#\/$defs\/simpleTypes'"
+                        },
+                        {
+                          "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties\/type\/anyOf\/1\/items\/$ref",
+                          "errors" : [
+                            {
+                              "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/$defs\/simpleTypes\/enum",
+                              "instanceLocation" : "\/type\/3",
+                              "keyword" : "enum",
+                              "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf\/1\/items\/$ref\/enum",
+                              "message" : "'\"type\"' is not one of the allowed values: \"array\", \"boolean\", \"integer\", \"null\", \"number\", \"object\", \"string\""
+                            }
+                          ],
+                          "instanceLocation" : "\/type\/3",
+                          "keyword" : "$ref",
+                          "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf\/1\/items\/$ref",
+                          "message" : "Validation failed during reference validation '#\/$defs\/simpleTypes'"
+                        }
+                      ],
+                      "instanceLocation" : "\/type",
+                      "keyword" : "items",
+                      "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf\/1\/items",
+                      "message" : "Validation failed for keyword 'items'"
+                    }
+                  ],
+                  "instanceLocation" : "\/type",
+                  "keyword" : "anyOf",
+                  "keywordLocation" : "\/allOf\/3\/$ref\/properties\/type\/anyOf",
+                  "message" : "Validation failed for keyword 'anyOf'"
+                },
+                {
+                  "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties\/minLength\/$ref",
+                  "errors" : [
+                    {
+                      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/$defs\/nonNegativeIntegerDefault0\/$ref",
+                      "errors" : [
+                        {
+                          "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/$defs\/nonNegativeInteger\/type",
+                          "instanceLocation" : "\/minLength",
+                          "keyword" : "type",
+                          "keywordLocation" : "\/allOf\/3\/$ref\/properties\/minLength\/$ref\/$ref\/type",
+                          "message" : "Expected type '[OrderedJSON.JSONType.integer]' but found 'string'"
+                        }
+                      ],
+                      "instanceLocation" : "\/minLength",
+                      "keyword" : "$ref",
+                      "keywordLocation" : "\/allOf\/3\/$ref\/properties\/minLength\/$ref\/$ref",
+                      "message" : "Validation failed during reference validation '#\/$defs\/nonNegativeInteger'"
+                    }
+                  ],
+                  "instanceLocation" : "\/minLength",
+                  "keyword" : "$ref",
+                  "keywordLocation" : "\/allOf\/3\/$ref\/properties\/minLength\/$ref",
+                  "message" : "Validation failed during reference validation '#\/$defs\/nonNegativeIntegerDefault0'"
+                }
+              ],
+              "instanceLocation" : "",
+              "keyword" : "properties",
+              "keywordLocation" : "\/allOf\/3\/$ref\/properties",
+              "message" : "Validation failed for keyword 'properties'"
+            }
+          ],
+          "instanceLocation" : "",
+          "keyword" : "$ref",
+          "keywordLocation" : "\/allOf\/3\/$ref",
+          "message" : "Validation failed during reference validation 'meta\/validation'"
+        }
+      ],
+      "instanceLocation" : "",
+      "keyword" : "allOf",
+      "keywordLocation" : "\/allOf",
+      "message" : "Validation failed for keyword 'allOf'"
+    }
+  ],
+  "instanceLocation" : "",
+  "keywordLocation" : "",
+  "valid" : false
+}

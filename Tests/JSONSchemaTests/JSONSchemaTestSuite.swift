@@ -143,19 +143,32 @@ extension Encodable {
 }
 
 extension Schema {
+  /// Pretty-printed JSON of this schema for failure diagnostics. Goes
+  /// through `JSONEncoder` with `.sortedKeys` (via `toJSONValue`) so the
+  /// output is alphabetically stable across runs even if a future change
+  /// shifts emission order — the helper is for *human-readable* failure
+  /// dumps, not byte-equal comparison. Use ``JSONValue/serialized(options:)``
+  /// directly when the spec requires preserving the schema author's
+  /// declared key order.
   func json() throws -> String {
-    try toJSONString()
+    try (try toJSONValue()).serialized(options: .pretty)
   }
 }
 
 extension JSONValue {
+  /// Pretty-printed JSON of this value, preserving declared key order via
+  /// the OrderedJSON serializer (``JSONValue/serialized(options:)``).
   func json() throws -> String {
-    try toJSONString()
+    try serialized(options: .pretty)
   }
 }
 
 extension ValidationResult {
+  /// Pretty-printed JSON of this validation result for failure diagnostics.
+  /// Goes through `JSONEncoder` with `.sortedKeys` (via `toJSONValue`) so
+  /// the output is alphabetically stable across runs — diagnostic
+  /// readability is the goal here, not byte-equal comparison.
   func json() throws -> String {
-    try toJSONString()
+    try (try toJSONValue()).serialized(options: .pretty)
   }
 }
