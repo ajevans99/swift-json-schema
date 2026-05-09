@@ -2,6 +2,10 @@ import Foundation
 
 public protocol ValidatableSchema: Equatable, Sendable {
   func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult
+
+  /// An ``OrderedJSON/JSONValue`` representation of this schema.
+  /// See ``Schema/jsonValue`` for the public-facing entry point.
+  var jsonValue: JSONValue { get }
 }
 
 extension ValidatableSchema {
