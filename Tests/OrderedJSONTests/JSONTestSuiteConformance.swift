@@ -55,9 +55,9 @@ struct JSONTestSuiteConformance {
     }
   }()
 
-  private static let mustAccept = allFiles.filter { $0.lastPathComponent.hasPrefix("y_") }
-  private static let mustReject = allFiles.filter { $0.lastPathComponent.hasPrefix("n_") }
-  private static let implementationDefined = allFiles.filter {
+  private static let mustAcceptFiles = allFiles.filter { $0.lastPathComponent.hasPrefix("y_") }
+  private static let mustRejectFiles = allFiles.filter { $0.lastPathComponent.hasPrefix("n_") }
+  private static let implementationDefinedFiles = allFiles.filter {
     $0.lastPathComponent.hasPrefix("i_")
   }
 
@@ -114,7 +114,7 @@ struct JSONTestSuiteConformance {
 
   // MARK: - "Must accept" cases
 
-  @Test(arguments: mustAccept)
+  @Test(arguments: Self.mustAcceptFiles)
   func mustAccept(file: URL) throws {
     let data = try Data(contentsOf: file)
     do {
@@ -128,7 +128,7 @@ struct JSONTestSuiteConformance {
 
   // MARK: - "Must reject" cases
 
-  @Test(arguments: mustReject)
+  @Test(arguments: Self.mustRejectFiles)
   func mustReject(file: URL) throws {
     let data = try Data(contentsOf: file)
     do {
@@ -143,7 +143,7 @@ struct JSONTestSuiteConformance {
 
   // MARK: - Implementation-defined cases
 
-  @Test(arguments: implementationDefined)
+  @Test(arguments: Self.implementationDefinedFiles)
   func implementationDefinedDecision(file: URL) throws {
     let data = try Data(contentsOf: file)
     let actual: Decision = (try? JSONValue.parse(data)) != nil ? .accepted : .rejected
@@ -173,7 +173,7 @@ struct JSONTestSuiteConformance {
   /// must produce byte-identical output between the two emit passes.
   /// Locks in the parser → serializer round-trip stability that motivates
   /// this whole effort (see #149).
-  @Test(arguments: mustAccept)
+  @Test(arguments: Self.mustAcceptFiles)
   func roundtripIsByteStable(file: URL) throws {
     let data = try Data(contentsOf: file)
     guard let first = try? JSONValue.parse(data) else {
