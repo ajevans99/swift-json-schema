@@ -33,6 +33,9 @@ jobs:
           fetch-depth: 0
           submodules: recursive
 
+      - name: Install jemalloc
+        run: brew install jemalloc
+
       - name: Resolve baseline tag
         id: baseline
         run: |

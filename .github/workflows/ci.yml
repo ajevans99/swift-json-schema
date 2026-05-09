@@ -23,6 +23,8 @@ jobs:
       if: ${{ failure() }}
     - name: Get swift version
       run: swift --version
+    - name: Install jemalloc
+      run: brew install jemalloc
     - name: Run tests
       run: swift test --enable-code-coverage
     - name: Upload coverage reports to Codecov
@@ -39,6 +41,8 @@ jobs:
         submodules: recursive
     - name: Get swift version
       run: swift --version
+    - name: Install jemalloc
+      run: sudo apt-get update && sudo apt-get install -y libjemalloc-dev
     - name: Delete Package.resolved
       run: rm -f Package.resolved
     - name: Build
@@ -59,5 +63,7 @@ jobs:
       run: swift --version
     - name: Get Xcode version
       run: xcodebuild -version
+    - name: Install jemalloc
+      run: brew install jemalloc
     - name: Build ${{ matrix.platform }}
       run: set -o pipefail && xcodebuild build -destination generic/platform=${{ matrix.platform }} -scheme swift-json-schema-Package | xcbeautify --renderer github-actions
