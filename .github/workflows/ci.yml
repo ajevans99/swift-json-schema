@@ -63,7 +63,7 @@ jobs:
       run: swift --version
     - name: Get Xcode version
       run: xcodebuild -version
-    - name: Install jemalloc
-      run: brew install jemalloc
     - name: Build ${{ matrix.platform }}
+      env:
+        SKIP_BENCHMARKS: "1"
       run: set -o pipefail && xcodebuild build -destination generic/platform=${{ matrix.platform }} -scheme swift-json-schema-Package | xcbeautify --renderer github-actions
