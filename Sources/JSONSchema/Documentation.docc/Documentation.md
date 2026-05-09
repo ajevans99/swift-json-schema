@@ -2,10 +2,12 @@
 
 The ``JSONSchema`` target provides the core runtime for working with JSON Schema documents in Swift. It focuses on representing schemas, decoding/encoding them, validating data, and navigating JSON documents with strongly typed utilities.
 
+`JSONSchema` re-exports the [`OrderedJSON`](https://swiftpackageindex.com/ajevans99/swift-json-schema/documentation/orderedjson) library, so types like `JSONValue` and `JSONType` are available unchanged from `import JSONSchema`. If you only need an order-preserving JSON parser/serializer without the validator, `import OrderedJSON` directly.
+
 ## Overview
 
 - **Schema representation** – ``Schema`` loads schemas from Swift builders, JSON strings, or decoded `JSONValue` instances.
-- **JSON data model** – ``JSONValue`` models any JSON payload, enabling type-safe validation and letting you construct instances directly in Swift without juggling `Any`.
+- **JSON data model** – `JSONValue` (re-exported from `OrderedJSON`) models any JSON payload, enabling type-safe validation and letting you construct instances directly in Swift without juggling `Any`.
 - **Pointer navigation** – ``JSONPointer`` provide convenient traversal of deeply nested JSON structures and map cleanly onto the JSON Schema specification's pointer syntax.
 - **Validation pipeline** – Calling ``Schema/validate(_:)`` returns a ``ValidationResult`` containing errors, annotations, and metadata about which keywords were evaluated. You can emit spec-compliant diagnostics through ``ValidationOutputLevel`` and ``ValidationOutputConfiguration``.
 - **Format validators** – The ``FormatValidator`` registry ships with built-in validators (URI, email, hostname, UUID, duration, and more) and lets you register custom implementations to extend your dialect.
@@ -35,12 +37,23 @@ Validation is spec-compliant: references resolve through ``JSONPointer`` paths, 
 
 ## Topics
 
+### Articles
+
+- <doc:Deterministic-schema-output>
+- <doc:Validation-output-formats>
+
 ### Core Types
 
 - ``Schema``
 - ``JSONValue``
 - ``JSONPointer``
 - ``ValidationResult``
+
+### Deterministic JSON
+
+- ``Schema/jsonValue``
+- ``ValidationResult/jsonValue``
+- ``ValidationError/jsonValue``
 
 ### Validation Output
 

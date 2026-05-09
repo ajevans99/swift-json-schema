@@ -7,12 +7,24 @@
 [![Draft 2020-12](https://img.shields.io/endpoint?url=https%3A%2F%2Fbowtie.report%2Fbadges%2Fswift-swift-json-schema%2Fcompliance%2Fdraft2020-12.json)](https://bowtie.report/#/implementations/swift-swift-json-schema)
 [![codecov](https://codecov.io/gh/ajevans99/swift-json-schema/graph/badge.svg?token=P5CGW5A95K)](https://codecov.io/gh/ajevans99/swift-json-schema)
 
-The Swift JSON Schema library provides a type-safe way to generate and validate JSON schema documents directly in Swift.
+The Swift JSON Schema library provides a type-safe way to generate and validate JSON schema documents directly in Swift, with **deterministic, byte-stable JSON output** at every layer — schema emission, validation results, and the underlying JSON value type.
+
+## Library targets
+
+The package ships four libraries you can import independently:
+
+| Library | Use it when you need |
+|---------|---------------------|
+| `OrderedJSON` | An order-preserving JSON parser, serializer, and value type. Standalone — use it without the validator if you just want stable JSON I/O across processes. |
+| `JSONSchema` | The JSON Schema 2020-12 validator. Re-exports `OrderedJSON` so types like `JSONValue` are available unchanged from `import JSONSchema`. |
+| `JSONSchemaBuilder` | A result-builder DSL plus the `@Schemable` macro for generating schemas from Swift types. Builds on `JSONSchema`. |
+| `JSONSchemaConversion` | Type bridges (`URL`, `UUID`, `Date`) for use with `JSONSchemaBuilder`. |
 
 * [Schema Generation](#schema-generation)
 * [Macros](#macros)
 * [Validation](#validation)
 * [Parsing](#parsing)
+* [Why not Foundation's JSON?](#why-not-foundations-json)
 * [Example Projects](#example-projects)
 * [Documentation](#documentation)
 * [Installation](#installation)
@@ -344,6 +356,36 @@ let weather: Weather = try Weather.schema.parseAndValidate(instance: data)
 ```
 
 > Shoutout to the [swift-parsing](https://github.com/pointfreeco/swift-parsing) library and the [Point-Free Parsing series](https://www.pointfree.co/collections/parsing) for the inspiration behind the parsing API and implementation.
+
+## Why not Foundation's JSON?
+
+You can use the validator with `JSONDecoder` / `JSONEncoder` if you want — `JSONValue` is `Codable`. But this package ships its own JSON parser (`OrderedJSON`) for one reason: **declared key order is preserved through the entire parse → validate → serialize pipeline, byte-stably across processes and platforms.**
+
+Foundation's parsers don't promise that:
+
+| Operation | `JSONDecoder` | `JSONSerialization` | `OrderedJSON` |
+|-----------|--------------|--------------------|--------------| 
+| Object key order preserved on parse | ❌ randomized | ✅ Apple 17+/14+ only | ✅ all platforms |
+| Object key order preserved on emit | ❌ randomized (hash-seed) | ❌ alphabetical with `.sortedKeys` | ✅ insertion order |
+| Round-trip byte-stable | ❌ | ⚠️ Apple-only | ✅ |
+
+For schema validation specifically, this matters because:
+
+* **Annotation/error output is deterministic** — the order of `result.annotations` and `result.errors` reflects the validation traversal, which itself follows the instance's declared key order. Snapshot tests against validation output don't flake.
+* **Serialized schemas are byte-stable** — a schema constructed via `JSONSchemaBuilder` (or parsed in) emits JSON in dialect-deterministic order, every run. Snapshots, signed payloads, generated artifacts all stay reproducible.
+* **Linux parity** — Foundation's `JSONSerialization` only preserves key order on Apple 17+/14+. `OrderedJSON` works everywhere SwiftPM does.
+
+Use `OrderedJSON` directly if you don't need the validator:
+
+```swift
+import OrderedJSON
+
+let value = try JSONValue.parse(data)            // preserves source key order
+let bytes = try value.serializedData()           // emits in that same order
+let pretty = try value.serialized(options: .pretty)
+```
+
+See issue [#149](https://github.com/ajevans99/swift-json-schema/issues/149) for the full background on why the determinism work happened.
 
 ## Example Projects
 
