@@ -40,6 +40,7 @@ let package = Package(
     .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.1" ..< "700.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.17.6"),
     .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.0"),
+    .package(url: "https://github.com/ordo-one/package-benchmark.git", from: "2.0.0"),
   ],
   targets: [
     // Ordered, RFC-8259-conformant JSON value type, parser, and serializer.
@@ -160,6 +161,29 @@ let package = Package(
       name: "JSONSchemaConversionTests",
       dependencies: [
         "JSONSchemaConversion"
+      ]
+    ),
+
+    // MARK: - Benchmarks (#162)
+    //
+    // Benchmark targets live under Benchmarks/ and require the
+    // package-benchmark plugin. Run with:
+    //
+    //     swift package --allow-writing-to-package-directory benchmark
+    //
+    // See Benchmarks/README.md for full details.
+    .executableTarget(
+      name: "OrderedJSONBenchmarks",
+      dependencies: [
+        "OrderedJSON",
+        .product(name: "Benchmark", package: "package-benchmark"),
+      ],
+      path: "Benchmarks/OrderedJSONBenchmarks",
+      resources: [
+        .copy("Resources")
+      ],
+      plugins: [
+        .plugin(name: "BenchmarkPlugin", package: "package-benchmark")
       ]
     ),
   ],
