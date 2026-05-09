@@ -365,15 +365,15 @@ Foundation's parsers don't promise that:
 
 | Operation | `JSONDecoder` | `JSONSerialization` | `OrderedJSON` |
 |-----------|--------------|--------------------|--------------| 
-| Object key order preserved on parse | ❌ randomized | ✅ Apple 17+/14+ only | ✅ all platforms |
-| Object key order preserved on emit | ❌ randomized (hash-seed) | ❌ alphabetical with `.sortedKeys` | ✅ insertion order |
-| Round-trip byte-stable | ❌ | ⚠️ Apple-only | ✅ |
+| Object key order preserved on parse | ❌ unspecified | ✅ iOS 17+/macOS 14+/tvOS 17+/watchOS 10+ | ✅ all platforms |
+| Object key order preserved on emit | ❌ unspecified | ❌ alphabetical with `.sortedKeys` | ✅ insertion order |
+| Round-trip byte-stable | ❌ | ⚠️ recent Apple platforms only | ✅ |
 
 For schema validation specifically, this matters because:
 
 * **Annotation/error output is deterministic** — the order of `result.annotations` and `result.errors` reflects the validation traversal, which itself follows the instance's declared key order. Snapshot tests against validation output don't flake.
 * **Serialized schemas are byte-stable** — a schema constructed via `JSONSchemaBuilder` (or parsed in) emits JSON in dialect-deterministic order, every run. Snapshots, signed payloads, generated artifacts all stay reproducible.
-* **Linux parity** — Foundation's `JSONSerialization` only preserves key order on Apple 17+/14+. `OrderedJSON` works everywhere SwiftPM does.
+* **Linux parity** — Foundation's `JSONSerialization` only preserves key order on iOS 17+ / macOS 14+ / tvOS 17+ / watchOS 10+; older OS versions and corelibs Foundation (Linux) make no such promise. `OrderedJSON` works everywhere SwiftPM does.
 
 Use `OrderedJSON` directly if you don't need the validator:
 

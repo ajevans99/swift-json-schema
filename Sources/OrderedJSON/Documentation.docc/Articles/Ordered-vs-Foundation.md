@@ -14,13 +14,15 @@ This article compares the three so you can pick the right one for your use case.
 |-----------|--------------|--------------------|--------------| 
 | Decodes into your `Codable` Swift types | ✅ | ❌ (gives `[String: Any]`) | ❌ (gives `JSONValue`) |
 | Untyped tree | ❌ (would need `JSONValue: Codable`) | ✅ (`Any`) | ✅ (`JSONValue`) |
-| Object key order preserved on **parse** | ❌ randomized | ✅ Apple 17+/14+ only | ✅ all platforms |
-| Object key order preserved on **emit** | ❌ randomized (hash-seed) | ❌ alphabetical with `.sortedKeys`; otherwise randomized | ✅ insertion order |
-| Round-trip byte-stable | ❌ | ⚠️ Apple-only | ✅ |
+| Object key order preserved on **parse** | ❌ unspecified | ✅ iOS 17+/macOS 14+/tvOS 17+/watchOS 10+ only | ✅ all platforms |
+| Object key order preserved on **emit** | ❌ unspecified | ❌ alphabetical with `.sortedKeys`; unspecified otherwise | ✅ insertion order |
+| Round-trip byte-stable | ❌ | ⚠️ recent Apple platforms only | ✅ |
 | RFC 8259 strict | ✅ | ✅ | ✅ |
-| Linux parity | ⚠️ corelibs Foundation | ⚠️ key order not preserved | ✅ |
+| Linux parity | ⚠️ corelibs Foundation | ⚠️ key order not guaranteed | ✅ |
 | Custom number-vs-double policy | ⚠️ via `Decimal` | ⚠️ via `NSNumber` introspection | ✅ explicit (``JSONValue/integer(_:)`` vs ``JSONValue/number(_:)``) |
 | Streaming / chunked input | ❌ | ❌ | ❌ (planned) |
+
+> Foundation's key-order behavior is not promised by `JSONDecoder` / `JSONEncoder` — it's implementation-defined and shouldn't be relied on. `JSONSerialization` *does* preserve insertion order on iOS 17+ / macOS 14+ / tvOS 17+ / watchOS 10+ where the parser was rewritten to do so; older OS versions and corelibs Foundation (Linux) make no such promise.
 
 ## When to pick what
 

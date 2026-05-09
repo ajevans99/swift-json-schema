@@ -12,16 +12,19 @@ let schema = try Schema(
   context: Context(dialect: .draft2020_12)
 )
 
-let json = schema.jsonValue                  // OrderedJSON.JSONValue
-let bytes = try json.serialized(options: .pretty)
+let json = schema.jsonValue                    // OrderedJSON.JSONValue
+let pretty = try json.serialized(options: .pretty)
 // → {
 //     "$id" : "https://example.com/s",
 //     "type" : "string",
 //     "minLength" : 1
 //   }
+
+// Or get the UTF-8 bytes directly:
+let bytes = try json.serializedData(options: .pretty)
 ```
 
-The same input yields the same bytes on every run, every process, every platform — no `JSONEncoder.outputFormatting = [.sortedKeys]` workaround required.
+The same input yields identical bytes on every run, every process, every platform — no `JSONEncoder.outputFormatting = [.sortedKeys]` workaround required.
 
 ## Key order
 

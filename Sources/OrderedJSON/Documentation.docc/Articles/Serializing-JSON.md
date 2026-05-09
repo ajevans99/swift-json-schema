@@ -51,7 +51,7 @@ case convertToString(positiveInfinity: String, negativeInfinity: String, nan: St
 case null
 ```
 
-The default is `.throw` — if the parser ever encounters a non-finite double, it throws ``JSONValue/SerializationError/nonConformingFloat(_:)`` rather than emitting invalid JSON.
+The default is `.throw` — if the value contains a non-finite double, the serializer throws ``JSONValue/SerializationError/nonConformingFloat(_:)`` rather than emitting invalid JSON. Note that JSON text itself can never represent `NaN` or `±Infinity`, so this case only arises when you've manually constructed a `JSONValue` from a Swift `Double` whose value happens to be non-finite.
 
 ```swift
 let value: JSONValue = .number(.infinity)
