@@ -77,8 +77,7 @@ struct SchemaJSONValueTests {
     ]
     let schema = try Schema(rawSchema: raw, context: Context(dialect: .draft2020_12))
 
-    let outputs = (0 ..< 5).compactMap { _ in try? schema.jsonValue.serialized() }
-    #expect(outputs.count == 5)
+    let outputs = try (0 ..< 5).map { _ in try schema.jsonValue.serialized() }
     let first = outputs[0]
     for run in outputs.dropFirst() {
       #expect(run == first)

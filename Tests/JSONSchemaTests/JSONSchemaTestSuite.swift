@@ -127,10 +127,12 @@ extension JSONSchemaTest: CustomTestStringConvertible {
 }
 
 extension Schema {
-  /// Pretty-printed JSON of this schema in declaration order. Used for
-  /// failure diagnostics in the test-suite drivers; goes through the
-  /// direct ``Schema/jsonValue`` accessor so output reflects the schema
-  /// author's declared keyword order without a `JSONEncoder` round-trip.
+  /// Pretty-printed JSON of this schema in deterministic dialect order.
+  /// Used for failure diagnostics in the test-suite drivers; goes through
+  /// the direct ``Schema/jsonValue`` accessor so output is byte-stable
+  /// across runs without a `JSONEncoder` round-trip. Keyword order
+  /// matches the dialect's registration order (e.g. `$id` before `type`),
+  /// not necessarily the source schema's declared order.
   func json() throws -> String {
     try jsonValue.serialized(options: .pretty)
   }
