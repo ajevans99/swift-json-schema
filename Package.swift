@@ -40,7 +40,7 @@ let package = Package(
     .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.1" ..< "700.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.17.6"),
     .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.0"),
-    .package(url: "https://github.com/ordo-one/package-benchmark.git", from: "2.0.0"),
+    .package(url: "https://github.com/ordo-one/package-benchmark.git", from: "1.31.0"),
   ],
   targets: [
     // Ordered, RFC-8259-conformant JSON value type, parser, and serializer.
