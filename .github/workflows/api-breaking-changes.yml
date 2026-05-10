@@ -47,6 +47,14 @@ jobs:
         # Don't fail the step on detected breakages — we report and label
         # instead, so reviewers can intentionally accept the change.
         continue-on-error: true
+        env:
+          # Skip the OrderedJSONBenchmarks target. Its package-benchmark
+          # plugin breaks SwiftPM's --emit-symbol-graph for sibling library
+          # targets, causing the digester to think every public symbol in
+          # OrderedJSON / JSONSchema / JSONSchemaBuilder / JSONSchemaConversion
+          # was "removed" — a 127-entry false-positive flood. Bench targets
+          # don't need an API surface check anyway.
+          SKIP_BENCHMARKS: "1"
         run: |
           set +e
           swift package diagnose-api-breaking-changes \

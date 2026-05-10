@@ -50,6 +50,11 @@ jobs:
       - name: Diagnose API breaking changes
         id: diagnose
         continue-on-error: true
+        env:
+          # See api-breaking-changes.yml for the full rationale: the bench
+          # plugin breaks symbol-graph emission for sibling library targets,
+          # producing a false-positive flood. Skip it.
+          SKIP_BENCHMARKS: "1"
         run: |
           set +e
           swift package diagnose-api-breaking-changes \
