@@ -46,7 +46,7 @@ jobs:
 
   build_apple_platforms:
     name: Build on Apple Platforms
-    runs-on: macos-26-xlarge
+    runs-on: macos-latest
     strategy:
         fail-fast: false
         matrix:

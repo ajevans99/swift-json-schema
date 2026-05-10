@@ -12,9 +12,9 @@ permissions:
 jobs:
   detect:
     name: Detect API breaking changes
-    # Match the runner used by the rest of CI so we get the same Swift toolchain
-    # — older toolchains (Swift ≤6.1) produce false positives in the digester.
-    runs-on: macos-26-xlarge
+    # macos-latest provides Swift ≥6.3, which is what the API digester needs
+    # to avoid the false-positive flood we saw on Swift ≤6.1.
+    runs-on: macos-latest
 
     steps:
       - name: Check out PR head

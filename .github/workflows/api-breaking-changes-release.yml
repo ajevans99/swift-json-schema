@@ -23,7 +23,7 @@ permissions:
 jobs:
   diff:
     name: Diff ${{ inputs.head_ref }} vs release
-    runs-on: macos-26-xlarge
+    runs-on: macos-latest
 
     steps:
       - name: Check out
