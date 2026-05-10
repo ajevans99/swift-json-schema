@@ -14,6 +14,15 @@ Use ``dependentRequired`` when the presence of one property requires another:
 }
 ```
 
+> Note: ``JSONSchemaComponent/dependentRequired(_:)``,
+> ``JSONSchemaComponent/dependentSchemas(_:)``, and
+> ``JSONSchemaComponent/vocabulary(_:)`` accept Swift's `KeyValuePairs`
+> rather than `Dictionary`. The dictionary-literal call site is unchanged
+> — `["credit_card": ["billing_address"]]` works as written — but the
+> declaration order of keys is preserved through to the emitted JSON.
+> A `Dictionary` would have been hash-seed-randomized at the literal-init
+> step, leaking nondeterministic order into your output.
+
 You can also build conditional schemas using the ``If`` helper:
 
 ```swift
