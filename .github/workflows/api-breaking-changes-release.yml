@@ -23,7 +23,8 @@ permissions:
 jobs:
   diff:
     name: Diff ${{ inputs.head_ref }} vs release
-    runs-on: macos-latest
+    # macos-26 — see api-breaking-changes.yml for the rationale.
+    runs-on: macos-26
 
     steps:
       - name: Check out
@@ -51,9 +52,8 @@ jobs:
         id: diagnose
         continue-on-error: true
         env:
-          # See api-breaking-changes.yml for the full rationale: the bench
-          # plugin breaks symbol-graph emission for sibling library targets,
-          # producing a false-positive flood. Skip it.
+          # See api-breaking-changes.yml — bench targets don't expose a
+          # stable public API, so they're omitted from the digester run.
           SKIP_BENCHMARKS: "1"
         run: |
           set +e

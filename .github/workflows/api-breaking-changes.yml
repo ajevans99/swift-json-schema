@@ -12,9 +12,11 @@ permissions:
 jobs:
   detect:
     name: Detect API breaking changes
-    # macos-latest provides Swift ≥6.3, which is what the API digester needs
-    # to avoid the false-positive flood we saw on Swift ≤6.1.
-    runs-on: macos-latest
+    # macos-26 (Swift 6.2+) — `macos-latest` currently resolves to an image
+    # with Swift 6.1.2, which has a known buggy API digester that emits
+    # "X has been removed" for every public symbol regardless of the
+    # actual diff. Pinning to macos-26 dodges that without going to xl.
+    runs-on: macos-26
 
     steps:
       - name: Check out PR head
@@ -48,12 +50,9 @@ jobs:
         # instead, so reviewers can intentionally accept the change.
         continue-on-error: true
         env:
-          # Skip the OrderedJSONBenchmarks target. Its package-benchmark
-          # plugin breaks SwiftPM's --emit-symbol-graph for sibling library
-          # targets, causing the digester to think every public symbol in
-          # OrderedJSON / JSONSchema / JSONSchemaBuilder / JSONSchemaConversion
-          # was "removed" — a 127-entry false-positive flood. Bench targets
-          # don't need an API surface check anyway.
+          # Skip the OrderedJSONBenchmarks target. Bench targets don't have
+          # a stable public API surface to track, so omitting them keeps
+          # the digester focused on the actual library products.
           SKIP_BENCHMARKS: "1"
         run: |
           set +e
