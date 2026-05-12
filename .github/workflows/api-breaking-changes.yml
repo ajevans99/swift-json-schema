@@ -29,9 +29,6 @@ jobs:
           swift --version
           xcodebuild -version
 
-      - name: Install jemalloc
-        run: brew install jemalloc
-
       - name: Resolve baseline (PR base branch)
         id: baseline
         run: |

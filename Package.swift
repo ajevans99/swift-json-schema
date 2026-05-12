@@ -1,17 +1,7 @@
 // swift-tools-version: 6.1
 
 import CompilerPluginSupport
-import Foundation
 import PackageDescription
-
-// Benchmarks pull in package-benchmark, which depends on jemalloc — fine on
-// macOS / Linux hosts where you can `brew install jemalloc` /
-// `apt-get install libjemalloc-dev`, but a problem when the package is
-// built for cross-platform Apple targets via `xcodebuild` (iOS / tvOS /
-// watchOS / visionOS) because the benchmark executable can't link the
-// host-installed jemalloc against an iOS slice. Gate the dep + target on
-// an env var: CI's Apple-platform jobs set SKIP_BENCHMARKS=1.
-let includeBenchmarks = ProcessInfo.processInfo.environment["SKIP_BENCHMARKS"] == nil
 
 let package = Package(
   name: "swift-json-schema",
@@ -45,15 +35,13 @@ let package = Package(
       targets: ["JSONSchemaConversion"]
     ),
   ],
-  dependencies: ([
+  dependencies: [
     .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.0.0"),
     .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.1" ..< "700.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.17.6"),
     .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.0"),
-  ] + (includeBenchmarks
-    ? [.package(url: "https://github.com/ordo-one/package-benchmark.git", from: "1.31.0")]
-    : [])) as [Package.Dependency],
-  targets: ([
+  ],
+  targets: [
     // Ordered, RFC-8259-conformant JSON value type, parser, and serializer.
     // Self-contained and reusable independently of JSON Schema. Eligible
     // for promotion to a separate package if outside demand materializes.
@@ -174,32 +162,6 @@ let package = Package(
         "JSONSchemaConversion"
       ]
     ),
-  ] + (includeBenchmarks
-    ? [
-      // MARK: - Benchmarks (#162)
-      //
-      // Benchmark targets live under Benchmarks/ and require the
-      // package-benchmark plugin (gated on SKIP_BENCHMARKS env var so
-      // iOS/tvOS/etc. cross-platform builds skip jemalloc). Run with:
-      //
-      //     swift package --allow-writing-to-package-directory benchmark
-      //
-      // See Benchmarks/README.md for full details.
-      .executableTarget(
-        name: "OrderedJSONBenchmarks",
-        dependencies: [
-          "OrderedJSON",
-          .product(name: "Benchmark", package: "package-benchmark"),
-        ],
-        path: "Benchmarks/OrderedJSONBenchmarks",
-        resources: [
-          .copy("Resources")
-        ],
-        plugins: [
-          .plugin(name: "BenchmarkPlugin", package: "package-benchmark")
-        ]
-      )
-    ]
-    : [])) as [Target],
+  ],
   swiftLanguageModes: [.v6]
 )

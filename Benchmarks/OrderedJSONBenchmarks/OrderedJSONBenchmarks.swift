@@ -8,6 +8,7 @@ import OrderedJSON
 ///
 /// Run with:
 ///
+///     cd Benchmarks
 ///     swift package --allow-writing-to-package-directory benchmark
 ///
 /// The corpus is small and committed to the repo so anyone can run these
@@ -23,7 +24,7 @@ nonisolated(unsafe) let benchmarks = {
 
   // MARK: - Corpus loading
 
-  // Vendored corpus: files live next to this source via SPM `.copy`.
+  // Vendored corpus: files live next to this source via SPM resources.
   let corpus = Corpus.load()
 
   // MARK: - Parse benchmarks
@@ -82,7 +83,7 @@ nonisolated(unsafe) let benchmarks = {
 
   // MARK: - Round-trip benchmarks
   //
-  // The "parse → emit → parse → emit" loop is the workload that
+  // The "parse → emit → parse" loop is the workload that
   // motivated all of #149: anything that ingests JSON, validates, and
   // re-emits (snapshot tests, signed payloads, generated artifacts) hits
   // this exact pattern.
@@ -122,7 +123,7 @@ private struct Corpus: Sendable {
         fatalError(
           """
           Could not locate \(name).json in the benchmark resource bundle. \
-          The package's resources block should be copying \
+          The package's resources block should be processing \
           Benchmarks/OrderedJSONBenchmarks/Resources/ into the executable bundle.
           """
         )
