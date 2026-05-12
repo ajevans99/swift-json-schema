@@ -23,7 +23,8 @@ permissions:
 jobs:
   diff:
     name: Diff ${{ inputs.head_ref }} vs release
-    runs-on: macos-26-xlarge
+    # macos-26 — see api-breaking-changes.yml for the rationale.
+    runs-on: macos-26
 
     steps:
       - name: Check out
@@ -50,6 +51,10 @@ jobs:
       - name: Diagnose API breaking changes
         id: diagnose
         continue-on-error: true
+        env:
+          # See api-breaking-changes.yml — bench targets don't expose a
+          # stable public API, so they're omitted from the digester run.
+          SKIP_BENCHMARKS: "1"
         run: |
           set +e
           swift package diagnose-api-breaking-changes \
