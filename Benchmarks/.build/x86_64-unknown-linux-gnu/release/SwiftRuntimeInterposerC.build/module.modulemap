@@ -1,4 +1,0 @@
-module SwiftRuntimeInterposerC {
-    umbrella "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-runtime-interposer/Sources/SwiftRuntimeInterposerC/include"
-    export *
-}
