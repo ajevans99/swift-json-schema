@@ -1,6 +1,6 @@
-# OrderedJSON benchmarks
+# Benchmarks
 
-Performance benchmarks for `OrderedJSON`'s parser and serializer, using [`ordo-one/package-benchmark`](https://github.com/ordo-one/package-benchmark) and comparing against Foundation's `JSONDecoder` / `JSONEncoder` / `JSONSerialization`.
+Performance benchmarks for `OrderedJSON`'s parser/serializer and `JSONSchema` validation hot paths, using [`ordo-one/package-benchmark`](https://github.com/ordo-one/package-benchmark).
 
 ## Running locally
 
@@ -25,9 +25,11 @@ cd Benchmarks
 swift package --allow-writing-to-package-directory benchmark
 ```
 
-This compiles in release mode and runs each benchmark for up to 2 seconds, reporting wall-clock time, total CPU time, and `malloc` count. Output goes to stdout as a set of percentile tables.
+Limit runs to one suite with `--target OrderedJSONBenchmarks` or `--target JSONSchemaBenchmarks`. This compiles in release mode and reports wall-clock time, total CPU time, and `malloc` count. Output goes to stdout as percentile tables.
 
 ## What gets benchmarked
+
+### OrderedJSON
 
 For each file in [`OrderedJSONBenchmarks/Resources/`](./OrderedJSONBenchmarks/Resources/):
 
@@ -38,9 +40,17 @@ For each file in [`OrderedJSONBenchmarks/Resources/`](./OrderedJSONBenchmarks/Re
 - **`serialize · <file> · JSONEncoder.sortedKeys`** — `JSONEncoder` with `.sortedKeys` (the apples-to-apples comparison since it's the only Foundation flag that produces stable output across processes)
 - **`roundtrip · <file> · OrderedJSON`** — full `parse → emit → parse` cycle (the workload that motivated `OrderedJSON` in the first place — see [#149](https://github.com/ajevans99/swift-json-schema/issues/149))
 
+### JSONSchema
+
+For each schema/instance pair in [`JSONSchemaBenchmarks/Resources/`](./JSONSchemaBenchmarks/Resources/):
+
+- **`construct · <schema> · Schema.init(rawSchema:)`** — schema construction from a parsed raw schema
+- **`validate · <schema> · Schema.validate`** — validation of a representative valid instance
+- **`output · <schema> · <level>`** — validation plus rendering for Flag, Basic, Detailed, and Verbose outputs
+
 ## Corpus
 
-Five committed files cover the workload space without requiring external downloads:
+The OrderedJSON suite uses five committed files that cover the workload space without requiring external downloads:
 
 | File | Size | Shape |
 |------|------|-------|
@@ -52,6 +62,8 @@ Five committed files cover the workload space without requiring external downloa
 
 Larger reference files (`canada.json`, `citm_catalog.json`, `twitter.json`) are intentionally not vendored — they're in the multi-MB range and would inflate the repo. See [#162](https://github.com/ajevans99/swift-json-schema/issues/162) for the plan to optionally fetch them at benchmark time.
 
+The JSONSchema suite uses three representative schemas: a Poll-shaped application schema, an OpenAPI path fragment, and the draft 2020-12 meta-schema.
+
 ## Adding a new case
 
 1. Drop a `.json` file into [`OrderedJSONBenchmarks/Resources/`](./OrderedJSONBenchmarks/Resources/).
@@ -62,4 +74,14 @@ The corresponding parse/serialize/roundtrip benchmarks are generated automatical
 
 ## Baselines and CI
 
-Baseline tracking and PR-time regression checks are tracked in [#162](https://github.com/ajevans99/swift-json-schema/issues/162). For now, this PR establishes only the local-run infrastructure; baselines and CI integration ship separately.
+Committed p90 threshold baselines live in [`Baselines/`](./Baselines/). CI runs both benchmark targets on `ubuntu-24.04`, checks current p90 wall-clock / CPU / malloc metrics against those baselines, and writes markdown tables to the GitHub Actions job summary.
+
+To refresh baselines on the same runner class after an intentional improvement, run:
+
+```bash
+cd Benchmarks
+rm -rf Baselines
+swift package --allow-writing-to-package-directory benchmark thresholds update --path Baselines --no-progress
+```
+
+Benchmark numbers are runner-sensitive; refresh committed baselines only from the pinned CI runner or a matching environment.

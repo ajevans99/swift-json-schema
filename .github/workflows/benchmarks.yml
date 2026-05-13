@@ -1,0 +1,48 @@
+name: Benchmarks
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  benchmarks:
+    name: Package benchmarks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+    - uses: actions/checkout@v5
+    - name: Get swift version
+      run: swift --version
+    - name: Install benchmark system dependencies
+      run: sudo apt-get update && sudo apt-get install -y libjemalloc-dev
+    - name: Run OrderedJSON benchmarks
+      working-directory: Benchmarks
+      run: |
+        set -o pipefail
+        echo "## OrderedJSON benchmarks" >> "$GITHUB_STEP_SUMMARY"
+        swift package --allow-writing-to-package-directory benchmark \
+          --target OrderedJSONBenchmarks \
+          --format markdown \
+          --path stdout \
+          --check-absolute-path Baselines \
+          --no-progress | tee -a "$GITHUB_STEP_SUMMARY"
+    - name: Run JSONSchema benchmarks
+      working-directory: Benchmarks
+      run: |
+        set -o pipefail
+        echo "## JSONSchema benchmarks" >> "$GITHUB_STEP_SUMMARY"
+        swift package --allow-writing-to-package-directory benchmark \
+          --target JSONSchemaBenchmarks \
+          --format markdown \
+          --path stdout \
+          --check-absolute-path Baselines \
+          --no-progress | tee -a "$GITHUB_STEP_SUMMARY"
+    - name: Upload benchmark baselines
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-baselines
+        path: Benchmarks/Baselines/*.json
