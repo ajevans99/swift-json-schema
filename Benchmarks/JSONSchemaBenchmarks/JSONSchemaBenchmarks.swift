@@ -96,7 +96,8 @@ private struct SchemaCorpus: Sendable {
 
   private static func loadJSONValue(named resourceName: String) -> JSONValue {
     let bundle = Bundle.module
-    guard let url = bundle.url(forResource: resourceName, withExtension: "json", subdirectory: nil) else {
+    guard let url = bundle.url(forResource: resourceName, withExtension: "json", subdirectory: nil)
+    else {
       fatalError(
         "Could not locate \(resourceName).json in the JSONSchema benchmark resource bundle."
       )
