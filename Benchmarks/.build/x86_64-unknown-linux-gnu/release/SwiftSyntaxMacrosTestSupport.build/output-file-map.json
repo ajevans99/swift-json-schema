@@ -1,0 +1,13 @@
+{
+  "": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/SwiftSyntaxMacrosTestSupport.build/SwiftSyntaxMacrosTestSupport.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/SwiftSyntaxMacrosTestSupport.build/SwiftSyntaxMacrosTestSupport.o",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/SwiftSyntaxMacrosTestSupport.build/primary.swiftdeps"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-syntax/Sources/SwiftSyntaxMacrosTestSupport/Assertions.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/SwiftSyntaxMacrosTestSupport.build/Assertions.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/SwiftSyntaxMacrosTestSupport.build/Assertions~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/SwiftSyntaxMacrosTestSupport.build/Assertions.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/SwiftSyntaxMacrosTestSupport.build/Assertions.dia"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/JSONSchemaClient.build/JSONSchemaClient.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/JSONSchemaClient.build/JSONSchemaClient.o",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/JSONSchemaClient.build/primary.swiftdeps"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/JSONSchemaClient/main.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/JSONSchemaClient.build/main.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/JSONSchemaClient.build/main~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/JSONSchemaClient.build/main.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/JSONSchemaClient.build/main.dia"
+  }
+}

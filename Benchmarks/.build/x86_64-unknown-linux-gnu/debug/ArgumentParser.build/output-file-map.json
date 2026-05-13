@@ -1,0 +1,299 @@
+{
+  "": {
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/primary.swiftdeps"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Completions/BashCompletionsGenerator.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/BashCompletionsGenerator.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/BashCompletionsGenerator.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/BashCompletionsGenerator~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/BashCompletionsGenerator.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/BashCompletionsGenerator.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Completions/CompletionsGenerator.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CompletionsGenerator.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CompletionsGenerator.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CompletionsGenerator~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CompletionsGenerator.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CompletionsGenerator.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Completions/FishCompletionsGenerator.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/FishCompletionsGenerator.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/FishCompletionsGenerator.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/FishCompletionsGenerator~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/FishCompletionsGenerator.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/FishCompletionsGenerator.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Completions/ZshCompletionsGenerator.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ZshCompletionsGenerator.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ZshCompletionsGenerator.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ZshCompletionsGenerator~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ZshCompletionsGenerator.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ZshCompletionsGenerator.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/Argument.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Argument.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Argument.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Argument~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Argument.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Argument.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/ArgumentHelp.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentHelp.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentHelp.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentHelp~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentHelp.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentHelp.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/ArgumentVisibility.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentVisibility.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentVisibility.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentVisibility~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentVisibility.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentVisibility.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/CompletionKind.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CompletionKind.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CompletionKind.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CompletionKind~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CompletionKind.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CompletionKind.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/Errors.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Errors.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Errors.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Errors~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Errors.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Errors.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/Flag.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Flag.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Flag.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Flag~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Flag.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Flag.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/NameSpecification.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/NameSpecification.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/NameSpecification.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/NameSpecification~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/NameSpecification.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/NameSpecification.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/Option.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Option.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Option.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Option~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Option.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Option.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/OptionGroup.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/OptionGroup.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/OptionGroup.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/OptionGroup~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/OptionGroup.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/OptionGroup.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/AsyncParsableCommand.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/AsyncParsableCommand.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/AsyncParsableCommand.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/AsyncParsableCommand~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/AsyncParsableCommand.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/AsyncParsableCommand.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/CommandConfiguration.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CommandConfiguration.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CommandConfiguration.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CommandConfiguration~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CommandConfiguration.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CommandConfiguration.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/CommandGroup.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CommandGroup.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CommandGroup.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CommandGroup~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CommandGroup.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CommandGroup.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/EnumerableFlag.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/EnumerableFlag.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/EnumerableFlag.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/EnumerableFlag~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/EnumerableFlag.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/EnumerableFlag.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/ExpressibleByArgument.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ExpressibleByArgument.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ExpressibleByArgument.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ExpressibleByArgument~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ExpressibleByArgument.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ExpressibleByArgument.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/ParsableArguments.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsableArguments.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsableArguments.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsableArguments~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsableArguments.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsableArguments.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/ParsableArgumentsValidation.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsableArgumentsValidation.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsableArgumentsValidation.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsableArgumentsValidation~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsableArgumentsValidation.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsableArgumentsValidation.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/ParsableCommand.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsableCommand.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsableCommand.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsableCommand~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsableCommand.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsableCommand.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/ArgumentDecoder.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentDecoder.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentDecoder.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentDecoder~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentDecoder.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentDecoder.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/ArgumentDefinition.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentDefinition.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentDefinition.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentDefinition~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentDefinition.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentDefinition.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/ArgumentSet.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentSet.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentSet.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentSet~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentSet.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ArgumentSet.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/CommandParser.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CommandParser.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CommandParser.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CommandParser~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CommandParser.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CommandParser.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/InputKey.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/InputKey.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/InputKey.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/InputKey~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/InputKey.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/InputKey.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/InputOrigin.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/InputOrigin.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/InputOrigin.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/InputOrigin~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/InputOrigin.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/InputOrigin.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/Name.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Name.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Name.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Name~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Name.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Name.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/Parsed.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Parsed.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Parsed.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Parsed~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Parsed.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Parsed.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/ParsedValues.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsedValues.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsedValues.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsedValues~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsedValues.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParsedValues.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/ParserError.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParserError.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParserError.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParserError~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParserError.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/ParserError.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/SplitArguments.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/SplitArguments.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/SplitArguments.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/SplitArguments~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/SplitArguments.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/SplitArguments.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Usage/DumpHelpGenerator.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/DumpHelpGenerator.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/DumpHelpGenerator.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/DumpHelpGenerator~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/DumpHelpGenerator.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/DumpHelpGenerator.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Usage/HelpCommand.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/HelpCommand.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/HelpCommand.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/HelpCommand~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/HelpCommand.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/HelpCommand.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Usage/HelpGenerator.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/HelpGenerator.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/HelpGenerator.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/HelpGenerator~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/HelpGenerator.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/HelpGenerator.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Usage/MessageInfo.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/MessageInfo.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/MessageInfo.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/MessageInfo~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/MessageInfo.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/MessageInfo.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Usage/UsageGenerator.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/UsageGenerator.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/UsageGenerator.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/UsageGenerator~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/UsageGenerator.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/UsageGenerator.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Utilities/CollectionExtensions.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CollectionExtensions.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CollectionExtensions.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CollectionExtensions~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CollectionExtensions.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/CollectionExtensions.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Utilities/Platform.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Platform.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Platform.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Platform~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Platform.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Platform.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Utilities/SequenceExtensions.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/SequenceExtensions.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/SequenceExtensions.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/SequenceExtensions~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/SequenceExtensions.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/SequenceExtensions.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Utilities/StringExtensions.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/StringExtensions.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/StringExtensions.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/StringExtensions~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/StringExtensions.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/StringExtensions.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Utilities/Tree.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Tree.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Tree.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Tree~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Tree.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/ArgumentParser.build/Tree.dia"
+  }
+}

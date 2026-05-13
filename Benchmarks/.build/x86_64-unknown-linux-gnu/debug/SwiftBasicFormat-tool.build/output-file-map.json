@@ -1,0 +1,47 @@
+{
+  "": {
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/primary.swiftdeps"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-syntax/Sources/SwiftBasicFormat/BasicFormat.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/BasicFormat.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/BasicFormat.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/BasicFormat~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/BasicFormat.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/BasicFormat.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-syntax/Sources/SwiftBasicFormat/Indenter.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/Indenter.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/Indenter.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/Indenter~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/Indenter.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/Indenter.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-syntax/Sources/SwiftBasicFormat/InferIndentation.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/InferIndentation.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/InferIndentation.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/InferIndentation~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/InferIndentation.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/InferIndentation.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-syntax/Sources/SwiftBasicFormat/Syntax+Extensions.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/Syntax+Extensions.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/Syntax+Extensions.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/Syntax+Extensions~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/Syntax+Extensions.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/Syntax+Extensions.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-syntax/Sources/SwiftBasicFormat/SyntaxProtocol+Formatted.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/SyntaxProtocol+Formatted.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/SyntaxProtocol+Formatted.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/SyntaxProtocol+Formatted~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/SyntaxProtocol+Formatted.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/SyntaxProtocol+Formatted.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-syntax/Sources/SwiftBasicFormat/Trivia+FormatExtensions.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/Trivia+FormatExtensions.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/Trivia+FormatExtensions.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/Trivia+FormatExtensions~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/Trivia+FormatExtensions.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftBasicFormat-tool.build/Trivia+FormatExtensions.dia"
+  }
+}

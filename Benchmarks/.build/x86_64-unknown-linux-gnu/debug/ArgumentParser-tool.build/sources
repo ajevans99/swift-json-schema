@@ -1,0 +1,42 @@
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Completions/BashCompletionsGenerator.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Completions/CompletionsGenerator.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Completions/FishCompletionsGenerator.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Completions/ZshCompletionsGenerator.swift
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/Argument.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/ArgumentHelp.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/ArgumentVisibility.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/CompletionKind.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/Errors.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/Flag.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/NameSpecification.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/Option.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Properties/OptionGroup.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/AsyncParsableCommand.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/CommandConfiguration.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/CommandGroup.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/EnumerableFlag.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/ExpressibleByArgument.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/ParsableArguments.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/ParsableArgumentsValidation.swift'
+'/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsable Types/ParsableCommand.swift'
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/ArgumentDecoder.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/ArgumentDefinition.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/ArgumentSet.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/CommandParser.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/InputKey.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/InputOrigin.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/Name.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/Parsed.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/ParsedValues.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/ParserError.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Parsing/SplitArguments.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Usage/DumpHelpGenerator.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Usage/HelpCommand.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Usage/HelpGenerator.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Usage/MessageInfo.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Usage/UsageGenerator.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Utilities/CollectionExtensions.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Utilities/Platform.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Utilities/SequenceExtensions.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Utilities/StringExtensions.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-argument-parser/Sources/ArgumentParser/Utilities/Tree.swift

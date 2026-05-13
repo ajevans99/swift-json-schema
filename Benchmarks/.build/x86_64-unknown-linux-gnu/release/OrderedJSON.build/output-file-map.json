@@ -1,0 +1,55 @@
+{
+  "": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/OrderedJSON.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/OrderedJSON.o",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/primary.swiftdeps"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/Array+JSONValue.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/Array+JSONValue.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/Array+JSONValue~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/Array+JSONValue.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/Array+JSONValue.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/JSONType.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONType.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONType~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONType.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONType.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/JSONValue+Codable.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+Codable.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+Codable~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+Codable.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+Codable.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/JSONValue+ExpressibleByLiteral.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+ExpressibleByLiteral.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+ExpressibleByLiteral~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+ExpressibleByLiteral.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+ExpressibleByLiteral.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/JSONValue+Parse.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+Parse.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+Parse~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+Parse.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+Parse.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/JSONValue+Serialize.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+Serialize.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+Serialize~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+Serialize.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+Serialize.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/JSONValue+merge.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+merge.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+merge~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+merge.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue+merge.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/JSONValue.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/OrderedJSON.build/JSONValue.dia"
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool.o",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/primary.swiftdeps"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/BenchmarkTool+Baselines.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Baselines.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Baselines~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Baselines.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Baselines.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/BenchmarkTool+CreateBenchmark.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+CreateBenchmark.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+CreateBenchmark~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+CreateBenchmark.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+CreateBenchmark.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/BenchmarkTool+Export+InfluxCSVFormatter.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+InfluxCSVFormatter.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+InfluxCSVFormatter~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+InfluxCSVFormatter.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+InfluxCSVFormatter.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/BenchmarkTool+Export+JMHElement.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+JMHElement.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+JMHElement~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+JMHElement.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+JMHElement.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/BenchmarkTool+Export+JMHFormatter.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+JMHFormatter.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+JMHFormatter~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+JMHFormatter.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+JMHFormatter.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/BenchmarkTool+Export+JSON.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+JSON.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+JSON~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+JSON.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export+JSON.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/BenchmarkTool+Export.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Export.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/BenchmarkTool+JSON.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+JSON.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+JSON~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+JSON.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+JSON.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/BenchmarkTool+Machine.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Machine.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Machine~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Machine.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Machine.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/BenchmarkTool+Operations.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Operations.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Operations~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Operations.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Operations.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/BenchmarkTool+PrettyPrinting.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+PrettyPrinting.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+PrettyPrinting~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+PrettyPrinting.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+PrettyPrinting.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/BenchmarkTool+ReadP90AbsoluteThresholds.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+ReadP90AbsoluteThresholds.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+ReadP90AbsoluteThresholds~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+ReadP90AbsoluteThresholds.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+ReadP90AbsoluteThresholds.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/BenchmarkTool+Thresholds.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Thresholds.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Thresholds~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Thresholds.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool+Thresholds.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/BenchmarkTool.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/BenchmarkTool.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/FilePath+Additions.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/FilePath+Additions.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/FilePath+Additions~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/FilePath+Additions.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/FilePath+Additions.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/FilePath+DirectoryView.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/FilePath+DirectoryView.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/FilePath+DirectoryView~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/FilePath+DirectoryView.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/FilePath+DirectoryView.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Plugins/BenchmarkTool/String+Additions.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/String+Additions.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/String+Additions~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/String+Additions.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/BenchmarkTool.build/String+Additions.dia"
+  }
+}

@@ -1,0 +1,243 @@
+{
+  "": {
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/primary.swiftdeps"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/Errno.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Errno.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Errno.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Errno~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Errno.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Errno.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/ErrnoWindows.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/ErrnoWindows.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/ErrnoWindows.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/ErrnoWindows~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/ErrnoWindows.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/ErrnoWindows.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/FileDescriptor.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FileDescriptor.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FileDescriptor.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FileDescriptor~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FileDescriptor.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FileDescriptor.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/FileHelpers.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FileHelpers.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FileHelpers.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FileHelpers~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FileHelpers.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FileHelpers.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/FileOperations.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FileOperations.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FileOperations.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FileOperations~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FileOperations.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FileOperations.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/FilePath/FilePath.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePath.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePath.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePath~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePath.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePath.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/FilePath/FilePathComponentView.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathComponentView.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathComponentView.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathComponentView~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathComponentView.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathComponentView.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/FilePath/FilePathComponents.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathComponents.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathComponents.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathComponents~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathComponents.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathComponents.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/FilePath/FilePathParsing.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathParsing.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathParsing.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathParsing~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathParsing.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathParsing.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/FilePath/FilePathString.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathString.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathString.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathString~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathString.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathString.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/FilePath/FilePathSyntax.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathSyntax.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathSyntax.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathSyntax~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathSyntax.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathSyntax.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/FilePath/FilePathTemp.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathTemp.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathTemp.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathTemp~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathTemp.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathTemp.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/FilePath/FilePathTempPosix.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathTempPosix.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathTempPosix.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathTempPosix~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathTempPosix.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathTempPosix.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/FilePath/FilePathTempWindows.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathTempWindows.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathTempWindows.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathTempWindows~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathTempWindows.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathTempWindows.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/FilePath/FilePathWindows.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathWindows.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathWindows.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathWindows~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathWindows.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePathWindows.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/FilePermissions.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePermissions.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePermissions.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePermissions~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePermissions.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/FilePermissions.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/IORing/IOCompletion.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/IOCompletion.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/IOCompletion.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/IOCompletion~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/IOCompletion.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/IOCompletion.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/IORing/IORequest.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/IORequest.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/IORequest.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/IORequest~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/IORequest.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/IORequest.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/IORing/IORing.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/IORing.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/IORing.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/IORing~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/IORing.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/IORing.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/IORing/RawIORequest.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/RawIORequest.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/RawIORequest.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/RawIORequest~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/RawIORequest.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/RawIORequest.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/Internals/Backcompat.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Backcompat.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Backcompat.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Backcompat~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Backcompat.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Backcompat.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/Internals/CInterop.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/CInterop.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/CInterop.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/CInterop~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/CInterop.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/CInterop.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/Internals/Constants.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Constants.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Constants.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Constants~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Constants.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Constants.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/Internals/Exports.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Exports.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Exports.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Exports~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Exports.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Exports.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/Internals/Mocking.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Mocking.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Mocking.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Mocking~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Mocking.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Mocking.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/Internals/RawBuffer.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/RawBuffer.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/RawBuffer.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/RawBuffer~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/RawBuffer.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/RawBuffer.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/Internals/Syscalls.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Syscalls.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Syscalls.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Syscalls~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Syscalls.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Syscalls.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/Internals/WindowsSyscallAdapters.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/WindowsSyscallAdapters.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/WindowsSyscallAdapters.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/WindowsSyscallAdapters~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/WindowsSyscallAdapters.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/WindowsSyscallAdapters.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/MachPort.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/MachPort.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/MachPort.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/MachPort~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/MachPort.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/MachPort.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/PlatformString.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/PlatformString.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/PlatformString.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/PlatformString~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/PlatformString.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/PlatformString.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/SystemString.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/SystemString.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/SystemString.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/SystemString~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/SystemString.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/SystemString.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/Util+StringArray.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Util+StringArray.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Util+StringArray.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Util+StringArray~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Util+StringArray.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Util+StringArray.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/Util.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Util.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Util.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Util~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Util.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/Util.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-system/Sources/System/UtilConsumers.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/UtilConsumers.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/UtilConsumers.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/UtilConsumers~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/UtilConsumers.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SystemPackage.build/UtilConsumers.dia"
+  }
+}

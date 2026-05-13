@@ -1,0 +1,3 @@
+module _SwiftSyntaxGenericTestSupport {
+    header "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/_SwiftSyntaxGenericTestSupport.build/include/_SwiftSyntaxGenericTestSupport-Swift.h"
+}

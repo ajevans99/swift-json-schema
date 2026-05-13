@@ -1,0 +1,37 @@
+a61dd740919ba4a0b5226be0ecc83fe2b7c6197a	not-for-merge	branch 'chore/add-sendable-conformance' of https://github.com/HdrHistogram/hdrhistogram-swift
+c2e1210df04b4fff47e53f2f9dad9cc45ae15d63	not-for-merge	branch 'main' of https://github.com/HdrHistogram/hdrhistogram-swift
+bbaa1591f5255133465bac9b35d9045fe6fb1394	not-for-merge	branch 'updatePackageDepedencies' of https://github.com/HdrHistogram/hdrhistogram-swift
+d1871a644d400815318de807d3e880c3b573e687	not-for-merge	'refs/notes/semantic-release' of https://github.com/HdrHistogram/hdrhistogram-swift
+196136fff22bb74fa787b1c846e906a4ba46d092	not-for-merge	'refs/notes/semantic-release-0.1.4' of https://github.com/HdrHistogram/hdrhistogram-swift
+1d025f360c19727670ecd94e2fda8df6e7641168	not-for-merge	'refs/pull/1/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+c13724031df9c6dd8dea251b7e0f00d02b582806	not-for-merge	'refs/pull/10/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+0e53eb5470c0d7a95b3c502cb8c2e79e865ce1d8	not-for-merge	'refs/pull/11/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+fe166015d244110875f7eb42c05cbc28983fad83	not-for-merge	'refs/pull/12/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+5fbcc638369a7c6f5758c1d1aaa5720a19b73b08	not-for-merge	'refs/pull/14/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+5c2ebb426ce6d1eed21747c5a1191c858fd4d394	not-for-merge	'refs/pull/15/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+530a9cacb6d12bed0ba07edf5871f2a58dd2ee22	not-for-merge	'refs/pull/16/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+a37078b8bc115f6940fa283bad257bac0e979e89	not-for-merge	'refs/pull/17/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+b00b945bb86116742fd26af4708ce2251c3189d1	not-for-merge	'refs/pull/18/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+81c856b2716f075b36250a24c09acbe3050f3791	not-for-merge	'refs/pull/19/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+f51afddf4c4f8abc4c683dc95843c752ed33da1f	not-for-merge	'refs/pull/20/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+34b56bc5ea528c78fbee37adcbfebc83b66982a6	not-for-merge	'refs/pull/21/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+eab1975ffc9d70fdbef7cfda3c343175be5bc96e	not-for-merge	'refs/pull/22/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+7842dcad4cebe6b56c4ff1d4157c60781ea4ea2c	not-for-merge	'refs/pull/24/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+2bb7cf644436c682dc10c24c746b5fb184c07e98	not-for-merge	'refs/pull/25/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+6152f2a4caa109d3faa89860a4845bbb154ef945	not-for-merge	'refs/pull/26/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+a61dd740919ba4a0b5226be0ecc83fe2b7c6197a	not-for-merge	'refs/pull/27/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+bbaa1591f5255133465bac9b35d9045fe6fb1394	not-for-merge	'refs/pull/28/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+f88817be625b8ecb83f8605cf876fbfec98f7342	not-for-merge	'refs/pull/28/merge' of https://github.com/HdrHistogram/hdrhistogram-swift
+70ef0a4d47bfc40056ec8d43a471513e7af4b993	not-for-merge	'refs/pull/29/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+fac12a0fc19e37a2ff51c845c5b42e825db34b0e	not-for-merge	'refs/pull/30/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+760aac642911cd5ff05d1fcff6a918275f86a589	not-for-merge	'refs/pull/5/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+d83f6fd938d9b5b3b5cbd56a6d9a9a8fc0cbfd5f	not-for-merge	'refs/pull/6/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+10f73df36faa86060c267a7e4364f32522c16414	not-for-merge	'refs/pull/7/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+63caea1ca1babc868028e29f0b451afe1ddb35fd	not-for-merge	'refs/pull/8/head' of https://github.com/HdrHistogram/hdrhistogram-swift
+657b68ad2a56de72216845263d0cb05135061ea0	not-for-merge	tag '0.0.1' of https://github.com/HdrHistogram/hdrhistogram-swift
+49df02bf90df582151bcaa363796133251c278c4	not-for-merge	tag '0.1.0' of https://github.com/HdrHistogram/hdrhistogram-swift
+604410b21ded1ebdf06ad98100f448c68e80f5a1	not-for-merge	tag '0.1.1' of https://github.com/HdrHistogram/hdrhistogram-swift
+a69fa24d7b70421870cafa86340ece900489e17e	not-for-merge	tag '0.1.2' of https://github.com/HdrHistogram/hdrhistogram-swift
+93a1618c8aa20f6a521a9da656a3e0591889e9dc	not-for-merge	tag '0.1.3' of https://github.com/HdrHistogram/hdrhistogram-swift
+de0b9b8a27956b9bfc9b4dce7d1c38ad7c579f19	not-for-merge	tag '0.1.4' of https://github.com/HdrHistogram/hdrhistogram-swift
+c2e1210df04b4fff47e53f2f9dad9cc45ae15d63	not-for-merge	tag '0.2.0' of https://github.com/HdrHistogram/hdrhistogram-swift

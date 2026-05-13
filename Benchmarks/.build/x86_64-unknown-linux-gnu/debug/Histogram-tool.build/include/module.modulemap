@@ -1,0 +1,3 @@
+module Histogram {
+    header "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/Histogram-tool.build/include/Histogram-Swift.h"
+}

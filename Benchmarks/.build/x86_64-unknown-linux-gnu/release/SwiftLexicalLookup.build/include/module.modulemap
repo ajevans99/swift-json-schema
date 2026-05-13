@@ -1,0 +1,3 @@
+module SwiftLexicalLookup {
+    header "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/SwiftLexicalLookup.build/include/SwiftLexicalLookup-Swift.h"
+}

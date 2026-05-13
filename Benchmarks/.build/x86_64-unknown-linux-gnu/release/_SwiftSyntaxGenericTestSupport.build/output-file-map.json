@@ -1,0 +1,19 @@
+{
+  "": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/_SwiftSyntaxGenericTestSupport.build/_SwiftSyntaxGenericTestSupport.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/_SwiftSyntaxGenericTestSupport.build/_SwiftSyntaxGenericTestSupport.o",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/_SwiftSyntaxGenericTestSupport.build/primary.swiftdeps"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxGenericTestSupport/AssertEqualWithDiff.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/_SwiftSyntaxGenericTestSupport.build/AssertEqualWithDiff.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/_SwiftSyntaxGenericTestSupport.build/AssertEqualWithDiff~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/_SwiftSyntaxGenericTestSupport.build/AssertEqualWithDiff.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/_SwiftSyntaxGenericTestSupport.build/AssertEqualWithDiff.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxGenericTestSupport/String+TrimmingTrailingWhitespace.swift": {
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/_SwiftSyntaxGenericTestSupport.build/String+TrimmingTrailingWhitespace.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/_SwiftSyntaxGenericTestSupport.build/String+TrimmingTrailingWhitespace~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/_SwiftSyntaxGenericTestSupport.build/String+TrimmingTrailingWhitespace.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/_SwiftSyntaxGenericTestSupport.build/String+TrimmingTrailingWhitespace.dia"
+  }
+}

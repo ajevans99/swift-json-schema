@@ -13,11 +13,18 @@ import JSONSchema
 /// The corpus is committed to the repo so CI and local runs exercise the same
 /// representative schemas without network downloads.
 nonisolated(unsafe) let benchmarks = {
+  let regressionThresholds: [BenchmarkMetric: BenchmarkThresholds] = [
+    .wallClock: .init(relative: [.p90: 10.0]),
+    .cpuTotal: .init(relative: [.p90: 10.0]),
+    .mallocCountTotal: .init(relative: [.p90: 10.0], absolute: [.p90: 10]),
+  ]
+
   Benchmark.defaultConfiguration = .init(
     metrics: [.wallClock, .cpuTotal, .mallocCountTotal],
     warmupIterations: 2,
     maxDuration: .seconds(1),
-    maxIterations: 500
+    maxIterations: 500,
+    thresholds: regressionThresholds
   )
 
   let corpus = SchemaCorpus.load()

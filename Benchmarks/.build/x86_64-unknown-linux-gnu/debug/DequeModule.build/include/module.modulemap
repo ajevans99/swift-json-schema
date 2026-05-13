@@ -1,0 +1,3 @@
+module DequeModule {
+    header "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/DequeModule.build/include/DequeModule-Swift.h"
+}
