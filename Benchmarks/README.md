@@ -21,6 +21,7 @@ sudo apt-get install libjemalloc-dev
 Then run:
 
 ```bash
+cd Benchmarks
 swift package --allow-writing-to-package-directory benchmark
 ```
 
@@ -55,7 +56,7 @@ Larger reference files (`canada.json`, `citm_catalog.json`, `twitter.json`) are 
 
 1. Drop a `.json` file into [`OrderedJSONBenchmarks/Resources/`](./OrderedJSONBenchmarks/Resources/).
 2. Add its name to the `names` array in [`OrderedJSONBenchmarks.swift`](./OrderedJSONBenchmarks/OrderedJSONBenchmarks.swift) (under `Corpus.load`).
-3. Re-run `swift package --allow-writing-to-package-directory benchmark`.
+3. Re-run `swift package --allow-writing-to-package-directory benchmark` from the `Benchmarks/` directory.
 
 The corresponding parse/serialize/roundtrip benchmarks are generated automatically.
 
