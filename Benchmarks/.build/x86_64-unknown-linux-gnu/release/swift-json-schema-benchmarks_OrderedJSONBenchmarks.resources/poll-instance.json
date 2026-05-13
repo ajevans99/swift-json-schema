@@ -1,0 +1,27 @@
+{
+  "id": 1,
+  "title": "Favorite Programming Language?",
+  "description": "Vote for your favorite language.",
+  "options": [
+    {"id": 1, "text": "Swift", "voteCount": 10},
+    {"id": 2, "text": "Python", "voteCount": 20},
+    {"id": 3, "text": "Rust", "voteCount": 15},
+    {"id": 4, "text": "Go", "voteCount": 8},
+    {"id": 5, "text": "TypeScript", "voteCount": 25}
+  ],
+  "createdAt": "2024-10-25T12:00:00Z",
+  "expiresAt": "2024-12-31T23:59:59Z",
+  "isActive": true,
+  "category": {
+    "technology": {
+      "_0": {
+        "subTopic": "software",
+        "hasDemo": true
+      }
+    }
+  },
+  "settings": {
+    "allowMultipleVotes": false,
+    "requireAuthentication": true
+  }
+}

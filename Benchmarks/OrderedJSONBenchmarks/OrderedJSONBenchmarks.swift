@@ -15,11 +15,18 @@ import OrderedJSON
 /// without external downloads. See `Benchmarks/README.md` for notes on
 /// adding cases and updating baselines.
 nonisolated(unsafe) let benchmarks = {
+  let regressionThresholds: [BenchmarkMetric: BenchmarkThresholds] = [
+    .wallClock: .init(relative: [.p90: 10.0]),
+    .cpuTotal: .init(relative: [.p90: 10.0]),
+    .mallocCountTotal: .init(relative: [.p90: 10.0], absolute: [.p90: 10]),
+  ]
+
   Benchmark.defaultConfiguration = .init(
     metrics: [.wallClock, .cpuTotal, .mallocCountTotal],
     warmupIterations: 3,
     maxDuration: .seconds(2),
-    maxIterations: 1000
+    maxIterations: 1000,
+    thresholds: regressionThresholds
   )
 
   // MARK: - Corpus loading

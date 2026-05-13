@@ -1,0 +1,12 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = true
+	symlinks = true
+	fsmonitor = false
+	longpaths = true
+[remote "origin"]
+	url = https://github.com/apple/swift-collections.git
+	tagOpt = --no-tags
+	fetch = +refs/*:refs/*
+	mirror = true

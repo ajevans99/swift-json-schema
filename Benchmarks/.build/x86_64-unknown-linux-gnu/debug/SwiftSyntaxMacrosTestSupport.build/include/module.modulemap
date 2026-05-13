@@ -1,0 +1,3 @@
+module SwiftSyntaxMacrosTestSupport {
+    header "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/SwiftSyntaxMacrosTestSupport.build/include/SwiftSyntaxMacrosTestSupport-Swift.h"
+}

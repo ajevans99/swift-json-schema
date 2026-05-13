@@ -1,0 +1,8 @@
+/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/Array+JSONValue.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/JSONType.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/JSONValue+Codable.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/JSONValue+ExpressibleByLiteral.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/JSONValue+Parse.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/JSONValue+Serialize.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/JSONValue+merge.swift
+/home/runner/work/swift-json-schema/swift-json-schema/Sources/OrderedJSON/JSONValue.swift

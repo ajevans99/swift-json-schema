@@ -1,0 +1,4 @@
+module SwiftRuntimeHooks {
+    umbrella header "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Sources/SwiftRuntimeHooks/include/SwiftRuntimeHooks.h"
+    export *
+}

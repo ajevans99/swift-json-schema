@@ -1,0 +1,103 @@
+{
+  "": {
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/primary.swiftdeps"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/JSONSchemaMacro/ExcludeFromSchemaMacro.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/ExcludeFromSchemaMacro.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/ExcludeFromSchemaMacro.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/ExcludeFromSchemaMacro~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/ExcludeFromSchemaMacro.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/ExcludeFromSchemaMacro.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/JSONSchemaMacro/JSONSchemaMacroPlugin.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/JSONSchemaMacroPlugin.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/JSONSchemaMacroPlugin.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/JSONSchemaMacroPlugin~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/JSONSchemaMacroPlugin.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/JSONSchemaMacroPlugin.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/JSONSchemaMacro/SchemaOptions.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaOptions.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaOptions.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaOptions~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaOptions.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaOptions.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/JSONSchemaMacro/Schemable/CompositionKeyword.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/CompositionKeyword.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/CompositionKeyword.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/CompositionKeyword~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/CompositionKeyword.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/CompositionKeyword.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/JSONSchemaMacro/Schemable/InitializerDiagnostics.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/InitializerDiagnostics.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/InitializerDiagnostics.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/InitializerDiagnostics~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/InitializerDiagnostics.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/InitializerDiagnostics.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/JSONSchemaMacro/Schemable/SchemaGenerator.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaGenerator.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaGenerator.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaGenerator~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaGenerator.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaGenerator.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/JSONSchemaMacro/Schemable/SchemaOptionsDiagnostics.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaOptionsDiagnostics.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaOptionsDiagnostics.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaOptionsDiagnostics~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaOptionsDiagnostics.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaOptionsDiagnostics.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/JSONSchemaMacro/Schemable/SchemaOptionsGenerator.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaOptionsGenerator.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaOptionsGenerator.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaOptionsGenerator~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaOptionsGenerator.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemaOptionsGenerator.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/JSONSchemaMacro/Schemable/SchemableEnumCase.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemableEnumCase.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemableEnumCase.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemableEnumCase~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemableEnumCase.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemableEnumCase.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/JSONSchemaMacro/Schemable/SchemableMacro.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemableMacro.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemableMacro.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemableMacro~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemableMacro.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemableMacro.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/JSONSchemaMacro/Schemable/SchemableMember.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemableMember.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemableMember.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemableMember~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemableMember.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SchemableMember.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/JSONSchemaMacro/Schemable/SupportedPrimitive.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SupportedPrimitive.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SupportedPrimitive.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SupportedPrimitive~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SupportedPrimitive.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SupportedPrimitive.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/JSONSchemaMacro/Schemable/SwiftSyntaxExtensions.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SwiftSyntaxExtensions.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SwiftSyntaxExtensions.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SwiftSyntaxExtensions~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SwiftSyntaxExtensions.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/SwiftSyntaxExtensions.dia"
+  },
+  "/home/runner/work/swift-json-schema/swift-json-schema/Sources/JSONSchemaMacro/TypeSpecificOptionMacros.swift": {
+    "dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/TypeSpecificOptionMacros.d",
+    "object": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/TypeSpecificOptionMacros.swift.o",
+    "swiftmodule": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/TypeSpecificOptionMacros~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/TypeSpecificOptionMacros.swiftdeps",
+    "diagnostics": "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/debug/JSONSchemaMacro-tool.build/TypeSpecificOptionMacros.dia"
+  }
+}

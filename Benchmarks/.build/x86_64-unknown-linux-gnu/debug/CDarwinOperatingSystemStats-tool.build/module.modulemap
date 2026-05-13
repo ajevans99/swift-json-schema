@@ -1,0 +1,4 @@
+module CDarwinOperatingSystemStats {
+    umbrella header "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/checkouts/package-benchmark/Platform/CDarwinOperatingSystemStats/include/CDarwinOperatingSystemStats.h"
+    export *
+}

@@ -1,0 +1,3 @@
+module JSONSchemaConversion {
+    header "/home/runner/work/swift-json-schema/swift-json-schema/Benchmarks/.build/x86_64-unknown-linux-gnu/release/JSONSchemaConversion.build/include/JSONSchemaConversion-Swift.h"
+}
