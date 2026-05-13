@@ -80,6 +80,21 @@ extension ValidationIssue {
         instanceLocation: instanceLocation,
         errors: errors
       )
+    case .allOfFailed(let errors),
+      .anyOfFailed(let errors),
+      .oneOfFailed(let errors),
+      .conditionalFailed(_, let errors),
+      .invalidDependentSchema(_, let errors),
+      .unevaluatedItemsFailed(let errors),
+      .unevaluatedPropertyFailed(let errors):
+      .init(
+        keyword: keyword,
+        message: description,
+        keywordLocation: keywordLocation,
+        absoluteKeywordLocation: absoluteKeywordLocation,
+        instanceLocation: instanceLocation,
+        errors: errors
+      )
     default:
       .init(
         keyword: keyword,

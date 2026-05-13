@@ -101,7 +101,14 @@ struct SchemaTests {
     let result = schema.validate(instance)
     #expect(result.isValid == false)
     #expect(result.errors?.count == 1)
-    #expect(result.annotations == nil)
+    // The `properties` keyword still records its annotation (which property
+    // names it applied to) even though both sub-validations failed — that
+    // matches the spec definition ("the set of instance property names
+    // matched by this keyword") and is what allows sibling
+    // `unevaluatedProperties` to behave correctly.
+    let propertiesAnnotation = result.annotations?.first
+    #expect(propertiesAnnotation?.keyword == Keywords.Properties.name)
+    #expect(propertiesAnnotation?.jsonValue == .array([.string("name"), .string("age")]))
   }
 
   @Test func validationOutputAPI() throws {

@@ -278,9 +278,17 @@ extension Keywords {
         instancePropertyNames.append(key)
       }
 
-      try builder.throwIfErrors()
-
+      // The `properties` annotation MUST record every property name this
+      // keyword applied to, regardless of whether the sub-validation passed.
+      // Insert before `throwIfErrors()` so that a failing sub-property does
+      // not suppress the annotation — otherwise sibling
+      // `unevaluatedProperties: false` reads every applicable property as
+      // "unevaluated" and cascades a spurious error to every ancestor.
+      // See JSON Schema 2020-12 core §10.3.2.1: the annotation is "the set
+      // of instance property names matched by this keyword."
       annotations.insert(keyword: self, at: instanceLocation, value: instancePropertyNames)
+
+      try builder.throwIfErrors()
     }
   }
 
@@ -335,9 +343,13 @@ extension Keywords {
         }
       }
 
-      try builder.throwIfErrors()
-
+      // See `Properties.validate` for the rationale: the annotation must be
+      // recorded before throwing so that `unevaluatedProperties` sees the
+      // property names this keyword applied to, even when one or more
+      // sub-validations failed.
       annotations.insert(keyword: self, at: instanceLocation, value: matchedPropertyNames)
+
+      try builder.throwIfErrors()
     }
   }
 
@@ -381,9 +393,13 @@ extension Keywords {
         validatedKeys.append(key)
       }
 
-      try builder.throwIfErrors()
-
+      // See `Properties.validate` for the rationale: the annotation must be
+      // recorded before throwing so that `unevaluatedProperties` sees every
+      // property name this keyword applied to, even when one or more
+      // sub-validations failed.
       annotations.insert(keyword: self, at: instanceLocation, value: validatedKeys)
+
+      try builder.throwIfErrors()
     }
   }
 
@@ -550,7 +566,17 @@ extension Keywords {
       }
 
       if validCount != 1 {
-        throw ValidationIssue.oneOfFailed(errors: [])
+        // Surface the per-subschema failures so consumers walking the
+        // `errors:` tree (UIs, error renderers, debuggers) can see *why*
+        // each branch failed instead of getting an opaque "did not match
+        // exactly one schema" with no children.
+        //
+        // Note this naturally produces an empty `errors:` array in the
+        // multi-match case (validCount > 1, all matching subschemas
+        // contribute zero errors), which matches the prior behavior for
+        // that branch — the failure is the keyword-level "exactly one"
+        // rule, not any individual subschema's verdict.
+        throw ValidationIssue.oneOfFailed(errors: builder.collectedErrors)
       }
     }
   }
@@ -614,7 +640,14 @@ extension Keywords {
     ) throws(ValidationIssue) {
       var subAnnotations = AnnotationContainer()
       let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
-      annotations.merge(subAnnotations)
+      // Per JSON Schema 2020-12 core §10.2.2.1, `if` only contributes to
+      // annotation collection when its subschema validates successfully —
+      // otherwise sibling `unevaluatedProperties`/`unevaluatedItems` would
+      // treat properties/indices "matched" by a failed `if` branch as
+      // evaluated. Mirrors the filter already in `allOf`/`anyOf`/`oneOf`.
+      if result.isValid {
+        annotations.merge(subAnnotations)
+      }
       context.context.ifConditionalResults[self.context.location.dropLast()] = result
     }
   }
@@ -709,11 +742,17 @@ extension Keywords {
       self.schemaMap = OrderedDictionary(
         uniqueKeysWithValues: value.object?
           .compactMap { (key, rawSchema) -> (String, Schema)? in
+            // Each per-property sub-schema lives at `<keyword>/<key>` and
+            // must inherit the enclosing schema's `$id`-resolved URI so that
+            // relative `$ref`s inside it (e.g. `#/$defs/...`) resolve
+            // against the parent document, not the in-memory placeholder
+            // base URL. Mirrors the Properties / PatternProperties pattern.
             guard
               let schema = try? Schema(
                 rawSchema: rawSchema,
-                location: context.location,
-                context: context.context
+                location: context.location.appending(.key(key)),
+                context: context.context,
+                baseURI: context.uri
               )
             else { return nil }
             return (key, schema)
@@ -992,6 +1031,13 @@ struct ValidationResultBuilder {
   }
 
   private var errors: [ValidationError] = []
+
+  /// Errors collected so far from `merging(_:)`. Exposed so keywords like
+  /// `oneOf` — which need to decide whether/how to throw based on a count
+  /// of *passing* subschemas (not just whether errors accumulated) — can
+  /// surface the per-subschema failures inside their own
+  /// `ValidationIssue` case rather than relying on `throwIfErrors`.
+  var collectedErrors: [ValidationError] { errors }
 
   mutating func merging(_ result: ValidationResult) {
     if result.isValid {
