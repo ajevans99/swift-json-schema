@@ -691,7 +691,12 @@ struct KeywordTests {
 
     @Test(arguments: [
       (JSONValue.object(["a": 1, "b": 2]), OrderedSet(["a", "b"]), true),
-      (JSONValue.object(["a": 1, "b": "string"]), nil, false),
+      // After fixing the Properties annotation suppression bug (issue:
+      // unevaluatedProperties cascade), the annotation MUST record every
+      // property name this keyword applied to even when one or more
+      // sub-validations failed. Both `a` and `b` were matched by
+      // `properties`; the failure of `b`'s subschema does not retract that.
+      (JSONValue.object(["a": 1, "b": "string"]), OrderedSet(["a", "b"]), false),
       (JSONValue.object(["a": 1]), OrderedSet(["a"]), true),
       (JSONValue.object(["b": 2]), OrderedSet(["b"]), true),
       (JSONValue.object(["c": 3]), OrderedSet([]), true),
@@ -723,7 +728,9 @@ struct KeywordTests {
 
     @Test(arguments: [
       (JSONValue.object(["a1": 1, "b2": 2]), OrderedSet(["a1", "b2"]), true),
-      (JSONValue.object(["a1": 1, "b2": "string"]), nil, false),
+      // Annotation must record every property name matched by a pattern,
+      // even if one or more sub-validations failed (see `properties` above).
+      (JSONValue.object(["a1": 1, "b2": "string"]), OrderedSet(["a1", "b2"]), false),
       (JSONValue.object(["a1": 1]), OrderedSet(["a1"]), true),
       (JSONValue.object(["b2": 2]), OrderedSet(["b2"]), true),
       (JSONValue.object(["c3": 3]), OrderedSet([]), true),
@@ -759,7 +766,10 @@ struct KeywordTests {
 
     @Test(arguments: [
       (JSONValue.object(["a": 1, "b": 2, "c": 3]), OrderedSet(["c"]), true),
-      (JSONValue.object(["a": 1, "b": 2, "c": "string"]), nil, false),
+      // Annotation must record every key this keyword applied to (i.e.
+      // every key not already covered by `properties`/`patternProperties`),
+      // even if the sub-validation failed (see `properties` above).
+      (JSONValue.object(["a": 1, "b": 2, "c": "string"]), OrderedSet(["c"]), false),
       (JSONValue.object(["a": 1, "b": 2]), OrderedSet([]), true),
       (JSONValue.object(["c": 3]), OrderedSet(["c"]), true),
       (JSONValue.string("not an object"), nil, true),

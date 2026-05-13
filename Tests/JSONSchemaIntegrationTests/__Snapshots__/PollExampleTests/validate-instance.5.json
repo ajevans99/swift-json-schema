@@ -45,6 +45,18 @@
       "annotation" : "Category of the poll, limited to specific types",
       "instanceLocation" : "\/category",
       "keywordLocation" : "\/properties\/category\/description"
+    },
+    {
+      "annotation" : [
+        "id",
+        "title",
+        "options",
+        "createdAt",
+        "isActive",
+        "category"
+      ],
+      "instanceLocation" : "",
+      "keywordLocation" : "\/properties"
     }
   ],
   "errors" : [
@@ -53,10 +65,47 @@
       "errors" : [
         {
           "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/category\/oneOf",
+          "errors" : [
+            {
+              "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/category\/oneOf\/0\/required",
+              "instanceLocation" : "\/category",
+              "keyword" : "required",
+              "keywordLocation" : "\/properties\/category\/oneOf\/0\/required",
+              "message" : "Required property 'technology' is missing"
+            },
+            {
+              "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/category\/oneOf\/1\/required",
+              "instanceLocation" : "\/category",
+              "keyword" : "required",
+              "keywordLocation" : "\/properties\/category\/oneOf\/1\/required",
+              "message" : "Required property 'entertainment' is missing"
+            },
+            {
+              "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/category\/oneOf\/2\/required",
+              "instanceLocation" : "\/category",
+              "keyword" : "required",
+              "keywordLocation" : "\/properties\/category\/oneOf\/2\/required",
+              "message" : "Required property 'education' is missing"
+            },
+            {
+              "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/category\/oneOf\/3\/type",
+              "instanceLocation" : "\/category",
+              "keyword" : "type",
+              "keywordLocation" : "\/properties\/category\/oneOf\/3\/type",
+              "message" : "Expected type '[OrderedJSON.JSONType.string]' but found 'object'"
+            },
+            {
+              "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/category\/oneOf\/3\/enum",
+              "instanceLocation" : "\/category",
+              "keyword" : "enum",
+              "keywordLocation" : "\/properties\/category\/oneOf\/3\/enum",
+              "message" : "'{\"food\": {\"_0\": {\"customDescription\": \"What's your favorite?\"}}}' is not one of the allowed values: \"sports\", \"other\""
+            }
+          ],
           "instanceLocation" : "\/category",
           "keyword" : "oneOf",
           "keywordLocation" : "\/properties\/category\/oneOf",
-          "message" : "Failed to satisfy exactly one schema: "
+          "message" : "Failed to satisfy exactly one schema: Required property 'technology' is missing; Required property 'entertainment' is missing; Required property 'education' is missing; Expected type '[OrderedJSON.JSONType.string]' but found 'object'; '{\"food\": {\"_0\": {\"customDescription\": \"What's your favorite?\"}}}' is not one of the allowed values: \"sports\", \"other\""
         }
       ],
       "instanceLocation" : "",

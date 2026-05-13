@@ -40,6 +40,18 @@
       "annotation" : "Category of the poll, limited to specific types",
       "instanceLocation" : "\/category",
       "keywordLocation" : "\/properties\/category\/description"
+    },
+    {
+      "annotation" : [
+        "id",
+        "title",
+        "options",
+        "createdAt",
+        "isActive",
+        "category"
+      ],
+      "instanceLocation" : "",
+      "keywordLocation" : "\/properties"
     }
   ],
   "errors" : [
@@ -78,36 +90,6 @@
               "keyword" : "properties",
               "keywordLocation" : "\/properties\/options\/items\/properties",
               "message" : "Validation failed for keyword 'properties'"
-            },
-            {
-              "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/additionalProperties",
-              "errors" : [
-                {
-                  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/additionalProperties",
-                  "instanceLocation" : "\/options\/0\/id",
-                  "keyword" : "boolean",
-                  "keywordLocation" : "\/properties\/options\/items\/additionalProperties",
-                  "message" : ""
-                },
-                {
-                  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/additionalProperties",
-                  "instanceLocation" : "\/options\/0\/text",
-                  "keyword" : "boolean",
-                  "keywordLocation" : "\/properties\/options\/items\/additionalProperties",
-                  "message" : ""
-                },
-                {
-                  "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/additionalProperties",
-                  "instanceLocation" : "\/options\/0\/voteCount",
-                  "keyword" : "boolean",
-                  "keywordLocation" : "\/properties\/options\/items\/additionalProperties",
-                  "message" : ""
-                }
-              ],
-              "instanceLocation" : "\/options\/0",
-              "keyword" : "additionalProperties",
-              "keywordLocation" : "\/properties\/options\/items\/additionalProperties",
-              "message" : "Validation failed for keyword 'additionalProperties'"
             }
           ],
           "instanceLocation" : "\/options",

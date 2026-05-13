@@ -1,5 +1,15 @@
 {
   "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#",
+  "annotations" : [
+    {
+      "annotation" : [
+        "name",
+        "children"
+      ],
+      "instanceLocation" : "",
+      "keywordLocation" : "\/properties"
+    }
+  ],
   "errors" : [
     {
       "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties",
