@@ -5,3 +5,11 @@ xcuserdata/
 DerivedData/
 .swiftpm/
 .netrc
+
+# SwiftPM build artifacts
+Benchmarks/.build/
+
+# Optional benchmark corpus fetched by Benchmarks/Scripts/fetch-reference-corpus.sh
+Benchmarks/OrderedJSONBenchmarks/Resources/canada.json
+Benchmarks/OrderedJSONBenchmarks/Resources/citm_catalog.json
+Benchmarks/OrderedJSONBenchmarks/Resources/twitter.json

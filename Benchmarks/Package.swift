@@ -25,7 +25,21 @@ let package = Package(
       plugins: [
         .plugin(name: "BenchmarkPlugin", package: "package-benchmark")
       ]
-    )
+    ),
+    .executableTarget(
+      name: "JSONSchemaBenchmarks",
+      dependencies: [
+        .product(name: "JSONSchema", package: "swift-json-schema"),
+        .product(name: "Benchmark", package: "package-benchmark"),
+      ],
+      path: "JSONSchemaBenchmarks",
+      resources: [
+        .process("Resources")
+      ],
+      plugins: [
+        .plugin(name: "BenchmarkPlugin", package: "package-benchmark")
+      ]
+    ),
   ],
   swiftLanguageModes: [.v6]
 )
