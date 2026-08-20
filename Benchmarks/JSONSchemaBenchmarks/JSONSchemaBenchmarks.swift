@@ -36,7 +36,7 @@ nonisolated(unsafe) let benchmarks = {
   ]
 
   for sample in corpus.samples {
-    Benchmark("construct · \(sample.name) · Schema.init(rawSchema:)") { benchmark in
+    Benchmark("construct.\(sample.name).Schema.init") { benchmark in
       for _ in benchmark.scaledIterations {
         blackHole(
           try Schema(
@@ -52,14 +52,14 @@ nonisolated(unsafe) let benchmarks = {
       context: .init(dialect: .draft2020_12)
     )
 
-    Benchmark("validate · \(sample.name) · Schema.validate") { benchmark in
+    Benchmark("validate.\(sample.name).Schema.validate") { benchmark in
       for _ in benchmark.scaledIterations {
         blackHole(schema.validate(sample.instance))
       }
     }
 
     for output in outputConfigurations {
-      Benchmark("output · \(sample.name) · \(output.name)") { benchmark in
+      Benchmark("output.\(sample.name).\(output.name)") { benchmark in
         for _ in benchmark.scaledIterations {
           blackHole(try schema.validate(sample.instance, output: output.configuration))
         }

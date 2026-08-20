@@ -22,30 +22,33 @@ jobs:
       run: swift --version
     - name: Install benchmark system dependencies
       run: sudo apt-get update && sudo apt-get install -y libjemalloc-dev
+    - name: Fetch reference corpus
+      run: Benchmarks/Scripts/fetch-reference-corpus.sh
+    - name: Check baseline coverage
+      id: baselines
+      run: |
+        if Benchmarks/Scripts/check-baseline-coverage.sh; then
+          echo "complete=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "complete=false" >> "$GITHUB_OUTPUT"
+        fi
+    - name: Generate benchmark baselines
+      if: ${{ steps.baselines.outputs.complete != 'true' }}
+      working-directory: Benchmarks
+      run: |
+        swift package --allow-writing-to-package-directory benchmark \
+          thresholds update \
+          --path Baselines \
+          --no-progress
     - name: Run OrderedJSON benchmarks
-      working-directory: Benchmarks
-      run: |
-        set -o pipefail
-        echo "## OrderedJSON benchmarks" >> "$GITHUB_STEP_SUMMARY"
-        swift package --allow-writing-to-package-directory benchmark \
-          --target OrderedJSONBenchmarks \
-          --format markdown \
-          --path stdout \
-          --check-absolute-path Baselines \
-          --no-progress | tee -a "$GITHUB_STEP_SUMMARY"
+      if: ${{ steps.baselines.outputs.complete == 'true' }}
+      run: Benchmarks/Scripts/check-thresholds.sh OrderedJSONBenchmarks
     - name: Run JSONSchema benchmarks
-      working-directory: Benchmarks
-      run: |
-        set -o pipefail
-        echo "## JSONSchema benchmarks" >> "$GITHUB_STEP_SUMMARY"
-        swift package --allow-writing-to-package-directory benchmark \
-          --target JSONSchemaBenchmarks \
-          --format markdown \
-          --path stdout \
-          --check-absolute-path Baselines \
-          --no-progress | tee -a "$GITHUB_STEP_SUMMARY"
+      if: ${{ steps.baselines.outputs.complete == 'true' }}
+      run: Benchmarks/Scripts/check-thresholds.sh JSONSchemaBenchmarks
     - name: Upload benchmark baselines
+      if: ${{ always() }}
       uses: actions/upload-artifact@v4
       with:
-        name: benchmark-baselines
+        name: benchmark-baselines-${{ runner.os }}-${{ runner.arch }}
         path: Benchmarks/Baselines/*.json
