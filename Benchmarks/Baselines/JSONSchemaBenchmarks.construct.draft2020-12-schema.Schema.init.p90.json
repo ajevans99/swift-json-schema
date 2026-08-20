@@ -1,5 +1,5 @@
 {
-  "cpuTotal" : 0,
-  "mallocCountTotal" : 548,
-  "wallClock" : 252159
+  "cpuTotal" : 10000000,
+  "mallocCountTotal" : 6528,
+  "wallClock" : 1372159
 }
