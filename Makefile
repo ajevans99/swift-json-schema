@@ -11,16 +11,16 @@ update-submodule:
 
 format:
 	@find Sources Tests Benchmarks \
-		-name '*.swift' \
-		-not -path '*/JSON-Schema-Test-Suite/*' \
-		-not -path '*/JSONTestSuite/*' \
-		-not -path 'Benchmarks/.build/*' \
+		\( -path 'Tests/JSONSchemaTests/JSON-Schema-Test-Suite' \
+			-o -path 'Tests/OrderedJSONTests/JSONTestSuite' \
+			-o -path 'Benchmarks/.build' \) -prune \
+		-o -name '*.swift' \
 		-print0 | xargs -0 swift format --in-place --parallel
 	@find Sources Tests Benchmarks \
-		-name '*.swift' \
-		-not -path '*/JSON-Schema-Test-Suite/*' \
-		-not -path '*/JSONTestSuite/*' \
-		-not -path 'Benchmarks/.build/*' \
+		\( -path 'Tests/JSONSchemaTests/JSON-Schema-Test-Suite' \
+			-o -path 'Tests/OrderedJSONTests/JSONTestSuite' \
+			-o -path 'Benchmarks/.build' \) -prune \
+		-o -name '*.swift' \
 		-print0 | xargs -0 swift format lint --strict --parallel
 	@echo "Swift code formatted successfully."
 

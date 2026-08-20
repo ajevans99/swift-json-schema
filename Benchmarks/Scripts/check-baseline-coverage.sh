@@ -9,6 +9,14 @@ readonly baseline_dir="${BENCHMARK_BASELINE_PATH:-${benchmark_dir}/Baselines}"
 missing=0
 current_target=""
 
+if ! benchmark_list="$(
+  cd "$benchmark_dir"
+  swift package --disable-automatic-resolution benchmark list --no-progress
+)"; then
+  echo "Failed to list benchmark targets." >&2
+  exit 1
+fi
+
 while IFS= read -r line; do
   if [[ "$line" =~ ^Target\ \'([^\']+)\'\ available\ benchmarks:$ ]]; then
     current_target="${BASH_REMATCH[1]}"
@@ -22,9 +30,6 @@ while IFS= read -r line; do
       missing=1
     fi
   fi
-done < <(
-  cd "$benchmark_dir"
-  swift package --disable-automatic-resolution benchmark list --no-progress
-)
+done <<< "$benchmark_list"
 
 exit "$missing"

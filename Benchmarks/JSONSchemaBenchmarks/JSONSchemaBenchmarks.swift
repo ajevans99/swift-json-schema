@@ -38,18 +38,14 @@ nonisolated(unsafe) let benchmarks = {
   for sample in corpus.samples {
     Benchmark("construct.\(sample.name).Schema.init") { benchmark in
       for _ in benchmark.scaledIterations {
-        blackHole(
-          try Schema(
-            rawSchema: sample.schema,
-            context: .init(dialect: .draft2020_12)
-          )
-        )
+        blackHole(try sample.makeSchema())
       }
     }
 
-    let schema = try! Schema(
-      rawSchema: sample.schema,
-      context: .init(dialect: .draft2020_12)
+    let schema = try! sample.makeSchema()
+    precondition(
+      schema.validate(sample.instance).isValid,
+      "Benchmark instance for \(sample.name) must fully validate."
     )
 
     Benchmark("validate.\(sample.name).Schema.validate") { benchmark in
@@ -73,24 +69,46 @@ private struct SchemaCorpus: Sendable {
 
   struct Sample: Sendable {
     let name: String
-    let schema: JSONValue
+    let schemaSource: SchemaSource
     let instance: JSONValue
+
+    func makeSchema() throws -> Schema {
+      switch schemaSource {
+      case .resource(let schema):
+        try Schema(
+          rawSchema: schema,
+          context: .init(dialect: .draft2020_12)
+        )
+      case .draft202012MetaSchema:
+        try Dialect.draft2020_12.loadMetaSchema()
+      }
+    }
+  }
+
+  enum SchemaSource: Sendable {
+    case resource(JSONValue)
+    case draft202012MetaSchema
   }
 
   static func load() -> SchemaCorpus {
-    let names = [
-      "poll",
-      "openapi-fragment",
-      "draft2020-12-schema",
+    let resourceNames = [
+      "poll", "openapi-fragment",
     ]
+    let resourceSamples = resourceNames.map { name in
+      Sample(
+        name: name,
+        schemaSource: .resource(loadJSONValue(named: "\(name).schema")),
+        instance: loadJSONValue(named: "\(name).instance")
+      )
+    }
     return SchemaCorpus(
-      samples: names.map { name in
+      samples: resourceSamples + [
         Sample(
-          name: name,
-          schema: loadJSONValue(named: "\(name).schema"),
-          instance: loadJSONValue(named: "\(name).instance")
+          name: "draft2020-12-schema",
+          schemaSource: .draft202012MetaSchema,
+          instance: loadJSONValue(named: "draft2020-12-schema.instance")
         )
-      }
+      ]
     )
   }
 
