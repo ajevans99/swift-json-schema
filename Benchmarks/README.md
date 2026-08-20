@@ -97,9 +97,17 @@ The corresponding parse/serialize/roundtrip benchmarks are generated automatical
 ## Baselines and CI
 
 Committed p90 threshold baselines live in [`Baselines/`](./Baselines/). CI runs
-both benchmark targets and the full reference corpus on `ubuntu-24.04`, checks
-current p90 wall-clock / CPU / malloc metrics against those baselines, and
-writes markdown tables to the GitHub Actions job summary.
+both benchmark targets and the full reference corpus on `ubuntu-24.04`, writes
+wall-clock / CPU / malloc tables to the GitHub Actions job summary, and checks
+malloc counts against the committed thresholds.
+
+Wall-clock and CPU values are informational on the shared GitHub-hosted runner.
+Calibration runs of the same commit varied far beyond the initial 10% timing
+tolerance, so treating static timing changes as a required check would be
+flaky. Use the reported tables to spot trends and reproduce suspected timing
+regressions on a dedicated runner. Allocation counts remain deterministic
+enough to enforce with the configured 10% relative and 10-allocation absolute
+tolerances.
 
 When a new benchmark has no committed baseline yet, CI generates a complete
 baseline artifact instead of performing a partial regression check. Commit the
