@@ -72,6 +72,23 @@ struct JSONReferenceComponentTests {
     #expect(schema.validate(invalid).isValid == false)
   }
 
+  @Test(arguments: ["0", "01", "+1", "-0"])
+  func referenceToNumericDefinition(name: String) {
+    var component = JSONObject {
+      JSONProperty(key: "node") {
+        JSONReference<TestNode>.definition(named: name)
+      }
+      .required()
+    }
+    component.schemaValue["$defs"] = .object([
+      name: TestNode.schema.schemaValue.value
+    ])
+
+    let schema = component.definition()
+    #expect(schema.validate(["node": ["name": "leaf"]]).isValid)
+    #expect(!schema.validate(["node": ["name": 42]]).isValid)
+  }
+
   @Test func dynamicReferenceEmitsKeywordAndParses() throws {
     let reference = JSONDynamicReference<TestNode>()
     #expect(
