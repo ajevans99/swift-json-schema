@@ -11,43 +11,50 @@ import OrderedJSON
 ///     cd Benchmarks
 ///     swift package --allow-writing-to-package-directory benchmark
 ///
-/// The corpus is small and committed to the repo so anyone can run these
-/// without external downloads. See `Benchmarks/README.md` for notes on
-/// adding cases and updating baselines.
+/// The committed corpus runs without external downloads. The larger reference
+/// corpus is included when fetched before building the benchmark package. See
+/// `Benchmarks/README.md` for details.
 nonisolated(unsafe) let benchmarks = {
+  let regressionThresholds: [BenchmarkMetric: BenchmarkThresholds] = [
+    .wallClock: .init(relative: [.p90: 10.0]),
+    .cpuTotal: .init(relative: [.p90: 10.0]),
+    .mallocCountTotal: .init(relative: [.p90: 10.0], absolute: [.p90: 10]),
+  ]
+
   Benchmark.defaultConfiguration = .init(
     metrics: [.wallClock, .cpuTotal, .mallocCountTotal],
     warmupIterations: 3,
     maxDuration: .seconds(2),
-    maxIterations: 1000
+    maxIterations: 1000,
+    thresholds: regressionThresholds
   )
 
   // MARK: - Corpus loading
 
-  // Vendored corpus: files live next to this source via SPM resources.
+  // Vendored and optionally fetched files are processed as SwiftPM resources.
   let corpus = Corpus.load()
 
   // MARK: - Parse benchmarks
   //
   // For each corpus file: parse via OrderedJSON, JSONDecoder<JSONValue>,
   // and JSONSerialization. Naming convention is
-  // "parse · <case> · <parser>" so result tables sort cleanly.
+  // "parse.<case>.<parser>" so threshold filenames are portable and stable.
 
   for sample in corpus.samples {
-    Benchmark("parse · \(sample.name) · OrderedJSON") { benchmark in
+    Benchmark("parse.\(sample.name).OrderedJSON") { benchmark in
       for _ in benchmark.scaledIterations {
         blackHole(try JSONValue.parse(sample.data))
       }
     }
 
-    Benchmark("parse · \(sample.name) · JSONDecoder") { benchmark in
+    Benchmark("parse.\(sample.name).JSONDecoder") { benchmark in
       let decoder = JSONDecoder()
       for _ in benchmark.scaledIterations {
         blackHole(try decoder.decode(JSONValue.self, from: sample.data))
       }
     }
 
-    Benchmark("parse · \(sample.name) · JSONSerialization") { benchmark in
+    Benchmark("parse.\(sample.name).JSONSerialization") { benchmark in
       for _ in benchmark.scaledIterations {
         blackHole(
           try JSONSerialization.jsonObject(with: sample.data, options: [.fragmentsAllowed])
@@ -66,13 +73,13 @@ nonisolated(unsafe) let benchmarks = {
   for sample in corpus.samples {
     let value = try! JSONValue.parse(sample.data)
 
-    Benchmark("serialize · \(sample.name) · OrderedJSON") { benchmark in
+    Benchmark("serialize.\(sample.name).OrderedJSON") { benchmark in
       for _ in benchmark.scaledIterations {
         blackHole(try value.serializedData())
       }
     }
 
-    Benchmark("serialize · \(sample.name) · JSONEncoder.sortedKeys") { benchmark in
+    Benchmark("serialize.\(sample.name).JSONEncoder.sortedKeys") { benchmark in
       let encoder = JSONEncoder()
       encoder.outputFormatting = [.sortedKeys]
       for _ in benchmark.scaledIterations {
@@ -89,7 +96,7 @@ nonisolated(unsafe) let benchmarks = {
   // this exact pattern.
 
   for sample in corpus.samples {
-    Benchmark("roundtrip · \(sample.name) · OrderedJSON") { benchmark in
+    Benchmark("roundtrip.\(sample.name).OrderedJSON") { benchmark in
       for _ in benchmark.scaledIterations {
         let v1 = try JSONValue.parse(sample.data)
         let bytes = try v1.serializedData()
@@ -111,14 +118,20 @@ private struct Corpus: Sendable {
 
   static func load() -> Corpus {
     let bundle = Bundle.module
-    let names = [
+    let committedNames = [
       "small",
       "wide-object",
       "deep-array",
       "poll-instance",
       "users-array",
     ]
-    let samples = names.map { name -> Sample in
+    let referenceNames = [
+      "canada",
+      "citm_catalog",
+      "twitter",
+    ]
+
+    let committedSamples = committedNames.map { name -> Sample in
       guard let url = bundle.url(forResource: name, withExtension: "json", subdirectory: nil) else {
         fatalError(
           """
@@ -128,13 +141,24 @@ private struct Corpus: Sendable {
           """
         )
       }
-      do {
-        let data = try Data(contentsOf: url)
-        return Sample(name: name, data: data)
-      } catch {
-        fatalError("Failed to load \(name).json: \(error)")
-      }
+      return loadSample(named: name, at: url)
     }
-    return Corpus(samples: samples)
+
+    let referenceSamples = referenceNames.compactMap { name -> Sample? in
+      guard let url = bundle.url(forResource: name, withExtension: "json", subdirectory: nil) else {
+        return nil
+      }
+      return loadSample(named: name, at: url)
+    }
+
+    return Corpus(samples: committedSamples + referenceSamples)
+  }
+
+  private static func loadSample(named name: String, at url: URL) -> Sample {
+    do {
+      return Sample(name: name, data: try Data(contentsOf: url))
+    } catch {
+      fatalError("Failed to load \(name).json: \(error)")
+    }
   }
 }
