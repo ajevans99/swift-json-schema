@@ -113,10 +113,55 @@ public struct IPv4FormatValidator: FormatValidator {
 
 public struct IPv6FormatValidator: FormatValidator {
   public let formatName = "ipv6"
-  nonisolated(unsafe) private static let regex = try! Regex(
-    #"^(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}$"#
-  )
-  public func validate(_ value: String) -> Bool { value.firstMatch(of: Self.regex) != nil }
+
+  public func validate(_ value: String) -> Bool {
+    // Six hextets followed by a dotted-decimal IPv4 tail is the longest form.
+    guard value.utf8.count <= 45 else { return false }
+
+    let sections = value.split(separator: "::", omittingEmptySubsequences: false)
+    guard sections.count <= 2 else { return false }
+
+    var hextetCount = 0
+    for (sectionIndex, section) in sections.enumerated() where !section.isEmpty {
+      let groups = section.split(separator: ":", omittingEmptySubsequences: false)
+      for (groupIndex, group) in groups.enumerated() {
+        if group.contains(".") {
+          guard
+            sectionIndex == sections.count - 1,
+            groupIndex == groups.count - 1,
+            Self.isIPv4Tail(group)
+          else { return false }
+          hextetCount += 2
+        } else {
+          guard
+            (1 ... 4).contains(group.utf8.count),
+            group.utf8.allSatisfy({
+              (48 ... 57).contains($0) || (65 ... 70).contains($0) || (97 ... 102).contains($0)
+            })
+          else { return false }
+          hextetCount += 1
+        }
+      }
+    }
+
+    // Compression must replace at least one of the eight 16-bit groups.
+    return sections.count == 2 ? hextetCount < 8 : hextetCount == 8
+  }
+
+  private static func isIPv4Tail(_ value: Substring) -> Bool {
+    let octets = value.split(separator: ".", omittingEmptySubsequences: false)
+    return octets.count == 4
+      && octets.allSatisfy { octet in
+        guard
+          (1 ... 3).contains(octet.utf8.count),
+          octet.utf8.allSatisfy({ (48 ... 57).contains($0) }),
+          octet.utf8.count == 1 || octet.first != "0",
+          let number = Int(octet),
+          number <= 255
+        else { return false }
+        return true
+      }
+  }
 }
 
 public struct UUIDFormatValidator: FormatValidator {

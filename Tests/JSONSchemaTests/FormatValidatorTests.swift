@@ -60,7 +60,7 @@ struct FormatValidatorTests {
 
   @Test(arguments: [
     ("2001:0db8:85a3:0000:0000:8a2e:0370:7334", true),
-    ("2001:db8::1", false),
+    ("2001:db8::1", true),
   ])
   func ipv6Validator(value: String, isValid: Bool) {
     let validator = IPv6FormatValidator()
