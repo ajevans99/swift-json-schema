@@ -1,446 +1,182 @@
 # Swift JSON Schema
 
 [![CI](https://github.com/ajevans99/swift-json-schema/actions/workflows/ci.yml/badge.svg)](https://github.com/ajevans99/swift-json-schema/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/ajevans99/swift-json-schema)](https://github.com/ajevans99/swift-json-schema/releases/latest)
 [![SPI Versions](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fajevans99%2Fswift-json-schema%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/ajevans99/swift-json-schema)
 [![SPI Platforms](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fajevans99%2Fswift-json-schema%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/ajevans99/swift-json-schema)
 [![Supported Dialects](https://img.shields.io/endpoint?url=https%3A%2F%2Fbowtie.report%2Fbadges%2Fswift-swift-json-schema%2Fsupported_versions.json)](https://bowtie.report/#/implementations/swift-swift-json-schema)
 [![Draft 2020-12](https://img.shields.io/endpoint?url=https%3A%2F%2Fbowtie.report%2Fbadges%2Fswift-swift-json-schema%2Fcompliance%2Fdraft2020-12.json)](https://bowtie.report/#/implementations/swift-swift-json-schema)
 [![codecov](https://codecov.io/gh/ajevans99/swift-json-schema/graph/badge.svg?token=P5CGW5A95K)](https://codecov.io/gh/ajevans99/swift-json-schema)
 
-The Swift JSON Schema library provides a type-safe way to generate and validate JSON schema documents directly in Swift, with **deterministic, byte-stable JSON output** at every layer — schema emission, validation results, and the underlying JSON value type.
+Generate JSON Schema from Swift types, validate JSON against Draft 2020-12 schemas, and parse validated input into typed Swift values.
 
-## Library targets
+Use the `@Schemable` macro or a composable result-builder DSL to define your schemas, or load existing schema documents with the standalone validator. The package also provides structured validation diagnostics, Foundation type conversions, and deterministic JSON serialization.
 
-The package ships four libraries you can import independently:
+[Try the live playground](https://ajevans99.github.io/swift-json-schema-playground/) · [Documentation](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder) · [Latest release](https://github.com/ajevans99/swift-json-schema/releases/latest)
 
-| Library | Use it when you need |
-|---------|---------------------|
-| `OrderedJSON` | An order-preserving JSON parser, serializer, and value type. Standalone — use it without the validator if you just want stable JSON I/O across processes. |
-| `JSONSchema` | The JSON Schema 2020-12 validator. Re-exports `OrderedJSON` so types like `JSONValue` are available unchanged from `import JSONSchema`. |
-| `JSONSchemaBuilder` | A result-builder DSL plus the `@Schemable` macro for generating schemas from Swift types. Builds on `JSONSchema`. |
-| `JSONSchemaConversion` | Type bridges (`URL`, `UUID`, `Date`) for use with `JSONSchemaBuilder`. |
+## Quick start
 
-* [Schema Generation](#schema-generation)
-* [Macros](#macros)
-* [Validation](#validation)
-* [Parsing](#parsing)
-* [Why not Foundation's JSON?](#why-not-foundations-json)
-* [Example Projects](#example-projects)
-* [Documentation](#documentation)
-* [Installation](#installation)
-* [Next Steps](#next-steps)
-* [License](#license)
-
-## Schema Generation
-
-Use the power of Swift result builders to generate JSON schema documents.
+Define a model once, then use its schema to generate JSON Schema, parse valid input, and reject invalid data:
 
 ```swift
-@JSONSchemaBuilder var personSchema: some JSONSchemaComponent {
-  JSONObject {
-    JSONProperty(key: "firstName") {
-      JSONString()
-        .description("The person's first name.")
-    }
+import JSONSchemaBuilder
 
-    JSONProperty(key: "lastName") {
-      JSONString()
-        .description("The person's last name.")
-    }
-
-    JSONProperty(key: "age") {
-      JSONInteger()
-        .description("Age in years which must be equal to or greater than zero.")
-        .minimum(0)
-    }
-  }
-  .title("Person")
-}
-```
-
-<details>
-  <summary>Generated JSON Schema</summary>
-
-  `Schema` returned from `personSchema.definition()` conforms to `Codable`.
-
-  ```swift
-  let encoder = JSONEncoder()
-  encoder.outputFormatting = .prettyPrinted
-
-  let schemaData = try! encoder.encode(personSchema.definition())
-  let string = String(data: schemaData, encoding: .utf8)!
-  print(string)
-  ```
-  
-  ```json
-  {
-    "title": "Person",
-    "type": "object",
-    "properties": {
-      "firstName": {
-        "type": "string",
-        "description": "The person's first name."
-      },
-      "lastName": {
-        "type": "string",
-        "description": "The person's last name."
-      },
-      "age": {
-        "description": "Age in years which must be equal to or greater than zero.",
-        "type": "integer",
-        "minimum": 0
-      }
-    }
-  }
-  ```
-</details>
-
-## Macros
-
-Use the `@Schemable` macro from `JSONSchemaBuilder` to automatically generate the result builders.
-
-```swift
 @Schemable
-@ObjectOptions(.additionalProperties { false })
 struct Person {
-  let firstName: String
+  @StringOptions(.minLength(1))
+  let name: String
 
-  let lastName: String?
-
-  @NumberOptions(.minimum(0), .maximum(120))
+  @NumberOptions(.minimum(0))
   let age: Int
-
-  /// A short bio or summary about the person, shown on their public profile.
-  @StringOptions(.maxLength(500))
-  let bio: String?
 }
+
+let schema = Person.schema.definition()
+print(try schema.jsonValue.serialized(options: .pretty))
+
+let person: Person = try Person.schema.parseAndValidate(
+  instance: #"{"name": "Ada", "age": 37}"#
+)
+print(person.name) // Ada
+
+let result = schema.validate(["name": "Ada", "age": -1])
+print(result.isValid) // false
 ```
 
-<details>
-  <summary>Expanded Macro</summary>
+`parseAndValidate` checks the schema's constraints and returns your Swift type, or throws with parsing and validation details. Use `schema.validate` when you only need a validation result, without constructing a model. [Learn about parsing and validation](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder/validation).
 
-  ```swift
-  struct Person {
-    let firstName: String
+### Build schemas directly
 
-    let lastName: String?
-
-    let age: Int
-
-    /// A short bio or summary about the person, shown on their public profile.
-    let bio: String?
-
-    // Auto-generated schema ↴
-    static var schema: some JSONSchemaComponent<Person> {
-      JSONSchema(Person.init) {
-          JSONObject {
-              JSONProperty(key: "firstName") {
-                  JSONString()
-              }
-              .required()
-              JSONProperty(key: "lastName") {
-                  JSONString()
-              }
-              JSONProperty(key: "age") {
-                  JSONInteger()
-                  .minimum(0)
-                  .maximum(120)
-              }
-              .required()
-              JSONProperty(key: "bio") {
-                  JSONString()
-                  .maxLength(500)
-                  .description(#"""
-                  A short bio or summary about the person, shown on their public profile.
-                  """#)
-              }
-          }
-          .additionalProperties(false)
-      }
-    }
-  }
-  extension Person: Schemable {}
-  ```
-
-</details>
-<br/>
-
-`@Schemable` can be applied to enums.
+Result builders infer their output types from the properties you declare:
 
 ```swift
-@Schemable
-enum Status {
-  case active
-  case inactive
-}
-```
-
-<details>
-  <summary>Expanded Macro</summary>
-
-  ```swift
-  enum Status {
-    case active
-    case inactive
-    
-    static var schema: some JSONSchemaComponent<Status> {
-      JSONString()
-        .enumValues {
-          "active"
-          "inactive"
-        }
-        .compactMap {
-          switch $0 {
-          case "active":
-            return Self.active
-          case "inactive":
-            return Self.inactive
-          default:
-              return nil
-          }
-        }
-      }
-  }
-  extension Status: Schemable {}
-  ```
-
-</details>
-<br/>
-
-Enums with associated values are also supported using `anyOf` schema composition. See the [JSONSchemaBuilder documentation](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder) for more information.
-
-For details on modeling dependencies and other conditional constructs, check the [Conditional Validation guide](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder/ConditionalValidation).
-
-## Validation
-
-Using the `Schema` type, you can validate JSON data against a schema.
-
-```swift
-let schemaString = """
-{
-  "type": "object",
-  "properties": {
-    "name": {
-      "type": "string",
-      "minLength": 1
-    }
-  }
-}
-"""
-let schema1 = try Schema(instance: schemaString)
-let result = try schema1.validate(instance: #"{"name": "Alice"}"#)
-```
-
-Alternatively, you can use the `JSONSchemaBuilder` builders (or [macros](#macros)) to create a schema and validate instances.
-
-```swift
-let nameBuilder = JSONObject {
+let personSchema = JSONObject {
   JSONProperty(key: "name") {
-    JSONString()
-      .minLength(1)
+    JSONString().minLength(1)
   }
+  .required()
+
+  JSONProperty(key: "age") {
+    JSONInteger().minimum(0)
+  }
+  .required()
 }
-let schema = nameBuilder.defintion()
 
-let instance1: JSONValue = ["name": "Alice"]
-let instance2: JSONValue = ["name": ""]
-
-let result1 = schema.validate(instance1)
-dump(result1, name: "Instance 1 Validation Result")
-let result2 = schema.validate(instance2)
-dump(result2, name: "Instance 2 Validation Result")
+let parsed: (String, Int) = try personSchema.parseAndValidate(
+  instance: #"{"name": "Ada", "age": 37}"#
+)
 ```
 
-<details>
-  <summary>Instance 1 Validation Result</summary>
+The output is a tuple in property declaration order. `parseAndValidate` returns it directly; `parse` returns `Parsed<(String, Int), ParseIssue>`. Add `.map(Person.init)` to the builder to construct a `Person` instead.
 
-  ```
-  ▿ Instance 1 Validation Result: JSONSchema.ValidationResult
-  - isValid: true
-  ▿ keywordLocation: #
-    - path: 0 elements
-  ▿ instanceLocation: #
-    - path: 0 elements
-  - errors: nil
-  ▿ annotations: Optional([JSONSchema.Annotation<JSONSchema.Keywords.Properties>(keyword: "properties", instanceLocation: #, schemaLocation: #/properties, absoluteSchemaLocation: nil, value: Set(["name"]))])
-    ▿ some: 1 element
-      ▿ JSONSchema.Annotation<JSONSchema.Keywords.Properties>
-        - keyword: "properties"
-        ▿ instanceLocation: #
-          - path: 0 elements
-        ▿ schemaLocation: #/properties
-          ▿ path: 1 element
-            ▿ JSONSchema.JSONPointer.Component.key
-              - key: "properties"
-        - absoluteSchemaLocation: nil
-        ▿ value: 1 member
-          - "name"
-  ```
-</details>
+Builders also support arrays, schema compositions, references, and conditional rules. [Explore the DSL](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder).
 
-<details>
-  <summary>Instance 2 Validation Result</summary>
+### Validate an existing schema
 
-  ```  ▿ Instance 2 Validation Result: JSONSchema.ValidationResult
-  - isValid: false
-  ▿ keywordLocation: #
-    - path: 0 elements
-  ▿ instanceLocation: #
-    - path: 0 elements
-  ▿ errors: Optional([JSONSchema.ValidationError(keyword: "properties", message: "Validation failed for keyword \'properties\'", keywordLocation: #/properties, instanceLocation: #, errors: Optional([JSONSchema.ValidationError(keyword: "minLength", message: "The string length is less than the specified \'minLength\'.", keywordLocation: #/properties/name/minLength, instanceLocation: #/name, errors: nil)]))])
-    ▿ some: 1 element
-      ▿ JSONSchema.ValidationError
-        - keyword: "properties"
-        - message: "Validation failed for keyword \'properties\'"
-        ▿ keywordLocation: #/properties
-          ▿ path: 1 element
-            ▿ JSONSchema.JSONPointer.Component.key
-              - key: "properties"
-        ▿ instanceLocation: #
-          - path: 0 elements
-        ▿ errors: Optional([JSONSchema.ValidationError(keyword: "minLength", message: "The string length is less than the specified \'minLength\'.", keywordLocation: #/properties/name/minLength, instanceLocation: #/name, errors: nil)])
-          ▿ some: 1 element
-            ▿ JSONSchema.ValidationError
-              - keyword: "minLength"
-              - message: "The string length is less than the specified \'minLength\'."
-              ▿ keywordLocation: #/properties/name/minLength
-                ▿ path: 3 elements
-                  ▿ JSONSchema.JSONPointer.Component.key
-                    - key: "properties"
-                  ▿ JSONSchema.JSONPointer.Component.key
-                    - key: "name"
-                  ▿ JSONSchema.JSONPointer.Component.key
-                    - key: "minLength"
-              ▿ instanceLocation: #/name
-                ▿ path: 1 element
-                  ▿ JSONSchema.JSONPointer.Component.key
-                    - key: "name"
-              - errors: nil
-  - annotations: nil
-  ```
-</details>
-<br/>
-
-## Parsing
-
-When using [builders](#schema-generation) or [macros](#macros), you can also parse JSON instances into Swift types.
+No Swift model or macro is required when your schema already exists:
 
 ```swift
-@Schemable
-enum TemperatureUnit {
-  case celsius
-  case fahrenheit
-}
+import JSONSchema
 
-@Schemable
-struct Weather {
-  let temperature: Double
-  let unit: TemperatureUnit
-  let conditions: String
-}
+let externalSchema = try Schema(
+  instance: #"{"type": "string", "minLength": 3}"#
+)
+let validation = try externalSchema.validate(instance: #""hi""#)
+print(validation.isValid) // false
 
-let data = """
-{
-  "temperature": 20,
-  "unit": "celsius",
-  "conditions": "Sunny"
-}
-"""
-let weather: Parsed<Weather, ParseIssue> = Weather.schema.parse(instance: data)
+let diagnostics = try validation.renderedOutput(level: .basic)
+print(try diagnostics.serialized(options: .pretty))
 ```
 
-Optionally, combine parsing and validation in a single step.
-
-```swift
-let weather: Weather = try Weather.schema.parseAndValidate(instance: data)
-```
-
-> Shoutout to the [swift-parsing](https://github.com/pointfreeco/swift-parsing) library and the [Point-Free Parsing series](https://www.pointfree.co/collections/parsing) for the inspiration behind the parsing API and implementation.
-
-## Why not Foundation's JSON?
-
-You can use the validator with `JSONDecoder` / `JSONEncoder` if you want — `JSONValue` is `Codable`. But this package ships its own JSON parser (`OrderedJSON`) for one reason: **declared key order is preserved through the entire parse → validate → serialize pipeline, byte-stably across processes and platforms.**
-
-Foundation's parsers don't promise that:
-
-| Operation | `JSONDecoder` | `JSONSerialization` | `OrderedJSON` |
-|-----------|--------------|--------------------|--------------| 
-| Object key order preserved on parse | ❌ unspecified | ✅ iOS 17+/macOS 14+/tvOS 17+/watchOS 10+ | ✅ all platforms |
-| Object key order preserved on emit | ❌ unspecified | ❌ alphabetical with `.sortedKeys` | ✅ insertion order |
-| Round-trip byte-stable | ❌ | ⚠️ recent Apple platforms only | ✅ |
-
-For schema validation specifically, this matters because:
-
-* **Annotation/error output is deterministic** — the order of `result.annotations` and `result.errors` reflects the validation traversal, which itself follows the instance's declared key order. Snapshot tests against validation output don't flake.
-* **Serialized schemas are byte-stable** — a schema constructed via `JSONSchemaBuilder` (or parsed in) emits JSON in dialect-deterministic order, every run. Snapshots, signed payloads, generated artifacts all stay reproducible.
-* **Linux parity** — Foundation's `JSONSerialization` only preserves key order on iOS 17+ / macOS 14+ / tvOS 17+ / watchOS 10+; older OS versions and corelibs Foundation (Linux) make no such promise. `OrderedJSON` works everywhere SwiftPM does.
-
-Use `OrderedJSON` directly if you don't need the validator:
-
-```swift
-import OrderedJSON
-
-let value = try JSONValue.parse(data)            // preserves source key order
-let bytes = try value.serializedData()           // emits in that same order
-let pretty = try value.serialized(options: .pretty)
-```
-
-See issue [#149](https://github.com/ajevans99/swift-json-schema/issues/149) for the full background on why the determinism work happened.
-
-## Example Projects
-
-Explore these companion repositories to see `swift-json-schema` in action:
-
-- [SwiftFunctionToolsExperiment](https://github.com/ajevans99/SwiftFunctionToolsExperiment) – demonstrates creating type-safe [OpenAI API function tool calls](https://platform.openai.com/docs/guides/function-calling) using schemas built with this library.
-- [swift-mcp-toolkit](https://github.com/ajevans99/swift-mcp-toolkit) – a toolkit built on top of the official Model Context Protocol Swift SDK ([modelcontextprotocol/swift-sdk](https://github.com/modelcontextprotocol/swift-sdk)) that makes it easy to define strongly-typed tools for MCP servers and clients.
-- [swift-json-schema-playground](https://github.com/ajevans99/swift-json-schema-playground) ([live demo](https://ajevans99.github.io/swift-json-schema-playground/)) – an in-browser JSON Schema validation playground that runs `swift-json-schema` compiled to WebAssembly via SwiftWasm, with a Monaco editor UI built on Vite + React.
-
-Have a project of your own? We'd love to showcase it. Open a PR to add your repository to this list.
-
-## Documentation
-
-The full documentation for this library is available through the Swift Package Index.
-
-- [JSONSchema Documentation](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschema)
-- [JSONSchemaBuilder Documentation](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder)
+The diagnostics identify the failing keyword and input location. [Learn about validation output](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschema/validation-output-formats).
 
 ## Installation
 
-You can add the SwiftJSONSchema package to your project using Swift Package Manager (SPM) or Xcode.
-
-### Using Swift Package Manager (SPM)
-
-To add SwiftJSONSchema to your project using Swift Package Manager, add the following dependency to your Package.swift file:
+Add the package in Xcode with **File > Add Package Dependencies**, or add it to `Package.swift`:
 
 ```swift
 dependencies: [
-  .package(url: "https://github.com/ajevans99/swift-json-schema", from: "0.2.1")
+  .package(url: "https://github.com/ajevans99/swift-json-schema", from: "0.13.2")
 ]
 ```
 
-Then, include `JSONSchema` and/or `JSONSchemaBuilder` as a dependency for your target:
+`from:` sets a minimum version and allows compatible updates; it does not pin an exact release. See the [latest release](https://github.com/ajevans99/swift-json-schema/releases/latest) for the current version.
+
+Choose the products your target uses. For the quick start:
 
 ```swift
 targets: [
   .target(
     name: "YourTarget",
     dependencies: [
-      .product(name: "JSONSchema", package: "swift-json-schema"),
-      .product(name: "JSONSchemaBuilder", package: "swift-json-schema"),
+      .product(name: "JSONSchemaBuilder", package: "swift-json-schema")
     ]
   )
 ]
 ```
 
-### Using Xcode
+| Library | Use it for |
+|---------|------------|
+| [`JSONSchema`](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschema) | Loading and validating existing JSON Schema documents, references, formats, and diagnostics. Re-exports `OrderedJSON`. |
+| [`JSONSchemaBuilder`](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder) | Generating schemas and parsing typed values with result builders and `@Schemable`. Builds on `JSONSchema`. |
+| [`JSONSchemaConversion`](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemaconversion) | Converting schema-defined strings into `UUID`, `URL`, and `Date` values. Builds on `JSONSchemaBuilder`. |
+| [`OrderedJSON`](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/orderedjson) | Order-preserving JSON parsing and serialization, independently of schema validation. |
 
-1. Open your project in Xcode.
-2. Navigate to File > Swift Packages > Add Package Dependency...
-3. Enter the repository URL: https://github.com/ajevans99/swift-json-schema
-4. Follow the prompts to add the package to your project.
+**Requirements:** Swift 6.1 or later. Package deployment minimums are macOS 13, iOS 16, Mac Catalyst 16, watchOS 9, tvOS 16, and visionOS 1. Generated schemas and variadic object builders require macOS 14, iOS 17, Mac Catalyst 17, watchOS 10, or tvOS 17 on those platforms. The package also builds on Linux.
 
-Once added, you can import `JSONSchema` in your Swift files and start using it in your project.
+## Schema-first code generation
+
+Starting with JSON Schema rather than Swift? The companion [swift-json-schema-codegen](https://github.com/ajevans99/swift-json-schema-codegen) package generates typed builder components from schema documents, completing the other direction: **JSON Schema to Swift**.
+
+With its separate `JSONSchemaCodegen` product installed, an inline schema becomes a typed parser:
+
+```swift
+import JSONSchemaCodegen
+
+@Schema("""
+{
+  "type": "object",
+  "properties": {
+    "name": { "type": "string" },
+    "age": { "type": "integer", "minimum": 0 }
+  },
+  "required": ["name", "age"]
+}
+""")
+enum PersonSchema {}
+
+let person = try PersonSchema.schema.parseAndValidate(
+  instance: #"{"name": "Ada", "age": 37}"#
+)
+print(person.name) // Ada
+```
+
+The output fields are inferred from the schema; you do not repeat their Swift types. A CLI and SwiftPM build-tool plugin also generate components from schema files, useful for shared API contracts, configuration formats, and design tokens. See the [codegen guide](https://github.com/ajevans99/swift-json-schema-codegen#readme) for installation, supported schemas, and file-based workflows.
+
+## Explore the capabilities
+
+The guides on Swift Package Index cover the details without requiring you to read generated macro code:
+
+| Guide | What you can do |
+|-------|-----------------|
+| [Generate schemas from Swift types](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder/macros) | Model nested and recursive data, enums, collections, custom coding keys, and nullable properties. |
+| [Build schemas manually](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder) | Compose reusable schemas with result builders, references, and dynamic object properties. |
+| [Model conditional rules](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder/conditionalvalidation) | Express property dependencies and `if`/`then`/`else` validation. |
+| [Parse into Swift values](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder/validation) | Combine parsing and validation, map outputs, and select composition branches. |
+| [Validate existing schemas](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschema) | Load schema documents, resolve references, and enable built-in or custom formats. |
+| [Inspect validation output](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschema/validation-output-formats) | Choose flag, basic, detailed, or verbose diagnostics. |
+| [Convert Foundation types](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemaconversion) | Parse UUIDs, URLs, and dates using custom property schemas. |
+| [Emit deterministic JSON](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschema/deterministic-schema-output) | Produce reproducible schemas and validation results, and understand the serialization guarantees. |
+
+## Ecosystem and integrations
+
+- [swift-json-schema-playground](https://github.com/ajevans99/swift-json-schema-playground) ([live demo](https://ajevans99.github.io/swift-json-schema-playground/)) - an in-browser validation playground running the package as WebAssembly via SwiftWasm.
+- [swift-mcp-toolkit](https://github.com/ajevans99/swift-mcp-toolkit) - strongly typed tools built on the official Model Context Protocol Swift SDK.
+- [SwiftFunctionToolsExperiment](https://github.com/ajevans99/SwiftFunctionToolsExperiment) - type-safe OpenAI API function tool calls using schemas built with this library.
+- [Bowtie](https://bowtie.report/#/implementations/swift-swift-json-schema) - cross-language JSON Schema conformance reports, with a dedicated [Swift harness](https://github.com/bowtie-json-schema/swift-swift-json-schema).
+- [A2UI](https://github.com/a2ui-project/a2ui) - agent-generated user interfaces, with Swift core and component-catalog libraries that use this package.
+
+Have a project to share? Open a PR to add it here.
 
 ## License
 
-This library is released under the MIT license. See [LICENSE](LICENSE) for details.
+Released under the MIT license. See [LICENSE](LICENSE) for details.

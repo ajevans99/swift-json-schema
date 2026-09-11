@@ -4,9 +4,15 @@ An order-preserving JSON parser, serializer, and value type for Swift.
 
 ## Overview
 
-`OrderedJSON` is a small, RFC-8259-conformant library that handles JSON the way most humans expect: **the order you wrote keys in is the order they come out**. Foundation's `JSONDecoder` and `JSONEncoder` randomize object key order across processes (their `Dictionary`-backed storage is hash-seed dependent). `OrderedJSON` uses an `OrderedCollections.OrderedDictionary` internally and ships a custom serializer that walks values in insertion order.
+`OrderedJSON` provides a JSON value tree, parser, and serializer that preserve object key order.
+It uses an `OrderedCollections.OrderedDictionary` internally and emits values in insertion order.
+Foundation's `JSONDecoder` and `JSONEncoder` remain useful for `Codable` interoperability, but
+do not guarantee preservation of that order.
 
-It's the foundation of the deterministic-output story in [`JSONSchema`](https://swiftpackageindex.com/ajevans99/swift-json-schema), but it's also useful standalone — anywhere you need byte-stable JSON output (snapshot testing, signed payloads, reproducible artifacts), `OrderedJSON` is the right shape.
+Use it independently for snapshot tests, ordered configuration files, and reproducible JSON
+artifacts, or through [`JSONSchema`](https://swiftpackageindex.com/ajevans99/swift-json-schema).
+Deterministic serialization is not source-text preservation or JSON canonicalization; see
+<doc:Ordered-vs-Foundation> for the distinction.
 
 ```swift
 import OrderedJSON
@@ -34,8 +40,8 @@ let bytes = try value.serializedData()
 ### Parsing
 
 - <doc:Parsing-JSON-deterministically>
-- ``JSONValue/parse(_:)-7yr2v``
-- ``JSONValue/parse(_:)-2hbu0``
+- ``JSONValue/parse(_:)-(Data)``
+- ``JSONValue/parse(_:)-(String)``
 - ``JSONParseError``
 
 ### Serializing

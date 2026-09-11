@@ -1,68 +1,67 @@
 # Ordered vs. Foundation
 
-When to reach for `OrderedJSON` instead of `JSONDecoder`/`JSONEncoder` or `JSONSerialization`.
+Choose a JSON API based on your data model and ordering requirements.
 
 ## Overview
 
-Apple's `Foundation` ships two JSON APIs (`JSONDecoder`/`JSONEncoder` for `Codable` types, and `JSONSerialization` for untyped trees). Both are well-tested and fast. `OrderedJSON` exists for one specific reason they don't cover: **byte-stable output across processes and platforms**, with the full untyped JSON tree as the value type.
+Foundation's `JSONDecoder` and `JSONEncoder` map JSON to and from `Codable` Swift types.
+`JSONSerialization` works with untyped Foundation objects. `OrderedJSON` provides a
+`JSONValue` tree with explicit object ordering and its own parser and serializer.
 
-This article compares the three so you can pick the right one for your use case.
+These APIs serve different purposes; schema validation does not require replacing every
+use of Foundation JSON in your application.
 
-## The comparison
+| Capability | `JSONDecoder` / `JSONEncoder` | `JSONSerialization` | `OrderedJSON` |
+| --- | --- | --- | --- |
+| Direct conversion to custom `Codable` models | Yes | No | No; parses into `JSONValue` |
+| Untyped JSON tree | Requires a value type such as `JSONValue` | Foundation objects, commonly accessed through `Any` | `JSONValue` |
+| Source object order retained for later emission | Not guaranteed | Do not rely on dictionary iteration order across platforms | Preserved by `JSONValue.parse` |
+| Serialization order | Unspecified by default; `.sortedKeys` sorts keys | Unspecified by default; `.sortedKeys` sorts keys | Stored insertion order |
+| Original whitespace, escapes, and number spelling retained | No | No | No |
 
-| Operation | `JSONDecoder` | `JSONSerialization` | `OrderedJSON` |
-|-----------|--------------|--------------------|--------------| 
-| Decodes into your `Codable` Swift types | ✅ | ❌ (gives `[String: Any]`) | ❌ (gives `JSONValue`) |
-| Untyped tree | ❌ (would need `JSONValue: Codable`) | ✅ (`Any`) | ✅ (`JSONValue`) |
-| Object key order preserved on **parse** | ❌ unspecified | ✅ iOS 17+/macOS 14+/tvOS 17+/watchOS 10+ only | ✅ all platforms |
-| Object key order preserved on **emit** | ❌ unspecified | ❌ alphabetical with `.sortedKeys`; unspecified otherwise | ✅ insertion order |
-| Round-trip byte-stable | ❌ | ⚠️ recent Apple platforms only | ✅ |
-| RFC 8259 strict | ✅ | ✅ | ✅ |
-| Linux parity | ⚠️ corelibs Foundation | ⚠️ key order not guaranteed | ✅ |
-| Custom number-vs-double policy | ⚠️ via `Decimal` | ⚠️ via `NSNumber` introspection | ✅ explicit (``JSONValue/integer(_:)`` vs ``JSONValue/number(_:)``) |
-| Streaming / chunked input | ❌ | ❌ | ❌ (planned) |
+Foundation implementations can differ across OS releases and platforms. Sorting keys can
+provide predictable output, but it is not the same as preserving source or declaration order.
 
-> Foundation's key-order behavior is not promised by `JSONDecoder` / `JSONEncoder` — it's implementation-defined and shouldn't be relied on. `JSONSerialization` *does* preserve insertion order on iOS 17+ / macOS 14+ / tvOS 17+ / watchOS 10+ where the parser was rewritten to do so; older OS versions and corelibs Foundation (Linux) make no such promise.
+## Use Foundation for Codable models
 
-## When to pick what
+If you already have `Codable` models and do not need insertion-order JSON output, continue
+using `JSONDecoder` and `JSONEncoder`. `JSONValue` also conforms to `Codable` for interoperability,
+but passing it through these APIs does not preserve its ordering guarantees.
 
-### Use `JSONDecoder` / `JSONEncoder` when
+For schema-driven conversion into Swift models, use the separate
+[`JSONSchemaBuilder`](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder)
+library and its `parseAndValidate` API.
 
-- You have a `Codable` Swift type and want the JSON tree mapped onto it. *That's what they're for.*
-- Output key order doesn't matter (most production code).
-- You're already deep in the `Codable` ecosystem with custom `init(from:)` / `encode(to:)` implementations.
+## Use OrderedJSON for ordered value trees
 
-### Use `JSONSerialization` when
+```swift
+import OrderedJSON
 
-- You need an untyped tree, you're Apple-platform-only, and you target iOS 17+/macOS 14+ where key order is preserved.
-- You're integrating with an Objective-C codebase that already uses `NSDictionary` / `NSArray`.
+let source = #"{ "name": "Ada", "age": 37 }"#
+let value = try JSONValue.parse(source)
+let compact = try value.serialized()
+// {"name":"Ada","age":37}
+```
 
-### Use `OrderedJSON` when
+The property order is retained, but the source whitespace is not. Parsing and serialization
+operate on JSON values, not the original token spellings. Objects with the same members in
+different orders compare equal, yet can serialize differently.
 
-- You need **byte-stable output across processes** (snapshot testing, signed payloads, generated artifacts, diff-friendly logs).
-- You need **Linux/cross-platform key-order preservation** — Foundation's `JSONSerialization` only preserves order on recent Apple OSes.
-- You want **explicit integer-vs-number disambiguation** instead of `NSNumber` introspection.
-- You're building tooling on top of [`JSONSchema`](https://swiftpackageindex.com/ajevans99/swift-json-schema) — the validator's deterministic output guarantee depends on `OrderedJSON`.
+This makes `OrderedJSON` useful for diff-friendly schema artifacts, snapshot tests, and
+ordered configuration output. It is not a JSON canonicalization implementation: applications
+that sign data must define their own byte representation or use their required canonical format.
+
+Construct ordered values directly or parse with `JSONValue.parse`. Converting an existing
+unordered Swift dictionary cannot recover the original source order.
 
 ## Performance
 
-`OrderedJSON`'s parser and serializer are written for **correctness and readability first**. They pass all 318 [`nst/JSONTestSuite`](https://github.com/nst/JSONTestSuite) cases and round-trip byte-stably, but they aren't yet tuned for throughput. Foundation's parsers benefit from years of tuning.
+Benchmark the API that matches your workload rather than assuming ordering implies a
+performance advantage. Foundation and `OrderedJSON` make different representation tradeoffs.
+The repository's [benchmark guide](https://github.com/ajevans99/swift-json-schema/blob/main/Benchmarks/README.md)
+describes the parser and serializer benchmarks.
 
-If your workload is parser-bound (large payloads, high request rate), benchmark before you switch. For typical schema-validation, snapshot-testing, and config-file-loading workloads, the throughput difference is unlikely to matter.
+## See also
 
-See [issue #162](https://github.com/ajevans99/swift-json-schema/issues/162) for the perf roadmap.
-
-## Migrating from `JSONDecoder` to `OrderedJSON`
-
-```diff
-- let dict = try JSONDecoder().decode([String: AnyCodable].self, from: data)
-+ let value = try JSONValue.parse(data)
-+ guard case .object(let dict) = value else { /* handle */ return }
-```
-
-```diff
-  let raw: [String: Any] = ["name": "Ada", "age": 37]
-- let bytes = try JSONSerialization.data(withJSONObject: raw, options: [.sortedKeys])
-+ let value: JSONValue = ["name": "Ada", "age": 37]
-+ let bytes = try value.serializedData()
-```
+- <doc:Parsing-JSON-deterministically>
+- <doc:Serializing-JSON>

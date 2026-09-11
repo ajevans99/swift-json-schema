@@ -1,8 +1,8 @@
 # Conditional Validation
 
-Learn how to use conditional keywords like ``dependentRequired`` and the ``If`` builder to model relationships between schema properties.
+Use property dependencies and ``ConditionalSchema`` to model relationships between schema properties.
 
-Use ``dependentRequired`` when the presence of one property requires another:
+Use ``JSONSchemaComponent/dependentRequired(_:)`` when the presence of one property requires another:
 
 ```swift
 @JSONSchemaBuilder var creditInfo: some JSONSchemaComponent {
@@ -23,7 +23,7 @@ Use ``dependentRequired`` when the presence of one property requires another:
 > A `Dictionary` would have been hash-seed-randomized at the literal-init
 > step, leaking nondeterministic order into your output.
 
-You can also build conditional schemas using the ``If`` helper:
+You can also build conditional schemas using the `If` helper:
 
 ```swift
 @JSONSchemaBuilder var conditional: some JSONSchemaComponent {

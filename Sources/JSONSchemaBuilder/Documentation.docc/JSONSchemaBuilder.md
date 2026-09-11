@@ -1,18 +1,25 @@
 # ``JSONSchemaBuilder``
 
-Allows for ergonomic JSON schema generation with Swift's result builders.
+Build reusable JSON schemas and parse validated input into Swift types.
 
 ## Overview
 
-To get started generating JSON schemas with result builders, import the `JSONSchemaBuilder` target and use the ``JSONSchemaBuilder`` result builder.
+Use result builders when you want explicit control over your schema, or start with <doc:Macros>
+to generate a schema from a Swift model. Both approaches support schema emission, validation,
+and typed parsing.
+
+To build a schema manually, import `JSONSchemaBuilder`:
 
 ```swift
-@JSONSchemaBuilder var schemaRepresentation: JSONSchemaComponent {
+import JSONSchemaBuilder
+
+@JSONSchemaBuilder var personSchema: some JSONSchemaComponent {
   JSONObject {
     JSONProperty(key: "firstName") {
       JSONString()
         .description("The person's first name.")
     }
+    .required()
 
     JSONProperty(key: "lastName") {
       JSONString()
@@ -24,22 +31,44 @@ To get started generating JSON schemas with result builders, import the `JSONSch
         .description("Age in years which must be equal to or greater than zero.")
         .minimum(0)
     }
+    .required()
   }
   .title("Person")
 }
+
+let schema = personSchema.definition()
+let json = try schema.jsonValue.serialized(options: .pretty)
+let person = try personSchema.parseAndValidate(
+  instance: #"{"firstName": "Ada", "age": 37}"#
+)
 ```
 
-Result builders enable composition of schemas, better readability, and validation directly into Swift types.
+The parsed output is `(String, String?, Int)` in property declaration order. Add `.map` to
+construct your own model, as shown in <doc:Validation>. Properties are optional until marked
+`.required()`; nullability is controlled separately with `.orNull()`.
+
+## Choose your next guide
+
+- <doc:Macros>: nested models, enums, recursive schemas, coding keys, and optional properties.
+- <doc:Validation>: parsing versus validation, typed output, errors, and schema compositions.
+- <doc:ConditionalValidation>: property dependencies and conditional rules.
+- <doc:WrapperTypes>: transformations, type erasure, and runtime schema components.
+- <doc:ValueBuilder>: construct JSON values with result builders.
+
+For string-to-`UUID`, `URL`, and `Date` conversions, see
+[`JSONSchemaConversion`](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemaconversion).
 
 ## Reusing existing schemas with references
 
 When you need to point at another schema fragment—either a local anchor or a remote definition—you can
 stay within the builder DSL while keeping strong typing:
 
-- ``JSONReference`` emits the standard ``$ref`` keyword and is ideal for definitions stored elsewhere in your document or an external file.
-- ``JSONDynamicReference`` emits ``$dynamicRef`` so it can resolve against the nearest matching ``JSONSchemaComponent/dynamicAnchor(_:)`` in scope, which is what the ``@Schemable`` macro now generates for recursive properties.
+- ``JSONReference`` emits the standard `$ref` keyword and is ideal for definitions stored elsewhere in your document or an external file.
+- ``JSONDynamicReference`` emits `$dynamicRef` for references resolved through dynamic scope, which is what the `@Schemable` macro generates for recursive properties.
 
-Both components delegate validation back through ``Schemable/schema`` for the referenced type, so parsing results remain strongly typed.
+Both components parse using the referenced type's schema, so results remain strongly typed.
+Use `parseAndValidate(_:validationContext:)` with a context containing your external schemas
+when a reference requires them.
 
 ## Pattern Properties and Additional Properties
 
@@ -50,7 +79,7 @@ The library supports two powerful features for object validation: pattern proper
 Pattern properties allow you to define validation rules for object properties whose names match a regular expression pattern. This is useful when you want to validate properties with dynamic names.
 
 ```swift
-@JSONSchemaBuilder var schemaRepresentation: JSONSchemaComponent {
+@JSONSchemaBuilder var schemaRepresentation: some JSONSchemaComponent {
   JSONObject {
     JSONProperty(key: "name") {
       JSONString()
@@ -112,7 +141,7 @@ The third example will validate that:
 
 ### Property Names
 
-The ``JSONObject/propertyNames(_:)`` modifier validates each property name using a subschema and captures the ones that match. The captured result is provided as a ``CapturedPropertyNames`` value containing the names seen, their raw strings, and an optional whitelist derived from ``enum`` values.
+The `propertyNames` modifier validates each property name using a subschema and captures the ones that match. The captured result is provided as a ``CapturedPropertyNames`` value containing the names seen, their raw strings, and an optional whitelist derived from `enum` values.
 
 ```swift
 enum Emotion: String, CaseIterable { case happy, sad, angry }
