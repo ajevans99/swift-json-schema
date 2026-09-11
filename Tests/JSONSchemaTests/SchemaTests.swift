@@ -196,10 +196,10 @@ struct SchemaTests {
   }
 
   @Test func validationMetaRejectsBadTypeKeyword() throws {
-    let loader = FileLoader<JSONValue>(
+    let loader = try FileLoader<JSONValue>(
       bundle: .jsonSchemaResources
     )
-    let rawSchema = try #require(loader.loadFile(named: "validation"))
+    let rawSchema = try loader.loadFile(named: "validation")
     let schema = try Schema(
       rawSchema: rawSchema,
       context: Context(dialect: .draft2020_12),
@@ -224,10 +224,10 @@ struct SchemaTests {
   }
 
   @Test func defsSchemaRejectsInvalidEntry() throws {
-    let loader = FileLoader<JSONValue>(
+    let loader = try FileLoader<JSONValue>(
       bundle: .jsonSchemaResources
     )
-    let raw = try #require(loader.loadFile(named: "core"))
+    let raw = try loader.loadFile(named: "core")
     let defsSchema = try #require(raw.object?["properties"]?.object?["$defs"])
     let schema = try Schema(
       rawSchema: defsSchema,

@@ -10,24 +10,28 @@ struct OutputTestSuite {
     "verbose": .verbose,
   ]
 
-  static let fileLoader = FileLoader<[OutputTestDocument]>(
-    subdirectory: "JSON-Schema-Test-Suite/output-tests/draft2020-12/content"
-  )
+  static let flattenedArguments: [(testCase: OutputTestDocument, path: URL)] = requiredFixtures {
+    try FileLoader<[OutputTestDocument]>(
+      subdirectory: "JSON-Schema-Test-Suite/output-tests/draft2020-12/content"
+    )
+    .loadNonEmptyFiles()
+    .flatMap { path, documents in
+      documents.map { ($0, path) }
+    }
+  }
 
-  static let flattenedArguments: [(testCase: OutputTestDocument, path: URL)] = {
-    fileLoader.loadAllFiles()
-      .flatMap { path, documents in
-        documents.map { ($0, path) }
-      }
-  }()
-
-  static let remotes: [String: JSONValue] = RemoteLoader().loadSchemas()
+  static let remotes = Result { try RemoteLoader().loadSchemas() }
 
   @Test(arguments: flattenedArguments)
   func outputTest(_ testDocument: OutputTestDocument, path: URL) throws {
+    try #require(
+      !testDocument.tests.isEmpty,
+      "No test cases in \(testDocument.description) at \(path.path)"
+    )
+    let remotes = try Self.remotes.get()
     let schema = try Schema(
       rawSchema: testDocument.schema,
-      context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes),
+      context: .init(dialect: .draft2020_12, remoteSchema: remotes),
       baseURI: path
     )
 
@@ -49,7 +53,7 @@ struct OutputTestSuite {
 
         let outputSchema = try Schema(
           rawSchema: outputSchemaJSON,
-          context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes),
+          context: .init(dialect: .draft2020_12, remoteSchema: remotes),
           baseURI: path
         )
 
