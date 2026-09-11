@@ -46,7 +46,7 @@ jobs:
     - name: Get swift version
       run: swift --version
     - name: Run tests
-      run: swift test --jobs 2
+      run: swift test --jobs 2 --force-resolved-versions
 
   build_apple_platforms:
     name: Build on Apple Platforms
