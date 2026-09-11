@@ -96,12 +96,6 @@ validators. To register an application-specific format, implement ``FormatValida
 a `formatName` and `validate(_:)` method, then include it in `formatValidators`. Each
 registered format name must be unique. A format without a registered validator is not asserted.
 
-The `ipv6` validator accepts the address forms in RFC 4291 section 2.2: eight hexadecimal
-groups, a single `::` compressing one or more zero groups, and an optional dotted-decimal
-IPv4 tail occupying the final two groups. IPv4 octets must be ASCII decimal values from
-0 through 255 without leading zeros. Only bare addresses are accepted, not URI brackets,
-ports, zone identifiers such as `%eth0`, or CIDR prefixes such as `/64`.
-
 ## Check a schema itself
 
 Constructing a `Schema` is different from checking it against the dialect's meta-schema:
