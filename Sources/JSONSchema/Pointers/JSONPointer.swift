@@ -12,16 +12,21 @@ public struct JSONPointer: Sendable, Hashable {
 
   public init() {}
 
+  /// Creates a pointer, preserving each unescaped token exactly.
+  ///
+  /// Numeric tokens name object members when traversing objects. When traversing arrays,
+  /// only `0` or an unsigned decimal index without leading zeroes can select an element.
   public init(from string: String) {
     let elements = string.split(separator: "/", omittingEmptySubsequences: false).dropFirst()
     for element in elements {
       // https://datatracker.ietf.org/doc/html/rfc6901#section-4
       let unescaped = element.replacing("~1", with: "/").replacing("~0", with: "~")
 
-      if let int = Int(unescaped) {
-        append(.index(int))
+      let component = Component.key(String(unescaped))
+      if let index = component.arrayIndex {
+        append(.index(index))
       } else {
-        append(.key(String(unescaped)))
+        append(component)
       }
     }
   }
@@ -146,6 +151,32 @@ extension JSONPointer: CustomStringConvertible, CustomDebugStringConvertible {
 }
 
 extension JSONPointer.Component {
+  fileprivate var token: String {
+    switch self {
+    case .index(let index): return String(index)
+    case .key(let key): return key
+    }
+  }
+
+  fileprivate var arrayIndex: Int? {
+    switch self {
+    case .index(let index):
+      return index >= 0 ? index : nil
+    case .key(let key):
+      guard let index = Int(key), index >= 0, String(index) == key else { return nil }
+      return index
+    }
+  }
+
+  // Parsed numeric tokens and object-key locations identify the same pointer.
+  static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.token == rhs.token
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(token)
+  }
+
   fileprivate var encodedFragment: String {
     switch self {
     case .index(let int):
@@ -170,21 +201,25 @@ extension JSONPointer: Codable {
 }
 
 extension JSONValue {
+  /// Resolves a pointer using exact object keys or RFC 6901 array indices.
+  ///
+  /// Returns `nil` for missing members, invalid or out-of-bounds array indices (including `-`),
+  /// or traversal through a scalar value.
   public func value(at pointer: JSONPointer) -> JSONValue? {
     guard !pointer.path.isEmpty else { return self }
 
     var current: JSONValue = self
 
-    for path in pointer.path {
-      switch path {
-      case .index(let index):
-        guard case .array(let array) = current else { return nil }
-        guard array.indices.contains(index) else { return nil }
+    for component in pointer.path {
+      switch current {
+      case .array(let array):
+        guard let index = component.arrayIndex, array.indices.contains(index) else { return nil }
         current = array[index]
-      case .key(let key):
-        guard case .object(let dictionary) = current else { return nil }
-        guard let value = dictionary[key] else { return nil }
+      case .object(let dictionary):
+        guard let value = dictionary[component.token] else { return nil }
         current = value
+      default:
+        return nil
       }
     }
 

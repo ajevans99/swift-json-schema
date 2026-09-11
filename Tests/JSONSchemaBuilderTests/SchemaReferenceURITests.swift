@@ -14,6 +14,22 @@ struct SchemaReferenceURITests {
     #expect(uri.rawValue == "#/definitions/Tree")
   }
 
+  @Test(arguments: ["0", "01", "+1", "-0", "-1", "92233720368547758080"])
+  func numericDefinitionNamesArePreserved(name: String) {
+    #expect(SchemaReferenceURI.definition(named: name).rawValue == "#/$defs/\(name)")
+    #expect(
+      SchemaReferenceURI.definition(named: name, location: .definitions).rawValue
+        == "#/definitions/\(name)"
+    )
+    #expect(
+      SchemaReferenceURI.remote(
+        "https://example.com/schema",
+        pointer: JSONPointer(tokens: ["$defs", name])
+      )
+      .rawValue == "https://example.com/schema#/$defs/\(name)"
+    )
+  }
+
   @Test func documentPointerEscapesTokens() {
     let pointer = JSONPointer(tokens: ["properties", "foo/bar", "tilde~value"])
     let uri = SchemaReferenceURI.documentPointer(pointer)
