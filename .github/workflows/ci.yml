@@ -31,18 +31,22 @@ jobs:
         codecov_token: ${{ secrets.CODECOV_TOKEN }}
   
   build_linux:
-    name: Build on Linux
+    name: Test on Linux
     runs-on: ubuntu-latest
+    container: swift:6.3.3-noble
+    timeout-minutes: 30
     steps:
     - uses: actions/checkout@v5
       with:
         submodules: recursive
+    - name: Install test fixture dependencies
+      run: |
+        apt-get update
+        apt-get install -y --no-install-recommends python3
     - name: Get swift version
       run: swift --version
-    - name: Delete Package.resolved
-      run: rm -f Package.resolved
-    - name: Build
-      run: swift build -v
+    - name: Run tests
+      run: swift test --jobs 2
 
   build_apple_platforms:
     name: Build on Apple Platforms

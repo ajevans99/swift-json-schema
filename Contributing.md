@@ -2,6 +2,19 @@
 
 Welcome to Swift JSON Schema! Contributions are welcome and greatly appreciated. By contributing, you are helping to make this project better for everyone.
 
+## Running Tests
+
+Initialize the conformance fixtures at their committed submodule revisions, then run the full package suite:
+
+```sh
+git submodule update --init --recursive
+swift test --jobs 2
+```
+
+Python 3 must be on `PATH`: the pinned JSON Schema test suite's `bin/jsonschema_suite remotes` helper uses it to load remote-reference fixtures. This command only needs the Python standard library, not a running HTTP server or third-party Python packages.
+
+Linux CI runs the full suite, including macro expansion and integration snapshots, in the `swift:6.3.3-noble` container with Python 3 installed. This pin defines the CI test environment, not a new package minimum. Keep `Package.resolved` and the fixture revisions intact when reproducing CI; do not update them just to run tests.
+
 ## Style Guidelines
 
 - Follow the [Swift API Design Guidelines](https://swift.org/documentation/api-design-guidelines/).
