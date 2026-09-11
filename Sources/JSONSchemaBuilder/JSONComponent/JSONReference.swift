@@ -49,7 +49,7 @@ public struct JSONReference<T: Schemable>: JSONSchemaComponent {
 
   /// Parses the referenced schema by delegating back to `T.schema`.
   public func parse(_ value: JSONValue) -> Parsed<T, ParseIssue> {
-    T.schema.parse(value)
+    ParsingScope.parseReference(T.schema, value: value, keyword: Keywords.Reference.name)
       .flatMap { output in
         guard let typedOutput = output as? T else {
           return .invalid([.compactMapValueNil(value: value)])

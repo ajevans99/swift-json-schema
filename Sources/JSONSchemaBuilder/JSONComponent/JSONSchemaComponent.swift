@@ -59,8 +59,13 @@ extension JSONSchemaComponent {
     _ value: JSONValue,
     validationContext: Context = .init(dialect: .draft2020_12)
   ) throws(ParseAndValidateIssue) -> Output {
-    let parsingResult = parse(value)
-    let validationResult = definition(context: validationContext).validate(value)
+    let evaluation = definition(context: validationContext).evaluate(value)
+    let parsingResult = ParsingScope.$current.withValue(
+      .init(evaluation: evaluation, context: validationContext)
+    ) {
+      parse(value)
+    }
+    let validationResult = evaluation.result
     switch (parsingResult, validationResult.isValid) {
     case (.valid(let output), true):
       return output
@@ -69,7 +74,7 @@ extension JSONSchemaComponent {
     case (.invalid(let errors), false):
       throw .parsingAndValidationFailed(errors, validationResult)
     case (.invalid(let errors), true):
-      // This case should really not be possible
+      // Custom parsers can reject values accepted by the JSON schema.
       throw .parsingFailed(errors)
     }
   }

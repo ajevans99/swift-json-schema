@@ -5,28 +5,264 @@
         - type: JSONComposition.oneOf
         - reason: "no match found"
         ▿ nestedErrors: 4 elements
-          ▿ Missing required property `technology`.
-            ▿ missingRequiredProperty: (1 element)
-              - property: "technology"
-          ▿ Missing required property `entertainment`.
-            ▿ missingRequiredProperty: (1 element)
-              - property: "entertainment"
-          ▿ Missing required property `education`.
-            ▿ missingRequiredProperty: (1 element)
-              - property: "education"
-          ▿ The instance `{"food": {"_0": {"customDescription": "What's your favorite?"}}}` does not match any enum case.
-            ▿ noEnumCaseMatch: (1 element)
-              ▿ value: {"food": {"_0": {"customDescription": "What's your favorite?"}}}
-                ▿ object: 1 key/value pair
-                  ▿ (2 elements)
-                    - key: "food"
-                    ▿ value: {"_0": {"customDescription": "What's your favorite?"}}
-                      ▿ object: 1 key/value pair
-                        ▿ (2 elements)
-                          - key: "_0"
-                          ▿ value: {"customDescription": "What's your favorite?"}
-                            ▿ object: 1 key/value pair
-                              ▿ (2 elements)
-                                - key: "customDescription"
-                                ▿ value: "What's your favorite?"
-                                  - string: "What\'s your favorite?"
+          ▿ Runtime validation issue: ValidationResult(isValid: false, keywordLocation: #/properties/category/oneOf/0, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/0), instanceLocation: #/category, errors: Optional([JSONSchema.ValidationError(keyword: "required", message: "Required property \'technology\' is missing", keywordLocation: #/properties/category/oneOf/0/required, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/0/required), instanceLocation: #/category, errors: nil)]), annotations: Optional([JSONSchema.Annotation<JSONSchema.Keywords.Properties>(keyword: "properties", instanceLocation: #/category, schemaLocation: #/properties/category/oneOf/0/properties, absoluteSchemaLocation: nil, value: [])]))
+            ▿ runtimeValidationIssue: ValidationResult
+              ▿ absoluteKeywordLocation: Optional<URL>
+                - some: https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/0
+              ▿ annotations: Optional<Array<AnyAnnotation>>
+                ▿ some: 1 element
+                  ▿ Annotation<Properties>
+                    - absoluteSchemaLocation: Optional<URL>.none
+                    ▿ instanceLocation: #/category
+                      ▿ path: 1 element
+                        ▿ Component
+                          - key: "category"
+                    - keyword: "properties"
+                    ▿ schemaLocation: #/properties/category/oneOf/0/properties
+                      ▿ path: 5 elements
+                        ▿ Component
+                          - key: "properties"
+                        ▿ Component
+                          - key: "category"
+                        ▿ Component
+                          - key: "oneOf"
+                        ▿ Component
+                          - index: 0
+                        ▿ Component
+                          - key: "properties"
+                    - value: 0 members
+              ▿ errors: Optional<Array<ValidationError>>
+                ▿ some: 1 element
+                  ▿ ValidationError
+                    ▿ absoluteKeywordLocation: Optional<URL>
+                      - some: https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/0/required
+                    - errors: Optional<Array<ValidationError>>.none
+                    ▿ instanceLocation: #/category
+                      ▿ path: 1 element
+                        ▿ Component
+                          - key: "category"
+                    - keyword: "required"
+                    ▿ keywordLocation: #/properties/category/oneOf/0/required
+                      ▿ path: 5 elements
+                        ▿ Component
+                          - key: "properties"
+                        ▿ Component
+                          - key: "category"
+                        ▿ Component
+                          - key: "oneOf"
+                        ▿ Component
+                          - index: 0
+                        ▿ Component
+                          - key: "required"
+                    - message: "Required property \'technology\' is missing"
+              ▿ instanceLocation: #/category
+                ▿ path: 1 element
+                  ▿ Component
+                    - key: "category"
+              - isValid: false
+              ▿ keywordLocation: #/properties/category/oneOf/0
+                ▿ path: 4 elements
+                  ▿ Component
+                    - key: "properties"
+                  ▿ Component
+                    - key: "category"
+                  ▿ Component
+                    - key: "oneOf"
+                  ▿ Component
+                    - index: 0
+          ▿ Runtime validation issue: ValidationResult(isValid: false, keywordLocation: #/properties/category/oneOf/1, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/1), instanceLocation: #/category, errors: Optional([JSONSchema.ValidationError(keyword: "required", message: "Required property \'entertainment\' is missing", keywordLocation: #/properties/category/oneOf/1/required, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/1/required), instanceLocation: #/category, errors: nil)]), annotations: Optional([JSONSchema.Annotation<JSONSchema.Keywords.Properties>(keyword: "properties", instanceLocation: #/category, schemaLocation: #/properties/category/oneOf/1/properties, absoluteSchemaLocation: nil, value: [])]))
+            ▿ runtimeValidationIssue: ValidationResult
+              ▿ absoluteKeywordLocation: Optional<URL>
+                - some: https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/1
+              ▿ annotations: Optional<Array<AnyAnnotation>>
+                ▿ some: 1 element
+                  ▿ Annotation<Properties>
+                    - absoluteSchemaLocation: Optional<URL>.none
+                    ▿ instanceLocation: #/category
+                      ▿ path: 1 element
+                        ▿ Component
+                          - key: "category"
+                    - keyword: "properties"
+                    ▿ schemaLocation: #/properties/category/oneOf/1/properties
+                      ▿ path: 5 elements
+                        ▿ Component
+                          - key: "properties"
+                        ▿ Component
+                          - key: "category"
+                        ▿ Component
+                          - key: "oneOf"
+                        ▿ Component
+                          - index: 1
+                        ▿ Component
+                          - key: "properties"
+                    - value: 0 members
+              ▿ errors: Optional<Array<ValidationError>>
+                ▿ some: 1 element
+                  ▿ ValidationError
+                    ▿ absoluteKeywordLocation: Optional<URL>
+                      - some: https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/1/required
+                    - errors: Optional<Array<ValidationError>>.none
+                    ▿ instanceLocation: #/category
+                      ▿ path: 1 element
+                        ▿ Component
+                          - key: "category"
+                    - keyword: "required"
+                    ▿ keywordLocation: #/properties/category/oneOf/1/required
+                      ▿ path: 5 elements
+                        ▿ Component
+                          - key: "properties"
+                        ▿ Component
+                          - key: "category"
+                        ▿ Component
+                          - key: "oneOf"
+                        ▿ Component
+                          - index: 1
+                        ▿ Component
+                          - key: "required"
+                    - message: "Required property \'entertainment\' is missing"
+              ▿ instanceLocation: #/category
+                ▿ path: 1 element
+                  ▿ Component
+                    - key: "category"
+              - isValid: false
+              ▿ keywordLocation: #/properties/category/oneOf/1
+                ▿ path: 4 elements
+                  ▿ Component
+                    - key: "properties"
+                  ▿ Component
+                    - key: "category"
+                  ▿ Component
+                    - key: "oneOf"
+                  ▿ Component
+                    - index: 1
+          ▿ Runtime validation issue: ValidationResult(isValid: false, keywordLocation: #/properties/category/oneOf/2, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/2), instanceLocation: #/category, errors: Optional([JSONSchema.ValidationError(keyword: "required", message: "Required property \'education\' is missing", keywordLocation: #/properties/category/oneOf/2/required, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/2/required), instanceLocation: #/category, errors: nil)]), annotations: Optional([JSONSchema.Annotation<JSONSchema.Keywords.Properties>(keyword: "properties", instanceLocation: #/category, schemaLocation: #/properties/category/oneOf/2/properties, absoluteSchemaLocation: nil, value: [])]))
+            ▿ runtimeValidationIssue: ValidationResult
+              ▿ absoluteKeywordLocation: Optional<URL>
+                - some: https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/2
+              ▿ annotations: Optional<Array<AnyAnnotation>>
+                ▿ some: 1 element
+                  ▿ Annotation<Properties>
+                    - absoluteSchemaLocation: Optional<URL>.none
+                    ▿ instanceLocation: #/category
+                      ▿ path: 1 element
+                        ▿ Component
+                          - key: "category"
+                    - keyword: "properties"
+                    ▿ schemaLocation: #/properties/category/oneOf/2/properties
+                      ▿ path: 5 elements
+                        ▿ Component
+                          - key: "properties"
+                        ▿ Component
+                          - key: "category"
+                        ▿ Component
+                          - key: "oneOf"
+                        ▿ Component
+                          - index: 2
+                        ▿ Component
+                          - key: "properties"
+                    - value: 0 members
+              ▿ errors: Optional<Array<ValidationError>>
+                ▿ some: 1 element
+                  ▿ ValidationError
+                    ▿ absoluteKeywordLocation: Optional<URL>
+                      - some: https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/2/required
+                    - errors: Optional<Array<ValidationError>>.none
+                    ▿ instanceLocation: #/category
+                      ▿ path: 1 element
+                        ▿ Component
+                          - key: "category"
+                    - keyword: "required"
+                    ▿ keywordLocation: #/properties/category/oneOf/2/required
+                      ▿ path: 5 elements
+                        ▿ Component
+                          - key: "properties"
+                        ▿ Component
+                          - key: "category"
+                        ▿ Component
+                          - key: "oneOf"
+                        ▿ Component
+                          - index: 2
+                        ▿ Component
+                          - key: "required"
+                    - message: "Required property \'education\' is missing"
+              ▿ instanceLocation: #/category
+                ▿ path: 1 element
+                  ▿ Component
+                    - key: "category"
+              - isValid: false
+              ▿ keywordLocation: #/properties/category/oneOf/2
+                ▿ path: 4 elements
+                  ▿ Component
+                    - key: "properties"
+                  ▿ Component
+                    - key: "category"
+                  ▿ Component
+                    - key: "oneOf"
+                  ▿ Component
+                    - index: 2
+          ▿ Runtime validation issue: ValidationResult(isValid: false, keywordLocation: #/properties/category/oneOf/3, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/3), instanceLocation: #/category, errors: Optional([JSONSchema.ValidationError(keyword: "type", message: "Expected type \'[OrderedJSON.JSONType.string]\' but found \'object\'", keywordLocation: #/properties/category/oneOf/3/type, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/3/type), instanceLocation: #/category, errors: nil), JSONSchema.ValidationError(keyword: "enum", message: "\'{\"food\": {\"_0\": {\"customDescription\": \"What\'s your favorite?\"}}}\' is not one of the allowed values: \"sports\", \"other\"", keywordLocation: #/properties/category/oneOf/3/enum, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/3/enum), instanceLocation: #/category, errors: nil)]), annotations: nil)
+            ▿ runtimeValidationIssue: ValidationResult
+              ▿ absoluteKeywordLocation: Optional<URL>
+                - some: https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/3
+              - annotations: Optional<Array<AnyAnnotation>>.none
+              ▿ errors: Optional<Array<ValidationError>>
+                ▿ some: 2 elements
+                  ▿ ValidationError
+                    ▿ absoluteKeywordLocation: Optional<URL>
+                      - some: https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/3/type
+                    - errors: Optional<Array<ValidationError>>.none
+                    ▿ instanceLocation: #/category
+                      ▿ path: 1 element
+                        ▿ Component
+                          - key: "category"
+                    - keyword: "type"
+                    ▿ keywordLocation: #/properties/category/oneOf/3/type
+                      ▿ path: 5 elements
+                        ▿ Component
+                          - key: "properties"
+                        ▿ Component
+                          - key: "category"
+                        ▿ Component
+                          - key: "oneOf"
+                        ▿ Component
+                          - index: 3
+                        ▿ Component
+                          - key: "type"
+                    - message: "Expected type \'[OrderedJSON.JSONType.string]\' but found \'object\'"
+                  ▿ ValidationError
+                    ▿ absoluteKeywordLocation: Optional<URL>
+                      - some: https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/3/enum
+                    - errors: Optional<Array<ValidationError>>.none
+                    ▿ instanceLocation: #/category
+                      ▿ path: 1 element
+                        ▿ Component
+                          - key: "category"
+                    - keyword: "enum"
+                    ▿ keywordLocation: #/properties/category/oneOf/3/enum
+                      ▿ path: 5 elements
+                        ▿ Component
+                          - key: "properties"
+                        ▿ Component
+                          - key: "category"
+                        ▿ Component
+                          - key: "oneOf"
+                        ▿ Component
+                          - index: 3
+                        ▿ Component
+                          - key: "enum"
+                    - message: "\'{\"food\": {\"_0\": {\"customDescription\": \"What\'s your favorite?\"}}}\' is not one of the allowed values: \"sports\", \"other\""
+              ▿ instanceLocation: #/category
+                ▿ path: 1 element
+                  ▿ Component
+                    - key: "category"
+              - isValid: false
+              ▿ keywordLocation: #/properties/category/oneOf/3
+                ▿ path: 4 elements
+                  ▿ Component
+                    - key: "properties"
+                  ▿ Component
+                    - key: "category"
+                  ▿ Component
+                    - key: "oneOf"
+                  ▿ Component
+                    - index: 3
