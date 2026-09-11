@@ -4,10 +4,6 @@ import Testing
 @testable import JSONSchema
 
 struct JSONSchemaTestSuite {
-  static let fileLoader = FileLoader<[JSONSchemaTest]>(
-    subdirectory: "JSON-Schema-Test-Suite/tests/draft2020-12"
-  )
-
   static let unsupportedFilePaths: [String] = []
 
   /// Test cases known to fail today, skipped from the official suite to keep
@@ -18,18 +14,25 @@ struct JSONSchemaTestSuite {
   static let unsupportedTests:
     [(path: String, description: String, testCase: String?, reason: String)] = []
 
-  static let flattenedArguments: [(schemaTest: JSONSchemaTest, path: URL)] = {
-    fileLoader.loadAllFiles()
-      .filter { unsupportedFilePaths.contains($0.url.lastPathComponent) == false }
-      .flatMap { path, schemaTests in
-        schemaTests.map { ($0, path) }
-      }
-  }()
+  static let flattenedArguments: [(schemaTest: JSONSchemaTest, path: URL)] = requiredFixtures {
+    try FileLoader<[JSONSchemaTest]>(
+      subdirectory: "JSON-Schema-Test-Suite/tests/draft2020-12"
+    )
+    .loadNonEmptyFiles()
+    .filter { unsupportedFilePaths.contains($0.url.lastPathComponent) == false }
+    .flatMap { path, schemaTests in
+      schemaTests.map { ($0, path) }
+    }
+  }
 
-  static let remotes: [String: JSONValue] = RemoteLoader().loadSchemas()
+  static let remotes = Result { try RemoteLoader().loadSchemas() }
 
   @Test(arguments: flattenedArguments)
   func schemaTest(_ schemaTest: JSONSchemaTest, path: URL) throws {
+    try #require(
+      !schemaTest.tests.isEmpty,
+      "No test cases in \(schemaTest.description) at \(path.path)"
+    )
     let pathFile = path.lastPathComponent
     let groupSkipped = Self.unsupportedTests.contains { entry in
       entry.path == pathFile
@@ -40,7 +43,7 @@ struct JSONSchemaTestSuite {
 
     let schema = try Schema(
       rawSchema: schemaTest.schema,
-      context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes)
+      context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes.get())
     )
 
     for testCase in schemaTest.tests {

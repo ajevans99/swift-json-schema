@@ -1,158 +1,283 @@
 import Foundation
 import JSONSchema
+import Testing
+
+struct FixtureLoadingError: Error, CustomStringConvertible {
+  let path: URL
+  let reason: String
+  var underlyingError: (any Error)?
+
+  var description: String {
+    "\(reason) at \(path.path)"
+      + (underlyingError.map { ": \($0)" } ?? "")
+  }
+}
 
 struct FileLoader<T: Decodable> {
-  let bundle: Bundle
-  let subdirectory: String?
+  let directory: URL
 
-  init(bundle: Bundle = .module, subdirectory: String? = nil) {
-    self.bundle = bundle
-    self.subdirectory = subdirectory
-  }
-
-  func listFiles() -> [URL] {
-    guard
-      let fileURLs = bundle.urls(
-        forResourcesWithExtension: "json",
-        subdirectory: subdirectory
-      )
-    else {
-      print("Failed to find JSON files")
-      return []
+  init(bundle: Bundle = .module, subdirectory: String? = nil) throws {
+    guard let resources = bundle.resourceURL else {
+      throw FixtureLoadingError(path: bundle.bundleURL, reason: "Missing bundle resources")
     }
-    return fileURLs as [URL]
+    directory = subdirectory.map { resources.appendingPathComponent($0) } ?? resources
   }
 
-  func loadFile(named name: String) -> T? {
-    guard
-      let url = bundle.url(
-        forResource: name,
-        withExtension: "json",
-        subdirectory: subdirectory
-      )
-    else {
-      print("Failed to find file named \(name)")
-      return nil
+  init(directory: URL) {
+    self.directory = directory
+  }
+
+  func listFiles(recursive: Bool = false) throws -> [URL] {
+    let files = try discoverFiles(in: directory, recursive: recursive)
+      .sorted { $0.path < $1.path }
+    guard !files.isEmpty else {
+      throw FixtureLoadingError(path: directory, reason: "No .json fixtures found")
     }
-
-    guard let data = readFile(at: url) else { return nil }
-    return decodeFile(from: data)
+    return files
   }
 
-  func readFile(at url: URL) -> Data? {
+  private func discoverFiles(in directory: URL, recursive: Bool) throws -> [URL] {
     do {
-      let data = try Data(contentsOf: url)
-      return data
-    } catch {
-      print("Error reading file at \(url): \(error)")
-      return nil
-    }
-  }
-
-  func decodeFile(from data: Data) -> T? {
-    let decoder = JSONDecoder()
-    do {
-      let decodedObject = try decoder.decode(T.self, from: data)
-      return decodedObject
-    } catch {
-      print("Error decoding file: \(error)")
-      return nil
-    }
-  }
-
-  func loadAllFiles() -> [(url: URL, decodedObject: T)] {
-    let fileURLs = listFiles()
-    var decodedObjects: [(url: URL, decodedObject: T)] = []
-
-    for fileURL in fileURLs {
-      if let data = readFile(at: fileURL),
-        let decodedObject = decodeFile(from: data)
-      {
-        decodedObjects.append((fileURL, decodedObject))
+      let entries = try FileManager.default.contentsOfDirectory(
+        at: directory,
+        includingPropertiesForKeys: [.isDirectoryKey],
+        options: [.skipsHiddenFiles]
+      )
+      var files: [URL] = []
+      for entry in entries {
+        if try entry.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true {
+          if recursive {
+            files += try discoverFiles(in: entry, recursive: true)
+          }
+        } else if entry.pathExtension == "json" {
+          files.append(entry)
+        }
       }
+      return files
+    } catch {
+      throw FixtureLoadingError(
+        path: directory,
+        reason: "Could not enumerate fixtures",
+        underlyingError: error
+      )
     }
+  }
 
-    return decodedObjects
+  func loadFile(named name: String) throws -> T {
+    try loadFile(at: directory.appendingPathComponent(name).appendingPathExtension("json"))
+  }
+
+  func loadFile(at url: URL) throws -> T {
+    try decodeFile(from: readFile(at: url), at: url)
+  }
+
+  func readFile(at url: URL) throws -> Data {
+    do {
+      return try Data(contentsOf: url)
+    } catch {
+      throw FixtureLoadingError(
+        path: url,
+        reason: "Could not read fixture",
+        underlyingError: error
+      )
+    }
+  }
+
+  func decodeFile(from data: Data, at url: URL) throws -> T {
+    do {
+      return try JSONDecoder().decode(T.self, from: data)
+    } catch {
+      throw FixtureLoadingError(
+        path: url,
+        reason: "Could not decode fixture",
+        underlyingError: error
+      )
+    }
+  }
+
+  func loadAllFiles() throws -> [(url: URL, decodedObject: T)] {
+    try listFiles().map { ($0, try loadFile(at: $0)) }
+  }
+}
+
+extension FileLoader where T: Collection {
+  func loadNonEmptyFiles() throws -> [(url: URL, decodedObject: T)] {
+    let files = try loadAllFiles()
+    for file in files where file.decodedObject.isEmpty {
+      throw FixtureLoadingError(path: file.url, reason: "Fixture contains no test groups")
+    }
+    return files
+  }
+}
+
+// Static parameter discovery cannot throw. Match JSONTestSuiteConformance's
+// fail-loudly behavior instead of passing a zero-case parameterized test.
+func requiredFixtures<T>(_ load: () throws -> T) -> T {
+  do {
+    return try load()
+  } catch {
+    fatalError(
+      """
+      Could not load conformance fixtures: \(error).
+      Run `git submodule update --init --recursive` and check the test bundle's copied resources.
+      """
+    )
   }
 }
 
 struct RemoteLoader {
+  let suiteRoot: URL
+
+  init(bundle: Bundle = .module) throws {
+    suiteRoot = try FileLoader<JSONValue>(bundle: bundle).directory
+      .appendingPathComponent("JSON-Schema-Test-Suite")
+  }
+
+  init(suiteRoot: URL) {
+    self.suiteRoot = suiteRoot
+  }
+
   private func fetchRemoteSchemas() throws -> [String: JSONValue] {
-    guard
-      let binDirectory = Bundle.module.url(
-        forResource: "jsonschema_suite",
-        withExtension: nil,
-        subdirectory: "JSON-Schema-Test-Suite/bin"
+    let binDirectory = suiteRoot.appendingPathComponent("bin")
+    let command = "./jsonschema_suite remotes"
+    let outputData = try runCommand(command, at: binDirectory)
+    let remoteSchemas: [String: JSONValue]
+    do {
+      remoteSchemas = try JSONDecoder().decode([String: JSONValue].self, from: outputData)
+    } catch {
+      throw FixtureLoadingError(
+        path: binDirectory,
+        reason: "Could not decode output of `\(command)`",
+        underlyingError: error
       )
-    else {
-      throw NSError(domain: "Invalid Path", code: 1, userInfo: nil)
     }
-
-    let outputData = try runCommand(
-      "./jsonschema_suite remotes",
-      at: binDirectory.deletingLastPathComponent()
-    )
-
-    let decoder = JSONDecoder()
-    let remoteSchemas = try decoder.decode([String: JSONValue].self, from: outputData)
-
+    guard !remoteSchemas.isEmpty else {
+      throw FixtureLoadingError(
+        path: suiteRoot.appendingPathComponent("remotes"),
+        reason: "`\(command)` returned no remote schemas"
+      )
+    }
     return remoteSchemas
   }
 
-  func loadSchemas() -> [String: JSONValue] {
-    do {
-      var remotes = try fetchRemoteSchemas()
-      let outputSchemas = try fetchOutputSchemas()
-      remotes.merge(outputSchemas) { _, new in new }
-      return remotes
-    } catch {
-      print("Error: \(error)")
-      return [:]
-    }
+  func loadSchemas() throws -> [String: JSONValue] {
+    var remotes = try fetchRemoteSchemas()
+    let outputSchemas = try fetchOutputSchemas()
+    remotes.merge(outputSchemas) { _, new in new }
+    return remotes
   }
 
   private func fetchOutputSchemas() throws -> [String: JSONValue] {
-    guard let resourcesURL = Bundle.module.resourceURL else { return [:] }
-    let outputTestsURL = resourcesURL.appendingPathComponent("JSON-Schema-Test-Suite/output-tests")
-
-    let directoryEnumerator = FileManager.default.enumerator(
-      at: outputTestsURL,
-      includingPropertiesForKeys: [.isDirectoryKey],
-      options: [.skipsHiddenFiles]
+    let loader = FileLoader<JSONValue>(
+      directory: suiteRoot.appendingPathComponent("output-tests")
     )
-
-    var discoveredSchemas: [String: JSONValue] = [:]
-
-    while let url = directoryEnumerator?.nextObject() as? URL {
-      guard url.lastPathComponent == "output-schema.json" else { continue }
-
-      let data = try Data(contentsOf: url)
-      let schema = try JSONDecoder().decode(JSONValue.self, from: data)
-
-      if case .object(let object) = schema,
-        case .string(let identifier)? = object["$id"]
-      {
-        discoveredSchemas[identifier] = schema
-      }
+    let files = try loader.listFiles(recursive: true)
+      .filter { $0.lastPathComponent == "output-schema.json" }
+    guard !files.isEmpty else {
+      throw FixtureLoadingError(
+        path: loader.directory,
+        reason: "No output-schema.json fixtures found"
+      )
     }
 
+    var discoveredSchemas: [String: JSONValue] = [:]
+    for url in files {
+      let schema = try loader.loadFile(at: url)
+      guard let identifier = schema.object?["$id"]?.string, !identifier.isEmpty else {
+        throw FixtureLoadingError(path: url, reason: "Output schema requires a nonempty string $id")
+      }
+      discoveredSchemas[identifier] = schema
+    }
     return discoveredSchemas
   }
 }
 
-func runCommand(_ command: String, at path: URL) throws -> Data {
-  let process = Process()
-  process.executableURL = URL(fileURLWithPath: "/bin/bash")
-  process.arguments = ["-c", command]
-  process.currentDirectoryURL = path
+struct CommandFailure: Error, CustomStringConvertible {
+  let command: String
+  let directory: URL
+  let status: Int32
+  let reason: Process.TerminationReason
+  let standardError: String
 
-  let pipe = Pipe()
-  process.standardOutput = pipe
-  process.standardError = pipe
+  var description: String {
+    """
+    Command `\(command)` at \(directory.path) failed \
+    (\(reason == .exit ? "exit status" : "signal") \(status)): \(standardError)
+    """
+  }
+}
 
-  try process.run()
-  process.waitUntilExit()
+func runCommand(
+  _ command: String,
+  at path: URL,
+  temporaryRoot: URL = FileManager.default.temporaryDirectory
+) throws -> Data {
+  try withTemporaryFixtureDirectory(in: temporaryRoot) { temporaryDirectory in
+    let process = Process()
+    process.executableURL = URL(fileURLWithPath: "/bin/bash")
+    process.arguments = ["-c", command]
+    process.currentDirectoryURL = path
 
-  let data = pipe.fileHandleForReading.readDataToEndOfFile()
-  return data
+    // Separate files keep diagnostics out of JSON and cannot fill up like
+    // pipes. They also avoid Foundation's trapping pipe reads on Linux EINTR.
+    let outputURL = temporaryDirectory.appendingPathComponent("stdout")
+    let diagnosticsURL = temporaryDirectory.appendingPathComponent("stderr")
+    try Data().write(to: outputURL)
+    try Data().write(to: diagnosticsURL)
+    let output = try FileHandle(forWritingTo: outputURL)
+    defer { output.closeFile() }
+    let diagnostics = try FileHandle(forWritingTo: diagnosticsURL)
+    defer { diagnostics.closeFile() }
+    process.standardOutput = output
+    process.standardError = diagnostics
+
+    do {
+      guard try path.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true else {
+        throw FixtureLoadingError(path: path, reason: "Command working path is not a directory")
+      }
+      try process.run()
+    } catch {
+      throw FixtureLoadingError(
+        path: path,
+        reason: "Could not launch `\(command)`",
+        underlyingError: error
+      )
+    }
+    process.waitUntilExit()
+
+    guard process.terminationReason == .exit, process.terminationStatus == 0 else {
+      throw CommandFailure(
+        command: command,
+        directory: path,
+        status: process.terminationStatus,
+        reason: process.terminationReason,
+        standardError: String(decoding: try Data(contentsOf: diagnosticsURL), as: UTF8.self)
+      )
+    }
+    do {
+      return try Data(contentsOf: outputURL)
+    } catch {
+      throw FixtureLoadingError(
+        path: path,
+        reason: "Could not read output of `\(command)`",
+        underlyingError: error
+      )
+    }
+  }
+}
+
+func withTemporaryFixtureDirectory<T>(
+  in root: URL = FileManager.default.temporaryDirectory,
+  _ body: (URL) throws -> T
+) throws -> T {
+  let directory = root.appendingPathComponent("json-schema-fixtures-\(UUID().uuidString)")
+  try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+  defer {
+    do {
+      try FileManager.default.removeItem(at: directory)
+    } catch {
+      Issue.record(error, "Could not remove temporary fixtures at \(directory.path)")
+    }
+  }
+  return try body(directory)
 }
