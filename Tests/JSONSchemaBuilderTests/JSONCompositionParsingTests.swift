@@ -160,7 +160,11 @@ struct JSONCompositionParsingTests {
     do {
       _ = try rejected.parseAndValidate("hi")
       Issue.record("Expected custom parsing failure")
-    } catch ParseAndValidateIssue.parsingFailed(let errors) {
+    } catch {
+      guard case .parsingFailed(let errors) = error else {
+        Issue.record("Expected custom parsing failure, received \(error)")
+        return
+      }
       #expect(
         errors == [
           .compositionFailure(
@@ -481,7 +485,11 @@ struct JSONCompositionParsingTests {
     do {
       _ = try projection.parseAndValidate(["value": "hi"])
       Issue.record("A referenced projection must not silently use a detached context")
-    } catch ParseAndValidateIssue.parsingFailed(let errors) {
+    } catch {
+      guard case .parsingFailed(let errors) = error else {
+        Issue.record("Expected a parsing scope failure, received \(error)")
+        return
+      }
       guard case .compositionFailure(.anyOf, let reason, _) = errors.first else {
         Issue.record("Expected an explicit composition scope error")
         return
