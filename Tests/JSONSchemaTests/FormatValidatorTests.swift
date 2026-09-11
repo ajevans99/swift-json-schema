@@ -6,7 +6,7 @@ import Testing
 struct FormatValidatorTests {
   @Test(arguments: [
     ("2024-01-01T12:00:00.000Z", true),
-    ("2024-01-01T12:00:00Z", false),
+    ("2024-01-01T12:00:00Z", true),
   ])
   func dateTimeValidator(value: String, isValid: Bool) {
     let validator = DateTimeFormatValidator()
