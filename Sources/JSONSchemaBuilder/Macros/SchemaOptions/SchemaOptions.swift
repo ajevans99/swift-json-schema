@@ -51,6 +51,9 @@ extension SchemaTrait where Self == SchemaOptionsTrait {
     fatalError(SchemaOptionsTrait.errorMessage)
   }
 
+  /// Replaces the accumulated schema, including preceding defaults and modifiers.
+  ///
+  /// Place modifiers after this option to apply them to the replacement schema.
   public static func customSchema<S: Schemable>(_ conversion: S.Type) -> SchemaOptionsTrait {
     fatalError(SchemaOptionsTrait.errorMessage)
   }

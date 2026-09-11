@@ -1,88 +1,67 @@
 import SwiftSyntax
+import SwiftSyntaxBuilder
 
 enum SchemaOptionsGenerator {
   static func apply(
-    _ arguments: LabeledExprListSyntax,
-    to codeBlockItem: CodeBlockItemSyntax,
-    for type: String
+    _ options: [ParsedOption],
+    to expression: CodeBlockItemSyntax
   ) -> CodeBlockItemSyntax {
-    var result = codeBlockItem
-
-    for argument in arguments {
-      result = applyOption(argument, to: result)
+    options.reduce(expression) { expression, option in
+      switch option.kind {
+      case .key:
+        return expression
+      case .customSchema(let value):
+        return "\(value).schema"
+      case .orNull, .modifier:
+        if let closure = option.trailingClosure {
+          return applyClosure(option, closure: closure, to: expression)
+        }
+        return """
+          \(expression)
+          .\(option.name.trimmed)(\(option.arguments))
+          """
+      }
     }
-
-    return result
   }
 
-  private static func applyOption(
-    _ argument: LabeledExprSyntax,
-    to codeBlockItem: CodeBlockItemSyntax
+  private static func applyClosure(
+    _ option: ParsedOption,
+    closure: ClosureExprSyntax,
+    to expression: CodeBlockItemSyntax
   ) -> CodeBlockItemSyntax {
-    guard let functionCall = argument.expression.as(FunctionCallExprSyntax.self),
-      let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self)
-    else {
-      return codeBlockItem
-    }
-
-    let optionName = memberAccess.declName.baseName.text
-
-    if optionName == "key" {
-      return codeBlockItem
-    }
-
-    // Handle customSchema specially - it replaces the entire schema
-    if optionName == "customSchema" {
-      guard let value = functionCall.arguments.first else {
-        return codeBlockItem
-      }
-
-      return "\(value).schema"
-    }
-
-    if let closure = functionCall.trailingClosure {
-      return applyClosureBasedOption(optionName, closure: closure, to: codeBlockItem)
-    } else if let value = functionCall.arguments.first {
+    if option.name.text == "additionalProperties",
+      closure.signature == nil, closure.statements.count == 1,
+      let first = closure.statements.first,
+      let value = first.item.as(BooleanLiteralExprSyntax.self)
+    {
       return """
-        \(codeBlockItem)
-        .\(raw: optionName)(\(value))
+        \(expression)
+        .additionalProperties(\(value.trimmed))
         """
     }
 
-    return codeBlockItem
-  }
-
-  private static func applyClosureBasedOption(
-    _ optionName: String,
-    closure: ClosureExprSyntax,
-    to codeBlockItem: CodeBlockItemSyntax
-  ) -> CodeBlockItemSyntax {
-    switch optionName {
-    case "additionalProperties":
-      if closure.statements.count == 1,
-        let first = closure.statements.first,
-        let expr = first.item.as(ExprSyntax.self),
-        let bool = expr.as(BooleanLiteralExprSyntax.self)
-      {
-        return """
-          \(codeBlockItem)
-          .additionalProperties(\(raw: bool.literal.text))
-          """
-      }
-      // Intentionally fall through to "patternProperties" to handle shared logic.
-      fallthrough
-    case "patternProperties", "propertyNames":
+    let arguments: String = option.arguments.isEmpty ? "" : "(\(option.arguments))"
+    let result: CodeBlockItemSyntax
+    if closure.signature == nil {
+      result = """
+        \(expression)
+        .\(option.name.trimmed)\(raw: arguments) { \(closure.statements) }\(option.call.additionalTrailingClosures)
+        """
+    } else {
+      result = """
+        \(expression)
+        .\(option.name.trimmed)\(raw: arguments) \(closure.trimmed)\(option.call.additionalTrailingClosures)
+        """
+    }
+    switch option.name.text {
+    case "additionalProperties", "patternProperties", "propertyNames":
       return """
-        \(codeBlockItem)
-        .\(raw: optionName) { \(closure.statements) }
+        \(result)
         // Drop the parse information. Use custom builder if needed.
         .map { $0.0 }
         """
     default:
-      return """
-        \(codeBlockItem)
-        .\(raw: optionName) { \(closure.statements) }
-        """
+      return result
     }
   }
 }

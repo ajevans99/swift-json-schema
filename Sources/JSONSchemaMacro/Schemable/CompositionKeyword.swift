@@ -1,3 +1,4 @@
+import SwiftDiagnostics
 import SwiftSyntax
 
 /// Represents the composition keyword that should be emitted in generated schemas.
@@ -5,27 +6,26 @@ enum CompositionKeyword {
   case oneOf
   case anyOf
 
-  init(argument: ExprSyntax?) {
+  init(argument: ExprSyntax?) throws {
     guard let argument else {
       self = .oneOf
       return
     }
 
-    if let memberAccess = argument.as(MemberAccessExprSyntax.self) {
-      self = CompositionKeyword(baseName: memberAccess.declName.baseName.text)
-    } else if let declReference = argument.as(DeclReferenceExprSyntax.self) {
-      self = CompositionKeyword(baseName: declReference.baseName.text)
-    } else {
-      self = .oneOf
-    }
-  }
-
-  private init(baseName: String) {
-    switch baseName.lowercased() {
-    case "anyof":
+    switch argument.as(MemberAccessExprSyntax.self)?.declName.baseName.text {
+    case "anyOf":
       self = .anyOf
-    default:
+    case "oneOf":
       self = .oneOf
+    default:
+      throw DiagnosticsError(diagnostics: [
+        Diagnostic(
+          node: argument,
+          message: ConfigurationDiagnostic(
+            message: "Schema composition must be an explicit .oneOf or .anyOf"
+          )
+        )
+      ])
     }
   }
 

@@ -646,7 +646,7 @@ import Testing
           case fahrenheit
 
           @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
-          \(modifier) static var schema: some JSONSchemaComponent<TemperatureKind> {
+          \(modifier == "private" ? "fileprivate" : modifier) static var schema: some JSONSchemaComponent<TemperatureKind> {
             JSONString()
               .enumValues {
                 "celsius"
@@ -665,7 +665,7 @@ import Testing
           }
         }
 
-        \(modifier == "private" || modifier == "fileprivate" ? "\(modifier) " : "")extension TemperatureKind: Schemable {
+        extension TemperatureKind: Schemable {
         }
         """,
       macros: testMacros

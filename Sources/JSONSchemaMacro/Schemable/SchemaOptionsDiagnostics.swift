@@ -1,15 +1,15 @@
 import SwiftDiagnostics
 import SwiftSyntax
-import SwiftSyntaxMacros
 
 /// Handles validation and diagnostics for @SchemaOptions and type-specific option macros
 struct SchemaOptionsDiagnostics {
   let propertyName: TokenSyntax
   let propertyType: TypeSyntax
-  let context: any MacroExpansionContext
+  let schemaType: SchemaType
+  let context: DiagnosticCollector
 
   /// Validates SchemaOptions and emits diagnostics for invalid configurations
-  func validateSchemaOptions(_ options: LabeledExprListSyntax) {
+  func validateSchemaOptions(_ options: [ParsedOption]) {
     // Check for conflicting readOnly/writeOnly
     validateReadWriteConflict(options)
 
@@ -18,7 +18,7 @@ struct SchemaOptionsDiagnostics {
   }
 
   /// Validates type-specific options (StringOptions, NumberOptions, etc.)
-  func validateTypeSpecificOptions(_ options: LabeledExprListSyntax, macroName: String) {
+  func validateTypeSpecificOptions(_ options: [ParsedOption], macroName: String) {
     // 1. Check that the option macro matches the property type
     validateTypeCompatibility(macroName: macroName)
 
@@ -35,41 +35,34 @@ struct SchemaOptionsDiagnostics {
   // MARK: - Type Compatibility
 
   private func validateTypeCompatibility(macroName: String) {
-    let typeInfo = propertyType.typeInformation()
+    func unwrapped(_ type: SchemaType) -> SchemaType {
+      if case .optional(let wrapped) = type { return unwrapped(wrapped) }
+      return type
+    }
+    let typeInfo = unwrapped(schemaType)
 
     switch macroName {
     case "StringOptions":
-      guard case .primitive(.string, _) = typeInfo else {
-        emitTypeMismatch(macroName: macroName, expectedType: "String", actualType: typeInfo)
+      guard case .scalar(.string) = typeInfo else {
+        emitTypeMismatch(macroName: macroName, expectedType: "String")
         return
       }
 
     case "NumberOptions":
       switch typeInfo {
-      case .primitive(.int, _), .primitive(.double, _):
+      case .scalar(.int), .scalar(.double), .scalar(.float):
         break  // Valid numeric types
       default:
         emitTypeMismatch(
           macroName: macroName,
-          expectedType: "numeric (Int, Double, etc.)",
-          actualType: typeInfo
+          expectedType: "numeric (Int, Double, etc.)"
         )
       }
 
     case "ArrayOptions":
-      // Check if type is an array
-      let typeString = propertyType.description.trimmingCharacters(in: .whitespaces)
-      if !typeString.hasPrefix("[") && !typeString.contains("Array<") {
-        let diagnostic = Diagnostic(
-          node: propertyName,
-          message: SchemaOptionsMismatchDiagnostic.typeMismatch(
-            macroName: macroName,
-            propertyName: propertyName.text,
-            expectedType: "Array",
-            actualType: typeString
-          )
-        )
-        context.diagnose(diagnostic)
+      guard case .array = typeInfo else {
+        emitTypeMismatch(macroName: macroName, expectedType: "Array")
+        return
       }
 
     case "ObjectOptions":
@@ -84,26 +77,15 @@ struct SchemaOptionsDiagnostics {
 
   private func emitTypeMismatch(
     macroName: String,
-    expectedType: String,
-    actualType: TypeSyntax.TypeInformation
+    expectedType: String
   ) {
-    let actualTypeString: String
-    switch actualType {
-    case .primitive(let primitive, _):
-      actualTypeString = primitive.rawValue
-    case .schemable(let name, _):
-      actualTypeString = name
-    case .notSupported:
-      actualTypeString = propertyType.description.trimmingCharacters(in: .whitespaces)
-    }
-
     let diagnostic = Diagnostic(
       node: propertyName,
       message: SchemaOptionsMismatchDiagnostic.typeMismatch(
         macroName: macroName,
         propertyName: propertyName.text,
         expectedType: expectedType,
-        actualType: actualTypeString
+        actualType: propertyType.trimmedDescription
       )
     )
     context.diagnose(diagnostic)
@@ -111,7 +93,7 @@ struct SchemaOptionsDiagnostics {
 
   // MARK: - Constraint Logic Validation
 
-  private func validateConstraintLogic(_ options: LabeledExprListSyntax, macroName: String) {
+  private func validateConstraintLogic(_ options: [ParsedOption], macroName: String) {
     let constraints = extractConstraints(from: options)
 
     switch macroName {
@@ -220,7 +202,7 @@ struct SchemaOptionsDiagnostics {
 
   // MARK: - Constraint Value Validation
 
-  private func validateConstraintValues(_ options: LabeledExprListSyntax, macroName: String) {
+  private func validateConstraintValues(_ options: [ParsedOption], macroName: String) {
     let constraints = extractConstraints(from: options)
 
     // Validate non-negative constraints
@@ -255,25 +237,19 @@ struct SchemaOptionsDiagnostics {
 
   // MARK: - ReadOnly/WriteOnly Validation
 
-  private func validateReadWriteConflict(_ options: LabeledExprListSyntax) {
+  private func validateReadWriteConflict(_ options: [ParsedOption]) {
     var hasReadOnly = false
     var hasWriteOnly = false
 
     for option in options {
-      guard let functionCall = option.expression.as(FunctionCallExprSyntax.self),
-        let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self)
-      else {
-        continue
-      }
-
-      let optionName = memberAccess.declName.baseName.text
+      let optionName = option.name.text
 
       if optionName == "readOnly" {
-        if let boolValue = extractBoolValue(from: functionCall), boolValue {
+        if let boolValue = extractBoolValue(from: option), boolValue {
           hasReadOnly = true
         }
       } else if optionName == "writeOnly" {
-        if let boolValue = extractBoolValue(from: functionCall), boolValue {
+        if let boolValue = extractBoolValue(from: option), boolValue {
           hasWriteOnly = true
         }
       }
@@ -292,21 +268,16 @@ struct SchemaOptionsDiagnostics {
 
   // MARK: - Duplicate Detection
 
-  private func validateNoDuplicates(_ options: LabeledExprListSyntax, macroName: String) {
+  private func validateNoDuplicates(_ options: [ParsedOption], macroName: String) {
     var seenOptions: [String: Int] = [:]
 
     for option in options {
-      guard let functionCall = option.expression.as(FunctionCallExprSyntax.self),
-        let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self)
-      else {
-        continue
-      }
-
-      let optionName = memberAccess.declName.baseName.text
+      let optionName = option.name.text
       seenOptions[optionName, default: 0] += 1
     }
 
-    for (optionName, count) in seenOptions where count > 1 {
+    for optionName in seenOptions.keys.sorted() {
+      guard let count = seenOptions[optionName], count > 1 else { continue }
       let diagnostic = Diagnostic(
         node: propertyName,
         message: SchemaOptionsMismatchDiagnostic.duplicateOption(
@@ -321,21 +292,15 @@ struct SchemaOptionsDiagnostics {
 
   // MARK: - Helper Methods
 
-  private func extractConstraints(from options: LabeledExprListSyntax) -> [String: Double] {
+  private func extractConstraints(from options: [ParsedOption]) -> [String: Double] {
     var constraints: [String: Double] = [:]
 
     for option in options {
-      guard let functionCall = option.expression.as(FunctionCallExprSyntax.self),
-        let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self)
-      else {
-        continue
-      }
-
-      let constraintName = memberAccess.declName.baseName.text
+      let constraintName = option.name.text
 
       // Extract numeric value from first argument
-      if let firstArg = functionCall.arguments.first,
-        let value = extractNumericValue(from: firstArg.expression)
+      if let firstValue = option.firstValue,
+        let value = extractNumericValue(from: firstValue)
       {
         constraints[constraintName] = value
       }
@@ -380,13 +345,13 @@ struct SchemaOptionsDiagnostics {
     return nil
   }
 
-  private func extractBoolValue(from functionCall: FunctionCallExprSyntax) -> Bool? {
-    guard let firstArg = functionCall.arguments.first else {
+  private func extractBoolValue(from option: ParsedOption) -> Bool? {
+    guard let firstValue = option.firstValue else {
       // No argument means default true for some options
       return true
     }
 
-    if let boolLiteral = firstArg.expression.as(BooleanLiteralExprSyntax.self) {
+    if let boolLiteral = firstValue.as(BooleanLiteralExprSyntax.self) {
       return boolLiteral.literal.text == "true"
     }
 
