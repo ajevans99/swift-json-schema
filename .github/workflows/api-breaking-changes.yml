@@ -22,9 +22,12 @@ jobs:
       - name: Check out PR head
         uses: actions/checkout@v5
         with:
-          # Need the full history so we can fetch the baseline tag.
+          # Need the full history for the baseline branch.
           fetch-depth: 0
           submodules: recursive
+
+      - name: Check scan result handling
+        run: python3 -m unittest discover -s .github/scripts -p 'test_api_compatibility.py'
 
       - name: Get Swift / Xcode versions
         run: |
@@ -33,127 +36,80 @@ jobs:
 
       - name: Resolve baseline (PR base branch)
         id: baseline
+        env:
+          BASE_REF: origin/${{ github.event.pull_request.base.ref }}
         run: |
-          # Compare against the branch this PR will merge into. This shows
-          # only the breakages this PR *introduces*, not the accumulated
-          # delta between the last release tag and the PR head.
-          #
-          # Cumulative-since-release breakages are checked separately by
-          # the `api-breaking-changes-release.yml` workflow on demand.
-          BASE_REF='origin/${{ github.event.pull_request.base.ref }}'
+          # Only changes introduced by this PR; cumulative-since-release
+          # changes are checked by api-breaking-changes-release.yml.
           echo "baseline=$BASE_REF" >> "$GITHUB_OUTPUT"
           echo "Comparing against: $BASE_REF"
 
       - name: Diagnose API breaking changes
         id: diagnose
-        # Don't fail the step on detected breakages — we report and label
-        # instead, so reviewers can intentionally accept the change.
-        continue-on-error: true
         env:
-          # Skip the OrderedJSONBenchmarks target. Bench targets don't have
-          # a stable public API surface to track, so omitting them keeps
-          # the digester focused on the actual library products.
-          SKIP_BENCHMARKS: "1"
+          BASELINE: ${{ steps.baseline.outputs.baseline }}
+        # Completed scans with intentional breaks succeed; incomplete scans fail.
+        run: python3 .github/scripts/api-compatibility.py --context pr --baseline "$BASELINE"
+
+      - name: Job summary and comment body
+        if: always()
         run: |
-          set +e
-          swift package diagnose-api-breaking-changes \
-            "${{ steps.baseline.outputs.baseline }}" \
-            > diagnose.log 2>&1
-          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
-          cat diagnose.log
-
-      - name: Parse breakages
-        id: parse
-        run: |
-          # The digester emits one "💔 API breakage:" line per finding.
-          BREAKAGES=$(grep -c "💔 API breakage:" diagnose.log || true)
-          echo "count=$BREAKAGES" >> "$GITHUB_OUTPUT"
-
-          # Capture findings for the comment body.
-          {
-            echo 'findings<<COMMENT_EOF'
-            grep "💔 API breakage:" diagnose.log | sed 's/.*💔 API breakage: //' || true
-            echo 'COMMENT_EOF'
-          } >> "$GITHUB_OUTPUT"
-
-          echo "Detected $BREAKAGES API breaking change(s)."
-
-      - name: Build comment body
-        id: comment
-        run: |
-          BASELINE='${{ steps.baseline.outputs.baseline }}'
-          COUNT='${{ steps.parse.outputs.count }}'
-
-          if [ "$COUNT" = "0" ]; then
-            cat > comment.md <<EOF
-          ### ✅ No public API breaking changes introduced
-
-          Compared this PR's head against \`$BASELINE\` using
-          \`swift package diagnose-api-breaking-changes\`. No breakages
-          detected in \`JSONSchema\`, \`JSONSchemaBuilder\`, or
-          \`JSONSchemaConversion\`.
-
-          <sub>This check shows only changes this PR introduces. Cumulative
-          breakages since the last release tag are reviewed at release time.</sub>
-          EOF
-          else
-            {
-              echo "### ⚠️ Public API breaking changes introduced ($COUNT)"
-              echo ""
-              echo "Compared this PR's head against \`$BASELINE\`. The Swift API digester reports the following changes introduced by this PR:"
-              echo ""
-              echo '```'
-              grep "💔 API breakage:" diagnose.log | sed 's/.*💔 API breakage: //' || true
-              echo '```'
-              echo ""
-              echo "If these breaks are intentional (e.g. preparing a major release), the \`breaking-change\` label has been applied for tracking — no further action needed. If they're accidental, restore the symbols or add deprecation shims."
-              echo ""
-              echo "<sub>This check shows only changes this PR introduces. Cumulative breakages since the last release tag are reviewed at release time.</sub>"
-            } > comment.md
+          if [ ! -s api-report.md ]; then
+            printf '%s\n' '### API compatibility scan could not complete' \
+              '' 'An earlier step failed or the scan was interrupted. API compatibility is unknown; existing labels are unchanged.' \
+              > api-report.md
           fi
+          {
+            cat api-report.md
+            for LOG in describe.log diagnose.log; do
+              if [ -f "$LOG" ]; then
+                printf '\n<details><summary>%s (last 500 lines)</summary>\n\n```text\n' "$LOG"
+                tail -500 "$LOG"
+                printf '\n```\n</details>\n'
+              fi
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Retain diagnostic logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-compatibility-diagnostics
+          path: |
+            api-report.md
+            describe.log
+            diagnose.log
+            package.json
 
       - name: Update sticky PR comment
+        # Fork and Dependabot tokens cannot write comments or labels.
+        if: always() && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: api-breaking-changes
-          path: comment.md
+          path: api-report.md
 
       - name: Add or remove `breaking-change` label
+        if: >-
+          success() &&
+          (steps.diagnose.outputs.status == 'clean' || steps.diagnose.outputs.status == 'breaking') &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          github.actor != 'dependabot[bot]'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          STATUS: ${{ steps.diagnose.outputs.status }}
         run: |
-          PR='${{ github.event.pull_request.number }}'
-          REPO='${{ github.repository }}'
-          COUNT='${{ steps.parse.outputs.count }}'
-
           # Make sure the label exists (idempotent).
           gh label create breaking-change \
             --repo "$REPO" \
             --color "B60205" \
             --description "Public API breaking change detected by CI" 2>/dev/null || true
 
-          if [ "$COUNT" = "0" ]; then
+          if [ "$STATUS" = "clean" ]; then
             # Remove if present; ignore 404 if not present.
             gh pr edit "$PR" --repo "$REPO" --remove-label "breaking-change" 2>/dev/null || true
           else
             gh pr edit "$PR" --repo "$REPO" --add-label "breaking-change"
           fi
-
-      - name: Job summary
-        if: always()
-        run: |
-          {
-            echo "## API breaking-change scan"
-            echo ""
-            echo "Compared against \`${{ steps.baseline.outputs.baseline }}\`."
-            echo "Detected **${{ steps.parse.outputs.count }}** breaking change(s)."
-            echo ""
-            if [ -s diagnose.log ]; then
-              echo '<details><summary>Full digester output</summary>'
-              echo ""
-              echo '```'
-              tail -500 diagnose.log
-              echo '```'
-              echo '</details>'
-            fi
-          } >> "$GITHUB_STEP_SUMMARY"
