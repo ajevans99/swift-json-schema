@@ -49,25 +49,47 @@ jobs:
         env:
           BASELINE: ${{ steps.baseline.outputs.baseline }}
         # Completed scans with intentional breaks succeed; incomplete scans fail.
-        run: python3 .github/scripts/api-compatibility.py --context pr --baseline "$BASELINE"
+        run: |
+          set +e
+          swift package diagnose-api-breaking-changes "$BASELINE" > diagnose.log 2>&1
+          EXIT_CODE=$?
+          set -e
+          cat diagnose.log
+          python3 .github/scripts/api-compatibility.py "$EXIT_CODE"
 
       - name: Job summary and comment body
         if: always()
+        env:
+          STATUS: ${{ steps.diagnose.outputs.status }}
+          COUNT: ${{ steps.diagnose.outputs.count }}
+          BASELINE: ${{ steps.baseline.outputs.baseline }}
         run: |
-          if [ ! -s api-report.md ]; then
-            printf '%s\n' '### API compatibility scan could not complete' \
-              '' 'An earlier step failed or the scan was interrupted. API compatibility is unknown; existing labels are unchanged.' \
-              > api-report.md
-          fi
+          {
+            case "$STATUS" in
+              clean) echo "### No public API breaking changes introduced" ;;
+              breaking)
+                echo "### Public API breaking changes introduced ($COUNT)"
+                printf '\n```text\n'
+                cat api-findings.txt
+                printf '\n```\n\n'
+                echo "Intentional breaks are allowed. Otherwise, restore the symbols or add deprecation shims."
+                ;;
+              *)
+                echo "### API compatibility scan could not complete"
+                echo "API compatibility is unknown; existing labels are unchanged."
+                ;;
+            esac
+            printf '\nCompared against `%s` using `swift package diagnose-api-breaking-changes`.\n\n' "$BASELINE"
+            echo "This check shows changes introduced by this PR; cumulative changes are reviewed at release time."
+            echo "See the job summary and api-compatibility-diagnostics artifact for diagnostic logs."
+          } > api-report.md
           {
             cat api-report.md
-            for LOG in describe.log diagnose.log; do
-              if [ -f "$LOG" ]; then
-                printf '\n<details><summary>%s (last 500 lines)</summary>\n\n```text\n' "$LOG"
-                tail -500 "$LOG"
-                printf '\n```\n</details>\n'
-              fi
-            done
+            if [ -f diagnose.log ]; then
+              printf '\n<details><summary>Digester output (last 500 lines)</summary>\n\n```text\n'
+              tail -500 diagnose.log
+              printf '\n```\n</details>\n'
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Retain diagnostic logs
@@ -77,9 +99,7 @@ jobs:
           name: api-compatibility-diagnostics
           path: |
             api-report.md
-            describe.log
             diagnose.log
-            package.json
 
       - name: Update sticky PR comment
         # Fork and Dependabot tokens cannot write comments or labels.

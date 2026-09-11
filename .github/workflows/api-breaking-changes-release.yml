@@ -66,28 +66,47 @@ jobs:
         id: diagnose
         env:
           BASELINE: ${{ steps.baseline.outputs.baseline }}
-        run: python3 .api-checks/.github/scripts/api-compatibility.py --context release --baseline "$BASELINE"
+        run: |
+          set +e
+          swift package diagnose-api-breaking-changes "$BASELINE" > diagnose.log 2>&1
+          EXIT_CODE=$?
+          set -e
+          cat diagnose.log
+          python3 .api-checks/.github/scripts/api-compatibility.py "$EXIT_CODE"
 
       - name: Job summary
         if: always()
         env:
           HEAD_REF: ${{ inputs.head_ref }}
+          BASELINE: ${{ steps.baseline.outputs.baseline }}
+          STATUS: ${{ steps.diagnose.outputs.status }}
+          COUNT: ${{ steps.diagnose.outputs.count }}
         run: |
-          if [ ! -s api-report.md ]; then
-            printf '%s\n' '### API compatibility scan could not complete' \
-              '' 'An earlier step failed or the scan was interrupted. API compatibility is unknown.' \
-              > api-report.md
-          fi
           {
-            printf '**Head:** `%s`\n\n' "$HEAD_REF"
+            echo "## Cumulative API breaking-change report"
+            printf '\n**Head:** `%s`\n**Baseline:** `%s`\n\n' "$HEAD_REF" "$BASELINE"
+            case "$STATUS" in
+              clean) echo "_No breaking changes since the baseline._" ;;
+              breaking)
+                echo "**Breakages found:** $COUNT"
+                printf '\n```text\n'
+                cat api-findings.txt
+                printf '\n```\n\n'
+                echo "These cumulative public API changes would ship in the next release."
+                ;;
+              *)
+                echo "### API compatibility scan could not complete"
+                echo "API compatibility is unknown. See the diagnostic logs."
+                ;;
+            esac
+          } > api-report.md
+          {
             cat api-report.md
-            for LOG in describe.log diagnose.log; do
-              if [ -f "$LOG" ]; then
-                printf '\n<details><summary>%s (last 500 lines)</summary>\n\n```text\n' "$LOG"
-                tail -500 "$LOG"
-                printf '\n```\n</details>\n'
-              fi
-            done
+            if [ -f diagnose.log ]; then
+              printf '\n<details><summary>Digester output (last 500 lines)</summary>\n\n```text\n'
+              tail -500 diagnose.log
+              printf '\n```\n</details>\n'
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Retain diagnostic logs
@@ -97,6 +116,4 @@ jobs:
           name: api-compatibility-diagnostics
           path: |
             api-report.md
-            describe.log
             diagnose.log
-            package.json
