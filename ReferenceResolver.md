@@ -14,22 +14,6 @@
 3. **Resolve fragments or anchors** – If the reference contains a fragment or anchor, `resolveFragmentOrAnchor` locates the subschema within the loaded base schema.
 4. **Return the resolved schema** – If none of the steps succeed, `ReferenceResolverError.unresolvedReference` is thrown.
 
-## Numeric JSON Pointer Tokens
-
-JSON Pointer tokens are interpreted according to the value being traversed. In an object,
-`0`, `01`, `+1`, and `-1` are distinct, exact member names; for example, `#/$defs/01`
-references the definition named `01`, not `1`. Pointer construction, string output, and
-Codable round trips preserve these names without numeric normalization.
-
-In an array, only `0` or a sequence of ASCII decimal digits starting with `1`–`9` can
-select an element. Leading zeroes, signs (including `+0` and `-0`), `-`, and indices
-outside the array's bounds do not select a value. `JSONValue.value(at:)` returns `nil`
-for these cases. This intentionally rejects signed and zero-padded indices that
-previously resolved as integers.
-
-Pointers compare and hash by their tokens, so a parsed `/0` equals a schema-generated
-location for the object member `0`. The public pointer API is unchanged.
-
 ## Why load the meta‑schema?
 
 JSON Schema dialects are themselves described by a schema—often called the *meta‑schema*. When a schema uses `$ref` to point directly to the dialect's meta‑schema (e.g. `https://json-schema.org/draft/2020-12/schema`), the resolver must return that meta‑schema so the reference can be validated. Loading it on demand keeps the meta‑schemas out of the normal cache while still supporting references to them.
