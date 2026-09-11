@@ -207,25 +207,34 @@ struct CommandFailure: Error, CustomStringConvertible {
   }
 }
 
-func runCommand(_ command: String, at path: URL) throws -> Data {
-  try withTemporaryFixtureDirectory { temporaryDirectory in
+func runCommand(
+  _ command: String,
+  at path: URL,
+  temporaryRoot: URL = FileManager.default.temporaryDirectory
+) throws -> Data {
+  try withTemporaryFixtureDirectory(in: temporaryRoot) { temporaryDirectory in
     let process = Process()
     process.executableURL = URL(fileURLWithPath: "/bin/bash")
     process.arguments = ["-c", command]
     process.currentDirectoryURL = path
 
-    let pipe = Pipe()
-    process.standardOutput = pipe
-
-    // A file keeps diagnostics out of JSON stdout without a second pipe that
-    // could fill up while stdout is being drained.
+    // Separate files keep diagnostics out of JSON and cannot fill up like
+    // pipes. They also avoid Foundation's trapping pipe reads on Linux EINTR.
+    let outputURL = temporaryDirectory.appendingPathComponent("stdout")
     let diagnosticsURL = temporaryDirectory.appendingPathComponent("stderr")
+    try Data().write(to: outputURL)
     try Data().write(to: diagnosticsURL)
+    let output = try FileHandle(forWritingTo: outputURL)
+    defer { output.closeFile() }
     let diagnostics = try FileHandle(forWritingTo: diagnosticsURL)
     defer { diagnostics.closeFile() }
+    process.standardOutput = output
     process.standardError = diagnostics
 
     do {
+      guard try path.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true else {
+        throw FixtureLoadingError(path: path, reason: "Command working path is not a directory")
+      }
       try process.run()
     } catch {
       throw FixtureLoadingError(
@@ -234,7 +243,6 @@ func runCommand(_ command: String, at path: URL) throws -> Data {
         underlyingError: error
       )
     }
-    let data = pipe.fileHandleForReading.readDataToEndOfFile()
     process.waitUntilExit()
 
     guard process.terminationReason == .exit, process.terminationStatus == 0 else {
@@ -246,13 +254,23 @@ func runCommand(_ command: String, at path: URL) throws -> Data {
         standardError: String(decoding: try Data(contentsOf: diagnosticsURL), as: UTF8.self)
       )
     }
-    return data
+    do {
+      return try Data(contentsOf: outputURL)
+    } catch {
+      throw FixtureLoadingError(
+        path: path,
+        reason: "Could not read output of `\(command)`",
+        underlyingError: error
+      )
+    }
   }
 }
 
-func withTemporaryFixtureDirectory<T>(_ body: (URL) throws -> T) throws -> T {
-  let directory = FileManager.default.temporaryDirectory
-    .appendingPathComponent("json-schema-fixtures-\(UUID().uuidString)")
+func withTemporaryFixtureDirectory<T>(
+  in root: URL = FileManager.default.temporaryDirectory,
+  _ body: (URL) throws -> T
+) throws -> T {
+  let directory = root.appendingPathComponent("json-schema-fixtures-\(UUID().uuidString)")
   try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
   defer {
     do {

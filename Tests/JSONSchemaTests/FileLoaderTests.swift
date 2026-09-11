@@ -222,6 +222,56 @@ struct RemoteLoaderTests {
 }
 
 struct RunCommandTests {
+  @Test(arguments: ["success", "launch-failure", "exit-failure", "signal"])
+  func removesCaptureFiles(outcome: String) throws {
+    try withTemporaryFixtureDirectory { root in
+      let captures = root.appendingPathComponent("captures")
+      try FileManager.default.createDirectory(at: captures, withIntermediateDirectories: false)
+      switch outcome {
+      case "success":
+        let output = try runCommand(
+          "printf 'output'; printf 'diagnostic' >&2",
+          at: root,
+          temporaryRoot: captures
+        )
+        #expect(output == Data("output".utf8))
+      case "launch-failure":
+        #expect(throws: FixtureLoadingError.self) {
+          try runCommand(
+            "true",
+            at: root.appendingPathComponent("missing"),
+            temporaryRoot: captures
+          )
+        }
+      default:
+        let termination = outcome == "signal" ? "kill -KILL $$" : "exit 17"
+        #expect {
+          try runCommand(
+            "printf 'output'; printf 'diagnostic' >&2; \(termination)",
+            at: root,
+            temporaryRoot: captures
+          )
+        } throws: { error in
+          guard let failure = error as? CommandFailure else { return false }
+          return failure.standardError == "diagnostic"
+            && (outcome == "signal" ? failure.reason == .uncaughtSignal : failure.status == 17)
+        }
+      }
+      #expect(try FileManager.default.contentsOfDirectory(atPath: captures.path).isEmpty)
+    }
+  }
+
+  @Test(arguments: 0 ..< 8)
+  func concurrentCommandOutput(index: Int) throws {
+    try withTemporaryFixtureDirectory { root in
+      let output = try runCommand(
+        "printf '\(index)'; sleep 0.05; printf '\(index)'",
+        at: root
+      )
+      #expect(String(decoding: output, as: UTF8.self) == "\(index)\(index)")
+    }
+  }
+
   @Test func standardErrorDoesNotCorruptJSON() throws {
     try withTemporaryFixtureDirectory { root in
       let output = try runCommand("printf 'warning' >&2; printf '{\"valid\":true}'", at: root)
@@ -231,8 +281,9 @@ struct RunCommandTests {
 
   @Test func signalTerminationFailsEvenWithValidOutput() throws {
     try withTemporaryFixtureDirectory { root -> Void in
+      // Test runners can pass on ignored/blocked SIGTERM; SIGKILL cannot be ignored.
       #expect {
-        try runCommand("printf '{}'; kill -TERM $$", at: root)
+        try runCommand("printf '{}'; kill -KILL $$", at: root)
       } throws: { error in
         guard let failure = error as? CommandFailure else { return false }
         return failure.reason == .uncaughtSignal && failure.description.contains("signal")
@@ -254,7 +305,7 @@ struct RunCommandTests {
   }
 
   @Test(.timeLimit(.minutes(1)))
-  func drainsOutputLargerThanPipeCapacity() throws {
+  func capturesOutputLargerThanPipeCapacity() throws {
     try withTemporaryFixtureDirectory { root in
       let output = try runCommand(
         """
