@@ -1,136 +1,109 @@
-# Validation
+# Parsing and validation
 
-Use result builders to generate parsed type-safe, schema validated results.
+Turn JSON into Swift values while enforcing your schema's constraints.
 
-## Overview
+## Choose the right operation
 
-To demonstrate validation, lets build an item in a virtual shopping cart. The item has an ID, name, price, and whether or not it is in-stock. Let's define the JSON schema for each property with result builders.
+| Operation | Result | Use it when |
+| --- | --- | --- |
+| `component.parseAndValidate(value)` | Your Swift output, or a thrown ``ParseAndValidateIssue`` | Input must both satisfy the schema and convert to your model. |
+| `component.definition().validate(value)` | `ValidationResult` | You need validity and diagnostics without constructing a Swift model. |
+| `component.parse(value)` | ``Parsed`` with ``ParseIssue`` values on failure | You need conversion without independently enforcing every schema keyword. |
 
-```swift
-let identifierSchema = JSONString()
-  .pattern("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
-  .description("Unique identifier for the product")
+The `instance: String` parsing overloads also throw if JSON decoding fails. Primitive parsers
+check JSON types, but `parse` alone is not a substitute for schema validation: for example,
+`JSONString().minLength(5).parse(.string("hi"))` still produces a string.
 
-let nameSchema = JSONString()
-  .minLength(1)
-  .description("Name of the product")
-
-let priceSchema = JSONNumber()
-  .multipleOf(0.01)
-  .description("Price of the product in USD")
-
-let inStockSchema = JSONBoolean()
-  .description("Availablility status of the product")
-```
-
-To validate, pass an instance of `JSONValue` to the ``JSONSchemaComponent/validate(_:)``. The result is a ``Validated`` enum which will either by ``Validated/valid(_:)`` if the instance meets the schema constraints, or else ``Validated/invalid(_:)``.
+## Map a builder into a Swift type
 
 ```swift
-let id = identifierSchema.validate(.string("E621E1F8-C36C-495A-93FC-0C247A3E6E5F")) // Parsed<String, String>
-let name = nameSchema.validate(.string("iPad")) // Parsed<String, String>
-let price = priceSchema.validate(.number(199.99)) // Parsed<Double, String>
-let inStock = inStockSchema.validate(.boolean(true)) // Parsed<Bool, String>
-```
+import JSONSchemaBuilder
 
-Notice that in the valid case, the first generic is a Swift primitives, not a `JSONValue` anymore. Of course, your instance is more likely to be a JSON string format.
-
-```json
-{
-  "id": "E621E1F8-C36C-495A-93FC-0C247A3E6E5F",
-  "name": "iPad",
-  "price": 199.99,
-  "inStock": true
-}
-```
-
-We can take our properties from before and create a ``JSONObject`` schema for the item.
-
-```swift
-let itemSchema = JSONObject {
-  JSONProperty(key: "id", value: identifierSchema)
-  JSONProperty(key: "name", value: nameSchema)
-  JSONProperty(key: "price", value: priceSchema)
-  JSONProperty(key: "inStock", value: inStockSchema)
-}
-```
-
-And now we are ready to validate.
-
-```swift
-let itemValidationResult = itemSchema.validate(itemInstance) // Parsed<(String?, String?, Double?, Bool?), String>
-switch itemValidationResult {
-case .valid(let value):
-  print(value)
-case .invalid(let array):
-  print("Errors: \(array.joined(separator: ", "))")
-}
-```
-
-`value` in the above is a tuple that lines up with the properties in order, in our case: `(String?, String?, Double?, Bool?)`. To avoid the optional, we can mark properties as ``JSONProperty/required()`` in the schema. If the property is missing in the instance (or `null`), we will receive an appropriate validation error.
-
-Let's also create a struct to represent the item in our Swift code.
-
-```swift
 struct Item {
-  let id: String
   let name: String
   let price: Double
-  let inStock: Bool
 }
-```
 
-Putting everything together and adding a mapping function to convert the validated tuple to an `Item` instance, we get the following:
-
-```swift
-let newItemSchema = JSONObject {
-  JSONProperty(key: "id") {
-    JSONString() // 1
-      .pattern("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
-      .description("Unique identifier for the product")
-  }
-  .required() // 2
-
+let itemSchema = JSONObject {
   JSONProperty(key: "name") {
-    JSONString()
-      .minLength(1)
-      .description("Name of the product")
+    JSONString().minLength(1)
   }
   .required()
 
   JSONProperty(key: "price") {
-    JSONNumber()
-      .multipleOf(0.01)
-      .description("Price of the product in USD")
-  }
-  .required()
-
-  JSONProperty(key: "inStock") {
-    JSONBoolean()
-      .description("Availablility status of the product")
+    JSONNumber().minimum(0)
   }
   .required()
 }
-.map(Item.init) // 3
+.map(Item.init)
 
-let item = newItemSchema.validate(itemInstance) // Parsed<Item, String>
+let item: Item = try itemSchema.parseAndValidate(
+  instance: #"{"name": "iPad", "price": 199.99}"#
+)
+print(item.name) // iPad
 ```
 
-1. Moved the schema definition inside the property builder with ``JSONProperty/init(key:builder:)``
-2. Marked the property as required with ``JSONProperty/required()``
-3. Added a mapping function to convert the validated tuple to an `Item` instance with ``JSONSchemaComponent/map(_:)`` 
-> Note: `.map(Item.init)` is a shorthand for `.map { Item(id: $0.0, name: $0.1, price: $0.2, inStock: $0.3) }`
+Object properties produce a tuple in declaration order. `.map(Item.init)` transforms that tuple
+into a model; ``JSONSchema`` also accepts a transform and a builder closure. See <doc:WrapperTypes>
+for other transformations, or <doc:Macros> to generate the builder from a Swift type.
 
-The library also provides ``JSONSchema/init(_:component:)`` to make it easy to transform the validated result to a custom type, instead of using the `map`.
+Properties are optional unless marked `.required()`. Required means the key must be present;
+whether its value may be `null` depends on the property's schema. Use `.orNull()` to accept
+explicit nulls. Macro-generated schemas infer required and nullable behavior from Swift types.
 
-Macros will generate the schema for you, so you don't have to write it by hand. <doc:Macros>
+## Handle invalid input
+
+```swift
+do {
+  let item = try itemSchema.parseAndValidate(
+    instance: #"{"name": "", "price": -1}"#
+  )
+  print(item)
+} catch {
+  switch error {
+  case .decodingFailed(let underlying):
+    print("Invalid JSON:", underlying)
+  case .parsingFailed(let issues):
+    print("Could not construct Item:", issues)
+  case .validationFailed(let result):
+    print("Schema constraints failed:", result.errors ?? [])
+  case .parsingAndValidationFailed(let issues, let result):
+    print("Parsing issues:", issues)
+    print("Schema constraints failed:", result.errors ?? [])
+  }
+}
+```
+
+Schema diagnostics include keyword and instance locations. For machine-readable diagnostics,
+use `result.renderedOutput(level: .basic)`; see the
+[validation output guide](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschema/validation-output-formats).
+
+## Formats and ordered input
+
+Enable format validation explicitly when your schema uses `format` constraints:
+
+```swift
+import JSONSchema
+
+let context = Context(
+  dialect: .draft2020_12,
+  formatValidators: DefaultFormatValidators.all
+)
+let email = try JSONString().format("email").parseAndValidate(
+  instance: #""ada@example.com""#,
+  validationContext: context
+)
+```
+
+The default context has no format validators. Custom implementations of `FormatValidator`
+can be passed in the same registry.
+
+String parsing overloads use `JSONDecoder` by default. When source key order matters, parse
+with `JSONValue.parse` first and pass the resulting value to `parseAndValidate` or `parse`.
 
 ## Composition parsing
 
-`parse(_:)` converts JSON into Swift values. Primitive parsers check the input type, but do not
-independently enforce every schema keyword. Use `parseAndValidate(_:validationContext:)` to require
-both a successful conversion and validity against the complete schema.
-
-Compositions also validate each branch's schema before running its parser. Constraints such as
+Compositions validate each branch's schema before running its parser. Constraints such as
 `minLength`, `pattern`, `const`, nested object requirements, and boolean schemas participate in
 branch selection, even when multiple branches produce the same Swift type:
 

@@ -1,66 +1,138 @@
 # ``JSONSchema``
 
-The ``JSONSchema`` target provides the core runtime for working with JSON Schema documents in Swift. It focuses on representing schemas, decoding/encoding them, validating data, and navigating JSON documents with strongly typed utilities.
-
-`JSONSchema` re-exports the [`OrderedJSON`](https://swiftpackageindex.com/ajevans99/swift-json-schema/documentation/orderedjson) library, so types like `JSONValue` and `JSONType` are available unchanged from `import JSONSchema`. If you only need an order-preserving JSON parser/serializer without the validator, `import OrderedJSON` directly.
+Validate JSON against Draft 2020-12 schemas and inspect structured diagnostics.
 
 ## Overview
 
-- **Schema representation** – ``Schema`` loads schemas from Swift builders, JSON strings, or decoded `JSONValue` instances.
-- **JSON data model** – `JSONValue` (re-exported from `OrderedJSON`) models any JSON payload, enabling type-safe validation and letting you construct instances directly in Swift without juggling `Any`.
-- **Pointer navigation** – ``JSONPointer`` provide convenient traversal of deeply nested JSON structures and map cleanly onto the JSON Schema specification's pointer syntax.
-- **Validation pipeline** – Calling ``Schema/validate(_:)`` returns a ``ValidationResult`` containing errors, annotations, and metadata about which keywords were evaluated. You can emit spec-compliant diagnostics through ``ValidationOutputLevel`` and ``ValidationOutputConfiguration``.
-- **Format validators** – The ``FormatValidator`` registry ships with built-in validators (URI, email, hostname, UUID, duration, and more) and lets you register custom implementations to extend your dialect.
-- **Dialect support** – ``Dialect`` encapsulates draft-specific features (like metaschemas, vocabulary requirements, and `$dynamicRef` semantics). You can opt into draft 2020-12 or supply your own dialect definition.
-- **Codable integration** – ``JSONValue``, ``Schema``, annotations, and validation results all conform to Swift's `Codable` protocols, making it straightforward to serialize or inspect them in tooling.
+Use `JSONSchema` directly when you already have a schema document. You do not need macros,
+result builders, or a Swift model to validate JSON. To generate schemas from Swift instead,
+see [`JSONSchemaBuilder`](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder).
 
-## Validation Lifecycle
+`JSONSchema` re-exports
+[`OrderedJSON`](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/orderedjson),
+including its `JSONValue` type and order-preserving parser.
+
+## Load a schema and validate input
 
 ```swift
-let schema = try Schema(instance: schemaJSONData)
-let payload: JSONValue = ["name": "Ada", "age": 37]
+import JSONSchema
 
-let result = schema.validate(payload)
-
-if result.isValid {
-	print("Document is valid")
-} else {
-	for error in result.errors ?? [] {
-		print("Keyword", error.keyword, "failed at", error.instanceLocation)
-	}
+let schemaJSON = """
+{
+  "type": "object",
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "age": { "type": "integer", "minimum": 0 }
+  },
+  "required": ["name", "age"]
 }
+"""
 
-let verboseOutput = try result.renderedOutput(level: .verbose)
+let schema = try Schema(
+  rawSchema: JSONValue.parse(schemaJSON),
+  context: Context(dialect: .draft2020_12)
+)
+let payload: JSONValue = ["name": "Ada", "age": -1]
+let result = schema.validate(payload)
+print(result.isValid) // false
+
+let diagnostics = try result.renderedOutput(level: .basic)
+print(try diagnostics.serialized(options: .pretty))
 ```
 
-Validation is spec-compliant: references resolve through ``JSONPointer`` paths, annotations flow through in-place applicators, and custom formats/dialects participate automatically. The repository keeps a synchronized copy of the official JSON Schema Test Suite (including the output tests), and `swift test` runs every draft 2020-12 fixture to maintain compatibility.
+``ValidationResult`` contains validity, nested errors, annotations, and keyword/instance
+locations. Basic output flattens errors to help locate the failing value; in this example,
+the `minimum` error points to `/age`. See <doc:Validation-output-formats> for the available
+diagnostic levels.
+
+`Schema(instance:)` is a convenience initializer for JSON strings that uses `JSONDecoder`
+by default. Use `JSONValue.parse` as above when you want to retain source key order.
+`Schema` and `JSONValue` also conform to `Codable`.
+
+## References and external schemas
+
+Schemas can use `$defs`, `$ref`, `$anchor`, and dynamic references. Register external documents
+by URI when constructing the validation context:
+
+```swift
+let context = Context(
+  dialect: .draft2020_12,
+  remoteSchema: [
+    "https://example.com/nonempty-string": [
+      "type": "string",
+      "minLength": 1,
+    ]
+  ]
+)
+let referenced = try Schema(
+  rawSchema: ["$ref": "https://example.com/nonempty-string"],
+  context: context
+)
+print(referenced.validate(.string("Ada")).isValid) // true
+```
+
+The registry supplies the documents; validation does not automatically fetch them over the
+network. Load external resources in your application and pass their parsed JSON values here.
+``JSONPointer`` provides navigation through nested JSON documents.
+
+## Enable format validation
+
+The default context has no format validators. To enforce supported string formats, provide
+``DefaultFormatValidators/all``:
+
+```swift
+let emailSchema = try Schema(
+  rawSchema: ["type": "string", "format": "email"],
+  context: Context(
+    dialect: .draft2020_12,
+    formatValidators: DefaultFormatValidators.all
+  )
+)
+print(emailSchema.validate(.string("not-an-email")).isValid) // false
+```
+
+The registry includes date/time, email, hostname, IP address, UUID, URI, and URI-reference
+validators. To register an application-specific format, implement ``FormatValidator`` with
+a `formatName` and `validate(_:)` method, then include it in `formatValidators`. Each
+registered format name must be unique. A format without a registered validator is not asserted.
+
+## Check a schema itself
+
+Constructing a `Schema` is different from checking it against the dialect's meta-schema:
+
+```swift
+let schemaCheck = try schema.validateAgainstMetaSchema()
+print(schemaCheck.isValid)
+```
+
+``Dialect`` controls keywords and vocabulary behavior; the built-in dialect is Draft 2020-12.
+The repository includes the official JSON Schema Test Suite, and the README's Bowtie badge
+links to the published compliance report.
 
 ## Topics
 
-### Articles
+### Guides
 
-- <doc:Deterministic-schema-output>
 - <doc:Validation-output-formats>
+- <doc:Deterministic-schema-output>
 
-### Core Types
+### Core types
 
 - ``Schema``
-- ``JSONValue``
 - ``JSONPointer``
 - ``ValidationResult``
+
+### Validation configuration
+
+- ``Context``
+- ``Dialect``
+- ``FormatValidator``
+- ``DefaultFormatValidators``
+- ``ValidationOutputLevel``
+- ``ValidationOutputConfiguration``
 
 ### Deterministic JSON
 
 - ``Schema/jsonValue``
 - ``ValidationResult/jsonValue``
 - ``ValidationError/jsonValue``
-
-### Validation Output
-
-- ``ValidationOutputLevel``
-- ``ValidationOutputConfiguration``
-
-### Infrastructure
-
-- ``FormatValidator``
-- ``Dialect``

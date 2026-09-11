@@ -5,6 +5,141 @@ import Testing
 @testable import JSONSchemaBuilder
 
 struct DocumentationExampleTests {
+  @Schemable
+  struct QuickStartPerson {
+    @StringOptions(.minLength(1))
+    let name: String
+
+    @NumberOptions(.minimum(0))
+    let age: Int
+  }
+
+  @Test func readMeQuickStart() throws {
+    let schema = QuickStartPerson.schema.definition()
+    let json = try schema.jsonValue.serialized(options: .pretty)
+    #expect(try JSONValue.parse(json) == schema.jsonValue)
+
+    let person: QuickStartPerson = try QuickStartPerson.schema.parseAndValidate(
+      instance: #"{"name": "Ada", "age": 37}"#
+    )
+    #expect(person.name == "Ada")
+    #expect(person.age == 37)
+
+    let result = schema.validate(["name": "Ada", "age": -1])
+    #expect(!result.isValid)
+  }
+
+  @Test(arguments: [
+    #"{"name": "Ada", "age": -1}"#,
+    #"{"name": "", "age": 37}"#,
+    #"{"name": "Ada"}"#,
+  ])
+  func readMeQuickStartRejectsInvalidInput(instance: String) {
+    #expect(throws: ParseAndValidateIssue.self) {
+      try QuickStartPerson.schema.parseAndValidate(instance: instance)
+    }
+  }
+
+  @Test func readMeBuilderAlternative() throws {
+    let personSchema = JSONObject {
+      JSONProperty(key: "name") {
+        JSONString().minLength(1)
+      }
+      .required()
+
+      JSONProperty(key: "age") {
+        JSONInteger().minimum(0)
+      }
+      .required()
+    }
+    let parsed: (String, Int) = try personSchema.parseAndValidate(
+      instance: #"{"name": "Ada", "age": 37}"#
+    )
+    #expect(parsed.0 == "Ada")
+    #expect(parsed.1 == 37)
+    #expect(personSchema.schemaValue == QuickStartPerson.schema.schemaValue)
+
+    let parsing: Parsed<(String, Int), ParseIssue> = personSchema.parse(["name": "Ada", "age": 37])
+    switch parsing {
+    case .valid(let value):
+      #expect(value.0 == "Ada")
+      #expect(value.1 == 37)
+    case .invalid(let issues):
+      Issue.record("Expected typed tuple output, got \(issues)")
+    }
+
+    let person = try personSchema.map(QuickStartPerson.init)
+      .parseAndValidate(
+        instance: #"{"name": "Ada", "age": 37}"#
+      )
+    #expect(person.name == "Ada")
+    #expect(person.age == 37)
+  }
+
+  @Test func doccTypedParsing() throws {
+    struct Item {
+      let name: String
+      let price: Double
+    }
+
+    let itemSchema = JSONObject {
+      JSONProperty(key: "name") {
+        JSONString().minLength(1)
+      }
+      .required()
+
+      JSONProperty(key: "price") {
+        JSONNumber().minimum(0)
+      }
+      .required()
+    }
+    .map(Item.init)
+
+    let item: Item = try itemSchema.parseAndValidate(
+      instance: #"{"name": "iPad", "price": 199.99}"#
+    )
+    #expect(item.name == "iPad")
+    #expect(item.price == 199.99)
+
+    do {
+      _ = try itemSchema.parseAndValidate(instance: #"{"name": "", "price": -1}"#)
+      Issue.record("Invalid item should fail schema validation")
+    } catch {
+      switch error {
+      case .validationFailed(let result):
+        #expect(!result.isValid)
+      case .decodingFailed, .parsingFailed, .parsingAndValidationFailed:
+        Issue.record("Expected a schema validation failure, got \(error)")
+      }
+    }
+  }
+
+  @Test func doccParsingVersusValidation() throws {
+    let text = JSONString().minLength(5)
+    #expect(text.parse(.string("hi")) == .valid("hi"))
+    #expect(throws: ParseAndValidateIssue.self) {
+      try text.parseAndValidate(.string("hi"))
+    }
+
+    let context = Context(
+      dialect: .draft2020_12,
+      formatValidators: DefaultFormatValidators.all
+    )
+    let email = try JSONString().format("email")
+      .parseAndValidate(
+        instance: #""ada@example.com""#,
+        validationContext: context
+      )
+    #expect(email == "ada@example.com")
+    #expect(throws: ParseAndValidateIssue.self) {
+      try JSONString().format("email")
+        .parseAndValidate(
+          .string("not-an-email"),
+          validationContext: context
+        )
+    }
+  }
+
   @Test func readMeBuilder() {
     @JSONSchemaBuilder var jsonSchema: some JSONSchemaComponent {
       JSONObject {
