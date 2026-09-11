@@ -12,19 +12,23 @@ enum ParsingScope {
       self.allowsIndependentEvaluation = !Self.hasCustomVocabulary(evaluation.schema)
     }
 
-    private init(evaluation: SchemaEvaluation?, parent: State) {
+    private init(evaluation: SchemaEvaluation?, parent: State, throughReference: Bool) {
       self.evaluation = evaluation
       self.context = parent.context
       self.allowsIndependentEvaluation =
         parent.allowsIndependentEvaluation
+        && (!throughReference || evaluation != nil)
         && !Self.hasCustomVocabulary(evaluation?.schema ?? .boolean(true))
     }
 
-    func descending(to evaluation: SchemaEvaluation?) -> State {
-      State(evaluation: evaluation, parent: self)
+    func descending(
+      to evaluation: SchemaEvaluation?,
+      throughReference: Bool = false
+    ) -> State {
+      State(evaluation: evaluation, parent: self, throughReference: throughReference)
     }
 
-    private static func hasCustomVocabulary(_ value: JSONValue) -> Bool {
+    static func hasCustomVocabulary(_ value: JSONValue) -> Bool {
       switch value {
       case .object(let object):
         if object["$vocabulary"] != nil { return true }
@@ -125,6 +129,7 @@ enum ParsingScope {
     // Type-erased projections and flatMap can parse a different schema shape.
     // Only context-independent schemas may be evaluated outside their recorded scope.
     if let current, current.allowsIndependentEvaluation,
+      !State.hasCustomVocabulary(component.schemaValue.value),
       !containsReference(component.schemaValue.value)
     {
       return .success(
@@ -154,13 +159,19 @@ enum ParsingScope {
   static func parseReference<Component: JSONSchemaComponent>(
     _ component: Component,
     value: JSONValue,
-    keyword: String
+    keyword: String,
+    referenceSchema: SchemaValue
   ) -> Parsed<Component.Output, ParseIssue> {
     guard let current else { return component.parse(value) }
-    let target = current.evaluation?.children
-      .first {
-        $0.reference == keyword && $0.instance == value
-      }
-    return $current.withValue(current.descending(to: target)) { component.parse(value) }
+    let target: SchemaEvaluation?
+    if let source = current.evaluation, source.schema == referenceSchema.value {
+      target = source.children.first { $0.reference == keyword && $0.instance == value }
+    } else {
+      target = nil
+    }
+    // An unmatched reference cannot lend a detached context to nested compositions.
+    return $current.withValue(current.descending(to: target, throughReference: true)) {
+      component.parse(value)
+    }
   }
 }

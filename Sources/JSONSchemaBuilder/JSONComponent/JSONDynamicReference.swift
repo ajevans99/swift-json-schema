@@ -32,12 +32,17 @@ public struct JSONDynamicReference<T: Schemable>: JSONSchemaComponent {
   /// Parses the incoming value using `T`'s schema so the caller continues to work with strongly
   /// typed Swift values.
   public func parse(_ value: JSONValue) -> Parsed<T, ParseIssue> {
-    ParsingScope.parseReference(T.schema, value: value, keyword: Keywords.DynamicReference.name)
-      .flatMap { output in
-        guard let typedOutput = output as? T else {
-          return .invalid([.compactMapValueNil(value: value)])
-        }
-        return .valid(typedOutput)
+    ParsingScope.parseReference(
+      T.schema,
+      value: value,
+      keyword: Keywords.DynamicReference.name,
+      referenceSchema: schemaValue
+    )
+    .flatMap { output in
+      guard let typedOutput = output as? T else {
+        return .invalid([.compactMapValueNil(value: value)])
       }
+      return .valid(typedOutput)
+    }
   }
 }

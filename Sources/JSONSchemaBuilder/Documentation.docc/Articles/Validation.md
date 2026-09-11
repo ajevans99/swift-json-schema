@@ -173,3 +173,7 @@ requires a matching position and branch schema in the original validation tree. 
 reports that branch validation is unavailable, rather than guessing a reference scope or using
 default validation options. Keep the parsing and emitted schema structures aligned for referenced
 projections, or inline their references before projecting.
+
+This also applies when a projection hides a branch's own custom vocabulary. Typed reference parsers
+only reuse evaluations belonging to their emitted reference schema; an unmatched reference cannot
+borrow another target's results or independently validate its nested compositions.

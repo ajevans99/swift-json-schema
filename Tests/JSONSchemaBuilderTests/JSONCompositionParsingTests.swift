@@ -538,4 +538,69 @@ struct JSONCompositionParsingTests {
       }
     #expect(try schema.parseAndValidate("hi") == "hi")
   }
+
+  @Test(arguments: [false, true], [false, true])
+  func projectedTypedReferenceRequiresItsOwnRecordedTarget(
+    dynamic: Bool,
+    hasRecordedReference: Bool
+  ) {
+    var projection: JSONComponents.AnySchemaComponent<ReferencedUnion>
+    if dynamic {
+      projection = JSONDynamicReference<ReferencedUnion>(anchor: "Original")
+        .eraseToAnySchemaComponent()
+    } else {
+      projection = JSONReference<ReferencedUnion>.definition(named: "Original")
+        .eraseToAnySchemaComponent()
+    }
+    if hasRecordedReference {
+      var replacement = ReferencedUnion.schema.schemaValue
+      replacement["$dynamicAnchor"] = "Replacement"
+      projection.schemaValue = .object([
+        dynamic ? "$dynamicRef" : "$ref": dynamic ? "#Replacement" : "#/$defs/Replacement",
+        "$defs": ["Replacement": replacement.value],
+      ])
+    } else {
+      projection.schemaValue = .boolean(true)
+    }
+
+    do {
+      _ = try projection.parseAndValidate("hi")
+      Issue.record("Expected a scope failure instead of an unrelated or detached reference target")
+    } catch {
+      guard case .parsingFailed(let errors) = error,
+        case .compositionFailure(.oneOf, let reason, _) = errors.first
+      else {
+        Issue.record("Expected an explicit composition scope error, received \(error)")
+        return
+      }
+      #expect(reason.contains("branch validation is unavailable"))
+    }
+  }
+
+  @Test func projectedBranchCannotHideItsCustomVocabulary() {
+    var branch = JSONString().minLength(5)
+    branch.schemaValue["$vocabulary"] = [
+      "https://json-schema.org/draft/2020-12/vocab/core": true
+    ]
+    var projection =
+      JSONComposition.AnyOf(into: String.self) {
+        branch
+        JSONString()
+      }
+      .eraseToAnySchemaComponent()
+    projection.schemaValue = .boolean(true)
+
+    do {
+      _ = try projection.parseAndValidate("hi")
+      Issue.record("Expected an explicit scope failure for the projected custom vocabulary")
+    } catch {
+      guard case .parsingFailed(let errors) = error,
+        case .compositionFailure(.anyOf, let reason, _) = errors.first
+      else {
+        Issue.record("Expected an explicit composition scope error, received \(error)")
+        return
+      }
+      #expect(reason.contains("branch validation is unavailable"))
+    }
+  }
 }
