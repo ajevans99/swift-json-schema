@@ -2,16 +2,62 @@ import Foundation
 
 // MARK: - Date and Time
 
+/// Validates RFC 3339 syntax and calendar dates, with optional fractional seconds.
+///
+/// Leap seconds must fall at UTC month-end 23:59, after applying the offset.
+/// Historical leap-second announcements are not checked.
 public struct DateTimeFormatValidator: FormatValidator {
   public let formatName = "date-time"
-  nonisolated(unsafe) private static let formatter: ISO8601DateFormatter = {
-    let f = ISO8601DateFormatter()
-    f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-    return f
-  }()
+  nonisolated(unsafe) private static let regex =
+    #/
+    ([0-9]{4})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])[Tt]
+    ([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)
+    (?:\.[0-9]+)?
+    (?:[Zz]|([+-])([01][0-9]|2[0-3]):([0-5][0-9]))
+    /#
 
   public func validate(_ value: String) -> Bool {
-    DateTimeFormatValidator.formatter.date(from: value) != nil
+    guard
+      let match = value.wholeMatch(of: Self.regex),
+      let year = Int(match.1),
+      let month = Int(match.2),
+      let day = Int(match.3),
+      let hour = Int(match.4),
+      let minute = Int(match.5),
+      let second = Int(match.6)
+    else { return false }
+
+    let monthLength = Self.daysInMonth(month, year: year)
+    guard day <= monthLength else { return false }
+    guard second == 60 else { return true }
+
+    var offsetMinutes = 0
+    if let sign = match.7 {
+      guard
+        let offsetHour = match.8.flatMap({ Int($0) }),
+        let offsetMinute = match.9.flatMap({ Int($0) })
+      else { return false }
+      offsetMinutes = (offsetHour * 60 + offsetMinute) * (sign == "-" ? -1 : 1)
+    }
+
+    let utcMinutes = hour * 60 + minute - offsetMinutes
+    // An offset under 24 hours can put UTC 23:59 on this date or the previous date.
+    if utcMinutes == -1 {
+      return day == 1
+    }
+    return utcMinutes == 23 * 60 + 59 && day == monthLength
+  }
+
+  private static func daysInMonth(_ month: Int, year: Int) -> Int {
+    switch month {
+    case 2:
+      return year.isMultiple(of: 4) && (!year.isMultiple(of: 100) || year.isMultiple(of: 400))
+        ? 29 : 28
+    case 4, 6, 9, 11:
+      return 30
+    default:
+      return 31
+    }
   }
 }
 

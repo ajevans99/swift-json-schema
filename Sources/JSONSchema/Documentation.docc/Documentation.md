@@ -96,6 +96,20 @@ validators. To register an application-specific format, implement ``FormatValida
 a `formatName` and `validate(_:)` method, then include it in `formatValidators`. Each
 registered format name must be unique. A format without a registered validator is not asserted.
 
+The `date-time` validator checks the complete RFC 3339 timestamp, including the Gregorian
+calendar date. Fractional seconds are optional, `T` and `Z` are case-insensitive, and a time
+zone (`Z` or a signed `HH:MM` offset) is required. For example, both
+`2024-01-01T12:00:00Z` and `2024-01-01T12:00:00.123+05:30` are valid. Impossible dates,
+missing time zones, and trailing text are rejected.
+
+Leap seconds (`:60`) are accepted only at UTC month-end 23:59 after applying the offset.
+This checks their calendar position, not whether a leap second was actually announced for
+that month; the validator does not maintain a historical leap-second table.
+
+Format validation does not convert timestamps to Foundation values. In particular,
+`JSONSchemaConversion`'s `Conversions.dateTime` still uses a Foundation formatter configured
+with fractional seconds and need not parse every valid RFC 3339 timestamp.
+
 ## Check a schema itself
 
 Constructing a `Schema` is different from checking it against the dialect's meta-schema:
