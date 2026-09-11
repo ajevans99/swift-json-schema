@@ -139,4 +139,12 @@ public final class Context: Sendable {
     self.lockedIfConditionalResults = LockIsolated([:])
     self.lockedActiveVocabularies = LockIsolated(nil)
   }
+
+  package func independentContext() -> Context {
+    Context(
+      dialect: dialect,
+      remoteSchema: remoteSchemaStorage,
+      formatValidators: Array(formatValidators.values)
+    )
+  }
 }

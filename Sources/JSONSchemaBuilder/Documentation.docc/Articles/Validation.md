@@ -123,3 +123,57 @@ let item = newItemSchema.validate(itemInstance) // Parsed<Item, String>
 The library also provides ``JSONSchema/init(_:component:)`` to make it easy to transform the validated result to a custom type, instead of using the `map`.
 
 Macros will generate the schema for you, so you don't have to write it by hand. <doc:Macros>
+
+## Composition parsing
+
+`parse(_:)` converts JSON into Swift values. Primitive parsers check the input type, but do not
+independently enforce every schema keyword. Use `parseAndValidate(_:validationContext:)` to require
+both a successful conversion and validity against the complete schema.
+
+Compositions also validate each branch's schema before running its parser. Constraints such as
+`minLength`, `pattern`, `const`, nested object requirements, and boolean schemas participate in
+branch selection, even when multiple branches produce the same Swift type:
+
+```swift
+let text = JSONComposition.OneOf(into: String.self) {
+  JSONString().minLength(5)
+  JSONString().maxLength(3)
+}
+let value = try text.parseAndValidate(.string("hi")) // "hi", from the second branch
+```
+
+- `AnyOf` returns the first schema-valid branch whose parser succeeds, in declaration order.
+- `OneOf` requires exactly one branch that is both schema-valid and successfully parsed.
+- `AllOf` requires every branch to validate and parse successfully, and returns the first branch's
+  output. It does not merge object fields or Swift outputs.
+- `Not` rejects a value when its branch both validates and parses successfully.
+
+Mappings still transform the selected output. A custom parser or `compactMap` can reject an
+otherwise schema-valid branch. For example, direct `OneOf.parse` can have one successful parser
+even though two JSON schemas match; `parseAndValidate` still rejects that instance as ambiguous.
+Similarly, a custom parsing failure inside `Not` does not override the complete schema's verdict.
+Schema failures are reported as nested `ParseIssue.runtimeValidationIssue` values, retaining
+keyword and instance locations.
+
+### Validation context and projections
+
+`parseAndValidate` evaluates the complete schema before parsing and reuses its branch results.
+Nested properties, array items, nullable unions, and typed references retain the caller's format
+validators, remote schemas, enclosing definitions, identifiers, vocabulary, and dynamic-reference
+scope. Direct composition, object, and array parsing uses a default draft 2020-12 context; pass
+`validationContext` to `parseAndValidate` when external schemas or custom formats are needed.
+
+Custom components, `flatMap`, and type-erased components can parse a shape different from their
+emitted `schemaValue`, such as an object projection of `allOf`. Unmatched, self-contained branches
+are evaluated separately with the caller's dialect and format validators, while the original full
+schema remains authoritative. This does not add field merging to `AllOf`.
+
+A projected branch containing `$ref` or `$dynamicRef`, or a projection under a custom vocabulary,
+requires a matching position and branch schema in the original validation tree. Otherwise parsing
+reports that branch validation is unavailable, rather than guessing a reference scope or using
+default validation options. Keep the parsing and emitted schema structures aligned for referenced
+projections, or inline their references before projecting.
+
+This also applies when a projection hides a branch's own custom vocabulary. Typed reference parsers
+only reuse evaluations belonging to their emitted reference schema; an unmatched reference cannot
+borrow another target's results or independently validate its nested compositions.

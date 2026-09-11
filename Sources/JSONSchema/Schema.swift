@@ -2,6 +2,7 @@ import Foundation
 
 public struct Schema: ValidatableSchema {
   let schema: any ValidatableSchema
+  let rawSchema: JSONValue
   let location: JSONPointer
   let context: Context
   let documentURL: URL
@@ -12,6 +13,7 @@ public struct Schema: ValidatableSchema {
     context: Context,
     baseURI: URL = URL(string: "https://swift-json-schema.invalid/in-memory")!
   ) throws(SchemaIssue) {
+    self.rawSchema = rawSchema
     self.location = location
     self.context = context
 
@@ -74,13 +76,14 @@ public struct Schema: ValidatableSchema {
     documentURL: URL = URL(string: "https://swift-json-schema.invalid/in-memory")!
   ) {
     self.schema = schema
+    self.rawSchema = schema.jsonValue
     self.location = location
     self.context = context
     self.documentURL = documentURL
   }
 
   public func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
-    schema.validate(instance, at: location)
+    SchemaEvaluation.record(self, instance: instance) { schema.validate(instance, at: location) }
   }
 
   func validate(
@@ -88,8 +91,10 @@ public struct Schema: ValidatableSchema {
     at location: JSONPointer,
     annotations: inout AnnotationContainer
   ) -> ValidationResult {
-    (schema as? ObjectSchema)?.validate(instance, at: location, annotations: &annotations)
-      ?? schema.validate(instance, at: location)
+    SchemaEvaluation.record(self, instance: instance) {
+      (schema as? ObjectSchema)?.validate(instance, at: location, annotations: &annotations)
+        ?? schema.validate(instance, at: location)
+    }
   }
 
   /// Validates this schema against its dialect's meta-schema.

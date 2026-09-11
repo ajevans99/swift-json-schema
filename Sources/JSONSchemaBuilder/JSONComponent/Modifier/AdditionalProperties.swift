@@ -29,6 +29,13 @@ extension JSONComponents {
       _ input: JSONValue
     ) -> Parsed<(Base.Output, AdditionalPropertiesParseResult<AdditionalProps.Output>), ParseIssue>
     {
+      ParsingScope.withRoot(self, value: input) { parseProperties(input) }
+    }
+
+    private func parseProperties(
+      _ input: JSONValue
+    ) -> Parsed<(Base.Output, AdditionalPropertiesParseResult<AdditionalProps.Output>), ParseIssue>
+    {
       guard case .object(let dictionary) = input else {
         return .error(.typeMismatch(expected: .object, actual: input))
       }
@@ -39,7 +46,12 @@ extension JSONComponents {
       // Validate the additional properties
       var additionalProperties: [String: AdditionalProps.Output] = [:]
       for (key, value) in dictionary where base.schemaValue.object?.keys.contains(key) == false {
-        switch additionalPropertiesSchema.parse(value) {
+        switch ParsingScope.parse(
+          additionalPropertiesSchema,
+          value: value,
+          schemaTokens: [Keywords.AdditionalProperties.name],
+          instanceTokens: [key]
+        ) {
         case .valid(let output): additionalProperties[key] = output
         case .invalid: continue
         }

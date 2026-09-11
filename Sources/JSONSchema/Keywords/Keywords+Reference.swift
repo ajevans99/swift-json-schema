@@ -51,7 +51,9 @@ extension Keywords {
       }
 
       var refAnnotations = AnnotationContainer()
-      let result = schema.validate(input, at: instanceLocation, annotations: &refAnnotations)
+      let result = SchemaEvaluation.$referenceKeyword.withValue(Self.name) {
+        schema.validate(input, at: instanceLocation, annotations: &refAnnotations)
+      }
       if !result.isValid {
         let prefixedErrors =
           result.errors?
@@ -106,7 +108,9 @@ extension Keywords {
       }
 
       var refAnnotations = AnnotationContainer()
-      let result = schema.validate(input, at: instanceLocation, annotations: &refAnnotations)
+      let result = SchemaEvaluation.$referenceKeyword.withValue(Self.name) {
+        schema.validate(input, at: instanceLocation, annotations: &refAnnotations)
+      }
       if !result.isValid {
         let prefixedErrors =
           result.errors?

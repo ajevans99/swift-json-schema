@@ -38,6 +38,12 @@ extension JSONComponents {
     public func parse(
       _ input: JSONValue
     ) -> Parsed<(Base.Output, PatternPropertiesParseResult<PatternProps.Output>), ParseIssue> {
+      ParsingScope.withRoot(self, value: input) { parseProperties(input) }
+    }
+
+    private func parseProperties(
+      _ input: JSONValue
+    ) -> Parsed<(Base.Output, PatternPropertiesParseResult<PatternProps.Output>), ParseIssue> {
       guard case .object(let dict) = input else {
         return .error(.typeMismatch(expected: .object, actual: input))
       }
@@ -55,7 +61,12 @@ extension JSONComponents {
         }
         for (key, value) in dict where key.firstMatch(of: regex) != nil {
           let singleKeyDict = [patternString: value]
-          switch patternPropertiesSchema.validate(singleKeyDict) {
+          let parsed = ParsingScope.$propertyLocation.withValue(
+            .init(keyword: Keywords.PatternProperties.name, instanceKey: key)
+          ) {
+            patternPropertiesSchema.validate(singleKeyDict)
+          }
+          switch parsed {
           case .valid(let out):
             matches[key] = .init(value: out, regex: patternString)
           case .invalid:

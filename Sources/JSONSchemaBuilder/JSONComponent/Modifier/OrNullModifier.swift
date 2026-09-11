@@ -126,11 +126,21 @@ where Wrapped.Output == WrappedValue {
   }
 
   public func parse(_ value: JSONValue) -> Parsed<WrappedValue?, ParseIssue> {
+    ParsingScope.withRoot(self, value: value) { parseWrapped(value) }
+  }
+
+  private func parseWrapped(_ value: JSONValue) -> Parsed<WrappedValue?, ParseIssue> {
     // Accept null - return nil for the optional type
     if case .null = value {
       return .valid(nil)
     }
-    return wrapped.parse(value).map(Optional.some)
+    return
+      ParsingScope.parse(
+        wrapped,
+        value: value,
+        schemaTokens: [composition.keywordName, "0"]
+      )
+      .map(Optional.some)
   }
 }
 

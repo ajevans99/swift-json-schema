@@ -35,6 +35,12 @@ extension JSONComponents {
     public func parse(
       _ input: JSONValue
     ) -> Parsed<(Base.Output, CapturedPropertyNames<Names.Output>), ParseIssue> {
+      ParsingScope.withRoot(self, value: input) { parseProperties(input) }
+    }
+
+    private func parseProperties(
+      _ input: JSONValue
+    ) -> Parsed<(Base.Output, CapturedPropertyNames<Names.Output>), ParseIssue> {
       guard case .object(let dict) = input else {
         return .error(.typeMismatch(expected: .object, actual: input))
       }
@@ -44,7 +50,12 @@ extension JSONComponents {
       var seen: [Names.Output] = []
       var raw: [String] = []
       for (key, _) in dict {
-        switch propertyNamesSchema.parse(.string(key)) {
+        switch ParsingScope.parse(
+          propertyNamesSchema,
+          value: .string(key),
+          schemaTokens: [Keywords.PropertyNames.name],
+          instanceTokens: [key]
+        ) {
         case .valid(let name):
           seen.append(name)
           raw.append(key)

@@ -46,12 +46,23 @@ public enum JSONComposition: Sendable {
     }
 
     public func parse(_ value: JSONValue) -> Parsed<Output, ParseIssue> {
+      ParsingScope.withRoot(self, value: value) { parseBranches(value) }
+    }
+
+    private func parseBranches(_ value: JSONValue) -> Parsed<Output, ParseIssue> {
       var allErrors: [ParseIssue] = []
 
-      for component in components {
-        switch component.parse(value) {
-        case .valid(let output): return .valid(output)
-        case .invalid(let errors): allErrors.append(contentsOf: errors)
+      for (index, component) in components.enumerated() {
+        switch ParsingScope.parseBranch(
+          component,
+          value: value,
+          keyword: Keywords.AnyOf.name,
+          index: index,
+          composition: .anyOf
+        ) {
+        case .failure(let error): return .error(error)
+        case .success(.valid(let output)): return .valid(output)
+        case .success(.invalid(let errors)): allErrors.append(contentsOf: errors)
         }
       }
       return .error(
@@ -77,17 +88,31 @@ public enum JSONComposition: Sendable {
     }
 
     public func parse(_ value: JSONValue) -> Parsed<Output, ParseIssue> {
+      ParsingScope.withRoot(self, value: value) { parseBranches(value) }
+    }
+
+    private func parseBranches(_ value: JSONValue) -> Parsed<Output, ParseIssue> {
       var combinedErrors: [ParseIssue] = []
       var validResult: Output?
+      var hasFailure = false
 
-      for component in components {
-        switch component.parse(value) {
-        case .valid(let result): if validResult == nil { validResult = result }
-        case .invalid(let errors): combinedErrors.append(contentsOf: errors)
+      for (index, component) in components.enumerated() {
+        switch ParsingScope.parseBranch(
+          component,
+          value: value,
+          keyword: Keywords.AllOf.name,
+          index: index,
+          composition: .allOf
+        ) {
+        case .failure(let error): return .error(error)
+        case .success(.valid(let result)): if validResult == nil { validResult = result }
+        case .success(.invalid(let errors)):
+          hasFailure = true
+          combinedErrors.append(contentsOf: errors)
         }
       }
 
-      guard let validResult, combinedErrors.isEmpty else {
+      guard let validResult, !hasFailure else {
         return .error(
           .compositionFailure(
             type: .allOf,
@@ -117,13 +142,24 @@ public enum JSONComposition: Sendable {
     }
 
     public func parse(_ value: JSONValue) -> Parsed<Output, ParseIssue> {
+      ParsingScope.withRoot(self, value: value) { parseBranches(value) }
+    }
+
+    private func parseBranches(_ value: JSONValue) -> Parsed<Output, ParseIssue> {
       var validResults: [Output] = []
       var combinedErrors: [ParseIssue] = []
 
-      for component in components {
-        switch component.parse(value) {
-        case .valid(let result): validResults.append(result)
-        case .invalid(let errors): combinedErrors.append(contentsOf: errors)
+      for (index, component) in components.enumerated() {
+        switch ParsingScope.parseBranch(
+          component,
+          value: value,
+          keyword: Keywords.OneOf.name,
+          index: index,
+          composition: .oneOf
+        ) {
+        case .failure(let error): return .error(error)
+        case .success(.valid(let result)): validResults.append(result)
+        case .success(.invalid(let errors)): combinedErrors.append(contentsOf: errors)
         }
       }
 
@@ -156,12 +192,28 @@ public enum JSONComposition: Sendable {
     }
 
     public func parse(_ value: JSONValue) -> Parsed<JSONValue, ParseIssue> {
-      switch component.parse(value) {
-      case .valid:
-        return .error(
-          .compositionFailure(type: .not, reason: "valid against not schema", nestedErrors: [])
-        )
-      case .invalid: return .valid(value)
+      ParsingScope.withRoot(self, value: value) {
+        let evaluation: SchemaEvaluation
+        switch ParsingScope.branchEvaluation(
+          component,
+          value: value,
+          keyword: Keywords.Not.name,
+          composition: .not
+        ) {
+        case .failure(let error): return .error(error)
+        case .success(let result): evaluation = result
+        }
+        guard evaluation.result.isValid else { return .valid(value) }
+        let parsed = ParsingScope.$current.withValue(
+          ParsingScope.current?.descending(to: evaluation)
+        ) { component.parse(value) }
+        switch parsed {
+        case .valid:
+          return .error(
+            .compositionFailure(type: .not, reason: "valid against not schema", nestedErrors: [])
+          )
+        case .invalid: return .valid(value)
+        }
       }
     }
   }
