@@ -26,10 +26,6 @@ let package = Package(
       name: "JSONSchemaBuilder",
       targets: ["JSONSchemaBuilder"]
     ),
-    .executable(
-      name: "JSONSchemaClient",
-      targets: ["JSONSchemaClient"]
-    ),
     .library(
       name: "JSONSchemaConversion",
       targets: ["JSONSchemaConversion"]
@@ -120,17 +116,6 @@ let package = Package(
         .product(name: "SwiftParserDiagnostics", package: "swift-syntax"),
         .product(name: "SwiftBasicFormat", package: "swift-syntax"),
         .product(name: "SwiftDiagnostics", package: "swift-syntax"),
-      ]
-    ),
-
-    // A client of the library, which is able to use the macro in its own code.
-    .executableTarget(
-      name: "JSONSchemaClient",
-      dependencies: [
-        "JSONSchema",
-        "JSONSchemaBuilder",
-        "JSONSchemaMacro",
-        "JSONSchemaConversion",
       ]
     ),
 

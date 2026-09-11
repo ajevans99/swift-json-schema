@@ -8,6 +8,27 @@ Welcome to Swift JSON Schema! Contributions are welcome and greatly appreciated.
 - Write clear and concise comments where necessary.
 - Ensure your code is well-documented and includes meaningful test cases.
 
+## Running Tests
+
+Use Swift 6.1 or later. Initialize the conformance suites at their committed revisions before running tests:
+
+```bash
+git submodule update --init --recursive
+swift test
+```
+
+The main package publishes libraries, not a demo executable. Add runnable examples and regressions to the existing test targets rather than a scratch client:
+
+- `Tests/JSONSchemaBuilderTests/CompileTimeMacroTests.swift` checks that generated macro expansions compile.
+- `Tests/JSONSchemaIntegrationTests/` exercises macros, parsing, validation, and conversions together.
+- `DocumentationExampleTests.swift` files keep documentation examples executable.
+
+To run just the integration tests:
+
+```bash
+swift test --filter JSONSchemaIntegrationTests
+```
+
 ## Code Formatting
 
 All code must be formatted using Swift format to ensure consistency across the codebase. The CI pipeline will check for formatting issues automatically. You can add the `auto-format` label to your pull requests to enable automatic Swift formatting before merging.
