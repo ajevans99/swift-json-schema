@@ -1,3 +1,4 @@
+import SwiftBasicFormat
 import SwiftDiagnostics
 import SwiftParser
 import SwiftSyntax
@@ -79,6 +80,98 @@ struct SchemaPlanningTests {
     #expect(field.modifiers.map(\.name.text) == ["description"])
     #expect(field.description == nil)
     #expect(field.defaultValue == nil)
+  }
+
+  @Test(arguments: [
+    ("String", "StringOptions", "minLength", "maxLength"),
+    ("Int", "NumberOptions", "minimum", "maximum"),
+    ("[String]", "ArrayOptions", "minItems", "maxItems"),
+    ("Value", "ObjectOptions", "minProperties", "maxProperties"),
+  ])
+  func customSchemaPreservesPropertyAttributeOrder(
+    type: String,
+    attribute: String,
+    before: String,
+    after: String
+  ) throws {
+    let plan = try plan(
+      """
+      struct Example {
+        @\(attribute)(.\(before)(1))
+        @SchemaOptions(.comment("discarded"), .customSchema(Custom.self), .description("kept"))
+        @\(attribute)(.\(after)(4))
+        @SchemaOptions(.title("last"))
+        let value: \(type)
+      }
+      """
+    )
+    let field = try #require(try fields(plan).first)
+    guard case .custom(let value) = field.base else {
+      Issue.record("Expected a custom base")
+      return
+    }
+    #expect(plan.diagnostics.isEmpty)
+    #expect(value.trimmedDescription == "Custom.self")
+    #expect(field.modifiers.map(\.name.text) == ["description", after, "title"])
+  }
+
+  @Test(arguments: ["struct", "final class"])
+  func customSchemaPreservesDeclarationAttributeOrder(kind: String) throws {
+    let plan = try plan(
+      """
+      @ObjectOptions(.minProperties(2))
+      @SchemaOptions(.comment("discarded"), .customSchema(Custom.self), .description("kept"))
+      @ObjectOptions(.maxProperties(4))
+      @SchemaOptions(.title("last"))
+      \(kind) Example {
+        let value: String
+        init(value: String) { self.value = value }
+      }
+      """
+    )
+    #expect(plan.diagnostics.isEmpty)
+    let declaration = try #require(SchemaEmitter.declarations(for: plan).first)
+    #expect(
+      declaration.formatted(using: BasicFormat(indentationWidth: .spaces(2))).trimmedDescription
+        == """
+        @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+        static var schema: some JSONSchemaComponent<Example> {
+          JSONSchema(Example.init) {
+            Custom.self.schema
+            .description("kept")
+            .maxProperties(4)
+            .title("last")
+          }
+        }
+        """
+    )
+  }
+
+  @Test(arguments: ["", "keyStrategy: nil"])
+  func absentKeyStrategyPreservesDefaultKeyPrecedence(arguments: String) throws {
+    let plan = try plan(
+      """
+      struct Example {
+        @SchemaOptions(.key("custom"))
+        let firstName: String
+        let lastName: String
+        let displayName: String
+        enum CodingKeys: String {
+          case firstName = "ignored"
+          case lastName = "coded"
+        }
+      }
+      """,
+      arguments: arguments
+    )
+    #expect(plan.diagnostics.isEmpty)
+    #expect(plan.configuration.keyStrategy == nil)
+    #expect(
+      try fields(plan).map(\.key.trimmedDescription) == [
+        "\"custom\"", "\"coded\"", "\"displayName\"",
+      ]
+    )
+    #expect(SchemaEmitter.declarations(for: plan).count == 1)
   }
 
   @Test func customSchemaDoesNotLeaveUnusedSelfReference() throws {

@@ -12,6 +12,8 @@ public enum SchemaComposition {
 /// for `optionalNulls` and explicit `.oneOf` or `.anyOf` cases for composition arguments;
 /// the macro cannot evaluate arbitrary Swift expressions for these settings.
 ///
+/// Passing `keyStrategy: nil` is equivalent to omitting the key strategy.
+///
 /// Unsupported property types produce a warning and are excluded. Unsupported enum
 /// associated values produce an error rather than a partially generated case.
 @attached(extension, conformances: Schemable)

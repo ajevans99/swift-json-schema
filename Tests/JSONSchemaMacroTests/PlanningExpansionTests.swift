@@ -6,10 +6,11 @@ import Testing
 struct PlanningExpansionTests {
   let macros: [String: Macro.Type] = ["Schemable": SchemableMacro.self]
 
-  @Test func explicitOptionalSpellingUsesScalarNullStyle() {
+  @Test(arguments: ["", "(keyStrategy: nil)"])
+  func explicitOptionalSpellingUsesScalarNullStyle(configuration: String) {
     assertMacroExpansion(
       """
-      @Schemable
+      @Schemable\(configuration)
       struct Example {
         let name: Swift.Optional<Swift.String>
       }

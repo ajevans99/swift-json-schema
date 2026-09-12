@@ -50,6 +50,44 @@ private enum PlanningFixtures {
       case `default` = #"name"key"#
     }
   }
+
+  struct ReplacementString: Schemable {
+    static var schema: JSONString {
+      JSONString()
+    }
+  }
+
+  struct ReplacementObject: Schemable {
+    static var schema: some JSONSchemaComponent<String> {
+      JSONObject {
+        JSONProperty(key: "replacement") { JSONString() }
+          .required()
+      }
+    }
+  }
+
+  @Schemable
+  struct ReplacedProperty {
+    @StringOptions(.minLength(2))
+    @SchemaOptions(.customSchema(ReplacementString.self), .description("kept"))
+    @StringOptions(.maxLength(4))
+    @SchemaOptions(.title("last"))
+    let value: String
+  }
+
+  @Schemable
+  @ObjectOptions(.minProperties(2))
+  @SchemaOptions(.customSchema(ReplacementObject.self), .description("kept"))
+  @ObjectOptions(.maxProperties(2))
+  @SchemaOptions(.title("last"))
+  struct ReplacedObject {
+    let value: String
+  }
+
+  @Schemable(keyStrategy: nil)
+  struct IdentityKeys {
+    let firstName: String
+  }
 }
 
 @Schemable
@@ -115,5 +153,62 @@ struct MacroPlanningIntegrationTests {
     let slash = try PlanningFixtures.EscapedValue.schema.parse(instance: #""a\\b""#)
     #expect(quote.value == .quote)
     #expect(slash.value == .slash)
+  }
+
+  @Test func propertyReplacementDiscardsEarlierConstraintsAndKeepsLaterOnes() throws {
+    let schema = PlanningFixtures.ReplacedProperty.schema
+    let expected: JSONValue = [
+      "type": "object",
+      "properties": [
+        "value": [
+          "type": "string",
+          "description": "kept",
+          "maxLength": 4,
+          "title": "last",
+        ]
+      ],
+      "required": ["value"],
+    ]
+    #expect(schema.schemaValue.value == expected)
+
+    #expect(try schema.parseAndValidate(instance: #"{"value":"x"}"#).value == "x")
+    #expect(try schema.parseAndValidate(instance: #"{"value":"abcd"}"#).value == "abcd")
+    #expect(throws: ParseAndValidateIssue.self) {
+      try schema.parseAndValidate(instance: #"{"value":"abcde"}"#)
+    }
+  }
+
+  @Test func declarationReplacementDiscardsEarlierConstraintsAndKeepsLaterOnes() throws {
+    let schema = PlanningFixtures.ReplacedObject.schema
+    let expected: JSONValue = [
+      "type": "object",
+      "properties": ["replacement": ["type": "string"]],
+      "required": ["replacement"],
+      "description": "kept",
+      "maxProperties": 2,
+      "title": "last",
+    ]
+    #expect(schema.schemaValue.value == expected)
+
+    #expect(try schema.parseAndValidate(instance: #"{"replacement":"x"}"#).value == "x")
+    #expect(
+      try schema.parseAndValidate(instance: #"{"replacement":"x","extra":true}"#).value == "x"
+    )
+    #expect(throws: ParseAndValidateIssue.self) {
+      try schema.parseAndValidate(instance: #"{"replacement":"x","extra":true,"another":false}"#)
+    }
+  }
+
+  @Test func explicitNilKeyStrategyCompilesAndUsesPropertyNames() throws {
+    let schema = PlanningFixtures.IdentityKeys.schema
+    let expected: JSONValue = [
+      "type": "object",
+      "properties": ["firstName": ["type": "string"]],
+      "required": ["firstName"],
+    ]
+    #expect(schema.schemaValue.value == expected)
+    let result = try schema.parse(instance: #"{"firstName":"Taylor"}"#)
+    #expect(result.value?.firstName == "Taylor")
+    #expect(result.errors == nil)
   }
 }

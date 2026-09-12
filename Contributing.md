@@ -60,7 +60,7 @@ The `@Schemable` implementation is a syntax-backed parse, plan, and emit pipelin
 
 Keep policy decisions out of emitters and generated expressions out of type analysis. Add new syntax support to the type parser, new option interpretation to option parsing/planning, and new rendering behavior to the relevant emitter.
 
-Option ordering is significant: `.customSchema(...)` replaces the accumulated schema, discarding defaults and modifiers before it. Modifiers after it are retained. Property keys retain the precedence `.key(...)`, `CodingKeys`, `keyStrategy`, then the Swift property name. Every recognized type-specific option group participates in both diagnostics and emission.
+Option ordering is significant across attributes as well as within them: `.customSchema(...)` replaces the accumulated schema, discarding defaults and modifiers before it. Modifiers after it are retained. Preserve source order when combining general and type-specific options for both properties and declarations; do not regroup them by category. Property keys retain the precedence `.key(...)`, `CodingKeys`, `keyStrategy`, then the Swift property name. An explicit `keyStrategy: nil` is normalized to an absent strategy. Every recognized type-specific option group participates in both diagnostics and emission.
 
 Access control is normalized for protocol witnesses: `open` declarations emit `public` witnesses, `private` declarations emit `fileprivate` witnesses, and conformance extensions have no explicit access modifier. Non-access modifiers such as `final` and `indirect` are never copied onto schema properties.
 

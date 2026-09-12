@@ -85,8 +85,8 @@ struct ParsedOptions {
     self.diagnostics = diagnostics
   }
 
-  func options(for attribute: OptionAttribute) -> [ParsedOption] {
-    groups.filter { $0.attribute == attribute }.flatMap(\.options)
+  func options(for attributes: OptionAttribute...) -> [ParsedOption] {
+    groups.filter { attributes.contains($0.attribute) }.flatMap(\.options)
   }
 
   var typeSpecific: [Group] { groups.filter { $0.attribute != .schema } }

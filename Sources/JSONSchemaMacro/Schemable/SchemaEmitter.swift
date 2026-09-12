@@ -58,7 +58,7 @@ enum SchemaEmitter {
     )
     var expression: CodeBlockItemSyntax = "JSONObject { \(statements) }"
     expression = SchemaOptionsGenerator.apply(
-      declaration.options.options(for: .schema) + declaration.options.options(for: .object),
+      declaration.options.options(for: .schema, .object),
       to: expression
     )
     if members.contains(where: { $0.field.usesSelfReference }) {

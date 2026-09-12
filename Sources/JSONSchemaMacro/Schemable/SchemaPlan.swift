@@ -162,7 +162,7 @@ enum SchemaPlanner {
       key: key,
       defaultValue: member.defaultValue,
       docString: member.docString,
-      options: generalOptions + member.options.typeSpecific.flatMap(\.options),
+      options: member.options.groups.flatMap(\.options),
       nullStyle: nullStyle
     )
     return .included(PlannedMember(source: member, field: field))

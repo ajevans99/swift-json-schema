@@ -14,6 +14,9 @@ struct MacroConfiguration {
       arguments?.first { $0.label?.text == name }?.expression
     }
     keyStrategy = argument("keyStrategy")
+      .flatMap {
+        $0.is(NilLiteralExprSyntax.self) ? nil : $0
+      }
     if let value = argument("optionalNulls") {
       guard let literal = value.as(BooleanLiteralExprSyntax.self) else {
         throw DiagnosticsError(diagnostics: [
