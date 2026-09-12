@@ -73,6 +73,32 @@ private enum PlanningFixtures {
   }
 
   @Schemable
+  struct RecursiveNode {
+    let children: [RecursiveNode]
+
+    init(children: [Self]) {
+      self.children = children
+    }
+
+    init(children: [String]) {
+      self.children = []
+    }
+  }
+
+  @Schemable
+  struct RecursiveNodeWithMatchingInitializerLast {
+    let children: [RecursiveNodeWithMatchingInitializerLast]
+
+    init(children: [String]) {
+      self.children = []
+    }
+
+    init(children: [Self]) {
+      self.children = children
+    }
+  }
+
+  @Schemable
   enum Event {
     case message(String, count: Swift.Optional<Int>)
   }
@@ -198,6 +224,25 @@ struct MacroPlanningIntegrationTests {
     #expect(record.name == "example")
     #expect(record.count == 42)
     #expect(result.errors == nil)
+  }
+
+  @Test func matchingSelfInitializerOverloadCompilesAndParsesRecursively() throws {
+    let node = try PlanningFixtures.RecursiveNode.schema.parseAndValidate(
+      instance: #"{"children":[{"children":[]}]}"#
+    )
+    #expect(node.children.count == 1)
+    let child = try #require(node.children.first)
+    #expect(child.children.isEmpty)
+  }
+
+  @Test func laterMatchingSelfInitializerOverloadCompilesAndParsesRecursively() throws {
+    let node = try PlanningFixtures.RecursiveNodeWithMatchingInitializerLast.schema
+      .parseAndValidate(
+        instance: #"{"children":[{"children":[]}]}"#
+      )
+    #expect(node.children.count == 1)
+    let child = try #require(node.children.first)
+    #expect(child.children.isEmpty)
   }
 
   @Test func privateDeclarationConformanceCompilesAndParses() throws {

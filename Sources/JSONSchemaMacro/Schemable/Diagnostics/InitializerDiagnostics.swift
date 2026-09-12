@@ -122,7 +122,10 @@ struct InitializerDiagnostics {
     guard case .success(let left) = SchemaType.parse(lhs),
       case .success(let right) = SchemaType.parse(rhs)
     else { return lhs.trimmedDescription == rhs.trimmedDescription }
-    return typesMatch(left, right)
+    return typesMatch(
+      left.resolvingSelfReferences(named: typeName.text),
+      right.resolvingSelfReferences(named: typeName.text)
+    )
   }
 
   private func typesMatch(_ lhs: SchemaType, _ rhs: SchemaType) -> Bool {

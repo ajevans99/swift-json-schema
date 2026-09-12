@@ -383,6 +383,49 @@ struct SchemaPlanningTests {
     #expect(plan.diagnostics.isEmpty)
   }
 
+  @Test(arguments: [false, true], [false, true])
+  func recursiveInitializerOverloadsNormalizeSelfInBothDeclarationOrders(
+    matchingInitializerFirst: Bool,
+    propertyUsesSelf: Bool
+  ) throws {
+    let propertyType = propertyUsesSelf ? "Self" : "Node"
+    let parameterType = propertyUsesSelf ? "Node" : "Self"
+    let firstType = matchingInitializerFirst ? parameterType : "String"
+    let firstValue = matchingInitializerFirst ? "children" : "[]"
+    let secondType = matchingInitializerFirst ? "String" : parameterType
+    let secondValue = matchingInitializerFirst ? "[]" : "children"
+    let plan = try plan(
+      """
+      struct Node {
+        let children: [\(propertyType)]
+        init(children: [\(firstType)]) { self.children = \(firstValue) }
+        init(children: [\(secondType)]) { self.children = \(secondValue) }
+      }
+      """
+    )
+    #expect(plan.diagnostics.isEmpty)
+  }
+
+  @Test func initializerSelfNormalizationPreservesUnrelatedTypeMismatch() throws {
+    let plan = try plan(
+      """
+      struct Node {
+        let children: [Self]
+        init(children: [OtherNode]) { self.children = [] }
+      }
+      """
+    )
+    #expect(plan.diagnostics.count == 1)
+    let diagnostic = try #require(plan.diagnostics.first)
+    #expect(diagnostic.diagMessage.severity == .error)
+    #expect(
+      diagnostic.message == """
+        Parameter 'children' has type '[OtherNode]' but schema expects '[Self]'. \
+        This type mismatch will cause the generated schema to fail.
+        """
+    )
+  }
+
   @Test(arguments: [false, true])
   func incompatibleOverloadsPreserveFirstCandidateDiagnostic(stringInitializerFirst: Bool) throws {
     let firstType = stringInitializerFirst ? "String" : "Bool"
