@@ -87,16 +87,15 @@ struct JSONParser {
   let bytes: UnsafeBufferPointer<UInt8>
   var index: Int = 0
 
-  /// Hard limit on the depth of nested objects/arrays. Prevents stack
-  /// overflow on adversarially deep input (e.g. JSONTestSuite's
-  /// `n_structure_100000_opening_arrays.json`). 256 comfortably accepts
-  /// any reasonable real-world JSON; legitimate use cases rarely exceed
-  /// 100 levels. The value is conservative because debug-build stack
-  /// frames are large enough that allowing deeper recursion risks
-  /// overflowing the macOS thread default (1MB) before the explicit
-  /// check fires.
+  /// Hard limit on nested objects/arrays. Container frames live in an
+  /// explicit stack so parsing does not consume call-stack space per level.
+  /// The limit bounds that stack even for adversarially deep input.
   static let maxDepth: Int = 256
-  var depth: Int = 0
+
+  private enum Container {
+    case object(OrderedDictionary<String, JSONValue>, key: String)
+    case array([JSONValue])
+  }
 
   // MARK: ASCII / control byte constants
 
@@ -175,99 +174,105 @@ struct JSONParser {
   // MARK: - Dispatch
 
   mutating func parseValue() throws -> JSONValue {
-    skipWhitespace()
-    guard let b = peek() else {
-      throw error("Unexpected end of input while reading value")
-    }
-    switch b {
-    case Self.openBrace: return try parseObject()
-    case Self.openBracket: return try parseArray()
-    case Self.quote: return .string(try parseString())
-    case Self.lowerT, Self.lowerF: return try parseBool()
-    case Self.lowerN: return try parseNull()
-    case Self.minus, Self.zero ... Self.nine: return try parseNumber()
-    default:
-      throw error("Unexpected character '\(printable(b))'")
+    var stack: [Container] = []
+    while true {
+      skipWhitespace()
+      guard let b = peek() else {
+        throw error("Unexpected end of input while reading value")
+      }
+      var value: JSONValue
+      switch b {
+      case Self.openBrace, Self.openBracket:
+        index += 1
+        // Report depth errors just after the opening delimiter, as before.
+        guard stack.count < Self.maxDepth else {
+          throw error("Maximum nesting depth (\(Self.maxDepth)) exceeded")
+        }
+        skipWhitespace()
+        if b == Self.openBrace {
+          guard peek() == Self.closeBrace else {
+            let key = try parseObjectKey()
+            stack.append(.object([:], key: key))
+            continue
+          }
+          index += 1
+          value = .object([:])
+        } else {
+          guard peek() == Self.closeBracket else {
+            stack.append(.array([]))
+            continue
+          }
+          index += 1
+          value = .array([])
+        }
+      case Self.quote: value = .string(try parseString())
+      case Self.lowerT, Self.lowerF: value = try parseBool()
+      case Self.lowerN: value = try parseNull()
+      case Self.minus, Self.zero ... Self.nine: value = try parseNumber()
+      default:
+        throw error("Unexpected character '\(printable(b))'")
+      }
+
+      // A completed child is attached to its parent; closed parents become
+      // the next child to attach, without recursively returning through them.
+      while let container = stack.popLast() {
+        skipWhitespace()
+        switch consume container {
+        case .object(var dict, let key):
+          // Reinsert duplicates so the last occurrence wins on position too.
+          if dict[key] != nil {
+            dict.removeValue(forKey: key)
+          }
+          dict[key] = value
+          switch peek() {
+          case Self.comma:
+            index += 1
+            let nextKey = try parseObjectKey()
+            stack.append(.object(dict, key: nextKey))
+          case Self.closeBrace:
+            index += 1
+            value = .object(dict)
+            continue
+          case nil:
+            throw error("Unexpected end of input inside object")
+          default:
+            throw error("Expected ',' or '}' in object")
+          }
+        case .array(var array):
+          array.append(value)
+          switch peek() {
+          case Self.comma:
+            index += 1
+            stack.append(.array(array))
+          case Self.closeBracket:
+            index += 1
+            value = .array(array)
+            continue
+          case nil:
+            throw error("Unexpected end of input inside array")
+          default:
+            throw error("Expected ',' or ']' in array")
+          }
+        }
+        break
+      }
+      if stack.isEmpty {
+        return value
+      }
     }
   }
 
   // MARK: - Structure
 
-  mutating func parseObject() throws -> JSONValue {
-    try expect(Self.openBrace)
-    depth += 1
-    defer { depth -= 1 }
-    if depth > Self.maxDepth {
-      throw error("Maximum nesting depth (\(Self.maxDepth)) exceeded")
-    }
-    var dict = OrderedDictionary<String, JSONValue>()
+  private mutating func parseObjectKey() throws -> String {
     skipWhitespace()
-    if peek() == Self.closeBrace {
-      index += 1
-      return .object(dict)
+    guard peek() == Self.quote else {
+      throw error("Expected string key in object")
     }
-    while true {
-      skipWhitespace()
-      guard peek() == Self.quote else {
-        throw error("Expected string key in object")
-      }
-      let key = try parseString()
-      skipWhitespace()
-      try expect(Self.colon)
-      let value = try parseValue()
-      // For duplicate keys: remove the previous entry first, then insert.
-      // OrderedDictionary's subscript-set updates the existing slot in
-      // place, which would leave the late-bound key at its original
-      // position. The documented behavior is "last occurrence wins on
-      // value AND position", so re-insert.
-      if dict[key] != nil {
-        dict.removeValue(forKey: key)
-      }
-      dict[key] = value
-      skipWhitespace()
-      switch peek() {
-      case Self.comma:
-        index += 1
-      case Self.closeBrace:
-        index += 1
-        return .object(dict)
-      case nil:
-        throw error("Unexpected end of input inside object")
-      default:
-        throw error("Expected ',' or '}' in object")
-      }
-    }
-  }
-
-  mutating func parseArray() throws -> JSONValue {
-    try expect(Self.openBracket)
-    depth += 1
-    defer { depth -= 1 }
-    if depth > Self.maxDepth {
-      throw error("Maximum nesting depth (\(Self.maxDepth)) exceeded")
-    }
-    var array: [JSONValue] = []
+    let key = try parseString()
     skipWhitespace()
-    if peek() == Self.closeBracket {
-      index += 1
-      return .array(array)
-    }
-    while true {
-      let value = try parseValue()
-      array.append(value)
-      skipWhitespace()
-      switch peek() {
-      case Self.comma:
-        index += 1
-      case Self.closeBracket:
-        index += 1
-        return .array(array)
-      case nil:
-        throw error("Unexpected end of input inside array")
-      default:
-        throw error("Expected ',' or ']' in array")
-      }
-    }
+    try expect(Self.colon)
+    return key
   }
 
   // MARK: - Literals
