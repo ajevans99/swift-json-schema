@@ -193,7 +193,8 @@ informational, including under fixed hashing.
 
 To intentionally refresh an already complete set, dispatch the **Benchmarks**
 workflow on the desired branch with `refresh_baselines=true`. This opt-in
-artifact-generation run skips enforcement and is not evidence of a regression
+artifact-generation run is named **Capture benchmark baselines**, skips
+enforcement, and is not evidence of the **Package benchmarks** regression
 check passing. Commit the unmodified artifact, then run the default workflow
 (`refresh_baselines=false`) separately to enforce it. Pull-request runs use
 the default checking path.

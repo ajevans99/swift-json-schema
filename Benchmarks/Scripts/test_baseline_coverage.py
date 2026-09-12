@@ -171,16 +171,27 @@ class BaselineCoverageTests(unittest.TestCase):
         generation = workflow.split("    - name: Generate benchmark baselines\n", 1)[1]
         generation = generation.split("\n    - ", 1)[0]
         self.assertIn(
-            "steps.baselines.outputs.complete == 'false' || inputs.refresh_baselines",
+            "steps.baselines.outputs.complete == 'false' || "
+            "(github.event_name == 'workflow_dispatch' && inputs.refresh_baselines)",
             generation,
         )
         for name in ("Run OrderedJSON benchmarks", "Run JSONSchema benchmarks"):
             step = workflow.split(f"    - name: {name}\n", 1)[1].split(
                 "\n    - ", 1)[0]
             self.assertIn(
-                "steps.baselines.outputs.complete == 'true' && !inputs.refresh_baselines",
+                "steps.baselines.outputs.complete == 'true' && "
+                "!(github.event_name == 'workflow_dispatch' && inputs.refresh_baselines)",
                 step,
             )
+
+    def test_manual_capture_has_a_distinct_check_name(self):
+        workflow = WORKFLOW.read_text()
+        self.assertIn(
+            "name: ${{ github.event_name == 'workflow_dispatch' && "
+            "inputs.refresh_baselines && 'Capture benchmark baselines' || "
+            "'Package benchmarks' }}",
+            workflow,
+        )
 
     def test_schema_check_survives_orderedjson_failure_without_masking_it(self):
         workflow = WORKFLOW.read_text()
@@ -188,7 +199,7 @@ class BaselineCoverageTests(unittest.TestCase):
         schema_step = schema_step.split("\n    - ", 1)[0]
         self.assertIn(
             "if: ${{ !cancelled() && steps.baselines.outputs.complete == 'true' "
-            "&& !inputs.refresh_baselines }}",
+            "&& !(github.event_name == 'workflow_dispatch' && inputs.refresh_baselines) }}",
             schema_step,
         )
         self.assertNotIn("continue-on-error", workflow)

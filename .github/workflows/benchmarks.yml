@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   benchmarks:
-    name: Package benchmarks
+    name: ${{ github.event_name == 'workflow_dispatch' && inputs.refresh_baselines && 'Capture benchmark baselines' || 'Package benchmarks' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
@@ -46,7 +46,7 @@ jobs:
           echo "complete=false" >> "$GITHUB_OUTPUT"
         fi
     - name: Generate benchmark baselines
-      if: ${{ steps.baselines.outputs.complete == 'false' || inputs.refresh_baselines }}
+      if: ${{ steps.baselines.outputs.complete == 'false' || (github.event_name == 'workflow_dispatch' && inputs.refresh_baselines) }}
       working-directory: Benchmarks
       run: |
         swift package --disable-automatic-resolution --allow-writing-to-package-directory benchmark \
@@ -55,10 +55,10 @@ jobs:
           --path Baselines \
           --no-progress
     - name: Run OrderedJSON benchmarks
-      if: ${{ steps.baselines.outputs.complete == 'true' && !inputs.refresh_baselines }}
+      if: ${{ steps.baselines.outputs.complete == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.refresh_baselines) }}
       run: Benchmarks/Scripts/check-thresholds.sh OrderedJSONBenchmarks
     - name: Run JSONSchema benchmarks
-      if: ${{ !cancelled() && steps.baselines.outputs.complete == 'true' && !inputs.refresh_baselines }}
+      if: ${{ !cancelled() && steps.baselines.outputs.complete == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.refresh_baselines) }}
       run: Benchmarks/Scripts/check-thresholds.sh JSONSchemaBenchmarks
     - name: Upload benchmark baselines
       if: ${{ always() }}
