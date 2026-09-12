@@ -50,21 +50,47 @@ public final class Context: Sendable {
 
   typealias DynamicScope = [String: (document: URL, pointer: JSONPointer, baseURI: URL)]
 
-  @TaskLocal private static var evaluationScopes: [ObjectIdentifier: [DynamicScope]] = [:]
+  /// An immutable frame shares its parent instead of copying the accumulated scope prefix.
+  final class DynamicScopeFrame: Sendable {
+    let context: ObjectIdentifier
+    let scopes: [DynamicScope]
+    let parent: DynamicScopeFrame?
+
+    init(context: ObjectIdentifier, scopes: [DynamicScope], parent: DynamicScopeFrame?) {
+      self.context = context
+      self.scopes = scopes
+      self.parent = parent
+    }
+  }
+
+  @TaskLocal static var evaluationScope: DynamicScopeFrame?
   @TaskLocal private static var vocabularyScopes: [ObjectIdentifier: Set<String>] = [:]
 
   var dynamicScopes: [DynamicScope] {
-    Self.evaluationScopes[ObjectIdentifier(self)] ?? []
+    // Materialize outermost-first order only for reference lookup, not on scope entry.
+    var reversedScopes: [DynamicScope] = []
+    var frame = Self.evaluationScope
+    let identifier = ObjectIdentifier(self)
+    while let current = frame {
+      if current.context == identifier {
+        reversedScopes.append(contentsOf: current.scopes.reversed())
+      }
+      frame = current.parent
+    }
+    return reversedScopes.reversed()
   }
 
   static func withFreshEvaluation<Result>(_ operation: () -> Result) -> Result {
-    $evaluationScopes.withValue([:], operation: operation)
+    $evaluationScope.withValue(nil, operation: operation)
   }
 
   func withDynamicScopes<Result>(_ scopes: [DynamicScope], operation: () -> Result) -> Result {
-    var evaluations = Self.evaluationScopes
-    evaluations[ObjectIdentifier(self), default: []].append(contentsOf: scopes)
-    return Self.$evaluationScopes.withValue(evaluations, operation: operation)
+    let frame = DynamicScopeFrame(
+      context: ObjectIdentifier(self),
+      scopes: scopes,
+      parent: Self.evaluationScope
+    )
+    return Self.$evaluationScope.withValue(frame, operation: operation)
   }
 
   /// Validators used when the ``Keywords.Format`` keyword is present.

@@ -5,6 +5,66 @@ import Testing
 @testable import JSONSchema
 
 struct EvaluationIsolationTests {
+  @Test func nestedDynamicScopesShareTheirPrefix() {
+    let context = Context(dialect: .draft2020_12)
+    let depth = 128
+
+    func descend(_ remaining: Int) {
+      let parent = Context.evaluationScope
+      context.withDynamicScopes([[:]]) {
+        let frame = Context.evaluationScope
+        #expect(frame?.parent === parent)
+        #expect(frame?.scopes.count == 1)
+        if remaining > 1 {
+          descend(remaining - 1)
+        } else {
+          #expect(context.dynamicScopes.count == depth)
+        }
+      }
+      #expect(Context.evaluationScope === parent)
+    }
+
+    Context.withFreshEvaluation {
+      descend(depth)
+      #expect(Context.evaluationScope == nil)
+    }
+  }
+
+  @Test func linkedDynamicScopesPreserveOrderAndContextIsolation() throws {
+    let context = Context(dialect: .draft2020_12)
+    let other = Context(dialect: .draft2020_12)
+    let url = try #require(URL(string: "https://example.com/scopes"))
+    func scope(_ token: String) -> Context.DynamicScope {
+      ["item": (document: url, pointer: JSONPointer(tokens: [token]), baseURI: url)]
+    }
+    func locations(_ context: Context) -> [String] {
+      context.dynamicScopes.compactMap { $0["item"]?.pointer.description }
+    }
+
+    Context.withFreshEvaluation {
+      context.withDynamicScopes([scope("outer-resource"), scope("outer-anchor")]) {
+        other.withDynamicScopes([scope("other-context")]) {
+          context.withDynamicScopes([scope("inner-resource"), scope("inner-anchor")]) {
+            #expect(
+              locations(context)
+                == ["#/outer-resource", "#/outer-anchor", "#/inner-resource", "#/inner-anchor"]
+            )
+            #expect(locations(other) == ["#/other-context"])
+            let frame = Context.evaluationScope
+            Context.withFreshEvaluation {
+              #expect(context.dynamicScopes.isEmpty)
+              #expect(other.dynamicScopes.isEmpty)
+            }
+            #expect(Context.evaluationScope === frame)
+          }
+          #expect(locations(context) == ["#/outer-resource", "#/outer-anchor"])
+        }
+        #expect(other.dynamicScopes.isEmpty)
+      }
+      #expect(context.dynamicScopes.isEmpty)
+    }
+  }
+
   @Test(arguments: [true, false])
   func reentrantValidationStartsFreshAndRestoresOuterScope(validInstance: Bool) throws {
     let validator = ReentrantFormatValidator()
