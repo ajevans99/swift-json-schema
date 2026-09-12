@@ -188,14 +188,25 @@ are committed, including the 16 new cases, so complete corpus discovery selects
 both enforcement steps rather than the baseline-generation path.
 
 The complete set was captured in [Ubuntu run 34718784775](https://github.com/ajevans99/swift-json-schema/actions/runs/34718784775)
-from commit `c37cee044c2d2a58cc6aaf6f3680e72e0c5f7378`, after the server-side
-rebase onto the current parser and validator. The runner was `ubuntu-24.04`
+at checkout `c973aef404346a564e4d22283bae68aae7064b26`: GitHub's PR merge
+of head `c37cee044c2d2a58cc6aaf6f3680e72e0c5f7378` into main
+`15ab4569bf68b1c3a84a8ffdc008b100f5416ebf`, not the head alone. The benchmark
+branch was then rebased onto that same main content; its production sources,
+benchmark definitions, and dependency locks match the capture. The runner was `ubuntu-24.04`
 (image `20260907.300.1`) with Swift 6.3.3, `x86_64-unknown-linux-gnu`.
 The artifact is copied without adjusting counts. It refreshes the previous 66
 cases as well as adding the new cases; all files now contain only
 `mallocCountTotal`, matching enforcement. No macOS or emulated timing results
 are used as thresholds. Timing and throughput remain informational, and the
 10% relative / 10-allocation absolute tolerances are unchanged.
+
+This refresh also incorporates newer correctness fixes, not just capture
+overhead changes. In particular, [#195](https://github.com/ajevans99/swift-json-schema/pull/195)
+isolates concurrent schema evaluations with fresh dynamic-scope frames and
+task-local scope state. That has a real allocation cost in meta-schema
+validation/output workloads; the correctness fix is retained, not classified
+as runner noise or a performance improvement. The refresh spans other source
+changes too, so it does not isolate or quantify the cost of #195 alone.
 
 Baseline generation is only allowed after successful benchmark discovery.
 Listing failures or empty/unrecognized listings fail CI without generating
