@@ -264,7 +264,7 @@ struct ReferenceResolver {
       context: context,
       baseURI: identifierLocation.document
     )
-    context.schemaCache[referenceURL.absoluteString] = schema
+    context.cacheSchema(schema, at: referenceURL.absoluteString)
     return schema
   }
 
@@ -279,7 +279,7 @@ struct ReferenceResolver {
       baseURI: referenceURL
     )
     let uri = (schema.schema as? ObjectSchema)?.uri?.absoluteString ?? referenceURL.absoluteString
-    context.schemaCache[uri] = schema
+    context.cacheSchema(schema, at: uri)
     return schema
   }
 
@@ -299,7 +299,7 @@ struct ReferenceResolver {
       context: context,
       baseURI: identifierLocation.document
     )
-    context.schemaCache[referenceURL.absoluteString] = schema
+    context.cacheSchema(schema, at: referenceURL.absoluteString)
     return schema
   }
 

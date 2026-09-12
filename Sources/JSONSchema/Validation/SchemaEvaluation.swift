@@ -10,6 +10,12 @@ package struct SchemaEvaluation: Sendable {
   @TaskLocal package static var referenceKeyword: String?
   @TaskLocal private static var recorder: Recorder?
 
+  static func withoutRecording<Result>(_ operation: () -> Result) -> Result {
+    $recorder.withValue(nil) {
+      $referenceKeyword.withValue(nil, operation: operation)
+    }
+  }
+
   private final class Recorder: Sendable {
     let evaluations = LockIsolated<[SchemaEvaluation]>([])
   }
@@ -56,7 +62,9 @@ package struct SchemaEvaluation: Sendable {
   static func capture(_ schema: Schema, instance: JSONValue) -> SchemaEvaluation {
     let recorder = Recorder()
     let result = $recorder.withValue(recorder) {
-      $referenceKeyword.withValue(nil) { schema.schema.validate(instance, at: .init()) }
+      $referenceKeyword.withValue(nil) {
+        Context.withFreshEvaluation { schema.schema.validate(instance, at: .init()) }
+      }
     }
     return SchemaEvaluation(
       schema: schema.rawSchema,

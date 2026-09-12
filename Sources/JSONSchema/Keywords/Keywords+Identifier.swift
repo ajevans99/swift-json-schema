@@ -32,23 +32,14 @@ extension Keywords {
         return baseURI
       }
 
-      if !context.context.identifierRegistry.keys.contains(newURL.absoluteURL) {
-        let documentURL = context.uri.withoutFragment ?? context.uri
-        context.context.identifierRegistry[newURL.absoluteURL] = .init(
+      let documentURL = context.uri.withoutFragment ?? context.uri
+      context.context.registerIdentifier(
+        newURL.absoluteURL,
+        location: .init(
           document: documentURL,
           pointer: context.location.dropLast()
         )
-
-        let newDocumentURL = newURL.absoluteURL.withoutFragment ?? newURL.absoluteURL
-        if context.context.documentCache[newDocumentURL] == nil,
-          let existingDocument = context.context.documentCache[documentURL]
-        {
-          context.context.documentCache[newDocumentURL] = SchemaDocument(
-            url: newDocumentURL,
-            rawSchema: existingDocument.rawSchema
-          )
-        }
-      }
+      )
 
       return newURL.absoluteURL
     }
@@ -97,9 +88,7 @@ extension Keywords {
       components?.fragment = anchorName
       guard let newURL = components?.url else { return }
       let location = context.location.dropLast()
-      if !context.context.anchors.keys.contains(newURL) {
-        context.context.anchors[newURL] = location
-      }
+      context.context.registerAnchor(newURL, at: location)
     }
   }
 
@@ -120,16 +109,8 @@ extension Keywords {
       components?.fragment = anchorName
       guard let newURL = components?.url else { return }
       let location = context.location.dropLast()
-      if !context.context.anchors.keys.contains(newURL) {
-        context.context.anchors[newURL] = location
-      }
-
-      let documentURL = context.uri.withoutFragment ?? context.uri
-      var anchors = context.context.documentDynamicAnchors[documentURL] ?? [:]
-      if anchors[anchorName] == nil {
-        anchors[anchorName] = (pointer: location, baseURI: context.uri)
-        context.context.documentDynamicAnchors[documentURL] = anchors
-      }
+      context.context.registerAnchor(newURL, at: location)
+      context.context.registerDynamicAnchor(anchorName, at: location, baseURI: context.uri)
     }
   }
 }

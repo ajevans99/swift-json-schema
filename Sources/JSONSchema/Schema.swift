@@ -17,18 +17,9 @@ public struct Schema: ValidatableSchema {
     self.location = location
     self.context = context
 
-    if self.context.rootRawSchema == nil {
-      self.context.rootRawSchema = rawSchema
-    }
-
     let documentURL = baseURI.withoutFragment ?? baseURI
     self.documentURL = documentURL
-    if self.context.documentCache[documentURL] == nil {
-      self.context.documentCache[documentURL] = SchemaDocument(
-        url: documentURL,
-        rawSchema: rawSchema
-      )
-    }
+    context.registerDocument(rawSchema, at: documentURL)
 
     switch rawSchema {
     case .boolean(let boolValue):
@@ -82,7 +73,15 @@ public struct Schema: ValidatableSchema {
     self.documentURL = documentURL
   }
 
+  /// Each call starts an independent evaluation, including calls made reentrantly
+  /// by a custom format validator. Nested schema references retain their caller's scope.
   public func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
+    SchemaEvaluation.withoutRecording {
+      Context.withFreshEvaluation { validateSubschema(instance, at: location) }
+    }
+  }
+
+  func validateSubschema(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
     SchemaEvaluation.record(self, instance: instance) { schema.validate(instance, at: location) }
   }
 
@@ -221,8 +220,7 @@ package struct ObjectSchema: ValidatableSchema {
 
     var didProcessIdentiferKeyword = false
 
-    let previousVocabularies = context.activeVocabularies
-    defer { context.activeVocabularies = previousVocabularies }
+    var activeVocabularies = context.activeVocabularies
 
     // First pass: Process $schema to inherit metaschema vocabularies
     if let schemaKeywordValue = schemaValue[Keywords.SchemaKeyword.name] {
@@ -234,7 +232,7 @@ package struct ObjectSchema: ValidatableSchema {
       keywords.append(schemaKeyword)
 
       if let vocabularies = schemaKeyword.resolvedVocabularies() {
-        context.activeVocabularies = vocabularies
+        activeVocabularies = vocabularies
       }
     }
 
@@ -251,52 +249,53 @@ package struct ObjectSchema: ValidatableSchema {
       try vocabulary.validateVocabularies()
 
       // Set active vocabularies in the context for sub-schemas
-      context.activeVocabularies = vocabulary.getActiveVocabularies()
+      activeVocabularies = vocabulary.getActiveVocabularies()
     }
 
     // Get keywords filtered by active vocabularies (either from $vocabulary or context)
-    let activeVocabs = context.activeVocabularies
-    let availableKeywords = context.dialect.keywords(activeVocabularies: activeVocabs)
+    let availableKeywords = context.dialect.keywords(activeVocabularies: activeVocabularies)
 
-    // Second pass: Process all other keywords using filtered keyword list
-    for keywordType in availableKeywords where schemaValue.keys.contains(keywordType.name) {
-      // Skip vocabulary keyword as it's already processed
-      if keywordType.name == Keywords.Vocabulary.name
-        || keywordType.name == Keywords.SchemaKeyword.name
-      {
-        continue
+    return context.withActiveVocabularies(activeVocabularies) {
+      // Second pass: Process all other keywords using filtered keyword list
+      for keywordType in availableKeywords where schemaValue.keys.contains(keywordType.name) {
+        // Skip vocabulary keyword as it's already processed
+        if keywordType.name == Keywords.Vocabulary.name
+          || keywordType.name == Keywords.SchemaKeyword.name
+        {
+          continue
+        }
+
+        let value = schemaValue[keywordType.name]!
+        let keywordLocation = location.appending(.key(keywordType.name))
+        let keyword = keywordType.init(
+          value: value,
+          context: .init(location: keywordLocation, context: context, uri: processedURI)
+        )
+        keywords.append(keyword)
+
+        if let identifier = keyword as? (any IdentifierKeyword) {
+          identifier.processIdentifier()
+
+          if let id = identifier as? Keywords.Identifier {
+            processedURI = id.processSubschema(baseURI: baseURI)
+            didProcessIdentiferKeyword = true
+          }
+          if let dynamic = identifier as? Keywords.DynamicAnchor, let name = dynamic.value.string {
+            dynamicAnchorInfo = (name, processedURI)
+          }
+        }
       }
 
-      let value = schemaValue[keywordType.name]!
-      let keywordLocation = location.appending(.key(keywordType.name))
-      let keyword = keywordType.init(
-        value: value,
-        context: .init(location: keywordLocation, context: context, uri: processedURI)
-      )
-      keywords.append(keyword)
-
-      if let identifier = keyword as? (any IdentifierKeyword) {
-        identifier.processIdentifier()
-
-        if let id = identifier as? Keywords.Identifier {
-          processedURI = id.processSubschema(baseURI: baseURI)
-          didProcessIdentiferKeyword = true
-        }
-        if let dynamic = identifier as? Keywords.DynamicAnchor, let name = dynamic.value.string {
-          dynamicAnchorInfo = (name, processedURI)
-        }
+      if location.isRoot && !didProcessIdentiferKeyword {
+        let documentURL = baseURI.withoutFragment ?? baseURI
+        context.registerIdentifier(
+          baseURI,
+          location: .init(document: documentURL, pointer: location)
+        )
       }
-    }
 
-    if location.isRoot && !didProcessIdentiferKeyword {
-      let documentURL = baseURI.withoutFragment ?? baseURI
-      context.identifierRegistry[baseURI] = .init(
-        document: documentURL,
-        pointer: location
-      )
+      return (processedURI, keywords, dynamicAnchorInfo)
     }
-
-    return (processedURI, keywords, dynamicAnchorInfo)
   }
 
   package func validate(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
@@ -309,7 +308,6 @@ package struct ObjectSchema: ValidatableSchema {
     at location: JSONPointer,
     annotations: inout AnnotationContainer
   ) -> ValidationResult {
-    var errors: [ValidationError] = []
     // Push the dynamic anchors registered for THIS schema's resource (the
     // resource it lives in, identified by its `$id`-resolved `uri`, falling
     // back to the document URL when the schema has no `$id`). This makes the
@@ -327,18 +325,15 @@ package struct ObjectSchema: ValidatableSchema {
     // and a fragment-bearing key would silently miss every anchor.
     let resourceURL: URL = uri?.withoutFragment ?? documentURL
     let resourceAnchors = context.documentDynamicAnchors[resourceURL] ?? [:]
-    context.dynamicScopes.append(
+    var scopes: [Context.DynamicScope] = [
       resourceAnchors.mapValues {
         (document: documentURL, pointer: $0.pointer, baseURI: $0.baseURI)
       }
-    )
-    defer {
-      _ = context.dynamicScopes.popLast()
-    }
+    ]
 
     if let dynamicAnchorInfo {
       // A schema-level `$dynamicAnchor` overrides the document entry while this schema validates.
-      context.dynamicScopes.append([
+      scopes.append([
         dynamicAnchorInfo.name: (
           document: self.documentURL,
           pointer: self.location,
@@ -347,15 +342,37 @@ package struct ObjectSchema: ValidatableSchema {
       ])
     }
 
-    defer {
-      if dynamicAnchorInfo != nil {
-        _ = context.dynamicScopes.popLast()
-      }
+    return context.withDynamicScopes(scopes) {
+      validateKeywords(instance, at: location, annotations: &annotations)
     }
+  }
 
+  private func validateKeywords(
+    _ instance: JSONValue,
+    at location: JSONPointer,
+    annotations: inout AnnotationContainer
+  ) -> ValidationResult {
+    var errors: [ValidationError] = []
+    var ifResult: Bool?
+    let minContainsIsZero = keywords.contains {
+      $0 is Keywords.MinContains && $0.value.exactInteger == 0
+    }
     for keyword in keywords {
       do throws(ValidationIssue) {
         switch keyword {
+        case let condition as Keywords.If:
+          ifResult = condition.evaluate(instance, at: location, using: &annotations)
+        case let then as Keywords.Then:
+          try then.validate(instance, at: location, using: &annotations, condition: ifResult)
+        case let elseKeyword as Keywords.Else:
+          try elseKeyword.validate(instance, at: location, using: &annotations, condition: ifResult)
+        case let contains as Keywords.Contains:
+          try contains.validate(
+            instance,
+            at: location,
+            using: &annotations,
+            minContainsIsZero: minContainsIsZero
+          )
         case let reference as any ReferenceKeyword:
           try reference.validate(
             instance,

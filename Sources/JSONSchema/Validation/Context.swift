@@ -1,6 +1,8 @@
 import Foundation
 
-/// Container for information used when validating a schema.
+/// Reusable schema definitions, reference caches, and validation configuration.
+///
+/// Dynamic scopes are local to each evaluation, not shared by concurrent callers.
 public final class Context: Sendable {
   private let lockedDialect: LockIsolated<Dialect>
   var dialect: Dialect {
@@ -8,10 +10,8 @@ public final class Context: Sendable {
     set { lockedDialect.withLock { $0 = newValue } }
   }
 
-  private let lockedRootRawSchema: LockIsolated<JSONValue?>
   var rootRawSchema: JSONValue? {
-    get { lockedRootRawSchema.withLock { $0 } }
-    set { lockedRootRawSchema.withLock { $0 = newValue } }
+    registry.withLock { $0.rootRawSchema }
   }
 
   /// Identifies where a `$id` lives: which document and what JSON pointer inside it.
@@ -20,27 +20,18 @@ public final class Context: Sendable {
     let pointer: JSONPointer
   }
 
-  private let lockedIdentifierRegistry: LockIsolated<[URL: IdentifierLocation]>
   var identifierRegistry: [URL: IdentifierLocation] {
-    get { lockedIdentifierRegistry.withLock { $0 } }
-    set { lockedIdentifierRegistry.withLock { $0 = newValue } }
+    registry.withLock { $0.identifiers }
   }
 
   /// Cache of every raw schema document we've loaded, keyed by canonical document URL.
-  private let lockedDocumentCache: LockIsolated<[URL: SchemaDocument]>
   var documentCache: [URL: SchemaDocument] {
-    get { lockedDocumentCache.withLock { $0 } }
-    set { lockedDocumentCache.withLock { $0 = newValue } }
+    registry.withLock { $0.documents }
   }
 
   /// Per-document map of `$dynamicAnchor` names to their location and base URI.
-  private let lockedDocumentDynamicAnchors:
-    LockIsolated<
-      [URL: [String: (pointer: JSONPointer, baseURI: URL)]]
-    >
   var documentDynamicAnchors: [URL: [String: (pointer: JSONPointer, baseURI: URL)]] {
-    get { lockedDocumentDynamicAnchors.withLock { $0 } }
-    set { lockedDocumentDynamicAnchors.withLock { $0 = newValue } }
+    registry.withLock { $0.dynamicAnchors }
   }
 
   private let lockedRemoteSchemaStorage: LockIsolated<[String: JSONValue]>
@@ -49,30 +40,57 @@ public final class Context: Sendable {
     set { lockedRemoteSchemaStorage.withLock { $0 = newValue } }
   }
 
-  private let lockedSchemaCache: LockIsolated<[String: Schema]>
   var schemaCache: [String: Schema] {
-    get { lockedSchemaCache.withLock { $0 } }
-    set { lockedSchemaCache.withLock { $0 = newValue } }
+    registry.withLock { $0.schemas }
   }
 
-  private let lockedAnchors: LockIsolated<[URL: JSONPointer]>
   var anchors: [URL: JSONPointer] {
-    get { lockedAnchors.withLock { $0 } }
-    set { lockedAnchors.withLock { $0 = newValue } }
+    registry.withLock { $0.anchors }
   }
 
-  /// Stack of dynamic scopes used to resolve ``$dynamicRef`` references.
-  /// Each scope maps an anchor name to the schema location pointer and its
-  /// associated base URI.
-  /// Stack of `$dynamicScope`s used during validation; each push records the
-  /// active anchors for the current schema/document so `$dynamicRef` can walk outwards.
-  private let lockedDynamicScopes:
-    LockIsolated<
-      [[String: (document: URL, pointer: JSONPointer, baseURI: URL)]]
-    >
-  var dynamicScopes: [[String: (document: URL, pointer: JSONPointer, baseURI: URL)]] {
-    get { lockedDynamicScopes.withLock { $0 } }
-    set { lockedDynamicScopes.withLock { $0 = newValue } }
+  typealias DynamicScope = [String: (document: URL, pointer: JSONPointer, baseURI: URL)]
+
+  /// An immutable frame shares its parent instead of copying the accumulated scope prefix.
+  final class DynamicScopeFrame: Sendable {
+    let context: ObjectIdentifier
+    let scopes: [DynamicScope]
+    let parent: DynamicScopeFrame?
+
+    init(context: ObjectIdentifier, scopes: [DynamicScope], parent: DynamicScopeFrame?) {
+      self.context = context
+      self.scopes = scopes
+      self.parent = parent
+    }
+  }
+
+  @TaskLocal static var evaluationScope: DynamicScopeFrame?
+  @TaskLocal private static var vocabularyScopes: [ObjectIdentifier: Set<String>] = [:]
+
+  var dynamicScopes: [DynamicScope] {
+    // Materialize outermost-first order only for reference lookup, not on scope entry.
+    var reversedScopes: [DynamicScope] = []
+    var frame = Self.evaluationScope
+    let identifier = ObjectIdentifier(self)
+    while let current = frame {
+      if current.context == identifier {
+        reversedScopes.append(contentsOf: current.scopes.reversed())
+      }
+      frame = current.parent
+    }
+    return reversedScopes.reversed()
+  }
+
+  static func withFreshEvaluation<Result>(_ operation: () -> Result) -> Result {
+    $evaluationScope.withValue(nil, operation: operation)
+  }
+
+  func withDynamicScopes<Result>(_ scopes: [DynamicScope], operation: () -> Result) -> Result {
+    let frame = DynamicScopeFrame(
+      context: ObjectIdentifier(self),
+      scopes: scopes,
+      parent: Self.evaluationScope
+    )
+    return Self.$evaluationScope.withValue(frame, operation: operation)
   }
 
   /// Validators used when the ``Keywords.Format`` keyword is present.
@@ -82,40 +100,73 @@ public final class Context: Sendable {
     set { lockedFormatValidators.withLock { $0 = newValue } }
   }
 
-  /// A dictionary that tracks whether the `minContains` constraint is effectively zero
-  /// for specific schema locations.
-  ///
-  /// - Key: A `JSONPointer` representing the schema location. This pointer identifies
-  ///   the specific part of the schema where the `minContains` constraint is applied.
-  /// - Value: A `Bool` indicating whether the `minContains` constraint is considered zero
-  ///   at the specified schema location. A value of `true` means that the constraint
-  ///   is effectively zero, allowing for validation to pass even if no instances match
-  ///   the `contains` keyword.
-  private let lockedMinContainsIsZero: LockIsolated<[JSONPointer: Bool]>
-  var minContainsIsZero: [JSONPointer: Bool] {
-    get { lockedMinContainsIsZero.withLock { $0 } }
-    set { lockedMinContainsIsZero.withLock { $0 = newValue } }
-  }
-
-  /// A dictionary that stores the results of conditional validations within a schema.
-  ///
-  /// - Key: A string representing the schema location pointer, excluding the specific
-  ///   path to the "if", "else", or "then" conditions.
-  /// - Value: An optional `ValidationResult` that represents the outcome of the
-  ///   conditional validation at the specified schema location.
-  private let lockedIfConditionalResults: LockIsolated<[JSONPointer: ValidationResult]>
-  var ifConditionalResults: [JSONPointer: ValidationResult] {
-    get { lockedIfConditionalResults.withLock { $0 } }
-    set { lockedIfConditionalResults.withLock { $0 = newValue } }
-  }
-
   /// Set of active vocabularies that should be applied when creating schemas.
   /// If nil, all dialect keywords are available. If set, only keywords from
   /// these vocabularies will be processed.
-  private let lockedActiveVocabularies: LockIsolated<Set<String>?>
   var activeVocabularies: Set<String>? {
-    get { lockedActiveVocabularies.withLock { $0 } }
-    set { lockedActiveVocabularies.withLock { $0 = newValue } }
+    Self.vocabularyScopes[ObjectIdentifier(self)]
+  }
+
+  func withActiveVocabularies<Result>(
+    _ vocabularies: Set<String>?,
+    operation: () -> Result
+  ) -> Result {
+    var scopes = Self.vocabularyScopes
+    scopes[ObjectIdentifier(self)] = vocabularies
+    return Self.$vocabularyScopes.withValue(scopes, operation: operation)
+  }
+
+  private struct Registry: Sendable {
+    var rootRawSchema: JSONValue?
+    var identifiers: [URL: IdentifierLocation] = [:]
+    var documents: [URL: SchemaDocument] = [:]
+    var dynamicAnchors: [URL: [String: (pointer: JSONPointer, baseURI: URL)]] = [:]
+    var schemas: [String: Schema] = [:]
+    var anchors: [URL: JSONPointer] = [:]
+  }
+
+  private let registry = LockIsolated(Registry())
+
+  func registerDocument(_ rawSchema: JSONValue, at url: URL) {
+    registry.withLock {
+      if $0.rootRawSchema == nil { $0.rootRawSchema = rawSchema }
+      if $0.documents[url] == nil {
+        $0.documents[url] = SchemaDocument(url: url, rawSchema: rawSchema)
+      }
+    }
+  }
+
+  func registerIdentifier(_ url: URL, location: IdentifierLocation) {
+    let resourceURL = url.withoutFragment ?? url
+    registry.withLock {
+      guard $0.identifiers[url] == nil else { return }
+      $0.identifiers[url] = location
+      if $0.documents[resourceURL] == nil, let document = $0.documents[location.document] {
+        $0.documents[resourceURL] = SchemaDocument(
+          url: resourceURL,
+          rawSchema: document.rawSchema
+        )
+      }
+    }
+  }
+
+  func registerAnchor(_ url: URL, at location: JSONPointer) {
+    registry.withLock {
+      if $0.anchors[url] == nil { $0.anchors[url] = location }
+    }
+  }
+
+  func registerDynamicAnchor(_ name: String, at location: JSONPointer, baseURI: URL) {
+    let document = baseURI.withoutFragment ?? baseURI
+    registry.withLock {
+      if $0.dynamicAnchors[document]?[name] == nil {
+        $0.dynamicAnchors[document, default: [:]][name] = (location, baseURI)
+      }
+    }
+  }
+
+  func cacheSchema(_ schema: Schema, at uri: String) {
+    registry.withLock { $0.schemas[uri] = schema }
   }
 
   public init(
@@ -124,20 +175,10 @@ public final class Context: Sendable {
     formatValidators: [any FormatValidator] = []
   ) {
     self.lockedDialect = LockIsolated(dialect)
-    self.lockedRootRawSchema = LockIsolated(nil)
-    self.lockedIdentifierRegistry = LockIsolated([:])
-    self.lockedDocumentCache = LockIsolated([:])
-    self.lockedDocumentDynamicAnchors = LockIsolated([:])
     self.lockedRemoteSchemaStorage = LockIsolated(remoteSchema)
-    self.lockedSchemaCache = LockIsolated([:])
-    self.lockedAnchors = LockIsolated([:])
-    self.lockedDynamicScopes = LockIsolated([])
     self.lockedFormatValidators = LockIsolated(
       Dictionary(uniqueKeysWithValues: formatValidators.map { ($0.formatName, $0) })
     )
-    self.lockedMinContainsIsZero = LockIsolated([:])
-    self.lockedIfConditionalResults = LockIsolated([:])
-    self.lockedActiveVocabularies = LockIsolated(nil)
   }
 
   package func independentContext() -> Context {
