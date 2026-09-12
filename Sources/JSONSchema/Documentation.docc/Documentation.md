@@ -47,7 +47,10 @@ diagnostic levels.
 
 `Schema(instance:)` is a convenience initializer for JSON strings that uses `JSONDecoder`
 by default. Use `JSONValue.parse` as above when you want to retain source key order.
-`Schema` and `JSONValue` also conform to `Codable`.
+`Schema` and `JSONValue` also conform to `Codable`. Decoding `Schema` with `JSONDecoder`
+initializes a default Draft 2020-12 context, including local-reference resolution and
+support for `validateAgainstMetaSchema()`. Use `Schema(rawSchema:context:)` when you need
+external schemas or custom format validators.
 
 ## References and external schemas
 
