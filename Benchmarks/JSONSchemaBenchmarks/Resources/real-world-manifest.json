@@ -1,0 +1,54 @@
+{
+  "sources": [
+    {
+      "name": "openapi-3.1",
+      "schema": "openapi-3.1.schema.json",
+      "schemaID": "https://spec.openapis.org/oas/3.1/schema/2025-11-23",
+      "repository": "https://github.com/OAI/spec.openapis.org",
+      "commit": "c6bdb19b420e5666495fdc8bd473f8ba610a7913",
+      "license": "Apache-2.0",
+      "licenseFile": "openapi-origin.LICENSE",
+      "attribution": "OpenAPI Specification, OpenAPI Initiative. Copyright The Linux Foundation. Published repository license also retained as oai-published.LICENSE.",
+      "dependencies": [],
+      "assets": [
+        {
+          "file": "openapi-3.1.schema.json",
+          "kind": "schema",
+          "url": "https://raw.githubusercontent.com/OAI/spec.openapis.org/c6bdb19b420e5666495fdc8bd473f8ba610a7913/oas/3.1/schema/2025-11-23",
+          "sha256": "1b8ccc6e34234b17536f2dd0eb3597142a32bd108438cd42471a5fca4c1a07ef"
+        },
+        {
+          "file": "openapi-origin.LICENSE",
+          "kind": "license",
+          "url": "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/6c6c327036987ad18352478b5eba54be10e4865f/LICENSE",
+          "sha256": "4948367c65e1ce06690e2cadc6e86fce1a6a6db55ef874ce4b78c0f472ce5f13"
+        }
+      ]
+    },
+    {
+      "name": "overlay-1.0",
+      "schema": "overlay-1.0.schema.json",
+      "schemaID": "https://spec.openapis.org/overlay/1.0/schema/2026-04-01",
+      "repository": "https://github.com/OAI/spec.openapis.org",
+      "commit": "c6bdb19b420e5666495fdc8bd473f8ba610a7913",
+      "license": "Apache-2.0",
+      "licenseFile": "oai-published.LICENSE",
+      "attribution": "Overlay Specification, OpenAPI Initiative. The upstream license contains no specific copyright-holder notice; its appendix retains the template placeholder.",
+      "dependencies": [],
+      "assets": [
+        {
+          "file": "overlay-1.0.schema.json",
+          "kind": "schema",
+          "url": "https://raw.githubusercontent.com/OAI/spec.openapis.org/c6bdb19b420e5666495fdc8bd473f8ba610a7913/overlay/1.0/schema/2026-04-01",
+          "sha256": "78973008684ac8bab89321cf984cbd7682fc4702ff08a05ffa13db1ed9667d3d"
+        },
+        {
+          "file": "oai-published.LICENSE",
+          "kind": "license",
+          "url": "https://raw.githubusercontent.com/OAI/spec.openapis.org/c6bdb19b420e5666495fdc8bd473f8ba610a7913/LICENSE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+        }
+      ]
+    }
+  ]
+}

@@ -58,6 +58,7 @@ class BaselineCoverageTests(unittest.TestCase):
             "SWIFT_CALLS": str(self.root / "calls"),
             "SWIFT_STATUS": "0",
             "GITHUB_OUTPUT": str(self.outputs),
+            "JSONSCHEMA_BENCHMARK_CORPUS": "optional",
         }
 
     def run_script(self):
@@ -130,6 +131,29 @@ class BaselineCoverageTests(unittest.TestCase):
             "--disable-automatic-resolution",
             (self.root / "calls").read_text().split(),
         )
+        self.assertIn(
+            "--metric mallocCountTotal",
+            (self.root / "calls").read_text(),
+        )
+
+    def test_ci_requires_real_schema_corpus_before_discovery(self):
+        workflow = WORKFLOW.read_text()
+        self.assertIn("JSONSCHEMA_BENCHMARK_CORPUS: required", workflow)
+        self.assertIn("JSONSCHEMA_BENCHMARK_SIZES: pr", workflow)
+        self.assertIn("python3 Benchmarks/Scripts/test_schema_corpus.py", workflow)
+        command = workflow_command("Fetch reference corpus")
+        self.assertIn("python3 Benchmarks/Scripts/fetch_schema_corpus.py\n", command)
+        self.assertIn("python3 Benchmarks/Scripts/fetch_schema_corpus.py --offline", command)
+        self.assertLess(workflow.index("- name: Fetch reference corpus"),
+                        workflow.index("- name: Check baseline coverage"))
+
+    def test_partial_listing_cannot_silently_skip_required_schema_corpus(self):
+        self.env["JSONSCHEMA_BENCHMARK_CORPUS"] = "required"
+        self.populate_baselines()
+        result = self.run_gate()
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("Failed to discover the required JSONSchema corpus", result.stderr)
+        self.assertFalse(self.outputs.exists())
 
     def test_generation_matches_allocation_only_enforcement(self):
         generation = subprocess.run(

@@ -10,8 +10,8 @@ import JSONSchema
 ///     cd Benchmarks
 ///     swift package --allow-writing-to-package-directory benchmark --target JSONSchemaBenchmarks
 ///
-/// The corpus is committed to the repo so CI and local runs exercise the same
-/// representative schemas without network downloads.
+/// The committed corpus runs offline. Pinned upstream schemas are included
+/// when fetched before building; CI requires the complete downloaded corpus.
 nonisolated(unsafe) let benchmarks = {
   let regressionThresholds: [BenchmarkMetric: BenchmarkThresholds] = [
     .wallClock: .init(relative: [.p90: 10.0]),
@@ -36,47 +36,68 @@ nonisolated(unsafe) let benchmarks = {
   ]
 
   for sample in corpus.samples {
-    Benchmark("construct.\(sample.name).Schema.init") { benchmark in
+    Benchmark("construct.\(sample.name).Schema.init", configuration: sample.configuration) {
+      benchmark in
       for _ in benchmark.scaledIterations {
         blackHole(try sample.makeSchema())
       }
     }
 
     for instance in sample.instances {
-      // Each workload gets its own warmed schema so reference caches are not
-      // seeded by a different instance. Preflight also checks rendered errors.
+      // The runner spawns a process per case. Verify only the selected workload
+      // in its unmeasured setup, not the entire scaled corpus in every process.
       let schema = try! sample.makeSchema()
       let name = instance.name.isEmpty ? sample.name : "\(sample.name).\(instance.name)"
-      do {
+      let preflight: Benchmark.BenchmarkSetupHook = {
         try instance.verify(schema: schema, name: name)
-      } catch {
-        fatalError("Benchmark preflight failed for \(name): \(error)")
       }
 
-      Benchmark("validate.\(name).Schema.validate") { benchmark in
-        for _ in benchmark.scaledIterations {
-          blackHole(schema.validate(instance.value))
-        }
-      }
-
-      for output in outputConfigurations {
-        Benchmark("output.\(name).\(output.name)") { benchmark in
+      Benchmark(
+        "validate.\(name).Schema.validate",
+        configuration: sample.configuration,
+        closure: { benchmark in
           for _ in benchmark.scaledIterations {
-            blackHole(try schema.validate(instance.value, output: output.configuration))
+            blackHole(schema.validate(instance.value))
           }
-        }
+        },
+        setup: preflight
+      )
+
+      for output in outputConfigurations
+      where instance.outputLevels.contains(output.configuration.level) {
+        Benchmark(
+          "output.\(name).\(output.name)",
+          configuration: sample.configuration,
+          closure: { benchmark in
+            for _ in benchmark.scaledIterations {
+              blackHole(try schema.validate(instance.value, output: output.configuration))
+            }
+          },
+          setup: preflight
+        )
       }
     }
   }
 }
 
-private struct SchemaCorpus: Sendable {
+struct SchemaCorpus: Sendable {
   let samples: [Sample]
 
   struct Sample: Sendable {
     let name: String
     let schemaSource: SchemaSource
     let instances: [Instance]
+    var isRealWorld = false
+
+    var configuration: Benchmark.Configuration {
+      var configuration = Benchmark.defaultConfiguration
+      if isRealWorld {
+        configuration.warmupIterations = 1
+        configuration.maxIterations = 20
+        configuration.timeUnits = .microseconds
+      }
+      return configuration
+    }
 
     func makeSchema() throws -> Schema {
       switch schemaSource {
@@ -87,6 +108,12 @@ private struct SchemaCorpus: Sendable {
         )
       case .draft202012MetaSchema:
         try Dialect.draft2020_12.loadMetaSchema()
+      case .downloaded(let schema, let baseURI, let remotes):
+        try Schema(
+          rawSchema: schema,
+          context: .init(dialect: .draft2020_12, remoteSchema: remotes),
+          baseURI: baseURI
+        )
       }
     }
   }
@@ -94,6 +121,7 @@ private struct SchemaCorpus: Sendable {
   enum SchemaSource: Sendable {
     case resource(JSONValue)
     case draft202012MetaSchema
+    case downloaded(JSONValue, baseURI: URL, remotes: [String: JSONValue])
   }
 
   struct Instance: Sendable {
@@ -101,6 +129,8 @@ private struct SchemaCorpus: Sendable {
     let value: JSONValue
     let expectedValidity: Bool
     let expectedErrors: [ExpectedError]
+    var outputLevels: [ValidationOutputLevel] = [.flag, .basic, .detailed, .verbose]
+    var minimumLeafErrors = 0
 
     func verify(schema: Schema, name: String) throws {
       precondition(
@@ -110,6 +140,10 @@ private struct SchemaCorpus: Sendable {
       let result = schema.validate(value)
       precondition(result.isValid == expectedValidity, "\(name): unexpected validation result")
       let errors = flattened(result.errors ?? [])
+      precondition(
+        errors.filter { $0.errors?.isEmpty ?? true }.count >= minimumLeafErrors,
+        "\(name): insufficient leaf errors"
+      )
       let expectedLeaves = expectedErrors.map { expected in
         guard
           let error = errors.first(where: {
@@ -135,6 +169,10 @@ private struct SchemaCorpus: Sendable {
             output.object?["valid"] == .boolean(expectedValidity),
             "\(name): incorrect \(level) validity"
           )
+          precondition(
+            renderedErrorCount(output) >= minimumLeafErrors,
+            "\(name): \(level) lost leaf errors"
+          )
           for error in expectedLeaves {
             precondition(
               containsRenderedError(output, matching: error),
@@ -158,9 +196,19 @@ private struct SchemaCorpus: Sendable {
       {
         return true
       }
+
       return (output.object?["errors"]?.array ?? [])
         .contains {
           containsRenderedError($0, matching: error)
+        }
+    }
+
+    private func renderedErrorCount(_ output: JSONValue) -> Int {
+      let local = output.object?["error"]?.string?.isEmpty == false ? 1 : 0
+      return local
+        + (output.object?["errors"]?.array ?? [])
+        .reduce(0) {
+          $0 + renderedErrorCount($1)
         }
     }
   }
@@ -217,33 +265,32 @@ private struct SchemaCorpus: Sendable {
       ),
     ]
 
-    return SchemaCorpus(
-      samples: workloads.map { workload in
-        let name = workload.name
-        return Sample(
-          name: name,
-          schemaSource: name == "draft2020-12-schema"
-            ? .draft202012MetaSchema : .resource(loadJSONValue(named: "\(name).schema")),
-          instances: [
-            Instance(
-              name: workload.preservesValidName ? "" : "valid",
-              value: loadJSONValue(named: "\(name).instance"),
-              expectedValidity: true,
-              expectedErrors: []
-            ),
-            Instance(
-              name: "invalid",
-              value: loadJSONValue(named: "\(name).invalid.instance"),
-              expectedValidity: false,
-              expectedErrors: workload.errors
-            ),
-          ]
-        )
-      }
-    )
+    let samples = workloads.map { workload in
+      let name = workload.name
+      return Sample(
+        name: name,
+        schemaSource: name == "draft2020-12-schema"
+          ? .draft202012MetaSchema : .resource(loadJSONValue(named: "\(name).schema")),
+        instances: [
+          Instance(
+            name: workload.preservesValidName ? "" : "valid",
+            value: loadJSONValue(named: "\(name).instance"),
+            expectedValidity: true,
+            expectedErrors: []
+          ),
+          Instance(
+            name: "invalid",
+            value: loadJSONValue(named: "\(name).invalid.instance"),
+            expectedValidity: false,
+            expectedErrors: workload.errors
+          ),
+        ]
+      )
+    }
+    return SchemaCorpus(samples: samples + RealWorldCorpus.load())
   }
 
-  private static func loadJSONValue(named resourceName: String) -> JSONValue {
+  static func loadJSONValue(named resourceName: String) -> JSONValue {
     let bundle = Bundle.module
     guard let url = bundle.url(forResource: resourceName, withExtension: "json", subdirectory: nil)
     else {

@@ -22,17 +22,26 @@ jobs:
     timeout-minutes: 45
     env:
       SWIFT_DETERMINISTIC_HASHING: "1"
+      JSONSCHEMA_BENCHMARK_CORPUS: required
+      JSONSCHEMA_BENCHMARK_SIZES: pr
 
     steps:
     - uses: actions/checkout@v5
     - name: Test baseline coverage gate
-      run: python3 Benchmarks/Scripts/test_baseline_coverage.py
+      run: |
+        python3 Benchmarks/Scripts/test_baseline_coverage.py
+        python3 Benchmarks/Scripts/test_schema_corpus.py
     - name: Get swift version
-      run: swift --version
+      run: |
+        swift --version
+        swift --version | grep -F 'Swift version 6.3.3'
     - name: Install benchmark system dependencies
       run: sudo apt-get update && sudo apt-get install -y libjemalloc-dev
     - name: Fetch reference corpus
-      run: Benchmarks/Scripts/fetch-reference-corpus.sh
+      run: |
+        Benchmarks/Scripts/fetch-reference-corpus.sh
+        python3 Benchmarks/Scripts/fetch_schema_corpus.py
+        python3 Benchmarks/Scripts/fetch_schema_corpus.py --offline
     - name: Check baseline coverage
       id: baselines
       run: |

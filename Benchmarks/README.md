@@ -27,18 +27,19 @@ swift package --disable-automatic-resolution --allow-writing-to-package-director
 
 Limit runs to one suite with `--target OrderedJSONBenchmarks` or `--target JSONSchemaBenchmarks`. This compiles in release mode and reports wall-clock time, total CPU time, and `malloc` count. Output goes to stdout as percentile tables. The local package dependency is explicitly named so these commands also work in renamed clones and Git worktrees.
 
-The committed corpus works offline. To include the larger reference corpus used
-by CI, fetch it before building:
+The committed corpus works offline. To include both downloaded corpora used
+by CI, fetch them before building:
 
 ```bash
 Benchmarks/Scripts/fetch-reference-corpus.sh
+python3 Benchmarks/Scripts/fetch_schema_corpus.py
 cd Benchmarks
-swift package --disable-automatic-resolution --allow-writing-to-package-directory benchmark \
-  --target OrderedJSONBenchmarks
+JSONSCHEMA_BENCHMARK_CORPUS=required \
+  swift package --disable-automatic-resolution --allow-writing-to-package-directory benchmark
 ```
 
-The script downloads files from a pinned `nativejson-benchmark` commit and
-verifies their SHA-256 checksums. Downloaded files are ignored by Git.
+The scripts download immutable upstream files and verify their SHA-256 checksums.
+Downloaded schemas, licenses, and reference JSON files are ignored by Git.
 
 ## What gets benchmarked
 
@@ -125,7 +126,7 @@ justified until the profile and repeated candidate measurements support them.
 
 ### JSONSchema
 
-The six schemas in [`JSONSchemaBenchmarks/Resources/`](./JSONSchemaBenchmarks/Resources/)
+The six committed schemas in [`JSONSchemaBenchmarks/Resources/`](./JSONSchemaBenchmarks/Resources/)
 each have one valid and one invalid instance: **66 cases** total (6 construction,
 12 warmed validation, and 48 validation-plus-output).
 
@@ -158,9 +159,13 @@ errors by keyword and instance JSON Pointer. Preflight checks those errors in
 the raw result and verifies their locations and nonempty messages survive Basic,
 Detailed, and Verbose output, while Flag must equal the expected validity.
 Each instance has its own schema warmed by these checks; no result is reused
-inside measured closures. These preconditions run during benchmark registration,
-including discovery, so a broken fixture fails rather than recording misleading
-numbers.
+inside measured closures. These preconditions run in the selected case's
+**unmeasured setup**, before warmup and measurement, so a broken fixture fails
+rather than recording misleading numbers. Discovery loads resources and lists
+cases but does not validate instances; run the suite, not only `benchmark list`,
+to exercise correctness. The runner launches a process per case, so validating
+every large instance during every registration would multiply setup cost
+unnecessarily.
 
 Resource-schema construction starts from already-parsed JSON. The meta-schema
 construction case intentionally retains `Dialect.draft2020_12.loadMetaSchema()`,
@@ -178,15 +183,112 @@ swift package --disable-automatic-resolution --allow-writing-to-package-director
 ```
 
 This is workload coverage for [#164](https://github.com/ajevans99/swift-json-schema/issues/164),
-not evidence of an optimization. Before that issue can close:
+not evidence of an optimization. The following remain future issue work, **not
+merge prerequisites for the benchmark-corpus change**:
 
 - [ ] Profile at least two validation hot paths with Instruments and record findings.
 - [ ] Implement a measured, correctness-preserving optimization exceeding 10% on a representative case.
 - [ ] Publish repeated, same-environment before/after measurements and correctness results.
-- [ ] Refresh all thresholds on the pinned Ubuntu runner after the final workload inventory is settled.
 
-A pinned, licensed real-world Sourcemeta subset is also pending corpus work;
-these focused synthetic fixtures are not presented as that subset.
+### Real-world JSONSchema corpus
+
+Two **unmodified production schemas**, published by the OpenAPI Initiative, are
+downloaded from `OAI/spec.openapis.org` at immutable commit
+`c6bdb19b420e5666495fdc8bd473f8ba610a7913`:
+
+| Benchmark source | Published schema | Size | License |
+|------------------|------------------|------|---------|
+| `openapi-3.1` | [OpenAPI 3.1, iteration 2025-11-23](https://raw.githubusercontent.com/OAI/spec.openapis.org/c6bdb19b420e5666495fdc8bd473f8ba610a7913/oas/3.1/schema/2025-11-23) | 33,452 B | Apache-2.0 |
+| `overlay-1.0` | [Overlay 1.0, iteration 2026-04-01](https://raw.githubusercontent.com/OAI/spec.openapis.org/c6bdb19b420e5666495fdc8bd473f8ba610a7913/overlay/1.0/schema/2026-04-01) | 1,869 B | Apache-2.0 |
+
+Both natively declare draft 2020-12. These are published JSON artifacts, not
+development YAML, archived schemas, converted dialects, or a Sourcemeta subset.
+Every `$ref` and `$dynamicRef` is local to its root; the fetcher checks the entire
+schema-valued reference graph and rejects missing documents, pointers, or anchors.
+OpenAPI's four dynamic references to local `#meta` are retained. `$schema` and
+`jsonSchemaDialect.default` are not external instance-validation dependencies.
+The loader supplies canonical `$id` URLs and a deterministic in-memory context;
+there is no network lookup during construction or validation.
+
+The small committed [manifest](./JSONSchemaBenchmarks/Resources/real-world-manifest.json)
+pins every root and license artifact by immutable URL and SHA-256. It also records
+attribution: **OpenAPI Specification, OpenAPI Initiative; Copyright The Linux
+Foundation** (from the originating OpenAPI license at commit
+`6c6c327036987ad18352478b5eba54be10e4865f`), and **Overlay Specification, OpenAPI
+Initiative**. The publication repository's Apache-2.0 text is retained alongside
+the originating OpenAPI license. Overlay's upstream license has a template
+copyright placeholder; no specific holder or year is invented. The files remain
+byte-for-byte unchanged, with license/attribution preserved in the resource bundle.
+
+`fetch_schema_corpus.py` stages all four assets and publishes the directory only
+after every checksum, JSON document, dialect, and reference passes validation.
+On failure it leaves the previous cache untouched, not a partially new corpus.
+Valid cached bytes are reused without network requests; corrupt cached bytes are
+explicitly reported and replaced only by a verified download. To verify a cache
+without network access:
+
+```bash
+python3 Benchmarks/Scripts/fetch_schema_corpus.py --offline
+```
+
+Absent downloads are optional for local runs; a partially present bundle is
+always an error. `JSONSCHEMA_BENCHMARK_CORPUS=required` makes wholly absent
+downloads an error too. Fetch or verify **before building** so SwiftPM bundles
+the right resources. CI requires this mode and additionally checks the exact
+discovered inventory: package-benchmark can return a successful listing exit
+code even when a benchmark process crashes, so exit status alone is insufficient.
+
+#### Generated workloads and runtime bounds
+
+[`RealWorldInstances.swift`](./JSONSchemaBenchmarks/RealWorldInstances.swift)
+generates deterministic instances outside measurement. Nothing large is committed
+or generated into resource files. The default **PR subset** uses sizes **10 and
+100**; `JSONSCHEMA_BENCHMARK_SIZES=extended` also includes **1000**.
+
+| Source | Size means | `invalid-early` | `invalid-late` / `invalid-many` |
+|--------|------------|-----------------|--------------------------------|
+| OpenAPI | N path entries, each with an operation, parameter, and response; N tag objects | Wrong `/openapi` version pattern, full paths retained | Last / every response `description` is an integer instead of a string |
+| Overlay | N distinct, item-validated action objects | Wrong `/overlay` version pattern, full actions retained | Last / every action `target` is an integer instead of a string |
+
+`valid` traverses the entire generated structure. Early/late refer to **error
+location**, not a promised fail-fast implementation; large early-invalid instances
+are always paired with equally sized valid and late-invalid cases. The many-error
+case checks first/last concrete leaf locations and at least N raw and rendered
+leaf errors. All variants check expected validity and all four output formats
+outside measurement, even when only selected output formats are timed.
+
+OpenAPI's selected official schema explicitly **does not validate embedded Schema
+Objects beyond their object/boolean type**; growth is in paths/operations/tags,
+not arbitrary Schema Object contents. Overlay's `update` payload is unconstrained;
+it stays small while the validated actions array grows. Neither root contains
+`minLength`; negatives use actual type/pattern assertions, never invented
+constraints. JSON Schema validation does not execute Overlay actions or resolve
+instance-data operation links, and is not complete normative-spec conformance.
+
+Each source adds one construction benchmark, four validation variants per size,
+Basic output for size-10 valid, Verbose for size-10 late-invalid, and Basic/Verbose
+for many-error cases at every size. Names include source, size, and validity,
+for example `validate.openapi-3.1.100.invalid-late.Schema.validate`.
+
+This adds **30 cases** in the PR subset (**96 JSONSchema / 160 combined** with
+the full OrderedJSON corpus), or **42 cases** extended (**108 / 172 combined**).
+All prior 66 JSONSchema and 64 OrderedJSON names are preserved. New cases use
+one warmup and at most 20 measured iterations or one second per case, whichever
+is reached first; preflight and an individual long operation can exceed that
+duration. Original case configurations are unchanged. Extended cases are opt-in,
+not required PR threshold inventory.
+
+The complete 108-case extended JSONSchema release smoke run took **142.83 s**
+on the development macOS ARM64 / Apple Swift 6.4 machine. This is one end-to-end
+runtime observation (including build/setup), not an optimization comparison or a
+promise about shared CI timing.
+
+```bash
+python3 Benchmarks/Scripts/fetch_schema_corpus.py
+JSONSCHEMA_BENCHMARK_CORPUS=required JSONSCHEMA_BENCHMARK_SIZES=extended \
+  swift package --package-path Benchmarks --disable-automatic-resolution \
+  --allow-writing-to-package-directory benchmark --target JSONSchemaBenchmarks --no-progress
+```
 
 ## Corpus
 
@@ -231,7 +333,10 @@ instance list, then run the full JSONSchema suite to exercise its preflight chec
 
 ## Baselines and CI
 
-Committed p90 threshold baselines live in [`Baselines/`](./Baselines/). CI runs
+Committed p90 allocation thresholds live in [`Baselines/`](./Baselines/). Capture
+and enforcement both select **only `mallocCountTotal`** so instrumentation is
+identical; collecting clock/CPU metrics also allocates and is not an equivalent
+allocation baseline. CI runs
 both benchmark targets and the full reference corpus on `ubuntu-24.04`, writes
 wall-clock / CPU / malloc tables to the GitHub Actions job summary, and checks
 malloc counts against the committed thresholds.
@@ -268,12 +373,15 @@ With complete coverage, JSONSchema reporting and enforcement also run when
 OrderedJSON fails, unless the workflow is cancelled. The job still fails for
 either suite's regression; this only preserves independent diagnostics.
 
-The preceding OrderedJSON layer refreshed 82 allocation thresholds, including
-its 16 new Foundation round-trip cases (64 OrderedJSON and 18 JSONSchema).
-This layer adds 48 JSONSchema workloads, for 130 combined cases; its complete
-Linux threshold refresh is pending.
+The full PR corpus requires **160 thresholds**: 64 OrderedJSON, 66 original
+JSONSchema workload cases, and 30 downloaded-schema cases. The workflow asserts
+Swift 6.3.3 and requires the fetched corpus and the small/medium PR subset.
+The workflow currently targets PRs into `main`, so a
+draft targeting an intermediate stack branch may need an explicit workflow
+dispatch or later final-base run to obtain that artifact. Timing and throughput
+remain informational; the allocation-only guard is unchanged.
 
-The complete fixed-hash set was captured in [Ubuntu run 34719883609](https://github.com/ajevans99/swift-json-schema/actions/runs/34719883609)
+The preceding OrderedJSON layer's 82 fixed-hash thresholds were captured in [Ubuntu run 34719883609](https://github.com/ajevans99/swift-json-schema/actions/runs/34719883609)
 at checkout `f424f3df8d309b65d480936928aa92b99195cae3` via an explicit
 `workflow_dispatch` refresh, not a moving PR merge ref. That branch includes
 main `15ab4569bf68b1c3a84a8ffdc008b100f5416ebf`; its production sources,
@@ -307,8 +415,12 @@ replacement thresholds. Discovery, generation, and checks all disable automatic
 dependency resolution. The coverage script exits with status 0 for complete
 coverage, 1 for missing baseline files, and 2 for discovery errors.
 
-Run the offline coverage-script and workflow regression cases with
-`python3 Benchmarks/Scripts/test_baseline_coverage.py` from the repository root.
+Run the offline integrity, inventory, and CI regression cases from the repository root:
+
+```bash
+python3 Benchmarks/Scripts/test_schema_corpus.py
+python3 Benchmarks/Scripts/test_baseline_coverage.py
+```
 
 To refresh baselines on the same runner class after an intentional improvement, run:
 
