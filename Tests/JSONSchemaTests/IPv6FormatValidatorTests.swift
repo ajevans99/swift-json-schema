@@ -145,10 +145,10 @@ struct IPv6FormatValidatorTests {
   }
 
   @Test func officialIPv6FormatCorpus() throws {
-    let loader = FileLoader<[JSONSchemaTest]>(
+    let loader = try FileLoader<[JSONSchemaTest]>(
       subdirectory: "JSON-Schema-Test-Suite/tests/draft2020-12/optional/format"
     )
-    let groups = try #require(loader.loadFile(named: "ipv6"))
+    let groups = try loader.loadFile(named: "ipv6")
     try #require(!groups.isEmpty)
 
     for group in groups {
