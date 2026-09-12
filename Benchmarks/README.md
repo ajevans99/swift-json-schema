@@ -278,9 +278,9 @@ is reached first; preflight and an individual long operation can exceed that
 duration. Original case configurations are unchanged. Extended cases are opt-in,
 not required PR threshold inventory.
 
-The complete 108-case extended JSONSchema release smoke run took **152.34 s**
-after syncing the merged infrastructure and current library changes, on the
-development macOS ARM64 / Apple Swift 6.4 machine. This is one end-to-end
+The complete 108-case extended JSONSchema release smoke run took **141.00 s**
+after syncing the concurrency fix in #195, on the development macOS ARM64 /
+Apple Swift 6.4 machine with default process hashing. This is one end-to-end
 runtime observation (including build/setup), not an optimization comparison or a
 promise about shared CI timing.
 
