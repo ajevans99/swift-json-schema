@@ -136,7 +136,9 @@ struct RemoteLoaderTests {
         guard let failure = error as? FixtureLoadingError else { return false }
         return failure.path.path.hasPrefix(root.path)
           && failure.description.contains("jsonschema_suite remotes")
-          && (output == "{}" || failure.underlyingError is DecodingError)
+          && (output == "{}"
+            || (output == "{" && failure.underlyingError is JSONParseError)
+            || (output == "[]" && failure.underlyingError is DecodingError))
       }
     }
   }
@@ -174,7 +176,7 @@ struct RemoteLoaderTests {
       } throws: { error in
         guard let failure = error as? FixtureLoadingError else { return false }
         return failure.path.resolvingSymlinksInPath().path == file.resolvingSymlinksInPath().path
-          && (contents != "{" || failure.underlyingError is DecodingError)
+          && (contents != "{" || failure.underlyingError is JSONParseError)
       }
     }
   }

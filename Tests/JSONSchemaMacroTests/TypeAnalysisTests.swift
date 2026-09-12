@@ -69,7 +69,8 @@ struct TypeAnalysisTests {
 
   @Test(arguments: SupportedPrimitive.allCases.filter(\.isScalar))
   func scalarSpellings(primitive: SupportedPrimitive) throws {
-    for source in [primitive.rawValue, "Swift.\(primitive.rawValue)"] {
+    let module = primitive == .decimal ? "Foundation" : "Swift"
+    for source in [primitive.rawValue, "\(module).\(primitive.rawValue)"] {
       let type = try parse(source)
       guard case .scalar(let parsed) = type else {
         Issue.record("Expected a scalar for \(source)")

@@ -58,6 +58,31 @@ construct your own model, as shown in <doc:Validation>. Properties are optional 
 For string-to-`UUID`, `URL`, and `Date` conversions, see
 [`JSONSchemaConversion`](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemaconversion).
 
+## Choose a numeric output type
+
+| Component | Swift output | Conversion |
+| --- | --- | --- |
+| ``JSONInteger`` | `Int` | Exact integral value within `Int` range, including tokens such as `1.0` and `1e2`. |
+| ``JSONNumber`` | `Double` | Allows rounding; rejects overflow and nonzero underflow to zero. |
+| ``JSONDecimal`` | Foundation `Decimal` | Exact decimal value; rejects inexact or out-of-range conversion. |
+
+Numeric schema constraints use exact JSON values regardless of the output type. Use
+`JSONNumberLiteral` bounds when Swift floating-point literals would lose precision:
+
+```swift
+import Foundation
+
+let cent = try JSONNumberLiteral("0.01")
+let amount: Decimal = try JSONDecimal()
+  .minimum(0)
+  .multipleOf(cent)
+  .parseAndValidate(instance: "9.270")
+```
+
+The string parsing overloads preserve numeric tokens by default. `@Schemable` maps `Decimal`
+and `Foundation.Decimal` properties to `JSONDecimal`, including optional properties and
+collection values. See <doc:Validation> for conversion failures and exact constraints.
+
 ## Reusing existing schemas with references
 
 When you need to point at another schema fragment—either a local anchor or a remote definition—you can

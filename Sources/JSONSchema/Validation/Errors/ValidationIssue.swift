@@ -6,29 +6,31 @@ public enum ValidationIssue: Error, Codable, Equatable {
   case constantMismatch(expected: JSONValue, actual: JSONValue)
 
   // Number
-  case notMultipleOf(number: Double, multiple: Double)
-  case exceedsMaximum(number: Double, maximum: Double)
-  case exceedsExclusiveMaximum(number: Double, maximum: Double)
-  case belowMinimum(number: Double, minimum: Double)
-  case belowExclusiveMinimum(number: Double, minimum: Double)
+  case notMultipleOf(number: JSONNumberLiteral, multiple: JSONNumberLiteral)
+  case exceedsMaximum(number: JSONNumberLiteral, maximum: JSONNumberLiteral)
+  case exceedsExclusiveMaximum(number: JSONNumberLiteral, maximum: JSONNumberLiteral)
+  case belowMinimum(number: JSONNumberLiteral, minimum: JSONNumberLiteral)
+  case belowExclusiveMinimum(number: JSONNumberLiteral, minimum: JSONNumberLiteral)
+  case numericValidationFailure(reason: String)
+  case evaluationFailed(errors: [ValidationError])
 
   // String
-  case exceedsMaxLength(string: String, maxLength: Int)
-  case belowMinLength(string: String, minLength: Int)
+  case exceedsMaxLength(string: String, maxLength: JSONNumberLiteral)
+  case belowMinLength(string: String, minLength: JSONNumberLiteral)
   case patternMismatch(string: String, pattern: String)
   case invalidFormat(name: String, value: String)
 
   // Arrays
-  case exceedsMaxItems(count: Int, maxItems: Int)
-  case belowMinItems(count: Int, minItems: Int)
+  case exceedsMaxItems(count: Int, maxItems: JSONNumberLiteral)
+  case belowMinItems(count: Int, minItems: JSONNumberLiteral)
   case itemsNotUnique
-  case containsInsufficientMatches(count: Int, required: Int)
-  case containsExcessiveMatches(count: Int, maxAllowed: Int)
+  case containsInsufficientMatches(count: Int, required: JSONNumberLiteral)
+  case containsExcessiveMatches(count: Int, maxAllowed: JSONNumberLiteral)
   case invalidItem(index: Int, error: ValidationError)
 
   // Objects
-  case exceedsMaxProperties(count: Int, maxProperties: Int)
-  case belowMinProperties(count: Int, minProperties: Int)
+  case exceedsMaxProperties(count: Int, maxProperties: JSONNumberLiteral)
+  case belowMinProperties(count: Int, minProperties: JSONNumberLiteral)
   case missingRequiredProperty(key: String)
   case missingDependentProperty(key: String, dependentOn: String)
   case invalidProperty(key: String, error: ValidationError)
@@ -55,6 +57,13 @@ public enum ValidationIssue: Error, Codable, Equatable {
 }
 
 extension ValidationIssue {
+  var isEvaluationFailure: Bool {
+    switch self {
+    case .numericValidationFailure, .evaluationFailed: true
+    default: false
+    }
+  }
+
   func makeValidationError(
     keyword: String,
     keywordLocation: JSONPointer,
@@ -80,7 +89,8 @@ extension ValidationIssue {
         instanceLocation: instanceLocation,
         errors: errors
       )
-    case .allOfFailed(let errors),
+    case .evaluationFailed(let errors),
+      .allOfFailed(let errors),
       .anyOfFailed(let errors),
       .oneOfFailed(let errors),
       .conditionalFailed(_, let errors),
@@ -120,6 +130,10 @@ extension ValidationIssue: CustomStringConvertible {
       return "Expected constant value '\(expected)' but found '\(actual)'"
 
     // Number
+    case .numericValidationFailure(let reason):
+      return reason
+    case .evaluationFailed:
+      return "Schema evaluation could not be completed"
     case .notMultipleOf(let number, let multiple):
       return "\(number) is not a multiple of \(multiple)"
     case .exceedsMaximum(let number, let maximum):

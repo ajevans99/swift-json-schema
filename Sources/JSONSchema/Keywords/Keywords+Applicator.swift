@@ -81,7 +81,7 @@ extension Keywords {
 
       for (offset, (instance, schema)) in zip(instances, subschemas).enumerated() {
         let prefixLocation = instanceLocation.appending(.index(offset))
-        let result = schema.validateSubschema(instance, at: prefixLocation)
+        let result = try schema.validateSubschema(instance, at: prefixLocation).requiringComplete()
         builder.merging(result)
         largestIndex = offset
       }
@@ -136,7 +136,7 @@ extension Keywords {
       // With array slice, original array indicies are used which is important here.
       for (index, instance) in zip(relevantInstanceItems.indices, relevantInstanceItems) {
         let itemLocation = instanceLocation.appending(.index(index))
-        let result = subschema.validateSubschema(instance, at: itemLocation)
+        let result = try subschema.validateSubschema(instance, at: itemLocation).requiringComplete()
         builder.merging(result)
       }
 
@@ -207,14 +207,17 @@ extension Keywords {
       var validIndices = [Int]()
       for (index, instance) in instances.enumerated() {
         let pointer = instanceLocation.appending(.index(index))
-        let result = subschema.validateSubschema(instance, at: pointer)
+        let result = try subschema.validateSubschema(instance, at: pointer).requiringComplete()
         if result.isValid {
           validIndices.append(index)
         }
       }
 
       if validIndices.isEmpty && !minContainsIsZero {
-        throw ValidationIssue.containsInsufficientMatches(count: instances.count, required: 1)
+        throw ValidationIssue.containsInsufficientMatches(
+          count: instances.count,
+          required: JSONNumberLiteral(1)
+        )
       }
 
       let annotationValue =
@@ -275,11 +278,13 @@ extension Keywords {
         guard let schema = schemaMap[key] else { continue }
         let propertyLocation = instanceLocation.appending(.key(key))
         var subAnnotations = AnnotationContainer()
-        let result = schema.validate(
-          value,
-          at: propertyLocation,
-          annotations: &subAnnotations
-        )
+        let result =
+          try schema.validate(
+            value,
+            at: propertyLocation,
+            annotations: &subAnnotations
+          )
+          .requiringComplete()
         builder.merging(result)
         annotations.merge(subAnnotations)
         instancePropertyNames.append(key)
@@ -344,7 +349,7 @@ extension Keywords {
       for (key, value) in instanceObject {
         for (regex, schema) in patterns where key.firstMatch(of: regex) != nil {
           let propertyLocation = instanceLocation.appending(.key(key))
-          let result = schema.validateSubschema(value, at: propertyLocation)
+          let result = try schema.validateSubschema(value, at: propertyLocation).requiringComplete()
           builder.merging(result)
           matchedPropertyNames.append(key)
         }
@@ -395,7 +400,8 @@ extension Keywords {
 
       for (key, value) in instanceObject where !previouslyValidatedKeys.contains(key) {
         let propertyLocation = instanceLocation.appending(.key(key))
-        let result = subschema.validateSubschema(value, at: propertyLocation)
+        let result = try subschema.validateSubschema(value, at: propertyLocation)
+          .requiringComplete()
         builder.merging(result)
         validatedKeys.append(key)
       }
@@ -438,10 +444,12 @@ extension Keywords {
 
       for key in instanceObject.keys {
         let keyValue = JSONValue.string(key)
-        let result = subschema.validateSubschema(
-          keyValue,
-          at: instanceLocation.appending(.key(key))
-        )
+        let result =
+          try subschema.validateSubschema(
+            keyValue,
+            at: instanceLocation.appending(.key(key))
+          )
+          .requiringComplete()
         builder.merging(result)
       }
 
@@ -479,7 +487,9 @@ extension Keywords {
 
       for subschema in subschemas {
         var subAnnotations = AnnotationContainer()
-        let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+        let result =
+          try subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+          .requiringComplete()
         // Per spec §10.2.1.1, allOf produces no annotations of its own, but the
         // annotations of each successful subschema propagate to the surrounding
         // schema. A failing subschema's annotations MUST NOT leak through, or
@@ -522,7 +532,9 @@ extension Keywords {
 
       for subschema in subschemas {
         var subAnnotations = AnnotationContainer()
-        let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+        let result =
+          try subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+          .requiringComplete()
         // Per spec §10.2.1.2, anyOf collects annotations only from MATCHING
         // (passing) subschemas. Merging from failing branches would cause
         // sibling `unevaluatedProperties`/`unevaluatedItems` to treat
@@ -567,7 +579,9 @@ extension Keywords {
 
       for subschema in subschemas {
         var subAnnotations = AnnotationContainer()
-        let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+        let result =
+          try subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+          .requiringComplete()
         if result.isValid {
           validCount += 1
           annotations.merge(subAnnotations)
@@ -614,7 +628,8 @@ extension Keywords {
       using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       var subAnnotations = AnnotationContainer()
-      let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+      let result = try subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+        .requiringComplete()
       if result.isValid {
         annotations.merge(subAnnotations)
         throw ValidationIssue.notFailed
@@ -648,16 +663,17 @@ extension Keywords {
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
-      _ = evaluate(input, at: instanceLocation, using: &annotations)
+      _ = try evaluate(input, at: instanceLocation, using: &annotations)
     }
 
     func evaluate(
       _ input: JSONValue,
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
-    ) -> Bool {
+    ) throws(ValidationIssue) -> Bool {
       var subAnnotations = AnnotationContainer()
-      let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+      let result = try subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+        .requiringComplete()
       // Per JSON Schema 2020-12 core §10.2.2.1, `if` only contributes to
       // annotation collection when its subschema validates successfully —
       // otherwise sibling `unevaluatedProperties`/`unevaluatedItems` would
@@ -706,7 +722,8 @@ extension Keywords {
       }
 
       var subAnnotations = AnnotationContainer()
-      let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+      let result = try subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+        .requiringComplete()
       if !result.isValid {
         throw ValidationIssue.conditionalFailed(condition: "then", errors: result.errors ?? [])
       }
@@ -749,7 +766,8 @@ extension Keywords {
         return
       }
       var subAnnotations = AnnotationContainer()
-      let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+      let result = try subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+        .requiringComplete()
       if !result.isValid {
         throw ValidationIssue.conditionalFailed(condition: "else", errors: result.errors ?? [])
       }
@@ -810,7 +828,8 @@ extension Keywords {
       // OrderedDictionary, but `instanceObject[key] != nil` is more idiomatic.
       for (key, schema) in schemaMap where instanceObject[key] != nil {
         var subAnnotations = AnnotationContainer()
-        let result = schema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+        let result = try schema.validate(input, at: instanceLocation, annotations: &subAnnotations)
+          .requiringComplete()
         builder.merging(result)
         // Per spec §10.2.2.4, dependentSchemas collects annotations only from
         // matching (passing) subschemas — the same rule as in-place applicators
@@ -895,7 +914,9 @@ extension Keywords {
         let instance = instances[index]
         let itemLocation = instanceLocation.appending(.index(index))
         var subAnnotations = AnnotationContainer()
-        let result = subschema.validate(instance, at: itemLocation, annotations: &subAnnotations)
+        let result =
+          try subschema.validate(instance, at: itemLocation, annotations: &subAnnotations)
+          .requiringComplete()
         builder.merging(result)
         annotations.merge(subAnnotations)
       }
@@ -975,11 +996,13 @@ extension Keywords {
         guard let propertyValue = instanceObject[propertyName] else { continue }
         var subAnnotations = AnnotationContainer()
         let propertyLocation = instanceLocation.appending(.key(propertyName))
-        let result = subschema.validate(
-          propertyValue,
-          at: propertyLocation,
-          annotations: &subAnnotations
-        )
+        let result =
+          try subschema.validate(
+            propertyValue,
+            at: propertyLocation,
+            annotations: &subAnnotations
+          )
+          .requiringComplete()
         builder.merging(result)
         annotations.merge(subAnnotations)
         validatedPropertyNames.append(propertyName)

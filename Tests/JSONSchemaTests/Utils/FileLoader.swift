@@ -15,16 +15,26 @@ struct FixtureLoadingError: Error, CustomStringConvertible {
 
 struct FileLoader<T: Decodable> {
   let directory: URL
+  let decode: (Data) throws -> T
 
-  init(bundle: Bundle = .module, subdirectory: String? = nil) throws {
+  init(
+    bundle: Bundle = .module,
+    subdirectory: String? = nil,
+    decode: @escaping (Data) throws -> T = { try JSONDecoder().decode(T.self, from: $0) }
+  ) throws {
     guard let resources = bundle.resourceURL else {
       throw FixtureLoadingError(path: bundle.bundleURL, reason: "Missing bundle resources")
     }
     directory = subdirectory.map { resources.appendingPathComponent($0) } ?? resources
+    self.decode = decode
   }
 
-  init(directory: URL) {
+  init(
+    directory: URL,
+    decode: @escaping (Data) throws -> T = { try JSONDecoder().decode(T.self, from: $0) }
+  ) {
     self.directory = directory
+    self.decode = decode
   }
 
   func listFiles(recursive: Bool = false) throws -> [URL] {
@@ -85,7 +95,7 @@ struct FileLoader<T: Decodable> {
 
   func decodeFile(from data: Data, at url: URL) throws -> T {
     do {
-      return try JSONDecoder().decode(T.self, from: data)
+      return try decode(data)
     } catch {
       throw FixtureLoadingError(
         path: url,
@@ -143,7 +153,13 @@ struct RemoteLoader {
     let outputData = try runCommand(command, at: binDirectory)
     let remoteSchemas: [String: JSONValue]
     do {
-      remoteSchemas = try JSONDecoder().decode([String: JSONValue].self, from: outputData)
+      guard let object = try JSONValue.parse(outputData).object else {
+        throw DecodingError.typeMismatch(
+          [String: JSONValue].self,
+          .init(codingPath: [], debugDescription: "Remote schemas must be an object")
+        )
+      }
+      remoteSchemas = Dictionary(uniqueKeysWithValues: object.map { ($0.key, $0.value) })
     } catch {
       throw FixtureLoadingError(
         path: binDirectory,
@@ -169,7 +185,8 @@ struct RemoteLoader {
 
   private func fetchOutputSchemas() throws -> [String: JSONValue] {
     let loader = FileLoader<JSONValue>(
-      directory: suiteRoot.appendingPathComponent("output-tests")
+      directory: suiteRoot.appendingPathComponent("output-tests"),
+      decode: { try JSONValue.parse($0) }
     )
     let files = try loader.listFiles(recursive: true)
       .filter { $0.lastPathComponent == "output-schema.json" }

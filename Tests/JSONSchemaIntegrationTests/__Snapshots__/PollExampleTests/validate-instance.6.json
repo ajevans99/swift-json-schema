@@ -69,7 +69,7 @@
                   "instanceLocation" : "\/options\/0\/id",
                   "keyword" : "minimum",
                   "keywordLocation" : "\/properties\/options\/items\/properties\/id\/minimum",
-                  "message" : "-1.0 is below minimum value of 1.0"
+                  "message" : "-1 is below minimum value of 1.0"
                 }
               ],
               "instanceLocation" : "\/options\/0",

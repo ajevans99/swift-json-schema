@@ -42,6 +42,7 @@ memberwise initializer usually suffices; classes need an explicit initializer.
 | `Bool` | ``JSONBoolean`` |
 | `Int` | ``JSONInteger`` |
 | `Double` | ``JSONNumber`` |
+| `Decimal`, `Foundation.Decimal` | ``JSONDecimal`` |
 | `[Element]`, `Array<Element>` | ``JSONArray`` with an element schema |
 | `[String: Value]`, `Dictionary<String, Value>` | ``JSONObject`` with an `additionalProperties` schema |
 | `[Key: Value]` with a suitable `Schemable` key | ``JSONObject`` with `propertyNames` and `additionalProperties` schemas |
@@ -77,8 +78,25 @@ Primitive numeric dictionary keys are not supported.
 
 The macro recognizes `Float` but currently emits `JSONNumber()`, whose output is
 `Double`. Use `Double` or a custom schema that explicitly converts to `Float`.
+`Decimal` and `Foundation.Decimal` are recognized directly, including optional properties,
+array elements, and dictionary values. They use exact decimal conversion rather than
+converting a `Double`:
+
+```swift
+import Foundation
+
+@Schemable
+struct Invoice {
+  let amount: Decimal
+  let discount: Foundation.Decimal?
+  let adjustments: [Decimal]
+  let totalsByCurrency: [String: Decimal]
+}
+```
+
+`JSONDecimal` rejects numbers that are inexact or out of range for Foundation `Decimal`.
 Other named types are assumed to provide a static `schema`; there is no automatic
-Foundation, `Set`, or arbitrary numeric-type conversion. Unsupported syntax such
+conversion for other Foundation types, `Set`, or arbitrary numeric types. Unsupported syntax such
 as tuples and function types is diagnosed and omitted, which can also cause an
 initializer mismatch. Prefer `T?` for optional properties; nullable collection
 elements and other unsupported type shapes need a hand-written schema.
@@ -265,6 +283,14 @@ default, read-only, write-only, deprecated, and comment. Type-level annotations
 apply to the root schema. Use `@StringOptions`, `@NumberOptions`, `@ArrayOptions`,
 and `@ObjectOptions` for type-specific constraints. For example, the object option
 above rejects properties not declared in `Account`.
+
+`@NumberOptions` supports both `Double` and `JSONNumberLiteral` arguments for `minimum`,
+`maximum`, `exclusiveMinimum`, `exclusiveMaximum`, and `multipleOf`. Use a validated
+`JSONNumberLiteral` constant constructed from a string for bounds that must not first round
+through `Double`; for example, `.multipleOf(cent)` where
+`let cent = try JSONNumberLiteral("0.01")`. The `Double` overloads require finite inputs.
+Constraints are validated exactly regardless of whether the property is `Int`, `Double`,
+or `Decimal`. See <doc:Validation> for exact decimal parsing.
 
 Documentation comments also work directly on enum associated-value parameters:
 

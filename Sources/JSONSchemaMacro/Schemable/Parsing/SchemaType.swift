@@ -97,6 +97,14 @@ indirect enum SchemaType {
       )
     case .memberType(let member):
       if let base = member.baseType.as(IdentifierTypeSyntax.self),
+        base.name.text.trimmingBackticks() == "Foundation",
+        base.genericArgumentClause == nil,
+        member.name.text.trimmingBackticks() == "Decimal",
+        member.genericArgumentClause == nil
+      {
+        return .scalar(.decimal)
+      }
+      if let base = member.baseType.as(IdentifierTypeSyntax.self),
         base.name.text.trimmingBackticks() == "Swift",
         base.genericArgumentClause == nil
       {

@@ -138,11 +138,9 @@ public enum Dialect: String, Hashable, Sendable {
   /// - Returns: A `Schema` representing the meta-schema for this dialect.
   /// - Throws: `MetaSchemaError` if the meta-schema cannot be loaded.
   public func loadMetaSchema() throws -> Schema {
-    let jsonDecoder = JSONDecoder()
     func jsonValue(from url: URL) throws -> JSONValue {
       let data = try Data(contentsOf: url)
-      let value = try jsonDecoder.decode(JSONValue.self, from: data)
-      return value
+      return try JSONValue.parse(data)
     }
 
     guard let baseURI = URL(string: "https://json-schema.org/draft/2020-12/schema") else {

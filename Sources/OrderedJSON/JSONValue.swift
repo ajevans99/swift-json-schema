@@ -25,8 +25,8 @@ import OrderedCollections
 /// - SeeAlso: ``JSONType``
 public enum JSONValue: Hashable, Equatable, Sendable {
   case string(String)
-  case number(Double)
-  case integer(Int)
+  // Keep number metadata out of every value's inline payload, including parser stack frames.
+  indirect case numberLiteral(JSONNumberLiteral)
   case object(OrderedDictionary<String, Self>)
   case array([Self])
   case boolean(Bool)
@@ -35,8 +35,7 @@ public enum JSONValue: Hashable, Equatable, Sendable {
   public var primitive: JSONType {
     switch self {
     case .string: return .string
-    case .number: return .number
-    case .integer: return .integer
+    case .numberLiteral(let number): return number.isInteger ? .integer : .number
     case .object: return .object
     case .array: return .array
     case .boolean: return .boolean
@@ -53,14 +52,9 @@ public enum JSONValue: Hashable, Equatable, Sendable {
       // representation. Hashing the scalar array preserves the contract
       // `lhs == rhs` ⇒ `lhs.hashValue == rhs.hashValue`.
       hasher.combine(Array(value.unicodeScalars))
-    case .number(let value):
+    case .numberLiteral(let value):
       hasher.combine(1)
       hasher.combine(value)
-    case .integer(let value):
-      // Hash integers as their double form so `.integer(1) == .number(1.0)`
-      // continue to share a hash bucket.
-      hasher.combine(1)
-      hasher.combine(Double(value))
     case .object(let dictionary):
       hasher.combine(2)
       // JSON objects are unordered for equality, so hash order-insensitively
@@ -91,14 +85,8 @@ public enum JSONValue: Hashable, Equatable, Sendable {
       // For example, "ä" (U+00E4) and "ä" (U+0061 U+0308) are canonically equal in Swift, but not in JSON.
       // See `const.json` test cases in JSON Schema Test Suite for more details.
       return lhsValue.unicodeScalars.elementsEqual(rhsValue.unicodeScalars)
-    case (.number(let lhsValue), .number(let rhsValue)):
+    case (.numberLiteral(let lhsValue), .numberLiteral(let rhsValue)):
       return lhsValue == rhsValue
-    case (.integer(let lhsValue), .integer(let rhsValue)):
-      return lhsValue == rhsValue
-    case (.number(let lhsValue), .integer(let rhsValue)):
-      return lhsValue == Double(rhsValue)
-    case (.integer(let lhsValue), .number(let rhsValue)):
-      return Double(lhsValue) == rhsValue
     case (.object(let lhsValue), .object(let rhsValue)):
       // JSON objects compare on key membership, not insertion order, even
       // though we store keys in an OrderedDictionary for deterministic
@@ -121,19 +109,43 @@ public enum JSONValue: Hashable, Equatable, Sendable {
 }
 
 extension JSONValue {
+  /// Constructs a JSON integer without losing precision.
+  public static func integer(_ value: Int) -> Self {
+    .numberLiteral(JSONNumberLiteral(value))
+  }
+
+  /// Constructs a number from a finite Swift double's decimal representation.
+  ///
+  /// - Precondition: `value` is finite. For untrusted values, use the throwing
+  ///   ``JSONNumberLiteral/init(_:)-(Double)`` initializer instead.
+  public static func number(_ value: Double) -> Self {
+    do {
+      return .numberLiteral(try JSONNumberLiteral(value))
+    } catch {
+      preconditionFailure("Cannot construct a JSON number: \(error)")
+    }
+  }
+
   public var string: String? {
     if case .string(let value) = self { return value }
     return nil
   }
 
-  public var number: Double? {
-    if case .number(let value) = self { return value }
+  /// The original, validated JSON number token.
+  public var numberLiteral: JSONNumberLiteral? {
+    if case .numberLiteral(let value) = self { return value }
     return nil
   }
 
+  /// A finite double approximation, or `nil` for nonnumbers or range failures.
+  /// Use ``JSONNumberLiteral/doubleValue()`` to receive conversion errors.
+  public var number: Double? {
+    try? numberLiteral?.doubleValue()
+  }
+
+  /// An exact Swift integer, regardless of the number's original spelling.
   public var integer: Int? {
-    if case .integer(let value) = self { return value }
-    return nil
+    try? numberLiteral?.integerValue()
   }
 
   public var object: OrderedDictionary<String, JSONValue>? {
@@ -159,11 +171,7 @@ extension JSONValue {
 
 extension JSONValue {
   public var numeric: Double? {
-    switch self {
-    case .integer(let integer): return Double(integer)
-    case .number(let double): return double
-    default: return nil
-    }
+    number
   }
 }
 
@@ -172,10 +180,8 @@ extension JSONValue: CustomStringConvertible {
     switch self {
     case .string(let value):
       return "\"\(value)\""
-    case .number(let value):
-      return String(value)
-    case .integer(let value):
-      return String(value)
+    case .numberLiteral(let value):
+      return value.rawValue
     case .object(let value):
       let pairs = value.map { "\"\($0.key)\": \($0.value.description)" }
       return "{\(pairs.joined(separator: ", "))}"

@@ -5,7 +5,7 @@ extension Array where Element == JSONValue {
   /// - Parameter value: The JSON value to convert to an array.
   public init(_ value: JSONValue) {
     switch value {
-    case .string, .number, .integer, .object, .boolean, .null: self = [value]
+    case .string, .numberLiteral, .object, .boolean, .null: self = [value]
     case .array(let array): self = array
     }
   }

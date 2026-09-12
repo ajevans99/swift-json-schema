@@ -6,7 +6,12 @@ public struct ValidationResult: Sendable, Encodable, Equatable {
   public let absoluteKeywordLocation: URL?
   public let instanceLocation: JSONPointer
   public let errors: [ValidationError]?
+  /// Operational failures that prevented evaluation, rather than ordinary constraint mismatches.
+  public let evaluationErrors: [ValidationError]?
   public let annotations: [AnyAnnotation]?
+
+  /// Incomplete evaluations always have `isValid == false` and cannot be negated into a match.
+  public var isEvaluationComplete: Bool { evaluationErrors?.isEmpty ?? true }
 
   init(
     valid: Bool,
@@ -14,13 +19,15 @@ public struct ValidationResult: Sendable, Encodable, Equatable {
     absoluteKeywordLocation: URL? = nil,
     instanceLocation: JSONPointer,
     errors: [ValidationError]? = nil,
+    evaluationErrors: [ValidationError]? = nil,
     annotations: [AnyAnnotation]? = nil
   ) {
-    self.isValid = valid
+    self.isValid = valid && (evaluationErrors?.isEmpty ?? true)
     self.keywordLocation = keywordLocation
     self.absoluteKeywordLocation = absoluteKeywordLocation
     self.instanceLocation = instanceLocation
     self.errors = errors
+    self.evaluationErrors = evaluationErrors
     self.annotations = annotations
   }
 
@@ -30,6 +37,7 @@ public struct ValidationResult: Sendable, Encodable, Equatable {
     case absoluteKeywordLocation
     case instanceLocation
     case errors
+    case evaluationErrors
     case annotations
   }
 
@@ -40,6 +48,7 @@ public struct ValidationResult: Sendable, Encodable, Equatable {
     try container.encodeIfPresent(absoluteKeywordLocation, forKey: .absoluteKeywordLocation)
     try container.encode(instanceLocation, forKey: .instanceLocation)
     try container.encodeIfPresent(errors, forKey: .errors)
+    try container.encodeIfPresent(evaluationErrors, forKey: .evaluationErrors)
     try container.encodeIfPresent(
       annotations?.map { AnyAnnotationWrapper(annotation: $0) },
       forKey: .annotations
@@ -52,6 +61,14 @@ public struct ValidationResult: Sendable, Encodable, Equatable {
       && lhs.absoluteKeywordLocation == rhs.absoluteKeywordLocation
       && lhs.instanceLocation == rhs.instanceLocation
       && lhs.errors == rhs.errors
+      && lhs.evaluationErrors == rhs.evaluationErrors
+  }
+
+  func requiringComplete() throws(ValidationIssue) -> Self {
+    if let evaluationErrors, !evaluationErrors.isEmpty {
+      throw .evaluationFailed(errors: evaluationErrors)
+    }
+    return self
   }
 }
 

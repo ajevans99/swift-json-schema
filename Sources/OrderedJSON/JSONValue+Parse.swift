@@ -40,9 +40,8 @@ extension JSONValue {
   /// - Top-level scalars (`null`, booleans, numbers, strings) are accepted
   ///   per the 2017 erratum to RFC 7159 (now required by RFC 8259), matching
   ///   `JSONSerialization.allowFragments` semantics.
-  /// - Numbers without a fractional or exponent component are decoded as
-  ///   `.integer(Int)` when the value fits in `Int`; otherwise as
-  ///   `.number(Double)`.
+  /// - Numbers retain their original token as a ``JSONNumberLiteral``, without
+  ///   rounding or imposing the range of a Swift numeric type.
   /// - Duplicate keys in an object are accepted; the **last** occurrence
   ///   wins on value *and* on position — the late-bound key appears at
   ///   the end of the iteration order, matching what a strict
@@ -447,7 +446,6 @@ struct JSONParser {
 
   mutating func parseNumber() throws -> JSONValue {
     let start = index
-    var isInteger = true
 
     if peek() == Self.minus {
       index += 1
@@ -469,7 +467,6 @@ struct JSONParser {
 
     // Fraction part.
     if peek() == Self.period {
-      isInteger = false
       index += 1
       guard let b = peek(), b >= Self.zero, b <= Self.nine else {
         throw error("Expected digit after decimal point")
@@ -479,7 +476,6 @@ struct JSONParser {
 
     // Exponent part.
     if let b = peek(), b == Self.lowerE || b == Self.upperE {
-      isInteger = false
       index += 1
       if let s = peek(), s == Self.plus || s == Self.minus { index += 1 }
       guard let d = peek(), d >= Self.zero, d <= Self.nine else {
@@ -496,13 +492,7 @@ struct JSONParser {
         return length
       }
     )
-    if isInteger, let int = Int(str) {
-      return .integer(int)
-    }
-    guard let double = Double(str) else {
-      throw error("Invalid number '\(str)'")
-    }
-    return .number(double)
+    return .numberLiteral(try JSONNumberLiteral(str))
   }
 
   // MARK: - Errors

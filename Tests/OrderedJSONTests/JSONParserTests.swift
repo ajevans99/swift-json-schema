@@ -59,11 +59,12 @@ struct JSONParserTests {
 
   // MARK: - Numbers
 
-  @Test func distinguishesIntegerFromDouble() throws {
+  @Test func preservesNumberValuesAndSpelling() throws {
     #expect(try JSONValue.parse("0") == .integer(0))
     #expect(try JSONValue.parse("1234567890") == .integer(1_234_567_890))
     #expect(try JSONValue.parse("0.5") == .number(0.5))
     #expect(try JSONValue.parse("1e3") == .number(1000.0))
+    #expect(try JSONValue.parse("1e3").numberLiteral?.rawValue == "1e3")
   }
 
   // MARK: - Error reporting
@@ -338,10 +339,22 @@ struct JSONParserTests {
         current = child
       }
     }
-    guard case .integer(let leaf) = current else {
+    guard let leaf = current.integer else {
       Issue.record("Expected integer leaf after \(depth) containers")
       return
     }
     #expect(leaf == 42)
+  }
+
+  @Test(arguments: [false, true])
+  func enforcesDepthLimitForMixedContainers(dataInput: Bool) {
+    let deep = String(repeating: #"[{"":"#, count: 300)
+    #expect(throws: JSONParseError.self) {
+      if dataInput {
+        _ = try JSONValue.parse(Data(deep.utf8))
+      } else {
+        _ = try JSONValue.parse(deep)
+      }
+    }
   }
 }

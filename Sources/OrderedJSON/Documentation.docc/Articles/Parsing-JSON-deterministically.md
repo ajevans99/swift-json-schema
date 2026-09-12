@@ -20,10 +20,31 @@ let value = try JSONValue.parse(json)
 ## What gets accepted
 
 - **Top-level scalars** (`null`, booleans, numbers, strings) — per RFC 8259's 2017 erratum, which made fragments part of the standard. Equivalent to passing `JSONSerialization.allowFragments`.
-- **Numbers** decode as ``JSONValue/integer(_:)`` when they fit `Int` and have no fractional or exponent component, otherwise as ``JSONValue/number(_:)``.
+- **Numbers** are stored as `.numberLiteral(JSONNumberLiteral)` with their original token.
+  Fractional digits, trailing zeros, a negative-zero sign, and exponent spelling are retained;
+  values such as `1e1000` need not fit `Int`, `Double`, or Foundation `Decimal`.
 - **Duplicate keys** are accepted; the **last** occurrence wins on both *value* and *position* — the late-bound key occupies the trailing position in the resulting object.
 - **UTF-16 surrogate pairs in `\u` escapes** are decoded into single Unicode scalars.
 - **The byte stream must be valid UTF-8**. UTF-16 / UTF-32 / BOMs are rejected.
+
+## Number tokens and numeric types
+
+```swift
+let value = try JSONValue.parse("[9.270,-0,1e1000]")
+print(try value.serialized()) // [9.270,-0,1e1000]
+
+let integral = try JSONValue.parse("1e2")
+print(integral.primitive == .integer) // true
+print(integral.integer == 100) // true
+```
+
+`primitive` classifies numbers mathematically: `1.0` and `1e2` are integers even though their
+tokens contain a decimal point or exponent. The original token remains unchanged. Conversion
+to a destination Swift type is a separate step and can fail if the value is out of range.
+See <doc:Migrating-to-lossless-numbers> for exact and approximate conversions.
+
+Number-token preservation does not retain source whitespace, string escape spellings, or
+duplicate object members. It is not a byte-for-byte source archive.
 
 ## Limits
 
@@ -51,5 +72,6 @@ do {
 |------|-----|
 | Strongly-typed Swift model from JSON | `JSONDecoder` |
 | Untyped JSON tree, key-order-preserving | `OrderedJSON.JSONValue.parse` |
+| Exact numbers and original numeric token spellings | `OrderedJSON.JSONValue.parse` |
 | RFC-8259-strict parsing (no trailing commas, no comments) | `OrderedJSON.JSONValue.parse` |
 | Round-trip byte-stable JSON (parse → emit → parse → emit) | `OrderedJSON.JSONValue.parse` + ``JSONValue/serialized(options:)`` |

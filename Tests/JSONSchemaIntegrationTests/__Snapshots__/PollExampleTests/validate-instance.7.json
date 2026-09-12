@@ -83,7 +83,7 @@
                   "instanceLocation" : "\/options\/0\/voteCount",
                   "keyword" : "minimum",
                   "keywordLocation" : "\/properties\/options\/items\/properties\/voteCount\/minimum",
-                  "message" : "-5.0 is below minimum value of 0.0"
+                  "message" : "-5 is below minimum value of 0.0"
                 }
               ],
               "instanceLocation" : "\/options\/0",

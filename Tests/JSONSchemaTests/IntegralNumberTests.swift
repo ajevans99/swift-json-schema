@@ -6,15 +6,13 @@ struct IntegralNumberTests {
   func integerTypeAcceptsIntegralNumbersWithoutChangingStorage(type: JSONValue) throws {
     let schema = try Schema(rawSchema: ["type": type], context: Context(dialect: .draft2020_12))
     let integral = try JSONValue.parse("1.0")
-    #expect(integral.primitive == .number)
-    #expect(integral.integer == nil)
+    #expect(integral.primitive == .integer)
+    #expect(integral.integer == 1)
     #expect(schema.validate(integral).isValid)
     #expect(schema.validate(.number(-0.0)).isValid)
     #expect(schema.validate(.number(-2.0)).isValid)
     #expect(!schema.validate(.number(1.5)).isValid)
-    #expect(!schema.validate(.number(Double.infinity)).isValid)
-    #expect(!schema.validate(.number(Double.nan)).isValid)
-    #expect(integral.primitive == .number)
+    #expect(integral.numberLiteral?.rawValue == "1.0")
   }
 
   @Test func schemaIntegerTypeIsNotLimitedToSwiftInt() throws {

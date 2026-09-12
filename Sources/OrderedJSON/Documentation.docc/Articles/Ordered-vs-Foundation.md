@@ -1,6 +1,6 @@
 # Ordered vs. Foundation
 
-Choose a JSON API based on your data model and ordering requirements.
+Choose a JSON API based on your data model, ordering, and numeric-precision requirements.
 
 ## Overview
 
@@ -17,7 +17,9 @@ use of Foundation JSON in your application.
 | Untyped JSON tree | Requires a value type such as `JSONValue` | Foundation objects, commonly accessed through `Any` | `JSONValue` |
 | Source object order retained for later emission | Not guaranteed | Do not rely on dictionary iteration order across platforms | Preserved by `JSONValue.parse` |
 | Serialization order | Unspecified by default; `.sortedKeys` sorts keys | Unspecified by default; `.sortedKeys` sorts keys | Stored insertion order |
-| Original whitespace, escapes, and number spelling retained | No | No | No |
+| Original number tokens retained | No | No | Yes, through `JSONValue.parse` and `serialized` |
+| Numbers beyond `Double` or `Decimal` range | Not guaranteed | Not guaranteed | Stored without conversion to those types |
+| Original whitespace and string escape spelling retained | No | No | No |
 
 Foundation implementations can differ across OS releases and platforms. Sorting keys can
 provide predictable output, but it is not the same as preserving source or declaration order.
@@ -26,7 +28,20 @@ provide predictable output, but it is not the same as preserving source or decla
 
 If you already have `Codable` models and do not need insertion-order JSON output, continue
 using `JSONDecoder` and `JSONEncoder`. `JSONValue` also conforms to `Codable` for interoperability,
-but passing it through these APIs does not preserve its ordering guarantees.
+but passing it through these APIs does not preserve its ordering or number-token guarantees.
+
+`JSONNumberLiteral` also conforms to `Codable`. Foundation's `JSONEncoder` encodes the
+standalone literal as a JSON number, not as a string or an object containing `rawValue`.
+
+Numeric encoding tries `Int`, then an exact `Decimal`, then `Double` only when constructing
+a `JSONNumberLiteral` from that double equals the original value. Otherwise it throws
+`EncodingError` rather than silently rounding. Even successful encoding can change spelling,
+such as emitting `1` for `1.0`.
+
+Numeric decoding tries `Int`, `Decimal`, then `Double`. A generic `Decoder` does not expose
+raw JSON tokens, and Foundation may already have rounded a value before the library receives
+it. Decoding therefore cannot promise original precision. `OrderedJSON` does not provide a
+replacement general-purpose `Codable` encoder or decoder.
 
 For schema-driven conversion into Swift models, use the separate
 [`JSONSchemaBuilder`](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder)
@@ -43,9 +58,10 @@ let compact = try value.serialized()
 // {"name":"Ada","age":37}
 ```
 
-The property order is retained, but the source whitespace is not. Parsing and serialization
-operate on JSON values, not the original token spellings. Objects with the same members in
-different orders compare equal, yet can serialize differently.
+The property order is retained, but the source whitespace is not. Number tokens retain their
+original spelling, while string escapes can change. Objects with the same members in different
+orders compare equal, yet can serialize differently. Likewise, numerically equivalent tokens
+such as `1` and `1.0` compare equal without sharing the same serialized bytes.
 
 This makes `OrderedJSON` useful for diff-friendly schema artifacts, snapshot tests, and
 ordered configuration output. It is not a JSON canonicalization implementation: applications
@@ -65,3 +81,4 @@ describes the parser and serializer benchmarks.
 
 - <doc:Parsing-JSON-deterministically>
 - <doc:Serializing-JSON>
+- <doc:Migrating-to-lossless-numbers>

@@ -34,8 +34,17 @@ extension JSONSchemaComponent {
   }
 
   public func parse(
+    instance: String
+  ) throws -> Parsed<Output, ParseIssue> {
+    parse(try JSONValue.parse(instance))
+  }
+
+  /// Compatibility path for custom Foundation decoder strategies. Numeric
+  /// precision and source spelling are not guaranteed by `JSONDecoder`.
+  @available(*, deprecated, message: "Use parse(instance:) for lossless JSON number parsing.")
+  public func parse(
     instance: String,
-    decoder: JSONDecoder = JSONDecoder()
+    decoder: JSONDecoder
   ) throws -> Parsed<Output, ParseIssue> {
     let value = try decoder.decode(JSONValue.self, from: Data(instance.utf8))
     return parse(value)
@@ -43,7 +52,25 @@ extension JSONSchemaComponent {
 
   public func parseAndValidate(
     instance: String,
-    decoder: JSONDecoder = JSONDecoder(),
+    validationContext: Context = .init(dialect: .draft2020_12)
+  ) throws(ParseAndValidateIssue) -> Output {
+    let value: JSONValue
+    do {
+      value = try JSONValue.parse(instance)
+    } catch {
+      throw .decodingFailed(error)
+    }
+    return try parseAndValidate(value, validationContext: validationContext)
+  }
+
+  @available(
+    *,
+    deprecated,
+    message: "Use parseAndValidate(instance:) for lossless JSON number parsing."
+  )
+  public func parseAndValidate(
+    instance: String,
+    decoder: JSONDecoder,
     validationContext: Context = .init(dialect: .draft2020_12)
   ) throws(ParseAndValidateIssue) -> Output {
     let value: JSONValue
