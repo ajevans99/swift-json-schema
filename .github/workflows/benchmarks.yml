@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: ["main"]
   workflow_dispatch:
+    inputs:
+      refresh_baselines:
+        description: Generate a baseline artifact instead of checking committed thresholds
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -15,6 +20,8 @@ jobs:
     name: Package benchmarks
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    env:
+      SWIFT_DETERMINISTIC_HASHING: "1"
 
     steps:
     - uses: actions/checkout@v5
@@ -39,7 +46,7 @@ jobs:
           echo "complete=false" >> "$GITHUB_OUTPUT"
         fi
     - name: Generate benchmark baselines
-      if: ${{ steps.baselines.outputs.complete == 'false' }}
+      if: ${{ steps.baselines.outputs.complete == 'false' || inputs.refresh_baselines }}
       working-directory: Benchmarks
       run: |
         swift package --disable-automatic-resolution --allow-writing-to-package-directory benchmark \
@@ -48,10 +55,10 @@ jobs:
           --path Baselines \
           --no-progress
     - name: Run OrderedJSON benchmarks
-      if: ${{ steps.baselines.outputs.complete == 'true' }}
+      if: ${{ steps.baselines.outputs.complete == 'true' && !inputs.refresh_baselines }}
       run: Benchmarks/Scripts/check-thresholds.sh OrderedJSONBenchmarks
     - name: Run JSONSchema benchmarks
-      if: ${{ steps.baselines.outputs.complete == 'true' }}
+      if: ${{ !cancelled() && steps.baselines.outputs.complete == 'true' && !inputs.refresh_baselines }}
       run: Benchmarks/Scripts/check-thresholds.sh JSONSchemaBenchmarks
     - name: Upload benchmark baselines
       if: ${{ always() }}

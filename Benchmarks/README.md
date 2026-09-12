@@ -94,6 +94,7 @@ instrumentation and machine load can affect timing, especially on tiny inputs.
 For example, from `Benchmarks/`:
 
 ```bash
+export SWIFT_DETERMINISTIC_HASHING=1
 swift package --disable-automatic-resolution --allow-writing-to-package-directory benchmark \
   baseline update before-time-1 --target OrderedJSONBenchmarks \
   --metric wallClock --metric throughput --no-progress
@@ -182,6 +183,25 @@ When a new benchmark has no committed baseline yet, CI generates a complete
 baseline artifact instead of performing a partial regression check. Commit the
 artifact from the pinned runner; the next run enforces it.
 
+CI sets `SWIFT_DETERMINISTIC_HASHING=1` for both capture and enforcement.
+Random hash seeds change Foundation dictionary traversal and therefore the
+comparison/allocation work of `.sortedKeys`, even for identical source bytes.
+Fixed hashing makes that workload repeatable; it does not change library
+defaults or establish performance across arbitrary hash seeds. Set the same
+environment variable when reproducing thresholds locally. Timing remains
+informational, including under fixed hashing.
+
+To intentionally refresh an already complete set, dispatch the **Benchmarks**
+workflow on the desired branch with `refresh_baselines=true`. This opt-in
+artifact-generation run skips enforcement and is not evidence of a regression
+check passing. Commit the unmodified artifact, then run the default workflow
+(`refresh_baselines=false`) separately to enforce it. Pull-request runs use
+the default checking path.
+
+With complete coverage, JSONSchema reporting and enforcement also run when
+OrderedJSON fails, unless the workflow is cancelled. The job still fails for
+either suite's regression; this only preserves independent diagnostics.
+
 The two new Foundation round-trip variants add 16 cases with the full corpus
 (64 OrderedJSON cases, 82 total across both suites). All 82 allocation thresholds
 are committed, including the 16 new cases, so complete corpus discovery selects
@@ -221,6 +241,7 @@ To refresh baselines on the same runner class after an intentional improvement, 
 
 ```bash
 cd Benchmarks
+export SWIFT_DETERMINISTIC_HASHING=1
 rm -rf Baselines
 swift package --disable-automatic-resolution --allow-writing-to-package-directory benchmark \
   thresholds update --metric mallocCountTotal --path Baselines --no-progress

@@ -157,6 +157,42 @@ class BaselineCoverageTests(unittest.TestCase):
             ]
             self.assertEqual(metrics, ["mallocCountTotal"])
 
+    def test_workflow_uses_fixed_hashing_for_all_benchmark_steps(self):
+        workflow = WORKFLOW.read_text()
+        job = workflow.split("  benchmarks:\n", 1)[1].split("    steps:\n", 1)[0]
+        self.assertIn('    env:\n      SWIFT_DETERMINISTIC_HASHING: "1"\n', job)
+
+    def test_explicit_refresh_is_opt_in_and_not_enforcement(self):
+        workflow = WORKFLOW.read_text()
+        dispatch = workflow.split("  workflow_dispatch:\n", 1)[1].split(
+            "\npermissions:", 1)[0]
+        self.assertIn("      refresh_baselines:\n", dispatch)
+        self.assertIn("        type: boolean\n        default: false\n", dispatch)
+        generation = workflow.split("    - name: Generate benchmark baselines\n", 1)[1]
+        generation = generation.split("\n    - ", 1)[0]
+        self.assertIn(
+            "steps.baselines.outputs.complete == 'false' || inputs.refresh_baselines",
+            generation,
+        )
+        for name in ("Run OrderedJSON benchmarks", "Run JSONSchema benchmarks"):
+            step = workflow.split(f"    - name: {name}\n", 1)[1].split(
+                "\n    - ", 1)[0]
+            self.assertIn(
+                "steps.baselines.outputs.complete == 'true' && !inputs.refresh_baselines",
+                step,
+            )
+
+    def test_schema_check_survives_orderedjson_failure_without_masking_it(self):
+        workflow = WORKFLOW.read_text()
+        schema_step = workflow.split("    - name: Run JSONSchema benchmarks\n", 1)[1]
+        schema_step = schema_step.split("\n    - ", 1)[0]
+        self.assertIn(
+            "if: ${{ !cancelled() && steps.baselines.outputs.complete == 'true' "
+            "&& !inputs.refresh_baselines }}",
+            schema_step,
+        )
+        self.assertNotIn("continue-on-error", workflow)
+
 
 if __name__ == "__main__":
     unittest.main()
