@@ -183,12 +183,19 @@ baseline artifact instead of performing a partial regression check. Commit the
 artifact from the pinned runner; the next run enforces it.
 
 The two new Foundation round-trip variants add 16 cases with the full corpus
-(64 OrderedJSON cases, 82 total across both suites). Their Linux threshold
-refresh is pending; the existing 66 committed files have not been replaced
-with macOS measurements. The workflow currently targets PRs into `main`, so a
-draft targeting an intermediate stack branch may need an explicit workflow
-dispatch or later final-base run to obtain that artifact. Timing and throughput
-remain informational; the allocation-only guard is unchanged.
+(64 OrderedJSON cases, 82 total across both suites). All 82 allocation thresholds
+are committed, including the 16 new cases, so complete corpus discovery selects
+both enforcement steps rather than the baseline-generation path.
+
+The complete set was captured in [Ubuntu run 34718784775](https://github.com/ajevans99/swift-json-schema/actions/runs/34718784775)
+from commit `c37cee044c2d2a58cc6aaf6f3680e72e0c5f7378`, after the server-side
+rebase onto the current parser and validator. The runner was `ubuntu-24.04`
+(image `20260907.300.1`) with Swift 6.3.3, `x86_64-unknown-linux-gnu`.
+The artifact is copied without adjusting counts. It refreshes the previous 66
+cases as well as adding the new cases; all files now contain only
+`mallocCountTotal`, matching enforcement. No macOS or emulated timing results
+are used as thresholds. Timing and throughput remain informational, and the
+10% relative / 10-allocation absolute tolerances are unchanged.
 
 Baseline generation is only allowed after successful benchmark discovery.
 Listing failures or empty/unrecognized listings fail CI without generating
