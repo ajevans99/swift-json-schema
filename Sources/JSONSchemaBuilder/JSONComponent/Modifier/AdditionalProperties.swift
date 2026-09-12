@@ -8,7 +8,8 @@ public struct AdditionalPropertiesParseResult<AdditionalOut> {
 
 extension JSONComponents {
   /// A JSON schema component that augments a base schema with additionalProperties support.
-  /// Any properties not consumed by the base schema are validated using a fallback subschema.
+  /// Properties not declared by `properties` or matched by `patternProperties` are parsed
+  /// using the additional schema. Parsing failures are reported rather than dropping entries.
   public struct AdditionalProperties<
     Base: JSONSchemaComponent,
     AdditionalProps: JSONSchemaComponent
@@ -40,12 +41,32 @@ extension JSONComponents {
         return .error(.typeMismatch(expected: .object, actual: input))
       }
 
-      // Validate the base properties
       let baseValidation = base.parse(input)
+      let enclosingSchema = ParsingScope.current?.evaluation?.schema.object
+      let declaredProperties =
+        enclosingSchema?[Keywords.Properties.name]?.object
+        ?? schemaValue[Keywords.Properties.name]?.object ?? [:]
+      let patternProperties =
+        enclosingSchema?[Keywords.PatternProperties.name]?.object
+        ?? schemaValue[Keywords.PatternProperties.name]?.object ?? [:]
+      var patterns: [Regex<AnyRegexOutput>] = []
+      for pattern in patternProperties.keys {
+        do {
+          patterns.append(try Regex(pattern))
+        } catch {
+          return .error(
+            .invalidRegularExpression(pattern: pattern, reason: String(describing: error))
+          )
+        }
+      }
 
-      // Validate the additional properties
       var additionalProperties: [String: AdditionalProps.Output] = [:]
-      for (key, value) in dictionary where base.schemaValue.object?.keys.contains(key) == false {
+      var additionalErrors: [ParseIssue] = []
+      var hasAdditionalFailure = false
+      for (key, value) in dictionary
+      where declaredProperties[key] == nil
+        && !patterns.contains(where: { key.firstMatch(of: $0) != nil })
+      {
         switch ParsingScope.parse(
           additionalPropertiesSchema,
           value: value,
@@ -53,14 +74,17 @@ extension JSONComponents {
           instanceTokens: [key]
         ) {
         case .valid(let output): additionalProperties[key] = output
-        case .invalid: continue
+        case .invalid(let errors):
+          hasAdditionalFailure = true
+          additionalErrors.append(contentsOf: errors)
         }
       }
 
-      // Combine the base properties and additional properties
       switch baseValidation {
-      case .valid(let baseOutput): return .valid((baseOutput, .init(matches: additionalProperties)))
-      case .invalid(let errors): return .invalid(errors)
+      case .valid(let baseOutput):
+        if hasAdditionalFailure { return .invalid(additionalErrors) }
+        return .valid((baseOutput, .init(matches: additionalProperties)))
+      case .invalid(let errors): return .invalid(errors + additionalErrors)
       }
     }
   }

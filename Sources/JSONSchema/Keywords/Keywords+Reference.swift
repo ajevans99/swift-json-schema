@@ -223,6 +223,9 @@ struct ReferenceResolver {
       return resolved
     }
 
+    if let fragment, !fragment.isEmpty {
+      throw ReferenceResolverError.unresolvedReference(refURL)
+    }
     return baseSchema
   }
 
@@ -309,6 +312,9 @@ struct ReferenceResolver {
       return try resolveSchemaFragment(for: referenceURL, pointer: anchorLocation, in: baseSchema)
     }
     if let fragment, !fragment.isEmpty {
+      guard fragment.hasPrefix("/") else {
+        throw ReferenceResolverError.unresolvedReference(referenceURL)
+      }
       let pointer = JSONPointer(from: fragment)
       return try resolveSchemaFragment(for: referenceURL, pointer: pointer, in: baseSchema)
     }

@@ -61,6 +61,7 @@ extension Keywords {
       let instanceType = input.primitive
       let isValid = allowedPrimitives.contains { allowedType in
         allowedType.matches(instanceType: instanceType)
+          || (allowedType == .integer && input.isMathematicalInteger)
       }
       if !isValid {
         throw ValidationIssue.typeMismatch(expected: allowedPrimitives, actual: instanceType)
@@ -273,7 +274,7 @@ extension Keywords {
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.maxLength = value.integer ?? Int.max
+      self.maxLength = value.exactInteger ?? Int.max
     }
 
     package func validate(
@@ -299,7 +300,7 @@ extension Keywords {
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.minLength = value.integer ?? 0
+      self.minLength = value.exactInteger ?? 0
     }
 
     package func validate(
@@ -391,7 +392,7 @@ extension Keywords {
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.maxItems = value.integer ?? Int.max
+      self.maxItems = value.exactInteger ?? Int.max
     }
 
     package func validate(
@@ -417,7 +418,7 @@ extension Keywords {
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.minItems = value.integer ?? 0
+      self.minItems = value.exactInteger ?? 0
     }
 
     package func validate(
@@ -472,7 +473,7 @@ extension Keywords {
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.maxContains = value.integer ?? Int.max
+      self.maxContains = value.exactInteger ?? Int.max
     }
 
     package func validate(
@@ -517,7 +518,7 @@ extension Keywords {
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.minContains = value.integer ?? 1
+      self.minContains = value.exactInteger ?? 1
 
       if minContains == 0 {
         context.context.minContainsIsZero[context.location.dropLast()] = true
@@ -570,7 +571,7 @@ extension Keywords {
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.maxProperties = value.integer ?? Int.max
+      self.maxProperties = value.exactInteger ?? Int.max
     }
 
     package func validate(
@@ -601,7 +602,7 @@ extension Keywords {
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.minProperties = value.integer ?? 0
+      self.minProperties = value.exactInteger ?? 0
     }
 
     package func validate(

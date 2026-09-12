@@ -60,7 +60,6 @@ public struct PropertyTuple<each Property: JSONPropertyComponent>: PropertyColle
     // SwiftPM tests at runtime under Swift 6.1.x (codegen bug, fixed in
     // 6.3); use the helper-function pack-expansion form instead.
     func schemaForProperty<Prop: JSONPropertyComponent>(_ property: Prop) {
-      guard !property.key.isEmpty else { return }
       output[property.key] = property.value.schemaValue.value
     }
     repeat schemaForProperty(each property)

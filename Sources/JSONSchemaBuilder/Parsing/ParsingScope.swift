@@ -4,17 +4,20 @@ enum ParsingScope {
   struct State: Sendable {
     let evaluation: SchemaEvaluation?
     let context: Context
+    let rootSchema: JSONValue
     let allowsIndependentEvaluation: Bool
 
-    init(evaluation: SchemaEvaluation, context: Context) {
+    init(evaluation: SchemaEvaluation, context: Context, rootSchema: JSONValue? = nil) {
       self.evaluation = evaluation
       self.context = context
+      self.rootSchema = rootSchema ?? evaluation.schema
       self.allowsIndependentEvaluation = !Self.hasCustomVocabulary(evaluation.schema)
     }
 
     private init(evaluation: SchemaEvaluation?, parent: State, throughReference: Bool) {
       self.evaluation = evaluation
       self.context = parent.context
+      self.rootSchema = parent.rootSchema
       self.allowsIndependentEvaluation =
         parent.allowsIndependentEvaluation
         && (!throughReference || evaluation != nil)
