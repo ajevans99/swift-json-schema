@@ -766,7 +766,7 @@ struct OptionalNullsExpansionTests {
           let temperature: Double?
 
           @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
-          \(modifier) static var schema: some JSONSchemaComponent<Weather> {
+          \(modifier == "private" ? "fileprivate" : modifier) static var schema: some JSONSchemaComponent<Weather> {
             JSONSchema(Weather.init) {
               JSONObject {
                 JSONProperty(key: "temperature") {
@@ -779,7 +779,7 @@ struct OptionalNullsExpansionTests {
           }
         }
 
-        \(modifier == "private" || modifier == "fileprivate" ? "\(modifier) " : "")extension Weather: Schemable {
+        extension Weather: Schemable {
         }
         """,
       macros: testMacros

@@ -1,12 +1,13 @@
 import SwiftDiagnostics
 import SwiftSyntax
-import SwiftSyntaxMacros
 
 /// Handles validation and diagnostics for initializer matching in @Schemable types
 struct InitializerDiagnostics {
   let typeName: TokenSyntax
-  let members: MemberBlockItemListSyntax
-  let context: any MacroExpansionContext
+  let allMembers: [SchemableMember]
+  let initializers: [InitializerDeclSyntax]
+  let isClass: Bool
+  let context: DiagnosticCollector
 
   /// Emits diagnostics when the generated schema may not match the memberwise initializer
   func emitDiagnostics(for schemableMembers: [SchemableMember]) {
@@ -17,15 +18,15 @@ struct InitializerDiagnostics {
     }
 
     // Build expected parameter list from schema members
-    let expectedParameters: [(name: String, type: String)] = schemableMembers.map { member in
+    let expectedParameters: [(name: String, type: TypeSyntax)] = schemableMembers.map { member in
       (
         name: member.identifier.text,
-        type: member.type.description.trimmingCharacters(in: .whitespaces)
+        type: member.type.trimmed
       )
     }
 
     // Try to find an explicit initializer
-    let explicitInits = members.compactMap { $0.decl.as(InitializerDeclSyntax.self) }
+    let explicitInits = initializers
 
     if let memberWiseInit = findMatchingInit(explicitInits, expectedParameters: expectedParameters)
     {
@@ -38,36 +39,23 @@ struct InitializerDiagnostics {
         availableInits: explicitInits,
         excludedProperties: excludedProperties
       )
-    } else {
-      // No explicit init - will use synthesized memberwise init
-      // Check for conditions that would break the synthesized init
+    } else if !isClass {
+      // Class initialization can depend on inheritance or extensions; leave it to Swift.
       validateSynthesizedInitRequirements(schemableMembers: schemableMembers)
     }
   }
 
   /// Gets all stored properties including those marked with @ExcludeFromSchema
   private func getAllStoredProperties() -> [(name: String, type: String)] {
-    members.compactMap { $0.decl.as(VariableDeclSyntax.self) }
-      .filter { !$0.isStatic }
-      .flatMap { variableDecl in
-        variableDecl.bindings.compactMap { binding -> (String, String)? in
-          guard let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier,
-            let type = binding.typeAnnotation?.type,
-            binding.isStoredProperty
-          else { return nil }
-
-          return (
-            name: identifier.text,
-            type: type.description.trimmingCharacters(in: .whitespaces)
-          )
-        }
-      }
+    allMembers.map {
+      (name: $0.identifier.text, type: $0.type.trimmedDescription)
+    }
   }
 
   /// Finds an initializer that matches the expected parameters
   private func findMatchingInit(
     _ inits: [InitializerDeclSyntax],
-    expectedParameters: [(name: String, type: String)]
+    expectedParameters: [(name: String, type: TypeSyntax)]
   ) -> InitializerDeclSyntax? {
     for initDecl in inits {
       let params = initDecl.signature.parameterClause.parameters
@@ -88,7 +76,7 @@ struct InitializerDiagnostics {
   /// Validates that an explicit init's parameters match the schema exactly
   private func validateInitParameters(
     _ initDecl: InitializerDeclSyntax,
-    expectedParameters: [(name: String, type: String)]
+    expectedParameters: [(name: String, type: TypeSyntax)]
   ) {
     let params = initDecl.signature.parameterClause.parameters
     for (index, (param, expected)) in zip(params, expectedParameters).enumerated() {
@@ -108,13 +96,12 @@ struct InitializerDiagnostics {
         context.diagnose(diagnostic)
       } else {
         // Only check types when names match (otherwise type comparison is meaningless)
-        // Check if types are obviously different (note: this is string comparison, not semantic)
-        if paramType != expected.type {
+        if !typesMatch(param.type, expected.type) {
           let diagnostic = Diagnostic(
             node: param.type,
             message: InitializerMismatchDiagnostic.parameterTypeMismatch(
               parameterName: paramName,
-              expectedType: expected.type,
+              expectedType: expected.type.trimmedDescription,
               actualType: paramType
             )
           )
@@ -124,9 +111,34 @@ struct InitializerDiagnostics {
     }
   }
 
+  private func typesMatch(_ lhs: TypeSyntax, _ rhs: TypeSyntax) -> Bool {
+    guard case .success(let left) = SchemaType.parse(lhs),
+      case .success(let right) = SchemaType.parse(rhs)
+    else { return lhs.trimmedDescription == rhs.trimmedDescription }
+    return typesMatch(left, right)
+  }
+
+  private func typesMatch(_ lhs: SchemaType, _ rhs: SchemaType) -> Bool {
+    switch (lhs, rhs) {
+    case (.scalar(let lhs), .scalar(let rhs)):
+      return lhs == rhs
+    case (.optional(let lhs), .optional(let rhs)), (.array(let lhs), .array(let rhs)):
+      return typesMatch(lhs, rhs)
+    case (.dictionary(let leftKey, let leftValue), .dictionary(let rightKey, let rightValue)):
+      return typesMatch(leftKey, rightKey) && typesMatch(leftValue, rightValue)
+    case (.named(let lhs), .named(let rhs)):
+      return lhs.tokens(viewMode: .sourceAccurate).map(\.text)
+        == rhs.tokens(viewMode: .sourceAccurate).map(\.text)
+    case (.selfReference, .selfReference):
+      return true
+    default:
+      return false
+    }
+  }
+
   /// Emits a warning when no matching initializer is found
   private func emitNoMatchingInitWarning(
-    expectedParameters: [(name: String, type: String)],
+    expectedParameters: [(name: String, type: TypeSyntax)],
     availableInits: [InitializerDeclSyntax],
     excludedProperties: [(name: String, type: String)]
   ) {
@@ -161,7 +173,7 @@ struct InitializerDiagnostics {
     // Check for properties with default values - these won't be in synthesized init
     // Only warn if there's a MIX of properties with and without defaults
     // (if ALL have defaults, the init() with no params is intentional and fine)
-    let membersWithDefaults = schemableMembers.filter { $0.defaultValue != nil }
+    let membersWithDefaults = schemableMembers.filter { !$0.isVariable && $0.defaultValue != nil }
     let membersWithoutDefaults = schemableMembers.filter { $0.defaultValue == nil }
 
     // Only emit diagnostic if there are BOTH properties with defaults AND without
@@ -231,7 +243,7 @@ enum InitializerMismatchDiagnostic: DiagnosticMessage {
         msg += """
 
 
-          Note: The following properties are excluded from the schema using @ExcludeFromSchema: \(excludedList)
+          Note: The following properties are excluded from the schema: \(excludedList)
           These will still be present in the memberwise initializer but not in the schema.
           """
       }

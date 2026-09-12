@@ -6,6 +6,13 @@ public enum SchemaComposition {
   case anyOf
 }
 
+/// Derives a schema and `Schemable` conformance for a struct, class, or enum.
+///
+/// Use the generated static `schema` property to inspect the JSON Schema or parse
+/// and validate JSON into the annotated type. Add annotations and constraints with
+/// `@SchemaOptions` and the type-specific option macros.
+///
+/// See <doc:Macros> for examples and configuration options.
 @attached(extension, conformances: Schemable)
 @attached(member, names: named(schema), named(keyEncodingStrategy))
 public macro Schemable(

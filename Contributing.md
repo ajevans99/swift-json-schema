@@ -47,6 +47,37 @@ To run just the integration tests:
 swift test --filter JSONSchemaIntegrationTests
 ```
 
+## Macro Architecture
+
+The `@Schemable` implementation is a syntax-backed parse, plan, and emit pipeline:
+
+| Location under `Sources/JSONSchemaMacro/Schemable/` | Responsibility |
+| --- | --- |
+| `SchemableMacro.swift` | Macro entry point and publication of diagnostics |
+| `Parsing/` | Declaration, type, and option analysis, plus syntax helpers |
+| `Planning/` | Schema and field plans, including field-selection and schema policies |
+| `Emission/` | Rendering plans as SwiftSyntax declarations and expressions |
+| `Diagnostics/` | Diagnostic collection and initializer/option validation |
+
+These directories belong to one SwiftPM target, not separate modules. Small parser-specific diagnostic definitions stay beside the parsing code that produces them.
+
+- `SchemableDeclaration` and `MacroConfiguration` parse declaration metadata and macro configuration. Declaration kind is retained: struct-only synthesized-initializer checks are not applied to classes. When no initializer is locally visible on a class, Swift resolves initialization rather than the macro guessing about inheritance or extensions.
+- `SchemaType` normalizes supported Swift type spellings without generating code. Named types retain their full syntax, including generic arguments. This is syntax analysis, not type checking; aliases and conformance resolution remain the Swift compiler's responsibility.
+- `ParsedOptions` parses option calls once, retaining source nodes, arguments, closures, and order for both diagnostics and generation.
+- `SchemaPlanner` produces explicit included, excluded, and unsupported member/case plans. Initializer diagnostics consume the same included fields that emission uses. An unsupported enum payload invalidates the whole case instead of emitting a partial constructor.
+- `FieldPlanner` resolves property keys, defaults, ordered schema replacements, requiredness, null representation, and reference requirements. Properties and enum payloads share field construction, but retain their distinct null-handling policies.
+- `SchemaEmitter`, `FieldEmitter`, `TypeSchemaEmitter`, and `SchemaOptionsGenerator` render the plans. Only the macro adapter publishes collected diagnostics to `MacroExpansionContext`.
+
+Keep policy decisions out of emitters and generated expressions out of type analysis. Add new syntax support to the type parser, new option interpretation to option parsing/planning, and new rendering behavior to the relevant emitter.
+
+Option ordering is significant across attributes as well as within them: `.customSchema(...)` replaces the accumulated schema, discarding defaults and modifiers before it. Modifiers after it are retained. Preserve source order when combining general and type-specific options for both properties and declarations; do not regroup them by category. Property keys retain the precedence `.key(...)`, `CodingKeys`, `keyStrategy`, then the Swift property name. An explicit `keyStrategy: nil` is normalized to an absent strategy. Every recognized type-specific option group participates in both diagnostics and emission.
+
+Access control is normalized for protocol witnesses: `open` declarations emit `public` witnesses, `private` declarations emit `fileprivate` witnesses, and conformance extensions have no explicit access modifier. Non-access modifiers such as `final` and `indirect` are never copied onto schema properties.
+
+Configuration requiring compile-time interpretation (`optionalNulls` and composition choices) must use explicit literals/cases. Nonliteral configuration and unrecognized option syntax produce diagnostics rather than silently selecting defaults or dropping options. Included stored properties require explicit type annotations. Unsupported property types retain their warning-and-exclusion behavior; unsupported enum payloads produce errors.
+
+Use focused type-analysis and planning tests for policy, expansion tests for emitted source and diagnostics, and compile-time/integration fixtures for generated-code validity and parsing behavior. In particular, cover equivalent optional/collection spellings, named generics, constructor field selection, option replacement order, and recursive reference requirements.
+
 ## Code Formatting
 
 All code must be formatted using Swift format to ensure consistency across the codebase. The CI pipeline will check for formatting issues automatically. You can add the `auto-format` label to your pull requests to enable automatic Swift formatting before merging.

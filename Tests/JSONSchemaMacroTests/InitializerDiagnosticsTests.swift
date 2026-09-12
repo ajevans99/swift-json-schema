@@ -342,7 +342,7 @@ struct InitializerDiagnosticsTests {
             Available initializers:
               - init(host: String, port: Int, internalFlag: Bool)
 
-            Note: The following properties are excluded from the schema using @ExcludeFromSchema: 'internalFlag'
+            Note: The following properties are excluded from the schema: 'internalFlag'
             These will still be present in the memberwise initializer but not in the schema.
 
             The generated schema expects JSONSchema(Config.init) to use an initializer that matches all schema properties. Consider adding a matching initializer or adjusting the schema properties.
