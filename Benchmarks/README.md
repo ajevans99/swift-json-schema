@@ -278,15 +278,15 @@ is reached first; preflight and an individual long operation can exceed that
 duration. Original case configurations are unchanged. Extended cases are opt-in,
 not required PR threshold inventory.
 
-The complete 108-case extended JSONSchema release smoke run took **141.00 s**
+The complete 108-case extended JSONSchema release smoke run took **138.42 s**
 after syncing the concurrency fix in #195, on the development macOS ARM64 /
-Apple Swift 6.4 machine with default process hashing. This is one end-to-end
+Apple Swift 6.4 machine with `SWIFT_DETERMINISTIC_HASHING=1`. This is one end-to-end
 runtime observation (including build/setup), not an optimization comparison or a
 promise about shared CI timing.
 
 ```bash
 python3 Benchmarks/Scripts/fetch_schema_corpus.py
-JSONSCHEMA_BENCHMARK_CORPUS=required JSONSCHEMA_BENCHMARK_SIZES=extended \
+SWIFT_DETERMINISTIC_HASHING=1 JSONSCHEMA_BENCHMARK_CORPUS=required JSONSCHEMA_BENCHMARK_SIZES=extended \
   swift package --package-path Benchmarks --disable-automatic-resolution \
   --allow-writing-to-package-directory benchmark --target JSONSchemaBenchmarks --no-progress
 ```
@@ -374,7 +374,7 @@ With complete coverage, JSONSchema reporting and enforcement also run when
 OrderedJSON fails, unless the workflow is cancelled. The job still fails for
 either suite's regression; this only preserves independent diagnostics.
 
-The full PR corpus requires **160 thresholds**: 64 OrderedJSON, 66 original
+The committed PR corpus contains all **160 thresholds**: 64 OrderedJSON, 66 original
 JSONSchema workload cases, and 30 downloaded-schema cases. The workflow asserts
 Swift 6.3.3 and requires the fetched corpus and the small/medium PR subset.
 The workflow currently targets PRs into `main`, so a
@@ -382,14 +382,17 @@ draft targeting an intermediate stack branch may need an explicit workflow
 dispatch or later final-base run to obtain that artifact. Timing and throughput
 remain informational; the allocation-only guard is unchanged.
 
-The preceding OrderedJSON layer's 82 fixed-hash thresholds were captured in [Ubuntu run 34719883609](https://github.com/ajevans99/swift-json-schema/actions/runs/34719883609)
-at checkout `f424f3df8d309b65d480936928aa92b99195cae3` via an explicit
+The complete 160-file fixed-hash set was captured in [Ubuntu run 34720180704](https://github.com/ajevans99/swift-json-schema/actions/runs/34720180704)
+at checkout `18db13a0bfdfff529d8cdb25b67cee20bb552940` via an explicit
 `workflow_dispatch` refresh, not a moving PR merge ref. That branch includes
 main `15ab4569bf68b1c3a84a8ffdc008b100f5416ebf`; its production sources,
 benchmark definitions, and dependency locks match the capture. The runner was `ubuntu-24.04`
 (image `20260907.300.1`) with Swift 6.3.3, `x86_64-unknown-linux-gnu`.
-The artifact is copied without adjusting counts. It refreshes the previous 66
-cases as well as adding the new cases; all files now contain only
+The artifact is copied without adjusting counts. Its exact 64/96 inventory
+matches discovery, and all 82 files shared with the preceding layer are
+byte-for-byte identical to that layer's independent
+[capture 34719883609](https://github.com/ajevans99/swift-json-schema/actions/runs/34719883609).
+The other 78 cover the focused and downloaded-schema additions. All files contain only
 `mallocCountTotal`, matching enforcement. No macOS or emulated timing results
 are used as thresholds. Timing and throughput remain informational, and the
 10% relative / 10-allocation absolute tolerances are unchanged.
@@ -399,8 +402,8 @@ checks both passed and failed on equivalent production code. For example,
 the Poll Foundation round trip varied from 619 to 643 allocations, exceeding
 the unchanged 10-allocation limit. The fixed-hash capture reports 599 for
 Poll, 597,532 for CITM, and 556,393 for Twitter; these are workload counts,
-not parser optimization gains. This capture-only run predates the distinct
-capture job name and must not be mistaken for an enforcement result.
+not parser optimization gains. The complete 160-file capture job finished in
+5m59s; capture success must not be mistaken for a separate enforcement result.
 
 This refresh also incorporates newer correctness fixes, not just capture
 overhead changes. In particular, [#195](https://github.com/ajevans99/swift-json-schema/pull/195)
