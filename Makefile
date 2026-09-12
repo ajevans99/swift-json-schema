@@ -10,16 +10,18 @@ update-submodule:
 	@echo "Submodules updated successfully."
 
 format:
-	@find Sources Tests \
-		-name '*.swift' \
-		-not -path '*/JSON-Schema-Test-Suite/*' \
-		-not -path '*/JSONTestSuite/*' \
-		-print0 | xargs -0 swift-format format --in-place --parallel
-	@find Sources Tests \
-		-name '*.swift' \
-		-not -path '*/JSON-Schema-Test-Suite/*' \
-		-not -path '*/JSONTestSuite/*' \
-		-print0 | xargs -0 swift-format lint --strict --parallel
+	@find Sources Tests Benchmarks \
+		\( -path 'Tests/JSONSchemaTests/JSON-Schema-Test-Suite' \
+			-o -path 'Tests/OrderedJSONTests/JSONTestSuite' \
+			-o -path 'Benchmarks/.build' \) -prune \
+		-o -name '*.swift' \
+		-print0 | xargs -0 swift format --in-place --parallel
+	@find Sources Tests Benchmarks \
+		\( -path 'Tests/JSONSchemaTests/JSON-Schema-Test-Suite' \
+			-o -path 'Tests/OrderedJSONTests/JSONTestSuite' \
+			-o -path 'Benchmarks/.build' \) -prune \
+		-o -name '*.swift' \
+		-print0 | xargs -0 swift format lint --strict --parallel
 	@echo "Swift code formatted successfully."
 
 .PHONY: clean-submodule format
