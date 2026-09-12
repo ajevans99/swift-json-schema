@@ -385,6 +385,58 @@ struct JSONProjectionTests {
     #expect(try union.projection(schemaValue: complete).parseAndValidate("hello") == "hello")
   }
 
+  @Test(arguments: ["0", "1", "01", "-1", "-0", "+1", "9223372036854775808"])
+  func numericDefinitionNamesResolveWithoutChangingTheirSpelling(name: String) throws {
+    let reference = JSONReference<ProjectionName>.definition(named: name)
+    #expect(reference.schemaValue["$ref"] == .string("#/$defs/\(name)"))
+    let union = JSONComposition.AnyOf(into: ProjectionValue.self) {
+      reference.map { ProjectionValue.name($0) }
+      JSONBoolean().map { ProjectionValue.flag($0) }
+    }
+    let complete: SchemaValue = [
+      "$defs": .object([name: ["type": "string", "minLength": 2]]),
+      "allOf": [union.schemaValue.value],
+    ]
+    let projection = union.projection(schemaValue: complete)
+    #expect(projection.parse("hello") == .valid(.name(ProjectionName(value: "hello"))))
+    #expect(try projection.parseAndValidate("hello") == .name(ProjectionName(value: "hello")))
+    #expect(try projection.parseAndValidate(false) == .flag(false))
+    #expect(projection.parse("x").errors != nil)
+    #expect(throws: ParseAndValidateIssue.self) { try projection.parseAndValidate("x") }
+  }
+
+  @Test func numericDefinitionReferencesCanTraverseSchemaArrays() throws {
+    let reference = JSONReference<ProjectionName>(uri: "#/$defs/0/allOf/0")
+    let complete: SchemaValue = [
+      "$defs": ["0": ["allOf": [["type": "string", "minLength": 2]]]],
+      "allOf": [reference.schemaValue.value],
+    ]
+    let projection = reference.projection(schemaValue: complete)
+    #expect(projection.parse("hello") == .valid(ProjectionName(value: "hello")))
+    #expect(try projection.parseAndValidate("hello") == ProjectionName(value: "hello"))
+    #expect(throws: ParseAndValidateIssue.self) { try projection.parseAndValidate("x") }
+  }
+
+  @Test(arguments: [
+    (JSONValue.object(["$id": "child"]), "$id"),
+    (JSONValue.object(["$vocabulary": ["https://example.com/custom": true]]), "vocabularies"),
+  ])
+  func numericReferenceTargetsCannotBypassProjectionPolicy(
+    target: JSONValue,
+    expectedReason: String
+  ) throws {
+    let reference = JSONReference<ProjectionName>(uri: "#/$defs/0/default/01/0")
+    let complete: SchemaValue = [
+      "$defs": ["0": ["default": ["01": .array([target])]]]
+    ]
+    let issues = try #require(reference.projection(schemaValue: complete).parse("hello").errors)
+    guard case .projectionFailure(let reason) = issues.first else {
+      Issue.record("Numeric reference targets must still be checked for unsupported schema policy")
+      return
+    }
+    #expect(reason.contains(expectedReason))
+  }
+
   @Test func concurrentCallsCanShareConfigurationWithoutSharingRoots() async throws {
     let context = Context(dialect: .draft2020_12)
     try await withThrowingTaskGroup(of: Void.self) { group in
