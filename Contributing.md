@@ -51,6 +51,16 @@ swift test --filter JSONSchemaIntegrationTests
 
 The `@Schemable` implementation is a syntax-backed parse, plan, and emit pipeline:
 
+| Location under `Sources/JSONSchemaMacro/Schemable/` | Responsibility |
+| --- | --- |
+| `SchemableMacro.swift` | Macro entry point and publication of diagnostics |
+| `Parsing/` | Declaration, type, and option analysis, plus syntax helpers |
+| `Planning/` | Schema and field plans, including field-selection and schema policies |
+| `Emission/` | Rendering plans as SwiftSyntax declarations and expressions |
+| `Diagnostics/` | Diagnostic collection and initializer/option validation |
+
+These directories belong to one SwiftPM target, not separate modules. Small parser-specific diagnostic definitions stay beside the parsing code that produces them.
+
 - `SchemableDeclaration` and `MacroConfiguration` parse declaration metadata and macro configuration. Declaration kind is retained: struct-only synthesized-initializer checks are not applied to classes. When no initializer is locally visible on a class, Swift resolves initialization rather than the macro guessing about inheritance or extensions.
 - `SchemaType` normalizes supported Swift type spellings without generating code. Named types retain their full syntax, including generic arguments. This is syntax analysis, not type checking; aliases and conformance resolution remain the Swift compiler's responsibility.
 - `ParsedOptions` parses option calls once, retaining source nodes, arguments, closures, and order for both diagnostics and generation.

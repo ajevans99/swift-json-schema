@@ -8,14 +8,11 @@ public enum SchemaComposition {
 
 /// Derives a schema and `Schemable` conformance for a struct, class, or enum.
 ///
-/// Included stored properties must have explicit type annotations. Use boolean literals
-/// for `optionalNulls` and explicit `.oneOf` or `.anyOf` cases for composition arguments;
-/// the macro cannot evaluate arbitrary Swift expressions for these settings.
+/// Use the generated static `schema` property to inspect the JSON Schema or parse
+/// and validate JSON into the annotated type. Add annotations and constraints with
+/// `@SchemaOptions` and the type-specific option macros.
 ///
-/// Passing `keyStrategy: nil` is equivalent to omitting the key strategy.
-///
-/// Unsupported property types produce a warning and are excluded. Unsupported enum
-/// associated values produce an error rather than a partially generated case.
+/// See <doc:Macros> for examples and configuration options.
 @attached(extension, conformances: Schemable)
 @attached(member, names: named(schema), named(keyEncodingStrategy))
 public macro Schemable(

@@ -1,13 +1,6 @@
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
-extension String {
-  func trimmingBackticks() -> String {
-    if hasPrefix("`") && hasSuffix("`") { return String(dropFirst().dropLast()) }
-    return self
-  }
-}
-
 enum SchemaEmitter {
   static func declarations(for plan: SchemaPlan) -> [DeclSyntax] {
     let declaration = plan.declaration

@@ -3,6 +3,11 @@ import SwiftParser
 import SwiftSyntax
 
 extension String {
+  func trimmingBackticks() -> String {
+    if hasPrefix("`") && hasSuffix("`") { return String(dropFirst().dropLast()) }
+    return self
+  }
+
   /// Sanitizes a qualified type name by removing backticks from all components.
   /// For example, "Outer.`Inner`" becomes "Outer.Inner".
   func sanitizingQualifiedTypeName() -> String {
