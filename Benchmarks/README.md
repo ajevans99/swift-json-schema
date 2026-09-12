@@ -104,7 +104,13 @@ swift package --disable-automatic-resolution --allow-writing-to-package-director
 
 Repeat with unique names (`before-time-2`, `before-time-3` and corresponding
 allocation runs), then repeat for the candidate using `after-*` names.
-Use `benchmark baseline compare before-time-1 after-time-1` to inspect deltas.
+Inspect deltas from `Benchmarks/` with:
+
+```bash
+swift package --disable-automatic-resolution --allow-writing-to-package-directory benchmark \
+  baseline compare before-time-1 after-time-1 --target OrderedJSONBenchmarks --no-progress
+```
+
 These local named baselines live under `.benchmarkBaselines`, not the committed
 Linux thresholds in `Baselines`. Report per-run medians/p90s and their range,
 not only the fastest run; inspect the whole corpus for tradeoffs.
@@ -198,8 +204,14 @@ To refresh baselines on the same runner class after an intentional improvement, 
 ```bash
 cd Benchmarks
 rm -rf Baselines
-swift package --disable-automatic-resolution --allow-writing-to-package-directory benchmark thresholds update --path Baselines --no-progress
+swift package --disable-automatic-resolution --allow-writing-to-package-directory benchmark \
+  thresholds update --metric mallocCountTotal --path Baselines --no-progress
 ```
+
+Capture thresholds with the same allocation-only metric selection used by
+enforcement. Enabling additional metrics during capture can change measurement
+overhead and therefore the allocation count; timing still appears in the
+separate informational report.
 
 package-benchmark reports improvements through a SwiftPM plugin error marker;
 the CI wrapper accepts only that marker. Regressions, missing baselines, and

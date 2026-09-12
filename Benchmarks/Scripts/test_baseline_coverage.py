@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+import shlex
 import subprocess
 import tempfile
 import textwrap
@@ -129,6 +130,32 @@ class BaselineCoverageTests(unittest.TestCase):
             "--disable-automatic-resolution",
             (self.root / "calls").read_text().split(),
         )
+
+    def test_generation_matches_allocation_only_enforcement(self):
+        generation = subprocess.run(
+            ["bash", "-e", "-o", "pipefail", "-c",
+             workflow_command("Generate benchmark baselines")],
+            cwd=ROOT, env=self.env, capture_output=True, text=True,
+        )
+        self.assertEqual(generation.returncode, 0, generation.stderr)
+        enforcement = subprocess.run(
+            ["bash", str(ROOT / "Scripts/check-thresholds.sh"),
+             "OrderedJSONBenchmarks"],
+            cwd=ROOT, env=self.env, capture_output=True, text=True,
+        )
+        self.assertEqual(enforcement.returncode, 0, enforcement.stderr)
+        calls = [
+            shlex.split(line)
+            for line in (self.root / "calls").read_text().splitlines()
+        ]
+        self.assertEqual(len(calls), 3)  # Capture, informational report, check.
+        for call in (calls[0], calls[2]):
+            metrics = [
+                call[index + 1]
+                for index, argument in enumerate(call)
+                if argument == "--metric"
+            ]
+            self.assertEqual(metrics, ["mallocCountTotal"])
 
 
 if __name__ == "__main__":

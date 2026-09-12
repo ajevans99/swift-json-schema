@@ -44,6 +44,7 @@ jobs:
       run: |
         swift package --disable-automatic-resolution --allow-writing-to-package-directory benchmark \
           thresholds update \
+          --metric mallocCountTotal \
           --path Baselines \
           --no-progress
     - name: Run OrderedJSON benchmarks
