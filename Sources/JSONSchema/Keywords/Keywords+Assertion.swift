@@ -519,10 +519,6 @@ extension Keywords {
       self.value = value
       self.context = context
       self.minContains = value.exactInteger ?? 1
-
-      if minContains == 0 {
-        context.context.minContainsIsZero[context.location.dropLast()] = true
-      }
     }
 
     package func validate(

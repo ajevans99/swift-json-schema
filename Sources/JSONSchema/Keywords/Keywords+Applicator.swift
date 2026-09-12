@@ -81,7 +81,7 @@ extension Keywords {
 
       for (offset, (instance, schema)) in zip(instances, subschemas).enumerated() {
         let prefixLocation = instanceLocation.appending(.index(offset))
-        let result = schema.validate(instance, at: prefixLocation)
+        let result = schema.validateSubschema(instance, at: prefixLocation)
         builder.merging(result)
         largestIndex = offset
       }
@@ -136,7 +136,7 @@ extension Keywords {
       // With array slice, original array indicies are used which is important here.
       for (index, instance) in zip(relevantInstanceItems.indices, relevantInstanceItems) {
         let itemLocation = instanceLocation.appending(.index(index))
-        let result = subschema.validate(instance, at: itemLocation)
+        let result = subschema.validateSubschema(instance, at: itemLocation)
         builder.merging(result)
       }
 
@@ -193,20 +193,27 @@ extension Keywords {
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
+      try validate(input, at: instanceLocation, using: &annotations, minContainsIsZero: false)
+    }
+
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      minContainsIsZero: Bool
+    ) throws(ValidationIssue) {
       guard let instances = input.array else { return }
 
       var validIndices = [Int]()
       for (index, instance) in instances.enumerated() {
         let pointer = instanceLocation.appending(.index(index))
-        let result = subschema.validate(instance, at: pointer)
+        let result = subschema.validateSubschema(instance, at: pointer)
         if result.isValid {
           validIndices.append(index)
         }
       }
 
-      if validIndices.isEmpty
-        && !context.context.minContainsIsZero[self.context.location.dropLast(), default: false]
-      {
+      if validIndices.isEmpty && !minContainsIsZero {
         throw ValidationIssue.containsInsufficientMatches(count: instances.count, required: 1)
       }
 
@@ -337,7 +344,7 @@ extension Keywords {
       for (key, value) in instanceObject {
         for (regex, schema) in patterns where key.firstMatch(of: regex) != nil {
           let propertyLocation = instanceLocation.appending(.key(key))
-          let result = schema.validate(value, at: propertyLocation)
+          let result = schema.validateSubschema(value, at: propertyLocation)
           builder.merging(result)
           matchedPropertyNames.append(key)
         }
@@ -388,7 +395,7 @@ extension Keywords {
 
       for (key, value) in instanceObject where !previouslyValidatedKeys.contains(key) {
         let propertyLocation = instanceLocation.appending(.key(key))
-        let result = subschema.validate(value, at: propertyLocation)
+        let result = subschema.validateSubschema(value, at: propertyLocation)
         builder.merging(result)
         validatedKeys.append(key)
       }
@@ -431,7 +438,10 @@ extension Keywords {
 
       for key in instanceObject.keys {
         let keyValue = JSONValue.string(key)
-        let result = subschema.validate(keyValue, at: instanceLocation.appending(.key(key)))
+        let result = subschema.validateSubschema(
+          keyValue,
+          at: instanceLocation.appending(.key(key))
+        )
         builder.merging(result)
       }
 
@@ -638,6 +648,14 @@ extension Keywords {
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
+      _ = evaluate(input, at: instanceLocation, using: &annotations)
+    }
+
+    func evaluate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer
+    ) -> Bool {
       var subAnnotations = AnnotationContainer()
       let result = subschema.validate(input, at: instanceLocation, annotations: &subAnnotations)
       // Per JSON Schema 2020-12 core §10.2.2.1, `if` only contributes to
@@ -648,7 +666,7 @@ extension Keywords {
       if result.isValid {
         annotations.merge(subAnnotations)
       }
-      context.context.ifConditionalResults[self.context.location.dropLast()] = result
+      return result.isValid
     }
   }
 
@@ -674,8 +692,16 @@ extension Keywords {
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
-      guard context.context.ifConditionalResults[self.context.location.dropLast()]?.isValid == true
-      else {
+      try validate(input, at: instanceLocation, using: &annotations, condition: nil)
+    }
+
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      condition: Bool?
+    ) throws(ValidationIssue) {
+      guard condition == true else {
         return
       }
 
@@ -710,8 +736,16 @@ extension Keywords {
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
-      guard context.context.ifConditionalResults[self.context.location.dropLast()]?.isValid == false
-      else {
+      try validate(input, at: instanceLocation, using: &annotations, condition: nil)
+    }
+
+    func validate(
+      _ input: JSONValue,
+      at instanceLocation: JSONPointer,
+      using annotations: inout AnnotationContainer,
+      condition: Bool?
+    ) throws(ValidationIssue) {
+      guard condition == false else {
         return
       }
       var subAnnotations = AnnotationContainer()

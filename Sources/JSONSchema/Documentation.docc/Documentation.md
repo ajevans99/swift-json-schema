@@ -49,6 +49,15 @@ diagnostic levels.
 by default. Use `JSONValue.parse` as above when you want to retain source key order.
 `Schema` and `JSONValue` also conform to `Codable`.
 
+## Reuse a schema
+
+A `Schema` is `Sendable` and can be cached and validated concurrently. Each public validation
+call has independent conditional results and dynamic-reference scopes, including a reentrant
+call from a custom format validator. Nested applicators and references retain the scope of their
+own evaluation. Reference definitions and caches are shared, with synchronized updates.
+
+Custom format validators are also `Sendable`; synchronize any mutable state they own.
+
 ## References and external schemas
 
 Schemas can use `$defs`, `$ref`, `$anchor`, and dynamic references. Register external documents
