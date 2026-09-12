@@ -8,6 +8,7 @@ DerivedData/
 
 # SwiftPM build artifacts
 Benchmarks/.build/
+Benchmarks/.benchmarkBaselines/
 
 # Optional benchmark corpus fetched by Benchmarks/Scripts/fetch-reference-corpus.sh
 Benchmarks/OrderedJSONBenchmarks/Resources/canada.json
