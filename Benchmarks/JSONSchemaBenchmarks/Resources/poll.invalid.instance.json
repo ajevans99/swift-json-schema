@@ -1,0 +1,13 @@
+{
+  "id": 0,
+  "title": "Invalid poll",
+  "createdAt": "2024-10-25T12:00:00Z",
+  "options": [
+    { "id": 1, "text": "", "voteCount": -1 },
+    { "id": 2, "text": "Python", "voteCount": 20 }
+  ],
+  "category": {
+    "technology": { "_0": { "subTopic": "software", "hasDemo": "yes" } }
+  },
+  "settings": { "allowMultipleVotes": false, "requireAuthentication": true }
+}

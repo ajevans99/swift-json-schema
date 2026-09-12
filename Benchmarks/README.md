@@ -125,11 +125,68 @@ justified until the profile and repeated candidate measurements support them.
 
 ### JSONSchema
 
-For each schema/instance pair in [`JSONSchemaBenchmarks/Resources/`](./JSONSchemaBenchmarks/Resources/):
+The six schemas in [`JSONSchemaBenchmarks/Resources/`](./JSONSchemaBenchmarks/Resources/)
+each have one valid and one invalid instance: **66 cases** total (6 construction,
+12 warmed validation, and 48 validation-plus-output).
 
-- **`construct.<schema>.Schema.init`** — schema construction from a parsed raw schema
-- **`validate.<schema>.Schema.validate`** — validation of a representative valid instance
-- **`output.<schema>.<level>`** — validation plus rendering for Flag, Basic, Detailed, and Verbose outputs
+- **`construct.<schema>.Schema.init`** — one construction case per schema, not per instance
+- **`validate.<schema>[.<validity>].Schema.validate`** — one validation per measured iteration, using a warmed schema
+- **`output.<schema>[.<validity>].<level>`** — validation plus Flag, Basic, Detailed, or Verbose rendering; not rendering a cached result
+
+The original valid Poll, OpenAPI fragment, and meta-schema cases retain their
+names. New invalid cases use `.invalid`; the three new focused schemas explicitly
+use `.valid` and `.invalid`.
+
+| Schema | Valid workload | Invalid workload |
+|--------|----------------|------------------|
+| `poll` | Application object with nested options, settings, and category alternatives | Numeric bounds, empty option text, and an invalid category payload |
+| `openapi-fragment` | Paths, operations, responses, and recursive component schema references | Version pattern, parameter enum, missing response description, and invalid component type |
+| `draft2020-12-schema` | Full meta-schema validated against itself | Nested invalid keyword values and duplicate `required` entries |
+| `regex-heavy` | 12 properties matched against four `patternProperties` expressions and their value patterns | Four malformed values spread across the patterns |
+| `reference-heavy` | Six tree nodes with repeated local `$ref` resolution over three levels | Invalid child identifier and grandchild label |
+| `combinator-heavy` | `allOf`, two successful `anyOf` branches, and exactly-one-match choices | Failed `anyOf`, both zero/multiple-match `oneOf`, and `allOf` label failures |
+
+The combinator's `unevaluatedProperties: false` requires annotations from **both**
+successful `anyOf` branches. It deliberately guards against treating naive
+short-circuiting as a semantics-preserving optimization. The regex keywords
+already compile patterns at schema construction time; these cases measure
+matching and traversal, not a presumed missing regex cache.
+
+All instance file I/O and parsing, expected-validity checks, and error-output
+checks happen before measurement. Every invalid fixture declares expected leaf
+errors by keyword and instance JSON Pointer. Preflight checks those errors in
+the raw result and verifies their locations and nonempty messages survive Basic,
+Detailed, and Verbose output, while Flag must equal the expected validity.
+Each instance has its own schema warmed by these checks; no result is reused
+inside measured closures. These preconditions run during benchmark registration,
+including discovery, so a broken fixture fails rather than recording misleading
+numbers.
+
+Resource-schema construction starts from already-parsed JSON. The meta-schema
+construction case intentionally retains `Dialect.draft2020_12.loadMetaSchema()`,
+including that API's bundled-resource loading and complete remote-schema context;
+it is not replaced with a partial standalone fixture. Meta-schema validation
+uses that same complete context, including remote `$ref` and `$dynamicRef`.
+
+Run all workload preflights and release measurements without fetching an external
+corpus:
+
+```bash
+cd Benchmarks
+swift package --disable-automatic-resolution --allow-writing-to-package-directory benchmark \
+  --target JSONSchemaBenchmarks --no-progress
+```
+
+This is workload coverage for [#164](https://github.com/ajevans99/swift-json-schema/issues/164),
+not evidence of an optimization. Before that issue can close:
+
+- [ ] Profile at least two validation hot paths with Instruments and record findings.
+- [ ] Implement a measured, correctness-preserving optimization exceeding 10% on a representative case.
+- [ ] Publish repeated, same-environment before/after measurements and correctness results.
+- [ ] Refresh all thresholds on the pinned Ubuntu runner after the final workload inventory is settled.
+
+A pinned, licensed real-world Sourcemeta subset is also pending corpus work;
+these focused synthetic fixtures are not presented as that subset.
 
 ## Corpus
 
@@ -154,7 +211,10 @@ CI also fetches three established, multi-megabyte reference files:
 They are not vendored because they would inflate every clone. The fetch script
 pins both the upstream commit and each file checksum.
 
-The JSONSchema suite uses three representative schemas: a Poll-shaped application schema, an OpenAPI path fragment, and the draft 2020-12 meta-schema.
+The JSONSchema suite retains the Poll, OpenAPI fragment, and complete draft
+2020-12 meta-schema, and adds three bounded synthetic schemas for regex,
+reference, and combinator workloads. All six include valid and invalid inputs.
+The new focused fixtures are authored in this repository and require no downloads.
 
 ## Adding a new case
 
@@ -163,6 +223,11 @@ The JSONSchema suite uses three representative schemas: a Poll-shaped applicatio
 3. Re-run `swift package --disable-automatic-resolution --allow-writing-to-package-directory benchmark` from the `Benchmarks/` directory.
 
 The corresponding parse/serialize/roundtrip benchmarks are generated automatically.
+
+For JSONSchema, add a schema plus valid/invalid instance resources and register
+them in `SchemaCorpus.load()`. Declare expected validity and meaningful leaf-error
+locations for invalid instances. Keep schema construction separate from the
+instance list, then run the full JSONSchema suite to exercise its preflight checks.
 
 ## Baselines and CI
 
@@ -203,10 +268,10 @@ With complete coverage, JSONSchema reporting and enforcement also run when
 OrderedJSON fails, unless the workflow is cancelled. The job still fails for
 either suite's regression; this only preserves independent diagnostics.
 
-The two new Foundation round-trip variants add 16 cases with the full corpus
-(64 OrderedJSON cases, 82 total across both suites). All 82 allocation thresholds
-are committed, including the 16 new cases, so complete corpus discovery selects
-both enforcement steps rather than the baseline-generation path.
+The preceding OrderedJSON layer refreshed 82 allocation thresholds, including
+its 16 new Foundation round-trip cases (64 OrderedJSON and 18 JSONSchema).
+This layer adds 48 JSONSchema workloads, for 130 combined cases; its complete
+Linux threshold refresh is pending.
 
 The complete fixed-hash set was captured in [Ubuntu run 34719883609](https://github.com/ajevans99/swift-json-schema/actions/runs/34719883609)
 at checkout `f424f3df8d309b65d480936928aa92b99195cae3` via an explicit

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://benchmarks.example/tree",
+  "title": "Bounded recursive reference workload",
+  "$ref": "#/$defs/node",
+  "$defs": {
+    "identifier": { "type": "integer", "minimum": 1 },
+    "label": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+    "node": {
+      "type": "object",
+      "required": ["id", "label", "children"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "label": { "$ref": "#/$defs/label" },
+        "children": {
+          "type": "array",
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/node" }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

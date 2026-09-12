@@ -1,0 +1,18 @@
+{
+  "id": 1, "label": "root",
+  "children": [
+    {
+      "id": 2, "label": "left",
+      "children": [
+        { "id": 3, "label": "left-leaf", "children": [] },
+        { "id": 4, "label": "middle-leaf", "children": [] }
+      ]
+    },
+    {
+      "id": 5, "label": "right",
+      "children": [
+        { "id": 6, "label": "right-leaf", "children": [] }
+      ]
+    }
+  ]
+}
