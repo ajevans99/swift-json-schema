@@ -27,7 +27,7 @@ let value = try JSONValue.parse(json)
 
 ## Limits
 
-The parser caps nested object/array depth at **256 levels**. Deeper input throws ``JSONParseError`` rather than risking a stack overflow. For real-world JSON, 256 is far beyond what any sane producer emits — most reach 5–10 levels.
+The parser accepts nested objects and arrays up to **256 levels**, using an explicit container stack rather than recursive parsing. A scalar leaf adds no container depth. Opening a container at level 257 throws ``JSONParseError`` with `Maximum nesting depth (256) exceeded`; the error offset points just after that opening delimiter. This limit is the same for `String` and `Data` input.
 
 ## Error reporting
 
