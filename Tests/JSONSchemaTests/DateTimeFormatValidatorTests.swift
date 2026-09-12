@@ -126,10 +126,10 @@ struct DateTimeFormatValidatorTests {
   }
 
   @Test func officialDraft2020FormatCases() throws {
-    let groups = try FileLoader<[JSONSchemaTest]>(
+    let loader = try FileLoader<[JSONSchemaTest]>(
       subdirectory: "JSON-Schema-Test-Suite/tests/draft2020-12/optional/format"
     )
-    .loadFile(named: "date-time")
+    let groups = try loader.loadFile(named: "date-time")
     #expect(!groups.isEmpty)
 
     for group in groups {
