@@ -4,21 +4,16 @@ extension Schema: Codable {
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
 
-    if let bool = try? container.decode(BooleanSchema.self) {
-      self.init(
-        schema: bool,
-        location: .init(),
-        context: Context(dialect: .draft2020_12),
-        documentURL: URL(string: "https://swift-json-schema.invalid/in-memory")!
-      )
-    } else if let schema = try? container.decode(ObjectSchema.self) {
-      self.init(
-        schema: schema,
-        location: .init(),
-        context: Context(dialect: .draft2020_12),
-        documentURL: URL(string: "https://swift-json-schema.invalid/in-memory")!
-      )
-    } else {
+    do {
+      let rawSchema: JSONValue
+      if let bool = try? container.decode(Bool.self) {
+        rawSchema = .boolean(bool)
+      } else {
+        let schemaValue = try ObjectSchema.decodeSchemaValue(from: decoder)
+        rawSchema = .object(.init(uniqueKeysWithValues: schemaValue))
+      }
+      try self.init(rawSchema: rawSchema, context: Context(dialect: .draft2020_12))
+    } catch {
       throw DecodingError.dataCorruptedError(
         in: container,
         debugDescription: "Expected either a boolean or an object representing a schema."
@@ -63,12 +58,31 @@ extension BooleanSchema: Codable {
 
 extension ObjectSchema: Codable {
   public init(from decoder: any Decoder) throws {
+    let schemaValue = try Self.decodeSchemaValue(from: decoder)
+
+    do {
+      try self.init(
+        schemaValue: schemaValue,
+        location: .init(),
+        context: Context(dialect: .draft2020_12)
+      )
+    } catch {
+      throw DecodingError.dataCorrupted(
+        .init(
+          codingPath: decoder.codingPath,
+          debugDescription: "Failed to initialize schema: \(error)"
+        )
+      )
+    }
+  }
+
+  fileprivate static func decodeSchemaValue(from decoder: any Decoder) throws -> [String: JSONValue]
+  {
     let container = try decoder.container(keyedBy: DynamicCodingKey.self)
 
     var schemaValue = [String: JSONValue]()
 
     let dialect = Dialect.draft2020_12
-    let context = Context(dialect: dialect)
 
     for keywordType in dialect.keywords {
       let key = keywordType.name
@@ -82,16 +96,7 @@ extension ObjectSchema: Codable {
       }
     }
 
-    do {
-      try self.init(schemaValue: schemaValue, location: .init(), context: context)
-    } catch {
-      throw DecodingError.dataCorrupted(
-        .init(
-          codingPath: decoder.codingPath,
-          debugDescription: "Failed to initialize schema: \(error)"
-        )
-      )
-    }
+    return schemaValue
   }
 
   public func encode(to encoder: any Encoder) throws {
