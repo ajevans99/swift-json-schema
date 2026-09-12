@@ -1,0 +1,3 @@
+# Measure library coverage, not execution of the test targets themselves.
+ignore:
+  - "Tests/**/*"
