@@ -59,9 +59,10 @@ extension JSONSchemaComponent {
     _ value: JSONValue,
     validationContext: Context = .init(dialect: .draft2020_12)
   ) throws(ParseAndValidateIssue) -> Output {
-    let evaluation = definition(context: validationContext).evaluate(value)
+    let context = validationContext.independentContext()
+    let evaluation = definition(context: context).evaluate(value)
     let parsingResult = ParsingScope.$current.withValue(
-      .init(evaluation: evaluation, context: validationContext)
+      .init(evaluation: evaluation, context: context)
     ) {
       parse(value)
     }

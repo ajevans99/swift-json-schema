@@ -4,6 +4,7 @@ import JSONSchema
 ///
 /// This component is used to represent a key-value pair in a JSON object.
 /// The key is a `String` and the value is a ``JSONSchemaComponent``.
+/// Empty strings are valid property names and are emitted like any other key.
 public struct JSONProperty<Value: JSONSchemaComponent>: JSONPropertyComponent {
   public let key: String
   public let isRequired = false

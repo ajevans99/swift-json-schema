@@ -147,4 +147,13 @@ public final class Context: Sendable {
       formatValidators: Array(formatValidators.values)
     )
   }
+
+  package var hasStandardProjectionVocabulary: Bool {
+    guard let vocabulary = remoteSchemaStorage[dialect.rawValue]?.object?["$vocabulary"] else {
+      return true
+    }
+    guard let entries = vocabulary.object else { return false }
+    return Set(entries.keys) == dialect.supportedVocabularies
+      && entries.values.allSatisfy { $0.boolean != nil }
+  }
 }

@@ -266,19 +266,11 @@ struct DictionaryArrayIntegrationTests {
       }
       """
 
-    // Test parsing (lenient) - should succeed even with invalid keys
     let parseResult = try Project.schema.parse(instance: json)
-    #expect(parseResult.value != nil, "Parsing should succeed (lenient)")
-    #expect(parseResult.errors == nil, "Parsing should not produce errors for invalid keys")
-
-    // Verify that the data is parsed as expected
-    guard let project = parseResult.value else {
-      throw TestError("Failed to parse project")
-    }
-
-    // The invalid keys are silently dropped during parsing (current behavior)
-    #expect(project.tasksByPriority.count == 0, "Invalid keys are dropped during parsing")
-    #expect(project.tasksByEmotion.count == 0, "Invalid keys are dropped during parsing")
+    #expect(parseResult.value == nil, "Invalid dictionary entries must not be silently dropped")
+    let parsingErrors = try #require(parseResult.errors)
+    #expect(parsingErrors.contains(.noEnumCaseMatch(value: "invalid_priority")))
+    #expect(parsingErrors.contains(.noEnumCaseMatch(value: "invalid_emotion")))
 
     // Test validation (strict) - should fail with invalid keys
     let schema = Project.schema.definition()

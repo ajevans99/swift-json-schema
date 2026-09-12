@@ -13,7 +13,7 @@ public enum Dialect: String, Hashable, Sendable {
   }
 
   /// The vocabularies supported by this dialect.
-  var supportedVocabularies: Set<String> {
+  package var supportedVocabularies: Set<String> {
     switch self {
     case .draft2020_12:
       [

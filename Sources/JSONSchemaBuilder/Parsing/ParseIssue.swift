@@ -7,6 +7,8 @@ public enum ParseIssue: Error, Equatable, Sendable {
   case compactMapValueNil(value: JSONValue)
   case compositionFailure(type: JSONComposition, reason: String, nestedErrors: [ParseIssue])
   case runtimeValidationIssue(ValidationResult)
+  case projectionFailure(reason: String)
+  case invalidRegularExpression(pattern: String, reason: String)
 }
 
 extension ParseIssue: CustomStringConvertible {
@@ -24,6 +26,10 @@ extension ParseIssue: CustomStringConvertible {
       "Composition (`\(type)`) failure: the instance \(reason)."
     case .runtimeValidationIssue(let error):
       "Runtime validation issue: \(error)"
+    case .projectionFailure(let reason):
+      "Projection failure: \(reason)"
+    case .invalidRegularExpression(let pattern, let reason):
+      "Invalid regular expression `\(pattern)`: \(reason)"
     }
   }
 }

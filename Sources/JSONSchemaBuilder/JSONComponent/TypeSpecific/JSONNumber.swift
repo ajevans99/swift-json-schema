@@ -11,7 +11,7 @@ public struct JSONInteger: JSONNumberType {
   }
 
   public func parse(_ value: JSONValue) -> Parsed<Int, ParseIssue> {
-    if case .integer(let int) = value { return .valid(int) }
+    if let int = value.exactInteger { return .valid(int) }
     return .error(.typeMismatch(expected: .integer, actual: value))
   }
 }

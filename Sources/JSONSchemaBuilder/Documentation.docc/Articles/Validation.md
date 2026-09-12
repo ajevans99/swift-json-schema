@@ -51,6 +51,11 @@ Properties are optional unless marked `.required()`. Required means the key must
 whether its value may be `null` depends on the property's schema. Use `.orNull()` to accept
 explicit nulls. Macro-generated schemas infer required and nullable behavior from Swift types.
 
+Typed `.additionalProperties { ... }` returns only keys that are neither declared in `properties`
+nor matched by `patternProperties`. Names such as `"type"` or `"properties"` in the input are
+ordinary extra keys, not schema metadata. Failed additional-value parsing now rejects the object
+instead of silently dropping those entries, including failures from nested models or enum keys.
+
 ## Handle invalid input
 
 ```swift
@@ -100,6 +105,10 @@ can be passed in the same registry.
 
 String parsing overloads use `JSONDecoder` by default. When source key order matters, parse
 with `JSONValue.parse` first and pass the resulting value to `parseAndValidate` or `parse`.
+Integral decimal numbers such as `1.0` satisfy JSON Schema's `integer` type without changing their
+stored `.number` representation. `JSONInteger` also accepts them when exactly representable as
+Swift `Int`, rejecting fractional, nonfinite, or out-of-range values rather than rounding.
+Integral decimal keyword bounds such as `"minLength": 2.0` are interpreted as integer bounds.
 
 ## Composition parsing
 
@@ -135,6 +144,9 @@ Nested properties, array items, nullable unions, and typed references retain the
 validators, remote schemas, enclosing definitions, identifiers, vocabulary, and dynamic-reference
 scope. Direct composition, object, and array parsing uses a default draft 2020-12 context; pass
 `validationContext` to `parseAndValidate` when external schemas or custom formats are needed.
+Each `parseAndValidate` call copies the context's configuration into a fresh evaluation context.
+It does not mutate the caller's schema caches, registered documents, or dynamic scopes, and
+reusing a context does not reuse an earlier call's root definitions.
 
 Custom components, `flatMap`, and type-erased components can parse a shape different from their
 emitted `schemaValue`, such as an object projection of `allOf`. Unmatched, self-contained branches
@@ -144,9 +156,70 @@ schema remains authoritative. This does not add field merging to `AllOf`.
 A projected branch containing `$ref` or `$dynamicRef`, or a projection under a custom vocabulary,
 requires a matching position and branch schema in the original validation tree. Otherwise parsing
 reports that branch validation is unavailable, rather than guessing a reference scope or using
-default validation options. Keep the parsing and emitted schema structures aligned for referenced
-projections, or inline their references before projecting.
+default validation options. Keep the parsing and emitted schema structures aligned, inline the
+references, or opt into the static projection boundary described below.
 
 This also applies when a projection hides a branch's own custom vocabulary. Typed reference parsers
 only reuse evaluations belonging to their emitted reference schema; an unmatched reference cannot
 borrow another target's results or independently validate its nested compositions.
+
+### Explicit static projections
+
+Use ``JSONComponents/Projection`` when a typed parser intentionally has a different shape from
+the complete schema, including reference-bearing compositions. This is useful for generated
+models whose parser merges `allOf` fields or represents a type array as an `AnyOf`.
+
+```swift
+struct Name: Schemable {
+  let value: String
+  static var schema: some JSONSchemaComponent<Name> {
+    JSONString().map { Name(value: $0) }
+  }
+}
+
+enum Value {
+  case name(Name)
+  case flag(Bool)
+}
+
+let parser = JSONComposition.AnyOf(into: Value.self) {
+  JSONReference<Name>.definition(named: "name").map { Value.name($0) }
+  JSONBoolean().map { Value.flag($0) }
+}
+let complete: SchemaValue = [
+  "$defs": ["name": ["type": "string"]],
+  "allOf": [parser.schemaValue.value],
+]
+let projection = JSONComponents.Projection(upstream: parser, schemaValue: complete)
+let value = try projection.parseAndValidate(.string("hello"))
+```
+
+The equivalent modifier is `parser.projection(schemaValue: complete)`. Both retain the parser's
+`Output`. The projection's mutable `schemaValue` is the exact complete validation schema;
+the wrapper does not rewrite it or add a validation keyword. `parseAndValidate` requires both
+the complete schema and the typed parser to succeed. Plain `parse` still does not enforce every
+keyword of the complete schema.
+
+Parsing evaluates the parser's own schema in an isolated context using the caller's format
+validators. Root `$defs` from the enclosing document, complete schema, and parser are combined
+for parsing only. This definition environment follows nested projections under properties,
+arrays, and compositions, and through recursive `JSONReference<T>` targets. Equal definitions
+may be repeated; conflicting names fail explicitly instead of shadowing. A top-level projection
+must carry the full definition bundle, while nested projections may inherit it.
+
+This boundary supports standard draft 2020-12 and static, self-contained `#/$defs/...` pointers
+without percent encoding. Unresolved references, remote references, dynamic references, and
+custom vocabulary declarations are rejected. Standard vocabulary subsets must include core,
+applicator, and validation; omitted format, unevaluated, or content vocabularies must not have
+keywords anywhere in the bundle. This prevents enabling assertions that the complete schema
+deliberately disables. Declaring all seven standard 2020-12 vocabularies is supported.
+Identifiers and anchors are allowed only when the bundle has no
+references; reference-bearing bundles must remove them and resolve any dynamic scope before
+projection. These checks traverse schema keywords and reference targets, not arbitrary instance
+data in `const`, `enum`, `default`, `examples`, or extension annotations. Caller overrides of
+the standard dialect's vocabulary also require the full standard vocabulary set.
+
+Unsupported scopes, conflicting definitions, malformed parsing bundles, and parsing-schema
+construction failures produce `ParseIssue.projectionFailure` rather than silently changing
+reference scope or falling back to a default schema. The existing safety refusal still applies
+to arbitrary type-erased or custom parsers that do not explicitly preserve their parsing schema.
