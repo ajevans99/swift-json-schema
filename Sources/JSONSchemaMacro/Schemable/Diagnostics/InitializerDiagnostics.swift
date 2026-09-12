@@ -30,7 +30,7 @@ struct InitializerDiagnostics {
 
     if let memberWiseInit = findMatchingInit(explicitInits, expectedParameters: expectedParameters)
     {
-      // Found a matching explicit init - validate it matches exactly
+      // Validate the best candidate, preserving detailed diagnostics if no overload fits.
       validateInitParameters(memberWiseInit, expectedParameters: expectedParameters)
     } else if !explicitInits.isEmpty {
       // Has explicit inits but none match - warn about this
@@ -52,25 +52,32 @@ struct InitializerDiagnostics {
     }
   }
 
-  /// Finds an initializer that matches the expected parameters
+  /// Prefers an exact match, retaining a name/count match for diagnostics if none fits.
   private func findMatchingInit(
     _ inits: [InitializerDeclSyntax],
     expectedParameters: [(name: String, type: TypeSyntax)]
   ) -> InitializerDeclSyntax? {
+    let expectedNames = Set(expectedParameters.map { $0.name })
+    var diagnosticCandidate: InitializerDeclSyntax?
+
     for initDecl in inits {
       let params = initDecl.signature.parameterClause.parameters
-      if params.count == expectedParameters.count {
-        // Check if all expected parameter names exist (regardless of order)
-        let paramNames = Set(params.map { $0.secondName?.text ?? $0.firstName.text })
-        let expectedNames = Set(expectedParameters.map { $0.name })
+      guard params.count == expectedParameters.count else { continue }
+      let paramNames = Set(params.map { $0.secondName?.text ?? $0.firstName.text })
+      guard paramNames == expectedNames else { continue }
 
-        if paramNames == expectedNames {
-          // Found an init with the right parameters (possibly wrong order)
-          return initDecl
-        }
+      if zip(params, expectedParameters)
+        .allSatisfy({ param, expected in
+          (param.secondName?.text ?? param.firstName.text) == expected.name
+            && typesMatch(param.type, expected.type)
+        })
+      {
+        return initDecl
       }
+
+      diagnosticCandidate = diagnosticCandidate ?? initDecl
     }
-    return nil
+    return diagnosticCandidate
   }
 
   /// Validates that an explicit init's parameters match the schema exactly
