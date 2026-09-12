@@ -31,6 +31,74 @@ private enum PlanningFixtures {
   }
 
   @Schemable
+  struct Token {
+    let value: Int
+
+    init(value: Int) {
+      self.value = value
+    }
+
+    init(value: String) {
+      self.value = Int(value) ?? 0
+    }
+  }
+
+  @Schemable
+  struct TokenWithMatchingInitializerLast {
+    let value: Int
+
+    init(value: String) {
+      self.value = Int(value) ?? 0
+    }
+
+    init(value: Int) {
+      self.value = value
+    }
+  }
+
+  @Schemable
+  struct RecordWithReorderedInitializerFirst {
+    let name: String
+    let count: Int
+
+    init(count: Int, name: String) {
+      self.name = name
+      self.count = count
+    }
+
+    init(name: String, count: Int) {
+      self.name = name
+      self.count = count
+    }
+  }
+
+  @Schemable
+  struct RecursiveNode {
+    let children: [RecursiveNode]
+
+    init(children: [Self]) {
+      self.children = children
+    }
+
+    init(children: [String]) {
+      self.children = []
+    }
+  }
+
+  @Schemable
+  struct RecursiveNodeWithMatchingInitializerLast {
+    let children: [RecursiveNodeWithMatchingInitializerLast]
+
+    init(children: [String]) {
+      self.children = []
+    }
+
+    init(children: [Self]) {
+      self.children = children
+    }
+  }
+
+  @Schemable
   enum Event {
     case message(String, count: Swift.Optional<Int>)
   }
@@ -117,6 +185,64 @@ struct MacroPlanningIntegrationTests {
   @Test func classUsesExplicitInitializerWithoutCopyingFinalModifier() throws {
     let result = try PlanningFixtures.Record.schema.parse(instance: #"{"name":"example"}"#)
     #expect(result.value?.name == "example")
+  }
+
+  @Test func matchingInitializerOverloadCompilesAndParsesInteger() throws {
+    let schema = PlanningFixtures.Token.schema
+    let expected: JSONValue = [
+      "type": "object",
+      "properties": ["value": ["type": "integer"]],
+      "required": ["value"],
+    ]
+    #expect(schema.schemaValue.value == expected)
+
+    let result = try schema.parse(instance: #"{"value":42}"#)
+    let token = try #require(result.value)
+    #expect(token.value == 42)
+    #expect(result.errors == nil)
+  }
+
+  @Test func laterMatchingInitializerOverloadCompilesAndParsesInteger() throws {
+    let schema = PlanningFixtures.TokenWithMatchingInitializerLast.schema
+    let expected: JSONValue = [
+      "type": "object",
+      "properties": ["value": ["type": "integer"]],
+      "required": ["value"],
+    ]
+    #expect(schema.schemaValue.value == expected)
+
+    let result = try schema.parse(instance: #"{"value":42}"#)
+    let token = try #require(result.value)
+    #expect(token.value == 42)
+    #expect(result.errors == nil)
+  }
+
+  @Test func reorderedInitializerDoesNotHideLaterCompatibleOverload() throws {
+    let schema = PlanningFixtures.RecordWithReorderedInitializerFirst.schema
+    let result = try schema.parse(instance: #"{"name":"example","count":42}"#)
+    let record = try #require(result.value)
+    #expect(record.name == "example")
+    #expect(record.count == 42)
+    #expect(result.errors == nil)
+  }
+
+  @Test func matchingSelfInitializerOverloadCompilesAndParsesRecursively() throws {
+    let node = try PlanningFixtures.RecursiveNode.schema.parseAndValidate(
+      instance: #"{"children":[{"children":[]}]}"#
+    )
+    #expect(node.children.count == 1)
+    let child = try #require(node.children.first)
+    #expect(child.children.isEmpty)
+  }
+
+  @Test func laterMatchingSelfInitializerOverloadCompilesAndParsesRecursively() throws {
+    let node = try PlanningFixtures.RecursiveNodeWithMatchingInitializerLast.schema
+      .parseAndValidate(
+        instance: #"{"children":[{"children":[]}]}"#
+      )
+    #expect(node.children.count == 1)
+    let child = try #require(node.children.first)
+    #expect(child.children.isEmpty)
   }
 
   @Test func privateDeclarationConformanceCompilesAndParses() throws {

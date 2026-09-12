@@ -3,6 +3,7 @@ import SwiftDiagnostics
 import SwiftParser
 import SwiftSyntax
 import SwiftSyntaxBuilder
+import SwiftSyntaxMacrosGenericTestSupport
 import Testing
 
 @testable import JSONSchemaMacro
@@ -277,6 +278,176 @@ struct SchemaPlanningTests {
       """
     )
     #expect(plan.diagnostics.isEmpty)
+  }
+
+  @Test(arguments: [false, true])
+  func initializerOverloadMatchingIgnoresDeclarationOrder(matchingInitializerFirst: Bool) throws {
+    let firstType = matchingInitializerFirst ? "Int" : "String"
+    let firstValue = matchingInitializerFirst ? "value" : "Int(value) ?? 0"
+    let secondType = matchingInitializerFirst ? "String" : "Int"
+    let secondValue = matchingInitializerFirst ? "Int(value) ?? 0" : "value"
+    let source = """
+      struct Token {
+        let value: Int
+
+        init(value: \(firstType)) {
+          self.value = \(firstValue)
+        }
+
+        init(value: \(secondType)) {
+          self.value = \(secondValue)
+        }
+      }
+      """
+    let plan = try plan(source)
+    #expect(plan.diagnostics.isEmpty)
+
+    assertMacroExpansion(
+      "@Schemable\n" + source,
+      expandedSource: """
+        struct Token {
+          let value: Int
+
+          init(value: \(firstType)) {
+            self.value = \(firstValue)
+          }
+
+          init(value: \(secondType)) {
+            self.value = \(secondValue)
+          }
+
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+          static var schema: some JSONSchemaComponent<Token> {
+            JSONSchema(Token.init) {
+              JSONObject {
+                JSONProperty(key: "value") {
+                  JSONInteger()
+                }
+                .required()
+              }
+            }
+          }
+        }
+
+        extension Token: Schemable {
+        }
+        """,
+      diagnostics: [],
+      macros: ["Schemable": SchemableMacro.self]
+    )
+  }
+
+  @Test(arguments: [false, true])
+  func initializerOverloadMatchingChecksAllParametersInOrder(
+    matchingInitializerFirst: Bool
+  ) throws {
+    let initializers = [
+      "init(count: Int, name: String) {}",
+      "init(name: String, count: String) {}",
+      "init(name: String, count: Int) {}",
+    ]
+    let orderedInitializers =
+      matchingInitializerFirst ? Array(initializers.reversed()) : initializers
+    let plan = try plan(
+      """
+      struct Example {
+        let name: String
+        let count: Int
+        \(orderedInitializers.joined(separator: "\n"))
+      }
+      """
+    )
+    #expect(plan.diagnostics.isEmpty)
+  }
+
+  @Test(arguments: [
+    ("Swift.Int", "String", "Int"),
+    ("Swift.Optional<Swift.Array<String>>", "[Int]?", "[String]?"),
+    ("Swift.Dictionary<String, Swift.Array<Int>>", "[String: [String]]", "[String: [Int]]"),
+    ("[String: Int]?", "[String: String]?", "Swift.Optional<Swift.Dictionary<String, Int>>"),
+  ])
+  func initializerOverloadSelectionNormalizesBuiltinSpellings(
+    propertyType: String,
+    incompatibleType: String,
+    compatibleType: String
+  ) throws {
+    let plan = try plan(
+      """
+      struct Example {
+        let value: \(propertyType)
+        init(value: \(incompatibleType)) {}
+        init(value: \(compatibleType)) {}
+      }
+      """
+    )
+    #expect(plan.diagnostics.isEmpty)
+  }
+
+  @Test(arguments: [false, true], [false, true])
+  func recursiveInitializerOverloadsNormalizeSelfInBothDeclarationOrders(
+    matchingInitializerFirst: Bool,
+    propertyUsesSelf: Bool
+  ) throws {
+    let propertyType = propertyUsesSelf ? "Self" : "Node"
+    let parameterType = propertyUsesSelf ? "Node" : "Self"
+    let firstType = matchingInitializerFirst ? parameterType : "String"
+    let firstValue = matchingInitializerFirst ? "children" : "[]"
+    let secondType = matchingInitializerFirst ? "String" : parameterType
+    let secondValue = matchingInitializerFirst ? "[]" : "children"
+    let plan = try plan(
+      """
+      struct Node {
+        let children: [\(propertyType)]
+        init(children: [\(firstType)]) { self.children = \(firstValue) }
+        init(children: [\(secondType)]) { self.children = \(secondValue) }
+      }
+      """
+    )
+    #expect(plan.diagnostics.isEmpty)
+  }
+
+  @Test func initializerSelfNormalizationPreservesUnrelatedTypeMismatch() throws {
+    let plan = try plan(
+      """
+      struct Node {
+        let children: [Self]
+        init(children: [OtherNode]) { self.children = [] }
+      }
+      """
+    )
+    #expect(plan.diagnostics.count == 1)
+    let diagnostic = try #require(plan.diagnostics.first)
+    #expect(diagnostic.diagMessage.severity == .error)
+    #expect(
+      diagnostic.message == """
+        Parameter 'children' has type '[OtherNode]' but schema expects '[Self]'. \
+        This type mismatch will cause the generated schema to fail.
+        """
+    )
+  }
+
+  @Test(arguments: [false, true])
+  func incompatibleOverloadsPreserveFirstCandidateDiagnostic(stringInitializerFirst: Bool) throws {
+    let firstType = stringInitializerFirst ? "String" : "Bool"
+    let secondType = stringInitializerFirst ? "Bool" : "String"
+    let plan = try plan(
+      """
+      struct Example {
+        let value: Int
+        init(value: \(firstType)) {}
+        init(value: \(secondType)) {}
+      }
+      """
+    )
+    #expect(plan.diagnostics.count == 1)
+    let diagnostic = try #require(plan.diagnostics.first)
+    #expect(diagnostic.diagMessage.severity == .error)
+    #expect(
+      diagnostic.message == """
+        Parameter 'value' has type '\(firstType)' but schema expects 'Int'. \
+        This type mismatch will cause the generated schema to fail.
+        """
+    )
   }
 
   @Test func variableDefaultDoesNotTriggerConstantInitializerWarning() throws {
