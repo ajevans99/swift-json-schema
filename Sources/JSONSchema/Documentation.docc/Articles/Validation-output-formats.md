@@ -75,11 +75,14 @@ if you subsequently use a `Codable` encoding path, such as `JSONEncoder.encode`.
 The rendered diagnostic structure is separate from ``ValidationResult/jsonValue``, which
 exposes the library's ordered representation of the original result.
 
-Numeric values and keyword bounds in ``ValidationIssue`` also use `JSONNumberLiteral`,
-including bounds for lengths, item counts, property counts, and `contains` matches. Actual
-counts and array indexes remain `Int`. When handling those issues directly, read `rawValue`
-for the bound's numeric token or use an explicit throwing conversion instead of assuming
-a `Double` or `Int` bound.
+Numeric operands in ``ValidationIssue`` cases such as `exceedsMaximum` and `notMultipleOf`
+use `JSONNumberLiteral`. When handling those issues directly, read `rawValue` for the numeric
+token or use an explicit throwing conversion instead of assuming a `Double` payload.
+Public error bound payloads for lengths, item counts, property counts, and `contains`
+matches remain `Int`, as do actual counts and array indexes. These constraints compare exact
+`JSONNumberLiteral` values and narrow bounds only when reporting a failed constraint. If a
+failed bound cannot be represented as `Int`, `numericValidationFailure` reports the exact
+bound in its reason instead of clamping it or substituting a default.
 
 For reproducible serialization of that result, use:
 
