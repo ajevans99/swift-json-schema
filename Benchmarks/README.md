@@ -358,6 +358,13 @@ explicitly rebaselined on the pinned CI runner for this precision change.
 Native OrderedJSON, JSONSerialization, and JSONSchema thresholds are retained,
 and the existing relative and absolute tolerances are unchanged.
 
+The 24-case Foundation/JSONValue cohort comes from
+[capture run 34735656501](https://github.com/ajevans99/swift-json-schema/actions/runs/34735656501)
+at `f2f6f6a8a7263cd9fd1dd6a1926769ec77f50153`, on Ubuntu 24.04 x86_64
+with Swift 6.3.3, deterministic hashing, and malloc-only measurement. Only these
+artifact files were adopted; six were already identical to the previous baseline.
+The other 136 baselines were not refreshed.
+
 `Dialect.loadMetaSchema()` caches only immutable bundled JSON documents; it
 still constructs an independent Schema and Context per call. Its benchmark
 therefore continues to measure schema construction, without repeatedly reading
