@@ -91,13 +91,6 @@ let manyItems = try Schema(instance: #"{"type":"array","minItems":1e1000}"#)
 print(manyItems.validate([]).isValid) // false
 ```
 
-Numeric operands in ``ValidationIssue`` cases such as `exceedsMaximum` and `notMultipleOf`
-use `JSONNumberLiteral`. Use `rawValue` to inspect the token or the literal's throwing
-conversion methods when a Swift number is needed. Public count/length error bound payloads,
-measured counts, and array indexes remain `Int`. Bounds are narrowed only when reporting a
-failed constraint, after the exact comparison. If a failed bound cannot be represented as
-`Int`, `numericValidationFailure` reports the exact bound in its reason instead of clamping
-it or substituting a default.
 See the [numeric migration guide](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/orderedjson/migrating-to-lossless-numbers)
 for enum-case, accessor, and `Codable` changes.
 
