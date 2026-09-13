@@ -112,7 +112,7 @@ struct KeywordTests {
       (JSONValue.string("2"), true),
       (JSONValue.null, true),
     ])
-    func multipleOf(instance: JSONValue, isValid: Bool) {
+    func multipleOf(instance: JSONValue, isValid: Bool) throws {
       let schemaValue: JSONValue = 2
       let annotations = AnnotationContainer()
       let keyword = Keywords.MultipleOf(value: schemaValue)
@@ -122,7 +122,10 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.notMultipleOf(number: instance.numeric ?? 0, multiple: 2)) {
+        let number = try #require(instance.numberLiteral)
+        #expect(
+          throws: ValidationIssue.notMultipleOf(number: number, multiple: JSONNumberLiteral(2))
+        ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -138,7 +141,7 @@ struct KeywordTests {
       (JSONValue.string("5"), true),
       (JSONValue.null, true),
     ])
-    func maximum(instance: JSONValue, isValid: Bool) {
+    func maximum(instance: JSONValue, isValid: Bool) throws {
       let schemaValue: JSONValue = 5
       let annotations = AnnotationContainer()
       let keyword = Keywords.Maximum(value: schemaValue)
@@ -148,7 +151,10 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.exceedsMaximum(number: instance.numeric ?? 0, maximum: 5)) {
+        let number = try #require(instance.numberLiteral)
+        #expect(
+          throws: ValidationIssue.exceedsMaximum(number: number, maximum: JSONNumberLiteral(5))
+        ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -164,7 +170,7 @@ struct KeywordTests {
       (JSONValue.string("4"), true),
       (JSONValue.null, true),
     ])
-    func exclusiveMaximum(instance: JSONValue, isValid: Bool) {
+    func exclusiveMaximum(instance: JSONValue, isValid: Bool) throws {
       let schemaValue: JSONValue = 5
       let annotations = AnnotationContainer()
       let keyword = Keywords.ExclusiveMaximum(value: schemaValue)
@@ -174,8 +180,12 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
+        let number = try #require(instance.numberLiteral)
         #expect(
-          throws: ValidationIssue.exceedsExclusiveMaximum(number: instance.numeric ?? 0, maximum: 5)
+          throws: ValidationIssue.exceedsExclusiveMaximum(
+            number: number,
+            maximum: JSONNumberLiteral(5)
+          )
         ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
@@ -192,7 +202,7 @@ struct KeywordTests {
       (JSONValue.string("5"), true),
       (JSONValue.null, true),
     ])
-    func minimum(instance: JSONValue, isValid: Bool) {
+    func minimum(instance: JSONValue, isValid: Bool) throws {
       let schemaValue: JSONValue = 5
       let annotations = AnnotationContainer()
       let keyword = Keywords.Minimum(value: schemaValue)
@@ -202,7 +212,9 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.belowMinimum(number: instance.numeric ?? 0, minimum: 5)) {
+        let number = try #require(instance.numberLiteral)
+        #expect(throws: ValidationIssue.belowMinimum(number: number, minimum: JSONNumberLiteral(5)))
+        {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -218,7 +230,7 @@ struct KeywordTests {
       (JSONValue.string("6"), true),
       (JSONValue.null, true),
     ])
-    func exclusiveMinimum(instance: JSONValue, isValid: Bool) {
+    func exclusiveMinimum(instance: JSONValue, isValid: Bool) throws {
       let schemaValue: JSONValue = 5
       let annotations = AnnotationContainer()
       let keyword = Keywords.ExclusiveMinimum(value: schemaValue)
@@ -228,8 +240,12 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
+        let number = try #require(instance.numberLiteral)
         #expect(
-          throws: ValidationIssue.belowExclusiveMinimum(number: instance.numeric ?? 0, minimum: 5)
+          throws: ValidationIssue.belowExclusiveMinimum(
+            number: number,
+            minimum: JSONNumberLiteral(5)
+          )
         ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
@@ -255,7 +271,10 @@ struct KeywordTests {
         }
       } else {
         #expect(
-          throws: ValidationIssue.exceedsMaxLength(string: instance.string ?? "", maxLength: 5)
+          throws: ValidationIssue.exceedsMaxLength(
+            string: instance.string ?? "",
+            maxLength: 5
+          )
         ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
@@ -278,8 +297,12 @@ struct KeywordTests {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       } else {
-        #expect(throws: ValidationIssue.belowMinLength(string: instance.string ?? "", minLength: 3))
-        {
+        #expect(
+          throws: ValidationIssue.belowMinLength(
+            string: instance.string ?? "",
+            minLength: 3
+          )
+        ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -357,7 +380,10 @@ struct KeywordTests {
         }
       } else {
         #expect(
-          throws: ValidationIssue.exceedsMaxItems(count: instance.array?.count ?? 0, maxItems: 3)
+          throws: ValidationIssue.exceedsMaxItems(
+            count: instance.array?.count ?? 0,
+            maxItems: 3
+          )
         ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
@@ -380,7 +406,10 @@ struct KeywordTests {
         }
       } else {
         #expect(
-          throws: ValidationIssue.belowMinItems(count: instance.array?.count ?? 0, minItems: 2)
+          throws: ValidationIssue.belowMinItems(
+            count: instance.array?.count ?? 0,
+            minItems: 2
+          )
         ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
@@ -436,7 +465,12 @@ struct KeywordTests {
           case .everyIndex: instance.array?.count ?? 0
           case .indicies(let indicies): indicies.count
           }
-        #expect(throws: ValidationIssue.containsExcessiveMatches(count: count, maxAllowed: 3)) {
+        #expect(
+          throws: ValidationIssue.containsExcessiveMatches(
+            count: count,
+            maxAllowed: 3
+          )
+        ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }
@@ -471,7 +505,12 @@ struct KeywordTests {
           case .everyIndex: instance.array?.count ?? 0
           case .indicies(let indicies): indicies.count
           }
-        #expect(throws: ValidationIssue.containsInsufficientMatches(count: count, required: 2)) {
+        #expect(
+          throws: ValidationIssue.containsInsufficientMatches(
+            count: count,
+            required: 2
+          )
+        ) {
           try keyword.validate(instance, at: .init(), using: annotations)
         }
       }

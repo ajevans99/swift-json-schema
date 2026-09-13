@@ -103,12 +103,59 @@ let email = try JSONString().format("email").parseAndValidate(
 The default context has no format validators. Custom implementations of `FormatValidator`
 can be passed in the same registry.
 
-String parsing overloads use `JSONDecoder` by default. When source key order matters, parse
-with `JSONValue.parse` first and pass the resulting value to `parseAndValidate` or `parse`.
-Integral decimal numbers such as `1.0` satisfy JSON Schema's `integer` type without changing their
-stored `.number` representation. `JSONInteger` also accepts them when exactly representable as
-Swift `Int`, rejecting fractional, nonfinite, or out-of-range values rather than rounding.
-Integral decimal keyword bounds such as `"minLength": 2.0` are interpreted as integer bounds.
+String parsing overloads use `JSONValue.parse` by default, preserving source key order and
+numeric tokens before conversion to your Swift output. You can also parse a `JSONValue`
+yourself and pass it to `parseAndValidate` or `parse`. Overloads accepting an explicit
+`JSONDecoder` remain available but are deprecated; Foundation decoding cannot guarantee
+original number precision or spelling.
+
+## Exact numbers and destination types
+
+JSON numbers are stored as `.numberLiteral(JSONNumberLiteral)`, not `Double`. Numeric
+validation compares mathematical values exactly, including `multipleOf`, independently of
+the type returned by your builder. General `multipleOf` arithmetic has a bounded work budget;
+exceeding it reports an explicit failure rather than approximating.
+
+Typed parsing is a separate conversion step:
+
+- `JSONInteger` accepts any mathematical integer that fits Swift `Int` exactly.
+  Tokens such as `1.0` and `1e2` qualify; fractional and out-of-range values fail.
+- `JSONNumber` returns `Double`, allowing rounding but rejecting overflow or nonzero values
+  that underflow to zero.
+- `JSONDecimal` returns Foundation `Decimal` without passing through `Double`. It rejects
+  inexact and out-of-range conversions.
+
+A valid JSON number such as `1e1000` can therefore pass schema validation but fail typed
+parsing. `ParseIssue.numericConversionFailed` reports the target type and conversion reason.
+Invalid JSON numbers, including non-finite inputs, are rejected before they enter the value tree.
+Integral decimal keyword bounds such as `"minLength": 2.0` remain valid integer bounds.
+Count constraints for lengths, items, properties, and `contains` matches compare those
+bounds exactly. A bound outside `Int` or `Double` range does not fall back to a permissive
+default; for example, `"minItems": 1e1000` still rejects an empty array.
+
+```swift
+import Foundation
+import JSONSchemaBuilder
+
+let cent = try JSONNumberLiteral("0.01")
+let maximum = try JSONNumberLiteral("9999999999999999.99")
+let price = JSONDecimal()
+  .multipleOf(cent)
+  .maximum(maximum)
+
+let amount: Decimal = try price.parseAndValidate(instance: "9.270")
+```
+
+`minimum`, `maximum`, `exclusiveMinimum`, `exclusiveMaximum`, and `multipleOf` accept
+`JSONNumberLiteral` as well as `Double`. Construct precise bounds from validated strings:
+Swift floating-point literals have already been converted to `Double` and cannot recover
+lost source digits. The `Double` overloads require finite inputs.
+
+`@NumberOptions` supports the same exact-literal overloads, and `@Schemable` recognizes
+`Decimal` and `Foundation.Decimal`, including optional properties and collection values.
+See <doc:Macros> and the
+[numeric migration guide](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/orderedjson/migrating-to-lossless-numbers)
+for the enum-case and accessor changes.
 
 ## Composition parsing
 

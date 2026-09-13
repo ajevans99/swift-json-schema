@@ -1,52 +1,22 @@
 import Foundation
 
 extension JSONValue {
-  /// How ``JSONValue/serialized(options:)`` handles non-finite doubles
-  /// (`NaN`, `+Inf`, `-Inf`), which are not representable in JSON.
-  ///
-  /// Mirrors `JSONEncoder.NonConformingFloatEncodingStrategy`. The default
-  /// is ``throw_`` so callers cannot silently produce invalid JSON.
-  public enum NonConformingFloatStrategy: Sendable, Hashable {
-    /// Throw a ``SerializationError/nonConformingFloat(_:)`` when a
-    /// non-finite double is encountered. The default.
-    case `throw`
-    /// Substitute the supplied string for `+Inf`, `-Inf`, and `NaN`. The
-    /// string is emitted as a JSON string literal, matching
-    /// `JSONEncoder.NonConformingFloatEncodingStrategy.convertToString`.
-    case convertToString(positiveInfinity: String, negativeInfinity: String, nan: String)
-    /// Emit `null` for any non-finite value.
-    case null
-  }
-
   /// Options for ``JSONValue/serialized(options:)``.
   public struct SerializationOptions: Sendable, Hashable {
     public var prettyPrinted: Bool
     /// The string used to indent each pretty-printed level. Defaults to two
     /// spaces, matching `JSONEncoder`'s default.
     public var indent: String
-    /// How to handle `NaN`, `+Inf`, and `-Inf`. Defaults to `.throw`, which
-    /// matches `JSONEncoder`'s default and prevents emitting invalid JSON.
-    public var nonConformingFloatStrategy: NonConformingFloatStrategy
-
     public init(
       prettyPrinted: Bool = false,
-      indent: String = "  ",
-      nonConformingFloatStrategy: NonConformingFloatStrategy = .throw
+      indent: String = "  "
     ) {
       self.prettyPrinted = prettyPrinted
       self.indent = indent
-      self.nonConformingFloatStrategy = nonConformingFloatStrategy
     }
 
     public static let compact = SerializationOptions(prettyPrinted: false)
     public static let pretty = SerializationOptions(prettyPrinted: true)
-  }
-
-  /// Errors that ``JSONValue/serialized(options:)`` can throw.
-  public enum SerializationError: Error, Equatable, Sendable {
-    /// A `NaN` or infinite double was encountered and the active strategy
-    /// is ``NonConformingFloatStrategy/throw_``.
-    case nonConformingFloat(Double)
   }
 
   /// Serializes this value to a JSON-encoded `String`.
@@ -57,9 +27,8 @@ extension JSONValue {
   /// reproducible bytes (snapshot tests, generated artifacts, signed
   /// payloads). See issue #149.
   ///
-  /// - Throws: ``SerializationError/nonConformingFloat(_:)`` when a non-finite
-  ///   double is encountered and
-  ///   ``SerializationOptions/nonConformingFloatStrategy`` is `.throw`.
+  /// Number tokens are emitted verbatim, including values outside the range
+  /// of `Double` or `Decimal`. Non-finite Swift values cannot enter this tree.
   public func serialized(options: SerializationOptions = .compact) throws -> String {
     var out = ""
     try write(to: &out, level: 0, options: options)
@@ -81,10 +50,8 @@ extension JSONValue {
       out.append("null")
     case .boolean(let b):
       out.append(b ? "true" : "false")
-    case .integer(let i):
-      out.append(String(i))
-    case .number(let d):
-      try JSONValue.appendNumber(d, options: options, to: &out)
+    case .numberLiteral(let number):
+      out.append(number.rawValue)
     case .string(let s):
       JSONValue.appendQuoted(s, to: &out)
     case .array(let array):
@@ -133,38 +100,6 @@ extension JSONValue {
         out.append(String(repeating: options.indent, count: level))
       }
       out.append("}")
-    }
-  }
-
-  private static func appendNumber(
-    _ value: Double,
-    options: SerializationOptions,
-    to out: inout String
-  ) throws {
-    guard value.isFinite else {
-      switch options.nonConformingFloatStrategy {
-      case .throw:
-        throw SerializationError.nonConformingFloat(value)
-      case .null:
-        out.append("null")
-      case .convertToString(let pos, let neg, let nan):
-        let replacement: String
-        if value.isNaN {
-          replacement = nan
-        } else if value > 0 {
-          replacement = pos
-        } else {
-          replacement = neg
-        }
-        appendQuoted(replacement, to: &out)
-      }
-      return
-    }
-    if value == value.rounded(), abs(value) < 1e16 {
-      // Match JSONEncoder's "n.0" form for integral doubles.
-      out.append("\(Int64(value)).0")
-    } else {
-      out.append(String(value))
     }
   }
 

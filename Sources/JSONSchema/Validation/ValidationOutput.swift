@@ -1,4 +1,5 @@
 import Foundation
+import OrderedCollections
 
 public enum ValidationOutputLevel: Hashable, Sendable {
   case flag
@@ -27,7 +28,7 @@ public struct ValidationOutputConfiguration: Sendable, Equatable {
   public static let verbose = ValidationOutputConfiguration(level: .verbose)
 }
 
-private struct ValidationOutputUnit: Encodable {
+private struct ValidationOutputUnit {
   let valid: Bool
   let keywordLocation: String
   let absoluteKeywordLocation: URL?
@@ -161,10 +162,21 @@ private struct ValidationOutputUnit: Encodable {
   }
 
   static func jsonValue(from unit: ValidationOutputUnit) throws -> JSONValue {
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = [.sortedKeys]
-    let data = try encoder.encode(unit)
-    return try JSONDecoder().decode(JSONValue.self, from: data)
+    var object = OrderedDictionary<String, JSONValue>()
+    object["valid"] = .boolean(unit.valid)
+    object["keywordLocation"] = .string(unit.keywordLocation)
+    if let absoluteKeywordLocation = unit.absoluteKeywordLocation {
+      object["absoluteKeywordLocation"] = .string(absoluteKeywordLocation.absoluteString)
+    }
+    object["instanceLocation"] = .string(unit.instanceLocation)
+    if let error = unit.error { object["error"] = .string(error) }
+    if let errors = unit.errors {
+      object["errors"] = .array(try errors.map { try jsonValue(from: $0) })
+    }
+    if let annotations = unit.annotations {
+      object["annotations"] = .array(annotations.map { $0.annotation.annotationJSONValue })
+    }
+    return .object(object)
   }
 }
 

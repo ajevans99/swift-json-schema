@@ -44,8 +44,10 @@ let output = try result.jsonValue.serialized()
 ```
 
 The convenience `Schema(instance:)` initializer and builder `parse(instance:)` /
-`parseAndValidate(instance:)` overloads use `JSONDecoder` by default. Once source key order
-has been lost through a Foundation decoder or an unordered dictionary, the serializer cannot
+`parseAndValidate(instance:)` overloads also use `JSONValue.parse` by default, preserving
+object order and number tokens. Explicit `decoder:` overloads remain as deprecated compatibility
+paths and cannot guarantee number precision or spelling. Once source key order or numeric
+precision has been lost through Foundation or an unordered dictionary, the serializer cannot
 recover it.
 
 ## Key order
@@ -59,13 +61,22 @@ This is intentional. JSON object keys are unordered for *equality*, but stable e
 - Reproducible generated schema artifacts
 
 Reproducible serialization is not a lossless round-trip of the original source text or a
-canonicalization standard for signatures. Whitespace, escape sequences, and number spellings
-can change. Equivalent objects with different stored property orders can emit different bytes;
-schema keyword ordering and instance property ordering are also distinct.
+canonicalization standard for signatures. Whitespace and string escape sequences can change.
+Numeric values retain their `JSONNumberLiteral` token spelling, including trailing zeros and
+exponents. Mathematically equal numbers with different spellings can therefore emit different
+bytes, as can equivalent objects with different stored property orders. Schema keyword ordering
+and instance property ordering are also distinct.
 
 ## Why not `Codable`?
 
-`Schema` still conforms to `Codable` — `JSONEncoder().encode(schema)` works. But the `JSONEncoder` keyed-container API stores keys in a `Dictionary` internally, dropping any insertion order along the way. Without `[.sortedKeys]`, output ordering is hash-seed dependent (varies across processes); with `[.sortedKeys]`, output is alphabetical, which is its own kind of arbitrary.
+`Schema` still conforms to `Codable`, but this is an interoperability path rather than a
+token-preserving one. Numeric encoding uses `Int`, exact `Decimal`, or a `Double` only when
+its reconstructed `JSONNumberLiteral` equals the original number; otherwise it throws
+`EncodingError`. Foundation decoding may round numbers before the library receives them.
+
+The `JSONEncoder` keyed-container API also drops insertion order. Without `[.sortedKeys]`,
+output ordering is hash-seed dependent; with `[.sortedKeys]`, output is alphabetical rather
+than source or dialect order.
 
 The ``Schema/jsonValue`` accessor sidesteps both problems by walking the schema's keyword list in declared-dialect order and building the result directly into an `OrderedCollections.OrderedDictionary`. No serialization round-trip.
 
@@ -83,5 +94,7 @@ let bytes = try result.jsonValue.serialized(options: .pretty)
 The `valid`, `keywordLocation`, `absoluteKeywordLocation`, `instanceLocation`, `errors`, `annotations` field order follows the library's result representation. Each ``ValidationError`` and annotation inside the tree is similarly ordered.
 
 This accessor is distinct from `renderedOutput(level:)`, whose basic, detailed, and verbose
-renderers currently bridge through Foundation. See <doc:Validation-output-formats> to choose
-between diagnostic output shapes and the direct ordered representation.
+renderers construct their diagnostic shapes directly as JSON values, also avoiding a Foundation
+numeric round-trip. Raw numeric annotations such as `1e1000` survive rendering and direct
+serialization even when Foundation cannot encode them. See <doc:Validation-output-formats>
+to choose between those shapes and the original result representation.

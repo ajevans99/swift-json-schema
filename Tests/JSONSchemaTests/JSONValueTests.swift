@@ -170,34 +170,33 @@ struct JSONValueTests {
   }
 
   @Test
-  func serializedThrowsOnNonConformingFloatByDefault() {
-    let value: JSONValue = .number(.nan)
-    #expect(throws: JSONValue.SerializationError.self) {
-      _ = try value.serialized()
+  func nonConformingFloatsAreRejectedBeforeSerialization() {
+    for value in [Double.nan, Double.infinity, -Double.infinity] {
+      #expect(throws: (any Error).self) {
+        _ = try JSONNumberLiteral(value)
+      }
     }
   }
 
   @Test
-  func serializedConvertsNonConformingFloatWhenStrategyConfigured() throws {
-    let nan: JSONValue = .number(.nan)
-    let posInf: JSONValue = .number(.infinity)
-    let negInf: JSONValue = .number(-.infinity)
-    let options = JSONValue.SerializationOptions(
-      nonConformingFloatStrategy: .convertToString(
-        positiveInfinity: "+inf",
-        negativeInfinity: "-inf",
-        nan: "nan"
-      )
-    )
-    #expect(try nan.serialized(options: options) == "\"nan\"")
-    #expect(try posInf.serialized(options: options) == "\"+inf\"")
-    #expect(try negInf.serialized(options: options) == "\"-inf\"")
+  func serializedPreservesNumberTokensBeyondSwiftNumericRanges() throws {
+    let json = #"{"x":1e1000,"y":9.270,"z":-0,"small":1e-1000}"#
+    #expect(try JSONValue.parse(json).serialized() == json)
   }
 
-  @Test
-  func serializedEmitsNullForNonConformingFloatWhenRequested() throws {
-    let value: JSONValue = .object(["x": .number(.nan)])
-    let options = JSONValue.SerializationOptions(nonConformingFloatStrategy: .null)
-    #expect(try value.serialized(options: options) == "{\"x\":null}")
+  @Test func codableInteroperabilityPreservesRepresentableDecimalValues() throws {
+    let value = try JSONValue.parse("9.270000000000000001")
+    let data = try JSONEncoder().encode(value)
+    #expect(try JSONValue.parse(data) == value)
+    #expect(try JSONDecoder().decode(JSONValue.self, from: data) == value)
+  }
+
+  @Test func codableEncodingRejectsUnrepresentableNumbersInsteadOfRounding() throws {
+    for text in ["1e1000", "1e-1000", "1234567890123456789012345678901234567890123456789"] {
+      let value = try JSONValue.parse(text)
+      #expect(throws: EncodingError.self) {
+        _ = try JSONEncoder().encode(value)
+      }
+    }
   }
 }

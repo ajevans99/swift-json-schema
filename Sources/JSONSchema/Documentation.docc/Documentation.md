@@ -10,7 +10,7 @@ see [`JSONSchemaBuilder`](https://swiftpackageindex.com/ajevans99/swift-json-sch
 
 `JSONSchema` re-exports
 [`OrderedJSON`](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/orderedjson),
-including its `JSONValue` type and order-preserving parser.
+including its `JSONValue` type and parser that preserves object order and number tokens.
 
 ## Load a schema and validate input
 
@@ -45,9 +45,11 @@ locations. Basic output flattens errors to help locate the failing value; in thi
 the `minimum` error points to `/age`. See <doc:Validation-output-formats> for the available
 diagnostic levels.
 
-`Schema(instance:)` is a convenience initializer for JSON strings that uses `JSONDecoder`
-by default. Use `JSONValue.parse` as above when you want to retain source key order.
-`Schema` and `JSONValue` also conform to `Codable`. Decoding `Schema` with `JSONDecoder`
+`Schema(instance:)` is a convenience initializer for JSON strings that uses `JSONValue.parse`
+by default, retaining source key order and numeric tokens. The overload accepting an explicit
+`JSONDecoder` is deprecated and remains only for compatibility. `Schema` and `JSONValue` also
+conform to `Codable`, but Foundation decoding cannot guarantee original number precision.
+Decoding `Schema` with `JSONDecoder`
 initializes a default Draft 2020-12 context, including local-reference resolution and
 support for `validateAgainstMetaSchema()`. Use `Schema(rawSchema:context:)` when you need
 external schemas or custom format validators.
@@ -60,6 +62,40 @@ call from a custom format validator. Nested applicators and references retain th
 own evaluation. Reference definitions and caches are shared, with synchronized updates.
 
 Custom format validators are also `Sendable`; synchronize any mutable state they own.
+
+## Exact numeric validation
+
+Numeric bounds and `multipleOf` compare exact `JSONNumberLiteral` values, without converting
+the instance or schema constraint to `Double`:
+
+```swift
+let priceSchema = try Schema(
+  instance: #"{"type":"number","multipleOf":0.01,"maximum":9.27}"#
+)
+print(try priceSchema.validate(instance: "9.270").isValid) // true
+```
+
+JSON Schema's `integer` type is mathematical: `1.0` and `1e2` are integers regardless of
+spelling. Validation is independent of a destination Swift type's precision and range;
+a valid JSON number can still fail conversion to `Int`, `Double`, or Foundation `Decimal`.
+General `multipleOf` arithmetic has a bounded work budget and reports failures explicitly rather than
+falling back to approximate validation.
+
+Count constraints (`minLength` / `maxLength`, `minItems` / `maxItems`, `minProperties` /
+`maxProperties`, and `minContains` / `maxContains`) also compare exact literals. Bounds must
+be mathematical nonnegative integers; `2.0` is accepted. Huge bounds are not converted to
+`Int` or `Double` and silently replaced with permissive defaults:
+
+```swift
+let manyItems = try Schema(instance: #"{"type":"array","minItems":1e1000}"#)
+print(manyItems.validate([]).isValid) // false
+```
+
+Numeric values and keyword bounds in ``ValidationIssue`` now contain `JSONNumberLiteral`.
+This includes count-constraint bounds; measured counts and array indexes remain `Int`. Use `rawValue` to
+inspect the token or the literal's throwing conversion methods when a Swift number is needed.
+See the [numeric migration guide](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/orderedjson/migrating-to-lossless-numbers)
+for enum-case, accessor, and `Codable` changes.
 
 ## References and external schemas
 

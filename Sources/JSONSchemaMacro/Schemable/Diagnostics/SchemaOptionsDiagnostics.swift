@@ -50,7 +50,7 @@ struct SchemaOptionsDiagnostics {
 
     case "NumberOptions":
       switch typeInfo {
-      case .scalar(.int), .scalar(.double), .scalar(.float):
+      case .scalar(.int), .scalar(.double), .scalar(.float), .scalar(.decimal):
         break  // Valid numeric types
       default:
         emitTypeMismatch(

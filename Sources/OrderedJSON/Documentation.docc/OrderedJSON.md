@@ -4,10 +4,11 @@ An order-preserving JSON parser, serializer, and value type for Swift.
 
 ## Overview
 
-`OrderedJSON` provides a JSON value tree, parser, and serializer that preserve object key order.
+`OrderedJSON` provides a JSON value tree, parser, and serializer that preserve object key order
+and JSON number tokens without converting them through `Double`.
 It uses an `OrderedCollections.OrderedDictionary` internally and emits values in insertion order.
 Foundation's `JSONDecoder` and `JSONEncoder` remain useful for `Codable` interoperability, but
-do not guarantee preservation of that order.
+do not guarantee preservation of that order, number spelling, or original numeric precision.
 
 Use it independently for snapshot tests, ordered configuration files, and reproducible JSON
 artifacts, or through [`JSONSchema`](https://swiftpackageindex.com/ajevans99/swift-json-schema).
@@ -35,7 +36,12 @@ let bytes = try value.serializedData()
 ### The value type
 
 - ``JSONValue``
+- ``JSONNumberLiteral``
 - ``JSONType``
+
+### Exact numbers
+
+- <doc:Migrating-to-lossless-numbers>
 
 ### Parsing
 
@@ -50,8 +56,6 @@ let bytes = try value.serializedData()
 - ``JSONValue/serialized(options:)``
 - ``JSONValue/serializedData(options:)``
 - ``JSONValue/SerializationOptions``
-- ``JSONValue/NonConformingFloatStrategy``
-- ``JSONValue/SerializationError``
 
 ### Comparison with Foundation
 

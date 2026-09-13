@@ -45,7 +45,24 @@ public struct Schema: ValidatableSchema {
   public init(
     instance: String,
     dialect: Dialect = .draft2020_12,
-    decoder: JSONDecoder = .init(),
+    remoteSchemas: [String: JSONValue] = [:],
+    formatValidators: [any FormatValidator] = []
+  ) throws {
+    try self.init(
+      rawSchema: JSONValue.parse(instance),
+      context: .init(
+        dialect: dialect,
+        remoteSchema: remoteSchemas,
+        formatValidators: formatValidators
+      )
+    )
+  }
+
+  @available(*, deprecated, message: "Omit decoder: to preserve JSON number precision.")
+  public init(
+    instance: String,
+    dialect: Dialect = .draft2020_12,
+    decoder: JSONDecoder,
     remoteSchemas: [String: JSONValue] = [:],
     formatValidators: [any FormatValidator] = []
   ) throws {
@@ -353,6 +370,7 @@ package struct ObjectSchema: ValidatableSchema {
     annotations: inout AnnotationContainer
   ) -> ValidationResult {
     var errors: [ValidationError] = []
+    var evaluationErrors: [ValidationError] = []
     var ifResult: Bool?
     let minContainsIsZero = keywords.contains {
       $0 is Keywords.MinContains && $0.value.exactInteger == 0
@@ -361,7 +379,7 @@ package struct ObjectSchema: ValidatableSchema {
       do throws(ValidationIssue) {
         switch keyword {
         case let condition as Keywords.If:
-          ifResult = condition.evaluate(instance, at: location, using: &annotations)
+          ifResult = try condition.evaluate(instance, at: location, using: &annotations)
         case let then as Keywords.Then:
           try then.validate(instance, at: location, using: &annotations, condition: ifResult)
         case let elseKeyword as Keywords.Else:
@@ -399,6 +417,10 @@ package struct ObjectSchema: ValidatableSchema {
           instanceLocation: location
         )
         errors.append(validationError)
+        if error.isEvaluationFailure {
+          evaluationErrors.append(validationError)
+          break
+        }
       }
     }
 
@@ -410,6 +432,7 @@ package struct ObjectSchema: ValidatableSchema {
       absoluteKeywordLocation: absoluteKeywordLocation(forPointer: self.location),
       instanceLocation: location,
       errors: errors.isEmpty ? nil : errors,
+      evaluationErrors: evaluationErrors.isEmpty ? nil : evaluationErrors,
       annotations: collectedAnnotations.isEmpty ? nil : collectedAnnotations
     )
   }

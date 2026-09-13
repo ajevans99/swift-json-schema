@@ -16,7 +16,8 @@ struct JSONSchemaTestSuite {
 
   static let flattenedArguments: [(schemaTest: JSONSchemaTest, path: URL)] = requiredFixtures {
     try FileLoader<[JSONSchemaTest]>(
-      subdirectory: "JSON-Schema-Test-Suite/tests/draft2020-12"
+      subdirectory: "JSON-Schema-Test-Suite/tests/draft2020-12",
+      decode: JSONSchemaTest.parseFixtures
     )
     .loadNonEmptyFiles()
     .filter { unsupportedFilePaths.contains($0.url.lastPathComponent) == false }
@@ -26,6 +27,16 @@ struct JSONSchemaTestSuite {
   }
 
   static let remotes = Result { try RemoteLoader().loadSchemas() }
+
+  @Test func fixtureLoadingPreservesNumericTokens() throws {
+    let data = Data(
+      #"[{"description":"lossless","schema":{"maximum":9007199254740993},"tests":[{"description":"huge","data":1e1000,"valid":false}]}]"#
+        .utf8
+    )
+    let fixture = try #require(JSONSchemaTest.parseFixtures(data).first)
+    #expect(fixture.schema.object?["maximum"]?.numberLiteral?.rawValue == "9007199254740993")
+    #expect(fixture.tests.first?.data.numberLiteral?.rawValue == "1e1000")
+  }
 
   @Test(arguments: flattenedArguments)
   func schemaTest(_ schemaTest: JSONSchemaTest, path: URL) throws {
@@ -123,6 +134,45 @@ struct JSONSchemaTest: Sendable, Codable {
   let specification: [Spec]?
   let schema: JSONValue
   let tests: [TestCase]
+
+  /// Keep schema and instance number tokens intact when loading the official suite.
+  static func parseFixtures(_ data: Data) throws -> [JSONSchemaTest] {
+    func malformed() -> DecodingError {
+      .dataCorrupted(.init(codingPath: [], debugDescription: "Invalid JSON Schema test fixture"))
+    }
+    guard let groups = try JSONValue.parse(data).array else { throw malformed() }
+    return try groups.map { group in
+      guard let fields = group.object,
+        let description = fields["description"]?.string,
+        let schema = fields["schema"],
+        let cases = fields["tests"]?.array
+      else { throw malformed() }
+      let specification: [Spec]?
+      if let value = fields["specification"] {
+        guard let specs = value.array else { throw malformed() }
+        specification = try specs.map { spec in
+          guard let core = spec.object?["core"]?.string else { throw malformed() }
+          return Spec(core: core, quote: spec.object?["quote"]?.string)
+        }
+      } else {
+        specification = nil
+      }
+      let tests = try cases.map { test in
+        guard let fields = test.object,
+          let description = fields["description"]?.string,
+          let data = fields["data"],
+          let valid = fields["valid"]?.boolean
+        else { throw malformed() }
+        return TestCase(description: description, data: data, valid: valid)
+      }
+      return JSONSchemaTest(
+        description: description,
+        specification: specification,
+        schema: schema,
+        tests: tests
+      )
+    }
+  }
 }
 
 extension JSONSchemaTest: CustomTestStringConvertible {

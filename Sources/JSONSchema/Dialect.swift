@@ -134,15 +134,37 @@ public enum Dialect: String, Hashable, Sendable {
   /// The meta-schema is a schema that describes the structure and rules for
   /// schemas in this dialect. It can be used to validate whether a schema
   /// document is well-formed according to the dialect's specification.
+  /// Immutable bundled JSON documents are cached; each call creates a fresh schema and context.
   ///
   /// - Returns: A `Schema` representing the meta-schema for this dialect.
   /// - Throws: `MetaSchemaError` if the meta-schema cannot be loaded.
   public func loadMetaSchema() throws -> Schema {
-    let jsonDecoder = JSONDecoder()
+    let resources: MetaSchemaResources
+    switch self {
+    case .draft2020_12:
+      resources = try Self.draft202012Resources.get()
+    }
+    return try Schema(
+      rawSchema: resources.schema,
+      context: .init(dialect: self, remoteSchema: resources.remotes),
+      baseURI: resources.baseURI
+    )
+  }
+
+  private struct MetaSchemaResources: Sendable {
+    let schema: JSONValue
+    let remotes: [String: JSONValue]
+    let baseURI: URL
+  }
+
+  private static let draft202012Resources = Result {
+    try loadDraft202012Resources()
+  }
+
+  private static func loadDraft202012Resources() throws -> MetaSchemaResources {
     func jsonValue(from url: URL) throws -> JSONValue {
       let data = try Data(contentsOf: url)
-      let value = try jsonDecoder.decode(JSONValue.self, from: data)
-      return value
+      return try JSONValue.parse(data)
     }
 
     guard let baseURI = URL(string: "https://json-schema.org/draft/2020-12/schema") else {
@@ -180,9 +202,9 @@ public enum Dialect: String, Hashable, Sendable {
           result[key] = value
         }
       } ?? [:]
-    return try Schema(
-      rawSchema: try jsonValue(from: schemaURL),
-      context: .init(dialect: self, remoteSchema: metaDictionary),
+    return try MetaSchemaResources(
+      schema: jsonValue(from: schemaURL),
+      remotes: metaDictionary,
       baseURI: baseURI
     )
   }

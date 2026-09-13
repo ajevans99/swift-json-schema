@@ -12,6 +12,29 @@ extension ValidationKeyword {
   package static var vocabulary: String {
     "https://json-schema.org/draft/2020-12/vocab/validation"
   }
+
+  func countBound() throws(ValidationIssue) -> JSONNumberLiteral {
+    guard let bound = value.numberLiteral, bound.isInteger, bound >= JSONNumberLiteral(0) else {
+      throw .numericValidationFailure(reason: "'\(Self.name)' must be a nonnegative integer")
+    }
+    return bound
+  }
+}
+
+extension JSONNumberLiteral {
+  /// Narrows a validated count or length bound to `Int` so a failure can report it.
+  ///
+  /// Bound comparisons use the full-precision literal, so narrowing here only affects how an
+  /// already-determined failure is described. A bound outside `Int`'s range is reported as a
+  /// numeric validation failure rather than clamped to a misleading value.
+  func intBound(for keyword: String) throws(ValidationIssue) -> Int {
+    guard let bound = try? integerValue() else {
+      throw .numericValidationFailure(
+        reason: "'\(keyword)' bound \(self) is outside the representable range"
+      )
+    }
+    return bound
+  }
 }
 
 protocol FormatKeyword: AssertionKeyword {}
@@ -127,13 +150,13 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let divisor: Double
+    private let divisor: JSONNumberLiteral?
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
 
-      divisor = value.numeric ?? 1.0
+      divisor = value.numberLiteral
     }
 
     package func validate(
@@ -141,17 +164,18 @@ extension Keywords {
       at location: JSONPointer,
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
-      if let double = input.numeric {
-        // If the divisor is less than 1 and the input is an integer, it is valid.
-        if case .integer = input, divisor < 1.0 {
-          return
-        }
-
-        let remainder = double.remainder(dividingBy: divisor)
-        let tolerance = 1e-10  // A small tolerance value to account for floating-point precision
-        if abs(remainder) > tolerance {
-          throw ValidationIssue.notMultipleOf(number: double, multiple: divisor)
-        }
+      guard let divisor, divisor > JSONNumberLiteral(0) else {
+        throw .numericValidationFailure(reason: "'multipleOf' must be a positive number")
+      }
+      guard let number = input.numberLiteral else { return }
+      let isMultiple: Bool
+      do {
+        isMultiple = try number.isMultiple(of: divisor)
+      } catch {
+        throw .numericValidationFailure(reason: "Cannot evaluate 'multipleOf': \(error)")
+      }
+      if !isMultiple {
+        throw .notMultipleOf(number: number, multiple: divisor)
       }
     }
   }
@@ -163,12 +187,12 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let maxValue: Double
+    private let maxValue: JSONNumberLiteral?
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.maxValue = value.numeric ?? .infinity
+      self.maxValue = value.numberLiteral
     }
 
     package func validate(
@@ -176,7 +200,10 @@ extension Keywords {
       at location: JSONPointer,
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
-      if let number = input.numeric, number > maxValue {
+      guard let maxValue else {
+        throw .numericValidationFailure(reason: "'maximum' must be a number")
+      }
+      if let number = input.numberLiteral, number > maxValue {
         throw ValidationIssue.exceedsMaximum(number: number, maximum: maxValue)
       }
     }
@@ -188,12 +215,12 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let exclusiveMaxValue: Double
+    private let exclusiveMaxValue: JSONNumberLiteral?
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.exclusiveMaxValue = value.numeric ?? .infinity
+      self.exclusiveMaxValue = value.numberLiteral
     }
 
     package func validate(
@@ -201,7 +228,10 @@ extension Keywords {
       at location: JSONPointer,
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
-      if let number = input.numeric, number >= exclusiveMaxValue {
+      guard let exclusiveMaxValue else {
+        throw .numericValidationFailure(reason: "'exclusiveMaximum' must be a number")
+      }
+      if let number = input.numberLiteral, number >= exclusiveMaxValue {
         throw ValidationIssue.exceedsExclusiveMaximum(number: number, maximum: exclusiveMaxValue)
       }
     }
@@ -214,12 +244,12 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let minValue: Double
+    private let minValue: JSONNumberLiteral?
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.minValue = value.numeric ?? -.infinity
+      self.minValue = value.numberLiteral
     }
 
     package func validate(
@@ -227,7 +257,10 @@ extension Keywords {
       at location: JSONPointer,
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
-      if let number = input.numeric, number < minValue {
+      guard let minValue else {
+        throw .numericValidationFailure(reason: "'minimum' must be a number")
+      }
+      if let number = input.numberLiteral, number < minValue {
         throw ValidationIssue.belowMinimum(number: number, minimum: minValue)
       }
     }
@@ -239,12 +272,12 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let exclusiveMinValue: Double
+    private let exclusiveMinValue: JSONNumberLiteral?
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.exclusiveMinValue = value.numeric ?? -.infinity
+      self.exclusiveMinValue = value.numberLiteral
     }
 
     package func validate(
@@ -252,7 +285,10 @@ extension Keywords {
       at location: JSONPointer,
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
-      if let number = input.numeric, number <= exclusiveMinValue {
+      guard let exclusiveMinValue else {
+        throw .numericValidationFailure(reason: "'exclusiveMinimum' must be a number")
+      }
+      if let number = input.numberLiteral, number <= exclusiveMinValue {
         throw ValidationIssue.belowExclusiveMinimum(number: number, minimum: exclusiveMinValue)
       }
     }
@@ -269,12 +305,9 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let maxLength: Int
-
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.maxLength = value.exactInteger ?? Int.max
     }
 
     package func validate(
@@ -282,8 +315,12 @@ extension Keywords {
       at location: JSONPointer,
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
-      if let string = input.string, string.count > maxLength {
-        throw ValidationIssue.exceedsMaxLength(string: string, maxLength: maxLength)
+      let maxLength = try countBound()
+      if let string = input.string, JSONNumberLiteral(string.count) > maxLength {
+        throw ValidationIssue.exceedsMaxLength(
+          string: string,
+          maxLength: try maxLength.intBound(for: Self.name)
+        )
       }
     }
   }
@@ -295,12 +332,9 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let minLength: Int
-
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.minLength = value.exactInteger ?? 0
     }
 
     package func validate(
@@ -308,8 +342,12 @@ extension Keywords {
       at location: JSONPointer,
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
-      if let string = input.string, string.count < minLength {
-        throw ValidationIssue.belowMinLength(string: string, minLength: minLength)
+      let minLength = try countBound()
+      if let string = input.string, JSONNumberLiteral(string.count) < minLength {
+        throw ValidationIssue.belowMinLength(
+          string: string,
+          minLength: try minLength.intBound(for: Self.name)
+        )
       }
     }
   }
@@ -387,12 +425,9 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let maxItems: Int
-
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.maxItems = value.exactInteger ?? Int.max
     }
 
     package func validate(
@@ -400,8 +435,12 @@ extension Keywords {
       at location: JSONPointer,
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
-      if let array = input.array, array.count > maxItems {
-        throw ValidationIssue.exceedsMaxItems(count: array.count, maxItems: maxItems)
+      let maxItems = try countBound()
+      if let array = input.array, JSONNumberLiteral(array.count) > maxItems {
+        throw ValidationIssue.exceedsMaxItems(
+          count: array.count,
+          maxItems: try maxItems.intBound(for: Self.name)
+        )
       }
     }
   }
@@ -413,12 +452,9 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let minItems: Int
-
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.minItems = value.exactInteger ?? 0
     }
 
     package func validate(
@@ -426,8 +462,12 @@ extension Keywords {
       at location: JSONPointer,
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
-      if let array = input.array, array.count < minItems {
-        throw ValidationIssue.belowMinItems(count: array.count, minItems: minItems)
+      let minItems = try countBound()
+      if let array = input.array, JSONNumberLiteral(array.count) < minItems {
+        throw ValidationIssue.belowMinItems(
+          count: array.count,
+          minItems: try minItems.intBound(for: Self.name)
+        )
       }
     }
   }
@@ -468,12 +508,9 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let maxContains: Int
-
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.maxContains = value.exactInteger ?? Int.max
     }
 
     package func validate(
@@ -487,19 +524,20 @@ extension Keywords {
         return
       }
 
+      let maxContains = try countBound()
       switch containsAnnotation.value {
       case .everyIndex:
-        if array.count > maxContains {
+        if JSONNumberLiteral(array.count) > maxContains {
           throw ValidationIssue.containsExcessiveMatches(
             count: array.count,
-            maxAllowed: maxContains
+            maxAllowed: try maxContains.intBound(for: Self.name)
           )
         }
       case .indicies(let indicies):
-        if indicies.count > maxContains {
+        if JSONNumberLiteral(indicies.count) > maxContains {
           throw ValidationIssue.containsExcessiveMatches(
             count: indicies.count,
-            maxAllowed: maxContains
+            maxAllowed: try maxContains.intBound(for: Self.name)
           )
         }
       }
@@ -513,12 +551,9 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let minContains: Int
-
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.minContains = value.exactInteger ?? 1
     }
 
     package func validate(
@@ -532,19 +567,20 @@ extension Keywords {
         return
       }
 
+      let minContains = try countBound()
       switch containsAnnotation.value {
       case .everyIndex:
-        if array.count < minContains {
+        if JSONNumberLiteral(array.count) < minContains {
           throw ValidationIssue.containsInsufficientMatches(
             count: array.count,
-            required: minContains
+            required: try minContains.intBound(for: Self.name)
           )
         }
       case .indicies(let indicies):
-        if indicies.count < minContains {
+        if JSONNumberLiteral(indicies.count) < minContains {
           throw ValidationIssue.containsInsufficientMatches(
             count: indicies.count,
-            required: minContains
+            required: try minContains.intBound(for: Self.name)
           )
         }
       }
@@ -562,12 +598,9 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let maxProperties: Int
-
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.maxProperties = value.exactInteger ?? Int.max
     }
 
     package func validate(
@@ -577,10 +610,11 @@ extension Keywords {
     ) throws(ValidationIssue) {
       guard let object = input.object else { return }
 
-      if object.count > maxProperties {
+      let maxProperties = try countBound()
+      if JSONNumberLiteral(object.count) > maxProperties {
         throw ValidationIssue.exceedsMaxProperties(
           count: object.count,
-          maxProperties: maxProperties
+          maxProperties: try maxProperties.intBound(for: Self.name)
         )
       }
     }
@@ -593,12 +627,9 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let minProperties: Int
-
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.minProperties = value.exactInteger ?? 0
     }
 
     package func validate(
@@ -608,8 +639,12 @@ extension Keywords {
     ) throws(ValidationIssue) {
       guard let object = input.object else { return }
 
-      if object.count < minProperties {
-        throw ValidationIssue.belowMinProperties(count: object.count, minProperties: minProperties)
+      let minProperties = try countBound()
+      if JSONNumberLiteral(object.count) < minProperties {
+        throw ValidationIssue.belowMinProperties(
+          count: object.count,
+          minProperties: try minProperties.intBound(for: Self.name)
+        )
       }
     }
   }

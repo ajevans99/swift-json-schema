@@ -2,6 +2,7 @@ import JSONSchema
 
 public enum ParseIssue: Error, Equatable, Sendable {
   case typeMismatch(expected: JSONType, actual: JSONValue)
+  case numericConversionFailed(value: JSONValue, target: String, reason: String)
   case noEnumCaseMatch(value: JSONValue)
   case missingRequiredProperty(property: String)
   case compactMapValueNil(value: JSONValue)
@@ -16,6 +17,8 @@ extension ParseIssue: CustomStringConvertible {
     switch self {
     case .typeMismatch(let expected, let actual):
       "Type mismatch: the instance of type `\(actual.primitive)` does not match the expected type `\(expected)`."
+    case .numericConversionFailed(let value, let target, let reason):
+      "Cannot convert JSON number `\(value)` to \(target): \(reason)"
     case .noEnumCaseMatch(let value):
       "The instance `\(value)` does not match any enum case."
     case .missingRequiredProperty(let property):

@@ -320,6 +320,12 @@ The JSONSchema suite retains the Poll, OpenAPI fragment, and complete draft
 reference, and combinator workloads. All six include valid and invalid inputs.
 The new focused fixtures are authored in this repository and require no downloads.
 
+For lossless-number changes, compare the number-heavy `canada` parse and roundtrip
+workloads alongside schema construction and validation. Parsing retains raw number
+tokens without normalization; validation exercises the exact numeric operations.
+The `JSONDecoder` and `JSONEncoder` rows also use `JSONValue`, so they include its
+numeric conversion costs rather than serving as unchanged Foundation-only controls.
+
 ## Adding a new case
 
 1. Drop a `.json` file into [`OrderedJSONBenchmarks/Resources/`](./OrderedJSONBenchmarks/Resources/).
@@ -334,6 +340,37 @@ locations for invalid instances. Keep schema construction separate from the
 instance list, then run the full JSONSchema suite to exercise its preflight checks.
 
 ## Baselines and CI
+
+### Numeric representation changes
+
+The lossless-number migration intentionally changes the numeric work in
+`parse.*.JSONDecoder`, `serialize.*.JSONEncoder.sortedKeys`, and
+`roundtrip.*.JSONDecoder.JSONEncoder.sortedKeys`. These cases use `JSONValue`,
+not an unchanged Foundation-only model. Decimal-first decoding retains values
+that the previous Int/Double representation rounded; encoding uses a Double
+only if its round-trippable decimal spelling has the same mathematical value,
+and otherwise requires an exact Decimal.
+
+For example, the previous Canada path could emit `-65.61361699999998` for
+`-65.613616999999977`. Keeping the latter value requires additional conversion
+and Decimal-formatting work on Linux. The Foundation/JSONValue cohort is
+explicitly rebaselined on the pinned CI runner for this precision change.
+Native OrderedJSON, JSONSerialization, and JSONSchema thresholds are retained,
+and the existing relative and absolute tolerances are unchanged.
+
+The 24-case Foundation/JSONValue cohort comes from
+[capture run 34735656501](https://github.com/ajevans99/swift-json-schema/actions/runs/34735656501)
+at `f2f6f6a8a7263cd9fd1dd6a1926769ec77f50153`, on Ubuntu 24.04 x86_64
+with Swift 6.3.3, deterministic hashing, and malloc-only measurement. Only these
+artifact files were adopted; six were already identical to the previous baseline.
+The other 136 baselines were not refreshed.
+
+`Dialect.loadMetaSchema()` caches only immutable bundled JSON documents; it
+still constructs an independent Schema and Context per call. Its benchmark
+therefore continues to measure schema construction, without repeatedly reading
+and parsing the same bundled documents.
+
+### Enforcement
 
 Committed p90 allocation thresholds live in [`Baselines/`](./Baselines/). Capture
 and enforcement both select **only `mallocCountTotal`** so instrumentation is

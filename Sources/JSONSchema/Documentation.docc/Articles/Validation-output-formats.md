@@ -58,10 +58,28 @@ The configuration also works with `result.renderedOutput(configuration:)`.
 
 ## Serialization and ordering
 
-The output renderers for basic, detailed, and verbose currently bridge through Foundation
-encoding and decoding. Do not rely on their returned object key order. Their diagnostic
-structure is separate from ``ValidationResult/jsonValue``, which exposes the library's
-ordered representation of the original result.
+Basic, detailed, and verbose output objects, including nested error objects, emit fields in
+this order: `valid`, `keywordLocation`, `absoluteKeywordLocation`, `instanceLocation`,
+`error`, `errors`, `annotations`. Absent optional fields are omitted. This core-fields-first
+order aligns with the library's result representation rather than the alphabetical order
+of the previous Foundation-based renderer. Direct serialization preserves this order;
+annotation values retain their own stored property order.
+
+The output renderers for basic, detailed, and verbose construct JSON values directly,
+without a Foundation encoding/decoding round-trip. Numeric annotations retain their
+`JSONNumberLiteral` values rather than passing through `Double`, including tokens such as
+`1e1000` outside `Double` and `Decimal` range. Calling `renderedOutput(level:)` and then
+`serialized` does not impose Foundation's numeric encoding limits. Those limits apply only
+if you subsequently use a `Codable` encoding path, such as `JSONEncoder.encode`.
+
+The rendered diagnostic structure is separate from ``ValidationResult/jsonValue``, which
+exposes the library's ordered representation of the original result.
+
+Numeric values and keyword bounds in ``ValidationIssue`` also use `JSONNumberLiteral`,
+including bounds for lengths, item counts, property counts, and `contains` matches. Actual
+counts and array indexes remain `Int`. When handling those issues directly, read `rawValue`
+for the bound's numeric token or use an explicit throwing conversion instead of assuming
+a `Double` or `Int` bound.
 
 For reproducible serialization of that result, use:
 

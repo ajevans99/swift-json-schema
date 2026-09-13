@@ -28,11 +28,10 @@ let bytes = try value.serializedData()  // UTF-8 Data, same content
 
 ## Options
 
-``JSONValue/SerializationOptions`` controls three things:
+``JSONValue/SerializationOptions`` controls formatting:
 
 - `prettyPrinted` — emit with line breaks and indentation, or compact on one line. Defaults to compact.
 - `indent` — the indent string used per nesting level when pretty-printed. Defaults to two spaces.
-- `nonConformingFloatStrategy` — how to handle `NaN` / `+Inf` / `-Inf`, which JSON cannot represent. See below.
 
 Two convenience presets:
 
@@ -41,34 +40,29 @@ Two convenience presets:
 .pretty      // SerializationOptions(prettyPrinted: true)
 ```
 
-## Non-finite floats
+## Number spelling and invalid numbers
 
-Plain JSON has no representation for `NaN` or `±Infinity`. ``JSONValue/NonConformingFloatStrategy`` mirrors `JSONEncoder.NonConformingFloatEncodingStrategy`:
-
-```swift
-case `throw`
-case convertToString(positiveInfinity: String, negativeInfinity: String, nan: String)
-case null
-```
-
-The default is `.throw` — if the value contains a non-finite double, the serializer throws ``JSONValue/SerializationError/nonConformingFloat(_:)`` rather than emitting invalid JSON. Note that JSON text itself can never represent `NaN` or `±Infinity`, so this case only arises when you've manually constructed a `JSONValue` from a Swift `Double` whose value happens to be non-finite.
+Numbers are emitted from their validated `JSONNumberLiteral.rawValue`, without conversion
+through `Int`, `Double`, or Foundation `Decimal`:
 
 ```swift
-let value: JSONValue = .number(.infinity)
-
-// Default behavior — throws:
-_ = try value.serialized()  // throws SerializationError.nonConformingFloat(.infinity)
-
-// Explicit string substitution:
-let opts = JSONValue.SerializationOptions(
-  nonConformingFloatStrategy: .convertToString(
-    positiveInfinity: "+Infinity",
-    negativeInfinity: "-Infinity",
-    nan: "NaN"
-  )
-)
-try value.serialized(options: opts)  // → "+Infinity"
+let value = try JSONValue.parse("[9.270,-0,1e1000]")
+print(try value.serialized()) // [9.270,-0,1e1000]
 ```
+
+Plain JSON has no representation for `NaN` or `±Infinity`. Invalid numbers are rejected when
+constructed, not during serialization. The `.number(Double)` convenience factory has a
+finite-value precondition. For an untrusted `Double`, use the throwing initializer:
+
+```swift
+func jsonNumber(from value: Double) throws -> JSONValue {
+  .numberLiteral(try JSONNumberLiteral(value))
+}
+```
+
+`NonConformingFloatStrategy`, `SerializationError`, and the `nonConformingFloatStrategy`
+option have been removed. If your application needs a null or string sentinel, choose it
+explicitly before constructing the JSON value. See <doc:Migrating-to-lossless-numbers>.
 
 ## Equality vs. ordering
 
@@ -84,3 +78,7 @@ try a.serialized() != try b.serialized()
 ```
 
 That's deliberate — JSON object semantics are unordered, but real-world consumers (snapshot tests, signed payloads, code review diffs) care a lot about which order the bytes come out in. `OrderedJSON` lets you have both.
+
+Numbers also compare by mathematical value, not spelling. `1`, `1.0`, and `1e0` compare equal
+and hash equally, but serialize to their stored tokens. Deterministic serialization is not
+canonicalization.

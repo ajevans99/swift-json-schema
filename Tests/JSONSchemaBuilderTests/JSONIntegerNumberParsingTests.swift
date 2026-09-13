@@ -9,14 +9,14 @@ struct JSONIntegerNumberParsingTests {
     let input = JSONValue.number(value)
     #expect(JSONInteger().parse(input) == .valid(expected))
     #expect(try JSONInteger().parseAndValidate(input) == expected)
-    #expect(input.primitive == .number)
+    #expect(input.primitive == .integer)
   }
 
   @Test(arguments: [
-    1.5, -1.5, Double.infinity, -Double.infinity, Double.nan, Double(Int.max),
+    1.5, -1.5, Double(Int.max),
     Double(Int.min).nextDown,
   ])
-  func fractionalNonfiniteAndOutOfRangeNumbersDoNotTrapOrRound(value: Double) {
+  func fractionalAndOutOfRangeNumbersDoNotTrapOrRound(value: Double) {
     #expect(JSONInteger().parse(.number(value)).errors != nil)
     #expect(throws: ParseAndValidateIssue.self) {
       try JSONInteger().parseAndValidate(.number(value))
@@ -26,7 +26,8 @@ struct JSONIntegerNumberParsingTests {
   @Test func rawDecimalInputAndIntegerStorageBothKeepTheirRepresentation() throws {
     let input = try JSONValue.parse("1.0")
     #expect(try JSONInteger().parseAndValidate(input) == 1)
-    #expect(input.integer == nil)
+    #expect(input.integer == 1)
+    #expect(input.numberLiteral?.rawValue == "1.0")
     #expect(input.number == 1.0)
     #expect(JSONInteger().parse(.integer(Int.max)) == .valid(Int.max))
     #expect(JSONInteger().parse(.integer(Int.min)) == .valid(Int.min))

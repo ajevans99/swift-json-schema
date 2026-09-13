@@ -19,7 +19,15 @@ extension NumberTrait where Self == NumberSchemaTrait {
     fatalError(NumberSchemaTrait.errorMessage)
   }
 
+  public static func multipleOf(_ value: JSONNumberLiteral) -> NumberSchemaTrait {
+    fatalError(NumberSchemaTrait.errorMessage)
+  }
+
   public static func minimum(_ value: Double) -> NumberSchemaTrait {
+    fatalError(NumberSchemaTrait.errorMessage)
+  }
+
+  public static func minimum(_ value: JSONNumberLiteral) -> NumberSchemaTrait {
     fatalError(NumberSchemaTrait.errorMessage)
   }
 
@@ -27,11 +35,23 @@ extension NumberTrait where Self == NumberSchemaTrait {
     fatalError(NumberSchemaTrait.errorMessage)
   }
 
+  public static func exclusiveMinimum(_ value: JSONNumberLiteral) -> NumberSchemaTrait {
+    fatalError(NumberSchemaTrait.errorMessage)
+  }
+
   public static func maximum(_ value: Double) -> NumberSchemaTrait {
     fatalError(NumberSchemaTrait.errorMessage)
   }
 
+  public static func maximum(_ value: JSONNumberLiteral) -> NumberSchemaTrait {
+    fatalError(NumberSchemaTrait.errorMessage)
+  }
+
   public static func exclusiveMaximum(_ value: Double) -> NumberSchemaTrait {
+    fatalError(NumberSchemaTrait.errorMessage)
+  }
+
+  public static func exclusiveMaximum(_ value: JSONNumberLiteral) -> NumberSchemaTrait {
     fatalError(NumberSchemaTrait.errorMessage)
   }
 }

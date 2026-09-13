@@ -54,6 +54,13 @@ extension Keywords {
       let result = SchemaEvaluation.$referenceKeyword.withValue(Self.name) {
         schema.validate(input, at: instanceLocation, annotations: &refAnnotations)
       }
+      if let evaluationErrors = result.evaluationErrors, !evaluationErrors.isEmpty {
+        throw .evaluationFailed(
+          errors: evaluationErrors.map {
+            $0.prefixedKeywordLocation(with: self.context.location, removingBase: schema.location)
+          }
+        )
+      }
       if !result.isValid {
         let prefixedErrors =
           result.errors?
@@ -110,6 +117,13 @@ extension Keywords {
       var refAnnotations = AnnotationContainer()
       let result = SchemaEvaluation.$referenceKeyword.withValue(Self.name) {
         schema.validate(input, at: instanceLocation, annotations: &refAnnotations)
+      }
+      if let evaluationErrors = result.evaluationErrors, !evaluationErrors.isEmpty {
+        throw .evaluationFailed(
+          errors: evaluationErrors.map {
+            $0.prefixedKeywordLocation(with: self.context.location, removingBase: schema.location)
+          }
+        )
       }
       if !result.isValid {
         let prefixedErrors =
