@@ -1,0 +1,6 @@
+{
+  "id": "item-42",
+  "tags": ["swift", "json-schema"],
+  "label": "combinator-sample",
+  "choices": [101, -1]
+}

@@ -14,3 +14,8 @@ Benchmarks/.benchmarkBaselines/
 Benchmarks/OrderedJSONBenchmarks/Resources/canada.json
 Benchmarks/OrderedJSONBenchmarks/Resources/citm_catalog.json
 Benchmarks/OrderedJSONBenchmarks/Resources/twitter.json
+
+# Checksum-pinned schemas and licenses fetched by fetch_schema_corpus.py
+Benchmarks/JSONSchemaBenchmarks/Resources/RealWorld/
+Benchmarks/JSONSchemaBenchmarks/Resources/.schema-corpus-*/
+Benchmarks/Scripts/__pycache__/

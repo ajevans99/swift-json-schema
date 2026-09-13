@@ -19,6 +19,14 @@ if ! benchmark_list="$(
   exit 2
 fi
 
+if [[ "${JSONSCHEMA_BENCHMARK_CORPUS:-optional}" == "required" ]]; then
+  if ! printf '%s\n' "$benchmark_list" | python3 "${script_dir}/check_schema_inventory.py" \
+    --sizes "${JSONSCHEMA_BENCHMARK_SIZES:-pr}"; then
+    echo "Failed to discover the required JSONSchema corpus." >&2
+    exit 2
+  fi
+fi
+
 while IFS= read -r line; do
   if [[ "$line" =~ ^Target\ \'([^\']+)\'\ available\ benchmarks:$ ]]; then
     current_target="${BASH_REMATCH[1]}"

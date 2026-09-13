@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Bounded combinator and annotation workload",
+  "type": "object",
+  "required": ["id", "tags", "choices", "label"],
+  "allOf": [
+    { "properties": { "label": { "type": "string", "minLength": 3 } } },
+    { "properties": { "label": { "pattern": "^[a-z-]+$" } } }
+  ],
+  "anyOf": [
+    {
+      "required": ["id"],
+      "properties": { "id": { "type": "string", "pattern": "^item-[0-9]+$" } }
+    },
+    {
+      "required": ["tags"],
+      "properties": {
+        "tags": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+      }
+    }
+  ],
+  "properties": {
+    "choices": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "type": "number", "minimum": 0 },
+          { "type": "integer", "maximum": 100 }
+        ]
+      }
+    }
+  },
+  "unevaluatedProperties": false
+}

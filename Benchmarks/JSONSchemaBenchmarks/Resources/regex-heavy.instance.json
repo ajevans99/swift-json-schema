@@ -1,0 +1,6 @@
+{
+  "tag_01": "swift", "tag_02": "schema", "tag_03": "draft-2020", "tag_04": "benchmark",
+  "metric_cpu": "42.00", "metric_memory": "1024.50", "metric_disk": "512.25",
+  "path_home": "/users/demo", "path_api": "/api/v1/polls", "path_cache": "/tmp/cache",
+  "user_id": "USR-123456", "team_id": "ORG-654321"
+}

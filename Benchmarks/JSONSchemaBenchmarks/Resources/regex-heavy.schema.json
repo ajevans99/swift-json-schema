@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Bounded pattern and patternProperties workload",
+  "type": "object",
+  "minProperties": 12,
+  "patternProperties": {
+    "^tag_[0-9]{2}$": { "type": "string", "pattern": "^[a-z][a-z0-9-]{2,15}$" },
+    "^metric_[a-z]+$": { "type": "string", "pattern": "^[0-9]{1,4}\\.[0-9]{2}$" },
+    "^path_[a-z]+$": { "type": "string", "pattern": "^(/[a-z0-9-]+){1,4}$" },
+    "^.*_id$": { "type": "string", "pattern": "^[A-Z]{3}-[0-9]{6}$" }
+  },
+  "additionalProperties": false
+}

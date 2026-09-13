@@ -1,0 +1,23 @@
+{
+  "openapi": "3.0.0",
+  "info": { "title": "Poll API", "version": "1.0.0" },
+  "paths": {
+    "/polls": {
+      "get": {
+        "operationId": "listPolls",
+        "parameters": [
+          { "name": "limit", "in": "body", "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "content": {} } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Poll": {
+        "type": "object",
+        "properties": { "id": { "type": "unknown" } }
+      }
+    }
+  }
+}
