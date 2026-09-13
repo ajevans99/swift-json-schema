@@ -9,7 +9,7 @@ import OrderedJSON
 /// Run with:
 ///
 ///     cd Benchmarks
-///     swift package --allow-writing-to-package-directory benchmark
+///     swift package --disable-automatic-resolution --allow-writing-to-package-directory benchmark
 ///
 /// The committed corpus runs without external downloads. The larger reference
 /// corpus is included when fetched before building the benchmark package. See
@@ -41,20 +41,23 @@ nonisolated(unsafe) let benchmarks = {
   // "parse.<case>.<parser>" so threshold filenames are portable and stable.
 
   for sample in corpus.samples {
-    Benchmark("parse.\(sample.name).OrderedJSON") { benchmark in
+    Benchmark("parse.\(sample.name).OrderedJSON", configuration: sample.configuration) {
+      benchmark in
       for _ in benchmark.scaledIterations {
         blackHole(try JSONValue.parse(sample.data))
       }
     }
 
-    Benchmark("parse.\(sample.name).JSONDecoder") { benchmark in
+    Benchmark("parse.\(sample.name).JSONDecoder", configuration: sample.configuration) {
+      benchmark in
       let decoder = JSONDecoder()
       for _ in benchmark.scaledIterations {
         blackHole(try decoder.decode(JSONValue.self, from: sample.data))
       }
     }
 
-    Benchmark("parse.\(sample.name).JSONSerialization") { benchmark in
+    Benchmark("parse.\(sample.name).JSONSerialization", configuration: sample.configuration) {
+      benchmark in
       for _ in benchmark.scaledIterations {
         blackHole(
           try JSONSerialization.jsonObject(with: sample.data, options: [.fragmentsAllowed])
@@ -66,20 +69,24 @@ nonisolated(unsafe) let benchmarks = {
   // MARK: - Serialize benchmarks
   //
   // For each corpus file (parsed once at setup): re-emit via OrderedJSON
-  // and via JSONEncoder. JSONEncoder's `.sortedKeys` is the apples-to-
-  // apples comparison since it's the only Foundation flag that produces
-  // stable output across processes.
+  // and via JSONEncoder. Both emit deterministic output, but sorting keys
+  // is not equivalent to preserving their source order.
 
   for sample in corpus.samples {
     let value = try! JSONValue.parse(sample.data)
 
-    Benchmark("serialize.\(sample.name).OrderedJSON") { benchmark in
+    Benchmark("serialize.\(sample.name).OrderedJSON", configuration: sample.configuration) {
+      benchmark in
       for _ in benchmark.scaledIterations {
         blackHole(try value.serializedData())
       }
     }
 
-    Benchmark("serialize.\(sample.name).JSONEncoder.sortedKeys") { benchmark in
+    Benchmark(
+      "serialize.\(sample.name).JSONEncoder.sortedKeys",
+      configuration: sample.configuration
+    ) {
+      benchmark in
       let encoder = JSONEncoder()
       encoder.outputFormatting = [.sortedKeys]
       for _ in benchmark.scaledIterations {
@@ -96,11 +103,43 @@ nonisolated(unsafe) let benchmarks = {
   // this exact pattern.
 
   for sample in corpus.samples {
-    Benchmark("roundtrip.\(sample.name).OrderedJSON") { benchmark in
+    Benchmark("roundtrip.\(sample.name).OrderedJSON", configuration: sample.configuration) {
+      benchmark in
       for _ in benchmark.scaledIterations {
         let v1 = try JSONValue.parse(sample.data)
         let bytes = try v1.serializedData()
         blackHole(try JSONValue.parse(bytes))
+      }
+    }
+
+    Benchmark(
+      "roundtrip.\(sample.name).JSONDecoder.JSONEncoder.sortedKeys",
+      configuration: sample.configuration
+    ) { benchmark in
+      let decoder = JSONDecoder()
+      let encoder = JSONEncoder()
+      encoder.outputFormatting = [.sortedKeys]
+      for _ in benchmark.scaledIterations {
+        let value = try decoder.decode(JSONValue.self, from: sample.data)
+        let bytes = try encoder.encode(value)
+        blackHole(try decoder.decode(JSONValue.self, from: bytes))
+      }
+    }
+
+    Benchmark(
+      "roundtrip.\(sample.name).JSONSerialization.sortedKeys",
+      configuration: sample.configuration
+    ) { benchmark in
+      for _ in benchmark.scaledIterations {
+        let value = try JSONSerialization.jsonObject(
+          with: sample.data,
+          options: [.fragmentsAllowed]
+        )
+        let bytes = try JSONSerialization.data(
+          withJSONObject: value,
+          options: [.fragmentsAllowed, .sortedKeys]
+        )
+        blackHole(try JSONSerialization.jsonObject(with: bytes, options: [.fragmentsAllowed]))
       }
     }
   }
@@ -114,6 +153,16 @@ private struct Corpus: Sendable {
   struct Sample: Sendable {
     let name: String
     let data: Data
+
+    var configuration: Benchmark.Configuration {
+      var configuration = Benchmark.defaultConfiguration
+      configuration.timeUnits = data.count < 1024 ? .nanoseconds : .microseconds
+      if data.count >= 16 * 1024 {
+        // One iteration is one document, or one complete round trip.
+        configuration.metrics.append(.throughput)
+      }
+      return configuration
+    }
   }
 
   static func load() -> Corpus {

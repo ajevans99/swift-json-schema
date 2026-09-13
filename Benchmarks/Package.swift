@@ -8,7 +8,7 @@ let package = Package(
     .macOS(.v13)
   ],
   dependencies: [
-    .package(path: ".."),
+    .package(name: "swift-json-schema", path: ".."),
     .package(url: "https://github.com/ordo-one/package-benchmark.git", from: "1.31.0"),
   ],
   targets: [

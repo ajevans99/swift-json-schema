@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+import shlex
 import subprocess
 import tempfile
 import textwrap
@@ -129,6 +130,79 @@ class BaselineCoverageTests(unittest.TestCase):
             "--disable-automatic-resolution",
             (self.root / "calls").read_text().split(),
         )
+
+    def test_generation_matches_allocation_only_enforcement(self):
+        generation = subprocess.run(
+            ["bash", "-e", "-o", "pipefail", "-c",
+             workflow_command("Generate benchmark baselines")],
+            cwd=ROOT, env=self.env, capture_output=True, text=True,
+        )
+        self.assertEqual(generation.returncode, 0, generation.stderr)
+        enforcement = subprocess.run(
+            ["bash", str(ROOT / "Scripts/check-thresholds.sh"),
+             "OrderedJSONBenchmarks"],
+            cwd=ROOT, env=self.env, capture_output=True, text=True,
+        )
+        self.assertEqual(enforcement.returncode, 0, enforcement.stderr)
+        calls = [
+            shlex.split(line)
+            for line in (self.root / "calls").read_text().splitlines()
+        ]
+        self.assertEqual(len(calls), 3)  # Capture, informational report, check.
+        for call in (calls[0], calls[2]):
+            metrics = [
+                call[index + 1]
+                for index, argument in enumerate(call)
+                if argument == "--metric"
+            ]
+            self.assertEqual(metrics, ["mallocCountTotal"])
+
+    def test_workflow_uses_fixed_hashing_for_all_benchmark_steps(self):
+        workflow = WORKFLOW.read_text()
+        job = workflow.split("  benchmarks:\n", 1)[1].split("    steps:\n", 1)[0]
+        self.assertIn('    env:\n      SWIFT_DETERMINISTIC_HASHING: "1"\n', job)
+
+    def test_explicit_refresh_is_opt_in_and_not_enforcement(self):
+        workflow = WORKFLOW.read_text()
+        dispatch = workflow.split("  workflow_dispatch:\n", 1)[1].split(
+            "\npermissions:", 1)[0]
+        self.assertIn("      refresh_baselines:\n", dispatch)
+        self.assertIn("        type: boolean\n        default: false\n", dispatch)
+        generation = workflow.split("    - name: Generate benchmark baselines\n", 1)[1]
+        generation = generation.split("\n    - ", 1)[0]
+        self.assertIn(
+            "steps.baselines.outputs.complete == 'false' || "
+            "(github.event_name == 'workflow_dispatch' && inputs.refresh_baselines)",
+            generation,
+        )
+        for name in ("Run OrderedJSON benchmarks", "Run JSONSchema benchmarks"):
+            step = workflow.split(f"    - name: {name}\n", 1)[1].split(
+                "\n    - ", 1)[0]
+            self.assertIn(
+                "steps.baselines.outputs.complete == 'true' && "
+                "!(github.event_name == 'workflow_dispatch' && inputs.refresh_baselines)",
+                step,
+            )
+
+    def test_manual_capture_has_a_distinct_check_name(self):
+        workflow = WORKFLOW.read_text()
+        self.assertIn(
+            "name: ${{ github.event_name == 'workflow_dispatch' && "
+            "inputs.refresh_baselines && 'Capture benchmark baselines' || "
+            "'Package benchmarks' }}",
+            workflow,
+        )
+
+    def test_schema_check_survives_orderedjson_failure_without_masking_it(self):
+        workflow = WORKFLOW.read_text()
+        schema_step = workflow.split("    - name: Run JSONSchema benchmarks\n", 1)[1]
+        schema_step = schema_step.split("\n    - ", 1)[0]
+        self.assertIn(
+            "if: ${{ !cancelled() && steps.baselines.outputs.complete == 'true' "
+            "&& !(github.event_name == 'workflow_dispatch' && inputs.refresh_baselines) }}",
+            schema_step,
+        )
+        self.assertNotIn("continue-on-error", workflow)
 
 
 if __name__ == "__main__":
