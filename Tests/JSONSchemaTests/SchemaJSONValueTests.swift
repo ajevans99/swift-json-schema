@@ -124,4 +124,144 @@ struct SchemaJSONValueTests {
 
     #expect(result.jsonValue == viaCodable)
   }
+
+  @Test func validationResultJSONValuePreservesSuccessfulAnnotations() throws {
+    let baseURI = try #require(URL(string: "https://example.com/annotated"))
+    let raw: JSONValue = [
+      "$id": "https://example.com/annotated",
+      "title": "outer",
+      "properties": [
+        "x": ["title": "x-title", "type": "string"],
+        "y": ["title": "y-title", "type": "string"],
+      ],
+    ]
+    let schema = try Schema(
+      rawSchema: raw,
+      context: Context(dialect: .draft2020_12),
+      baseURI: baseURI
+    )
+    let instance: JSONValue = ["y": "second", "x": "first"]
+    let result = schema.validate(instance, at: JSONPointer(tokens: ["payload"]))
+    #expect(result.isValid)
+
+    // AnnotationContainer supplies relative locations only. Its optional
+    // absolute locations are nil and must be omitted by both serializers.
+    let expected: JSONValue = [
+      "valid": true,
+      "keywordLocation": "",
+      "absoluteKeywordLocation": "https://example.com/annotated#",
+      "instanceLocation": "/payload",
+      "annotations": [
+        [
+          "keywordLocation": "/title",
+          "instanceLocation": "/payload",
+          "annotation": "outer",
+        ],
+        [
+          "keywordLocation": "/properties/y/title",
+          "instanceLocation": "/payload/y",
+          "annotation": "y-title",
+        ],
+        [
+          "keywordLocation": "/properties/x/title",
+          "instanceLocation": "/payload/x",
+          "annotation": "x-title",
+        ],
+        [
+          "keywordLocation": "/properties",
+          "instanceLocation": "/payload",
+          "annotation": ["y", "x"],
+        ],
+      ],
+    ]
+    let viaCodable = try JSONValue.parse(JSONEncoder().encode(result))
+    #expect(result.jsonValue == viaCodable)
+    #expect(result.jsonValue == expected)
+  }
+
+  @Test func validationResultJSONValuePreservesNestedReferenceAndCompositionErrors() throws {
+    let baseURI = try #require(URL(string: "https://example.com/choices"))
+    let raw: JSONValue = [
+      "$id": "https://example.com/choices",
+      "$defs": [
+        "choice": [
+          "oneOf": [
+            ["type": "string", "minLength": 3],
+            ["type": "string", "pattern": "^A"],
+          ]
+        ]
+      ],
+      "properties": [
+        "value": ["$ref": "#/$defs/choice"]
+      ],
+    ]
+    let schema = try Schema(
+      rawSchema: raw,
+      context: Context(dialect: .draft2020_12),
+      baseURI: baseURI
+    )
+    let result = schema.validate(["value": "hi"])
+    #expect(result.isValid == false)
+
+    // Relative locations follow the reference; absolute locations retain
+    // the definition's path. Both failing oneOf branches must survive.
+    let minLengthError: JSONValue = [
+      "keyword": "minLength",
+      "message": "String 'hi' is shorter than minimum length of 3",
+      "keywordLocation": "/properties/value/$ref/oneOf/0/minLength",
+      "absoluteKeywordLocation": "https://example.com/choices#/$defs/choice/oneOf/0/minLength",
+      "instanceLocation": "/value",
+    ]
+    let patternError: JSONValue = [
+      "keyword": "pattern",
+      "message": "String 'hi' does not match pattern '^A'",
+      "keywordLocation": "/properties/value/$ref/oneOf/1/pattern",
+      "absoluteKeywordLocation": "https://example.com/choices#/$defs/choice/oneOf/1/pattern",
+      "instanceLocation": "/value",
+    ]
+    let oneOfError: JSONValue = [
+      "keyword": "oneOf",
+      "message": .string(
+        "Failed to satisfy exactly one schema: String 'hi' is shorter than minimum length of 3; "
+          + "String 'hi' does not match pattern '^A'"
+      ),
+      "keywordLocation": "/properties/value/$ref/oneOf",
+      "absoluteKeywordLocation": "https://example.com/choices#/$defs/choice/oneOf",
+      "instanceLocation": "/value",
+      "errors": .array([minLengthError, patternError]),
+    ]
+    let referenceError: JSONValue = [
+      "keyword": "$ref",
+      "message": "Validation failed during reference validation '#/$defs/choice'",
+      "keywordLocation": "/properties/value/$ref",
+      "absoluteKeywordLocation": "https://example.com/choices#/properties/value/$ref",
+      "instanceLocation": "/value",
+      "errors": .array([oneOfError]),
+    ]
+    let propertiesError: JSONValue = [
+      "keyword": "properties",
+      "message": "Validation failed for keyword 'properties'",
+      "keywordLocation": "/properties",
+      "absoluteKeywordLocation": "https://example.com/choices#/properties",
+      "instanceLocation": "",
+      "errors": .array([referenceError]),
+    ]
+    let expected: JSONValue = [
+      "valid": false,
+      "keywordLocation": "",
+      "absoluteKeywordLocation": "https://example.com/choices#",
+      "instanceLocation": "",
+      "errors": .array([propertiesError]),
+      "annotations": [
+        [
+          "keywordLocation": "/properties",
+          "instanceLocation": "",
+          "annotation": ["value"],
+        ]
+      ],
+    ]
+    let viaCodable = try JSONValue.parse(JSONEncoder().encode(result))
+    #expect(result.jsonValue == viaCodable)
+    #expect(result.jsonValue == expected)
+  }
 }
