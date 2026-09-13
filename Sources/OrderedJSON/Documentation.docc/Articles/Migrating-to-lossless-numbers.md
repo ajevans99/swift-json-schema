@@ -25,6 +25,11 @@ JSON number syntax without surrounding whitespace, rejecting invalid tokens such
 `JSONValue.parse` and `serialized` preserve number tokens and object order, but not every
 source detail: whitespace, string escape spellings, and duplicate members are not retained.
 
+The stored literal is just its token: parsing and serialization do not allocate normalized
+coefficient or exponent arrays. Numeric operations derive exact metadata when needed, using
+machine-sized integers for common values and arbitrary-length decimal arithmetic otherwise.
+This does not impose a machine-integer limit on accepted tokens.
+
 ## Update enum pattern matches
 
 `.integer(Int)` and `.number(Double)` are now static convenience factories, not enum cases.

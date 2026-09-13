@@ -25,8 +25,7 @@ import OrderedCollections
 /// - SeeAlso: ``JSONType``
 public enum JSONValue: Hashable, Equatable, Sendable {
   case string(String)
-  // Keep number metadata out of every value's inline payload, including parser stack frames.
-  indirect case numberLiteral(JSONNumberLiteral)
+  case numberLiteral(JSONNumberLiteral)
   case object(OrderedDictionary<String, Self>)
   case array([Self])
   case boolean(Bool)

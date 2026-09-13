@@ -492,7 +492,7 @@ struct JSONParser {
         return length
       }
     )
-    return .numberLiteral(try JSONNumberLiteral(str))
+    return .numberLiteral(JSONNumberLiteral(validatedLiteral: str))
   }
 
   // MARK: - Errors

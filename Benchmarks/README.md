@@ -320,6 +320,12 @@ The JSONSchema suite retains the Poll, OpenAPI fragment, and complete draft
 reference, and combinator workloads. All six include valid and invalid inputs.
 The new focused fixtures are authored in this repository and require no downloads.
 
+For lossless-number changes, compare the number-heavy `canada` parse and roundtrip
+workloads alongside schema construction and validation. Parsing retains raw number
+tokens without normalization; validation exercises the exact numeric operations.
+The `JSONDecoder` and `JSONEncoder` rows also use `JSONValue`, so they include its
+numeric conversion costs rather than serving as unchanged Foundation-only controls.
+
 ## Adding a new case
 
 1. Drop a `.json` file into [`OrderedJSONBenchmarks/Resources/`](./OrderedJSONBenchmarks/Resources/).

@@ -150,6 +150,12 @@ struct JSONNumberLiteralTests {
     ["-12", "-1.2e1", "-1200e-2", "-12.0000"],
     ["1e999999999999999999999999", "10e999999999999999999999998"],
     ["1e-999999999999999999999999", "10e-1000000000000000000000000"],
+    ["18446744073709551615", "184467440737095516150e-1", "18446744073709551615.000"],
+    ["18446744073709551616", "1844674407370955161600e-2", "18446744073709551616.0"],
+    ["1e9223372036854775807", "0.1e9223372036854775808", "10e9223372036854775806"],
+    ["1e9223372036854775808", "10e9223372036854775807", "100e9223372036854775806"],
+    ["1e-9223372036854775808", "10e-9223372036854775809", "0.1e-9223372036854775807"],
+    ["1e-9223372036854775809", "0.1e-9223372036854775808", "10e-9223372036854775810"],
   ])
   func normalizedEqualityAndHash(_ spellings: [String]) throws {
     let values = try spellings.map { try JSONNumberLiteral($0) }
@@ -206,6 +212,23 @@ struct JSONNumberLiteralTests {
     ("1e999999999999999999999999", "7", false),
     ("1e-999999999999999999999999", "1e-1000000000000000000000000", true),
     ("1e-1000000000000000000000000", "1e-999999999999999999999999", false),
+    ("18446744073709551615", "3", true),
+    ("18446744073709551615", "7", false),
+    ("18446744073709551616", "2", true),
+    ("18446744073709551616", "3", false),
+    ("18446744073709551615e20", "18446744073709551615", true),
+    ("18446744073709551615", "18446744073709551616", false),
+    ("1", "0.0000000000000000000542101086242752217003726400434970855712890625", true),
+    ("1e20", "18446744073709551615", false),
+    ("1e19", "9223372036854775808", false),
+    ("1e63", "9223372036854775808", true),
+    ("1e27", "7450580596923828125", true),
+    ("1e26", "7450580596923828125", false),
+    ("3e63", "13835058055282163712", true),
+    ("1e9223372036854775807", "1e-9223372036854775808", true),
+    ("1e-9223372036854775808", "1e9223372036854775807", false),
+    ("1e9223372036854775807", "7e-9223372036854775808", false),
+    ("1e9223372036854775807", "8e-9223372036854775808", true),
   ])
   func exactDivisibility(_ numerator: String, _ denominator: String, _ expected: Bool) throws {
     #expect(
@@ -235,6 +258,78 @@ struct JSONNumberLiteralTests {
     let divisor = try JSONNumberLiteral(text)
     for numerator in [JSONNumberLiteral(0), JSONNumberLiteral(1)] {
       #expect(throws: ConversionError.nonPositiveDivisor) { try numerator.isMultiple(of: divisor) }
+    }
+  }
+
+  @Test func compactStorageDoesNotEnlargeJSONValues() {
+    #expect(MemoryLayout<JSONNumberLiteral>.size == MemoryLayout<String>.size)
+    #expect(MemoryLayout<JSONValue>.stride <= 32)
+  }
+
+  @Test func longTokensNormalizeWithoutLosingDigits() throws {
+    let zeros = String(repeating: "0", count: 10_000)
+    let spellings = [
+      ("1." + zeros, "1"),
+      ("18446744073709551615." + zeros, "18446744073709551615"),
+      ("18446744073709551616." + zeros, "18446744073709551616"),
+      ("0." + zeros + "927e10003", "927"),
+      ("927" + zeros + "e-10000", "927"),
+      ("927e+" + zeros, "927"),
+      ("-0." + zeros + "e-" + zeros + "1", "0"),
+    ]
+    for (text, canonical) in spellings {
+      let number = try JSONNumberLiteral(text)
+      let expected = try JSONNumberLiteral(canonical)
+      #expect(number == expected)
+      #expect(number.hashValue == expected.hashValue)
+      #expect(number.isInteger)
+      let parsed = try JSONValue.parse(text)
+      #expect(parsed == .numberLiteral(number))
+      #expect(try parsed.serialized() == text)
+    }
+    let huge = try JSONNumberLiteral("1." + zeros + "1")
+    #expect(!huge.isInteger)
+    #expect(huge > JSONNumberLiteral(1))
+    #expect(huge < JSONNumberLiteral(2))
+  }
+
+  @Test func orderingAcrossCompactBoundaries() throws {
+    let texts = [
+      "-1e9223372036854775808", "-1e9223372036854775807",
+      "-18446744073709551616", "-18446744073709551615",
+      "-1e-9223372036854775808", "-1e-9223372036854775809",
+      "0", "1e-9223372036854775809", "1e-9223372036854775808",
+      "18446744073709551614", "18446744073709551615", "18446744073709551616",
+      "18446744073709551617", "99999999999999999999",
+      "1e9223372036854775807", "9e9223372036854775807", "1e9223372036854775808",
+    ]
+    let values = try texts.map { try JSONNumberLiteral($0) }
+    for left in values.indices {
+      for right in values.indices {
+        #expect((values[left] < values[right]) == (left < right))
+        #expect((values[left] == values[right]) == (left == right))
+      }
+    }
+  }
+
+  @Test func fullWidthCoefficientsAgreeWithUnsignedArithmetic() throws {
+    var state: UInt64 = 0x9E37_79B9_7F4A_7C15
+    for _ in 0 ..< 256 {
+      state = state &* 6_364_136_223_846_793_005 &+ 1
+      let numerator = state
+      state = state &* 6_364_136_223_846_793_005 &+ 1
+      for denominator in [UInt64(1), 2, 3, 5, 9, UInt64.max, state | 1] {
+        for scale in [-129, -2, 0, 2, 129] {
+          let left = try JSONNumberLiteral("\(numerator)e\(scale)")
+          let right = try JSONNumberLiteral("\(denominator)e\(scale)")
+          #expect(try left.isMultiple(of: right) == (numerator % denominator == 0))
+          #expect((left < right) == (numerator < denominator))
+          #expect((left == right) == (numerator == denominator))
+          let equivalent = try JSONNumberLiteral("\(numerator)0e\(scale - 1)")
+          #expect(left == equivalent)
+          #expect(left.hashValue == equivalent.hashValue)
+        }
+      }
     }
   }
 
