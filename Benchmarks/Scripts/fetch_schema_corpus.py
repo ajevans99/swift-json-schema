@@ -8,7 +8,7 @@ from pathlib import Path
 import re
 import sys
 import tempfile
-from urllib.parse import unquote, urldefrag, urljoin
+from urllib.parse import unquote, urldefrag, urljoin, urlsplit
 from urllib.request import urlopen
 
 
@@ -90,8 +90,18 @@ def verify_references(documents):
                     visit(child, base)
 
     for document in documents:
-        if document.get("$schema") != DIALECT or not document.get("$id"):
-            raise ValueError("Corpus roots must declare draft 2020-12 and an absolute $id")
+        root_id = document.get("$id")
+        try:
+            root_uri = urlsplit(root_id) if isinstance(root_id, str) else None
+        except ValueError:
+            root_uri = None
+        if (
+            document.get("$schema") != DIALECT
+            or root_uri is None
+            or root_uri.scheme != "https"
+            or not root_uri.hostname
+        ):
+            raise ValueError("Corpus roots must declare draft 2020-12 and an absolute HTTPS $id")
         visit(document, document["$id"])
     for reference in references:
         resource, fragment = urldefrag(reference)

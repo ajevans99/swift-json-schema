@@ -104,6 +104,55 @@ class SchemaCorpusTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "draft 2020-12"):
             verify_references([schema])
 
+    def test_root_ids_must_be_absolute_https_uris(self):
+        roots = [{"$schema": DIALECT}]
+        roots.extend(
+            {"$schema": DIALECT, "$id": root_id}
+            for root_id in (
+                None, "", 42, [], {}, "schema.json", "/schema",
+                "//example.org/schema", "http://example.org/schema",
+                "ftp://example.org/schema", "https:relative", "https:///schema",
+                "https://", "https://[invalid/schema",
+            )
+        )
+        for schema in roots:
+            with self.subTest(schema=schema), self.assertRaisesRegex(
+                ValueError, r"absolute HTTPS \$id"
+            ):
+                verify_references([schema])
+
+    def test_invalid_root_id_never_publishes_or_replaces_cache(self):
+        for existing_cache in (False, True):
+            with self.subTest(existing_cache=existing_cache):
+                if existing_cache:
+                    self.populate()
+                schema = {**self.schema, "$id": "http://example.org/schema"}
+                data = json.dumps(schema).encode()
+                manifest = copy.deepcopy(self.manifest)
+                manifest["sources"][0]["assets"][0]["sha256"] = hashlib.sha256(data).hexdigest()
+
+                def download(url):
+                    return data if url.endswith(".json") else self.download(url)
+
+                with self.assertRaisesRegex(ValueError, r"absolute HTTPS \$id"):
+                    fetch(manifest, self.destination, downloader=download)
+                if existing_cache:
+                    self.assertEqual(
+                        {path.name: path.read_bytes() for path in self.destination.iterdir()},
+                        self.payloads,
+                    )
+                else:
+                    self.assertFalse(self.destination.exists())
+                self.assertEqual(
+                    list(self.root.iterdir()), [self.destination] if existing_cache else []
+                )
+
+    def test_relative_subschema_ids_remain_supported(self):
+        schema = copy.deepcopy(self.schema)
+        schema["$defs"]["name"]["$id"] = "name"
+        schema["properties"]["name"]["$ref"] = "name"
+        verify_references([schema])
+
     def test_pinned_cross_document_and_dynamic_refs(self):
         root = {**self.schema, "$ref": "https://example.org/remote"}
         remote = {"$schema": DIALECT, "$id": "https://example.org/remote",

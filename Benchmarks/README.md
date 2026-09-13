@@ -221,7 +221,8 @@ copyright placeholder; no specific holder or year is invented. The files remain
 byte-for-byte unchanged, with license/attribution preserved in the resource bundle.
 
 `fetch_schema_corpus.py` stages all four assets and publishes the directory only
-after every checksum, JSON document, dialect, and reference passes validation.
+after every checksum, JSON document, dialect, absolute HTTPS root `$id`, and
+reference passes validation.
 On failure it leaves the previous cache untouched, not a partially new corpus.
 Valid cached bytes are reused without network requests; corrupt cached bytes are
 explicitly reported and replaced only by a verified download. To verify a cache
