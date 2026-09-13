@@ -1,11 +1,100 @@
 import Foundation
-import JSONSchema
 import OrderedCollections
 import Testing
+
+@testable import JSONSchema
 
 /// Phase 2 of #149 — validation output (annotations) must be deterministic.
 @Suite("Validation output determinism (#149 Phase 2)")
 struct ValidationOutputDeterminismTests {
+
+  @Test(arguments: [
+    ValidationOutputLevel.basic, .detailed, .verbose,
+  ])
+  func renderedErrorsFollowResultFieldOrder(level: ValidationOutputLevel) throws {
+    let location = try #require(URL(string: "https://example.com/schema#/type"))
+    let leaf = ValidationError(
+      keyword: "type",
+      message: "Expected integer.",
+      keywordLocation: JSONPointer(tokens: ["type"]),
+      absoluteKeywordLocation: location,
+      instanceLocation: JSONPointer()
+    )
+    let branch = ValidationError(
+      keyword: "allOf",
+      message: "Validation failed.",
+      keywordLocation: JSONPointer(),
+      instanceLocation: JSONPointer(),
+      errors: [leaf]
+    )
+    let result = ValidationResult(
+      valid: false,
+      keywordLocation: JSONPointer(),
+      absoluteKeywordLocation: location,
+      instanceLocation: JSONPointer(),
+      errors: [branch]
+    )
+
+    let output = try #require(result.renderedOutput(level: level).object)
+    let coreFields = [
+      "valid", "keywordLocation", "absoluteKeywordLocation", "instanceLocation",
+    ]
+    #expect(Array(output.keys) == coreFields + ["errors"])
+    var error = try #require(output["errors"]?.array?.first?.object)
+    if level == .verbose {
+      #expect(Array(error.keys) == ["valid", "keywordLocation", "instanceLocation", "errors"])
+      error = try #require(error["errors"]?.array?.first?.object)
+    }
+    #expect(Array(error.keys) == coreFields + ["error"])
+    #expect(error["error"] == "Expected integer.")
+  }
+
+  @Test(arguments: [
+    ValidationOutputLevel.basic, .detailed, .verbose,
+  ])
+  func renderedAnnotationsFollowCoreFields(level: ValidationOutputLevel) throws {
+    let schema = try Schema(
+      instance:
+        #"{"$id":"https://example.com/schema","default":{"z":1e1000,"a":9.2700}}"#
+    )
+    let result = schema.validate(.null)
+    #expect(result.isValid)
+    let output = try #require(result.renderedOutput(level: level).object)
+
+    #expect(
+      Array(output.keys) == [
+        "valid", "keywordLocation", "absoluteKeywordLocation", "instanceLocation", "annotations",
+      ]
+    )
+    let annotation = try #require(output["annotations"]?.array?.first?.object)
+    #expect(
+      Array(annotation.keys) == [
+        "keywordLocation", "instanceLocation", "annotation",
+      ]
+    )
+    let value = try #require(annotation["annotation"])
+    #expect(try value.serialized() == #"{"z":1e1000,"a":9.2700}"#)
+  }
+
+  @Test(
+    arguments: [ValidationOutputLevel.basic, .detailed, .verbose],
+    [false, true]
+  )
+  func renderedOutputOmitsAbsentFields(level: ValidationOutputLevel, valid: Bool) throws {
+    let result = ValidationResult(
+      valid: valid,
+      keywordLocation: JSONPointer(),
+      instanceLocation: JSONPointer()
+    )
+    let output = try result.renderedOutput(level: level)
+    let expected =
+      valid
+      ? #"{"valid":true,"keywordLocation":"","instanceLocation":""}"#
+      : #"{"valid":false,"keywordLocation":"","instanceLocation":"","error":"Validation failed."}"#
+
+    #expect(try output.serialized() == expected)
+    #expect(try result.renderedOutput(level: .flag).serialized() == (valid ? "true" : "false"))
+  }
 
   // MARK: - Properties annotation order matches instance order
 

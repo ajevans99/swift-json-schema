@@ -58,6 +58,13 @@ The configuration also works with `result.renderedOutput(configuration:)`.
 
 ## Serialization and ordering
 
+Basic, detailed, and verbose output objects, including nested error objects, emit fields in
+this order: `valid`, `keywordLocation`, `absoluteKeywordLocation`, `instanceLocation`,
+`error`, `errors`, `annotations`. Absent optional fields are omitted. This core-fields-first
+order aligns with the library's result representation rather than the alphabetical order
+of the previous Foundation-based renderer. Direct serialization preserves this order;
+annotation values retain their own stored property order.
+
 The output renderers for basic, detailed, and verbose construct JSON values directly,
 without a Foundation encoding/decoding round-trip. Numeric annotations retain their
 `JSONNumberLiteral` values rather than passing through `Double`, including tokens such as

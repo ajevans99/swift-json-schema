@@ -163,19 +163,19 @@ private struct ValidationOutputUnit {
 
   static func jsonValue(from unit: ValidationOutputUnit) throws -> JSONValue {
     var object = OrderedDictionary<String, JSONValue>()
+    object["valid"] = .boolean(unit.valid)
+    object["keywordLocation"] = .string(unit.keywordLocation)
     if let absoluteKeywordLocation = unit.absoluteKeywordLocation {
       object["absoluteKeywordLocation"] = .string(absoluteKeywordLocation.absoluteString)
     }
-    if let annotations = unit.annotations {
-      object["annotations"] = .array(annotations.map { $0.annotation.annotationJSONValue })
-    }
+    object["instanceLocation"] = .string(unit.instanceLocation)
     if let error = unit.error { object["error"] = .string(error) }
     if let errors = unit.errors {
       object["errors"] = .array(try errors.map { try jsonValue(from: $0) })
     }
-    object["instanceLocation"] = .string(unit.instanceLocation)
-    object["keywordLocation"] = .string(unit.keywordLocation)
-    object["valid"] = .boolean(unit.valid)
+    if let annotations = unit.annotations {
+      object["annotations"] = .array(annotations.map { $0.annotation.annotationJSONValue })
+    }
     return .object(object)
   }
 }
