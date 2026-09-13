@@ -89,29 +89,6 @@ print(try diagnostics.serialized(options: .pretty))
 
 The diagnostics identify the failing keyword and input location. [Learn about validation output](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschema/validation-output-formats).
 
-### Preserve numeric precision
-
-JSON numbers are stored as validated `JSONNumberLiteral` tokens, not `Double`. Parsing and direct serialization retain spellings such as `9.270`, `-0`, and `1e1000` without requiring them to fit a Swift numeric type:
-
-```swift
-import Foundation
-import JSONSchemaBuilder
-
-let value = try JSONValue.parse(#"{"amount":9.270,"large":1e1000}"#)
-print(try value.serialized()) // {"amount":9.270,"large":1e1000}
-
-let cent = try JSONNumberLiteral("0.01")
-let amount: Decimal = try JSONDecimal()
-  .multipleOf(cent)
-  .parseAndValidate(instance: "9.270")
-```
-
-`JSONDecimal` converts directly to an exact Foundation `Decimal`, rejecting inexact or out-of-range values. `@Schemable` recognizes `Decimal` and `Foundation.Decimal`, including optional properties and collections. Numeric validation uses exact values independently of whether the builder returns `Int`, `Double`, or `Decimal`.
-
-`Schema(instance:)` and the builder's `parse(instance:)` / `parseAndValidate(instance:)` use the lossless parser by default. Explicit `decoder:` overloads remain deprecated compatibility paths. Foundation `Codable` cannot guarantee original number precision or spelling; use `JSONValue.parse` and `serialized` for token-preserving I/O.
-
-Existing `.integer(42)`, `.number(9.27)`, and Swift literals still construct values, but `.number` requires a finite `Double`, and floating-point literals cannot recover source precision. Use throwing `JSONNumberLiteral` initializers for exact strings or untrusted numeric inputs. Enum pattern matches must migrate to `.numberLiteral`; see the [numeric migration guide](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/orderedjson/migrating-to-lossless-numbers) for accessor changes and conversion limits.
-
 ## Installation
 
 Add the package in Xcode with **File > Add Package Dependencies**, or add it to `Package.swift`:
