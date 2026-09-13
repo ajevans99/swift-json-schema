@@ -273,7 +273,7 @@ struct KeywordTests {
         #expect(
           throws: ValidationIssue.exceedsMaxLength(
             string: instance.string ?? "",
-            maxLength: JSONNumberLiteral(5)
+            maxLength: 5
           )
         ) {
           try keyword.validate(instance, at: .init(), using: annotations)
@@ -300,7 +300,7 @@ struct KeywordTests {
         #expect(
           throws: ValidationIssue.belowMinLength(
             string: instance.string ?? "",
-            minLength: JSONNumberLiteral(3)
+            minLength: 3
           )
         ) {
           try keyword.validate(instance, at: .init(), using: annotations)
@@ -382,7 +382,7 @@ struct KeywordTests {
         #expect(
           throws: ValidationIssue.exceedsMaxItems(
             count: instance.array?.count ?? 0,
-            maxItems: JSONNumberLiteral(3)
+            maxItems: 3
           )
         ) {
           try keyword.validate(instance, at: .init(), using: annotations)
@@ -408,7 +408,7 @@ struct KeywordTests {
         #expect(
           throws: ValidationIssue.belowMinItems(
             count: instance.array?.count ?? 0,
-            minItems: JSONNumberLiteral(2)
+            minItems: 2
           )
         ) {
           try keyword.validate(instance, at: .init(), using: annotations)
@@ -468,7 +468,7 @@ struct KeywordTests {
         #expect(
           throws: ValidationIssue.containsExcessiveMatches(
             count: count,
-            maxAllowed: JSONNumberLiteral(3)
+            maxAllowed: 3
           )
         ) {
           try keyword.validate(instance, at: .init(), using: annotations)
@@ -508,7 +508,7 @@ struct KeywordTests {
         #expect(
           throws: ValidationIssue.containsInsufficientMatches(
             count: count,
-            required: JSONNumberLiteral(2)
+            required: 2
           )
         ) {
           try keyword.validate(instance, at: .init(), using: annotations)
@@ -534,7 +534,7 @@ struct KeywordTests {
         #expect(
           throws: ValidationIssue.exceedsMaxProperties(
             count: instance.object?.count ?? 0,
-            maxProperties: JSONNumberLiteral(2)
+            maxProperties: 2
           )
         ) {
           try keyword.validate(instance, at: .init(), using: annotations)
@@ -560,7 +560,7 @@ struct KeywordTests {
         #expect(
           throws: ValidationIssue.belowMinProperties(
             count: instance.object?.count ?? 0,
-            minProperties: JSONNumberLiteral(2)
+            minProperties: 2
           )
         ) {
           try keyword.validate(instance, at: .init(), using: annotations)
@@ -714,7 +714,7 @@ struct KeywordTests {
         #expect(
           throws: ValidationIssue.containsInsufficientMatches(
             count: instance.array?.count ?? 0,
-            required: JSONNumberLiteral(1)
+            required: 1
           )
         ) {
           try keyword.validate(instance, at: .init(), using: &annotations)

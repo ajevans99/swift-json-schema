@@ -216,7 +216,7 @@ extension Keywords {
       if validIndices.isEmpty && !minContainsIsZero {
         throw ValidationIssue.containsInsufficientMatches(
           count: instances.count,
-          required: JSONNumberLiteral(1)
+          required: 1
         )
       }
 

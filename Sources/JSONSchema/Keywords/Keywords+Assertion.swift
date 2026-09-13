@@ -21,6 +21,22 @@ extension ValidationKeyword {
   }
 }
 
+extension JSONNumberLiteral {
+  /// Narrows a validated count or length bound to `Int` so a failure can report it.
+  ///
+  /// Bound comparisons use the full-precision literal, so narrowing here only affects how an
+  /// already-determined failure is described. A bound outside `Int`'s range is reported as a
+  /// numeric validation failure rather than clamped to a misleading value.
+  func intBound(for keyword: String) throws(ValidationIssue) -> Int {
+    guard let bound = try? integerValue() else {
+      throw .numericValidationFailure(
+        reason: "'\(keyword)' bound \(self) is outside the representable range"
+      )
+    }
+    return bound
+  }
+}
+
 protocol FormatKeyword: AssertionKeyword {}
 
 extension FormatKeyword {
@@ -301,7 +317,10 @@ extension Keywords {
     ) throws(ValidationIssue) {
       let maxLength = try countBound()
       if let string = input.string, JSONNumberLiteral(string.count) > maxLength {
-        throw ValidationIssue.exceedsMaxLength(string: string, maxLength: maxLength)
+        throw ValidationIssue.exceedsMaxLength(
+          string: string,
+          maxLength: try maxLength.intBound(for: Self.name)
+        )
       }
     }
   }
@@ -325,7 +344,10 @@ extension Keywords {
     ) throws(ValidationIssue) {
       let minLength = try countBound()
       if let string = input.string, JSONNumberLiteral(string.count) < minLength {
-        throw ValidationIssue.belowMinLength(string: string, minLength: minLength)
+        throw ValidationIssue.belowMinLength(
+          string: string,
+          minLength: try minLength.intBound(for: Self.name)
+        )
       }
     }
   }
@@ -415,7 +437,10 @@ extension Keywords {
     ) throws(ValidationIssue) {
       let maxItems = try countBound()
       if let array = input.array, JSONNumberLiteral(array.count) > maxItems {
-        throw ValidationIssue.exceedsMaxItems(count: array.count, maxItems: maxItems)
+        throw ValidationIssue.exceedsMaxItems(
+          count: array.count,
+          maxItems: try maxItems.intBound(for: Self.name)
+        )
       }
     }
   }
@@ -439,7 +464,10 @@ extension Keywords {
     ) throws(ValidationIssue) {
       let minItems = try countBound()
       if let array = input.array, JSONNumberLiteral(array.count) < minItems {
-        throw ValidationIssue.belowMinItems(count: array.count, minItems: minItems)
+        throw ValidationIssue.belowMinItems(
+          count: array.count,
+          minItems: try minItems.intBound(for: Self.name)
+        )
       }
     }
   }
@@ -502,14 +530,14 @@ extension Keywords {
         if JSONNumberLiteral(array.count) > maxContains {
           throw ValidationIssue.containsExcessiveMatches(
             count: array.count,
-            maxAllowed: maxContains
+            maxAllowed: try maxContains.intBound(for: Self.name)
           )
         }
       case .indicies(let indicies):
         if JSONNumberLiteral(indicies.count) > maxContains {
           throw ValidationIssue.containsExcessiveMatches(
             count: indicies.count,
-            maxAllowed: maxContains
+            maxAllowed: try maxContains.intBound(for: Self.name)
           )
         }
       }
@@ -545,14 +573,14 @@ extension Keywords {
         if JSONNumberLiteral(array.count) < minContains {
           throw ValidationIssue.containsInsufficientMatches(
             count: array.count,
-            required: minContains
+            required: try minContains.intBound(for: Self.name)
           )
         }
       case .indicies(let indicies):
         if JSONNumberLiteral(indicies.count) < minContains {
           throw ValidationIssue.containsInsufficientMatches(
             count: indicies.count,
-            required: minContains
+            required: try minContains.intBound(for: Self.name)
           )
         }
       }
@@ -586,7 +614,7 @@ extension Keywords {
       if JSONNumberLiteral(object.count) > maxProperties {
         throw ValidationIssue.exceedsMaxProperties(
           count: object.count,
-          maxProperties: maxProperties
+          maxProperties: try maxProperties.intBound(for: Self.name)
         )
       }
     }
@@ -613,7 +641,10 @@ extension Keywords {
 
       let minProperties = try countBound()
       if JSONNumberLiteral(object.count) < minProperties {
-        throw ValidationIssue.belowMinProperties(count: object.count, minProperties: minProperties)
+        throw ValidationIssue.belowMinProperties(
+          count: object.count,
+          minProperties: try minProperties.intBound(for: Self.name)
+        )
       }
     }
   }

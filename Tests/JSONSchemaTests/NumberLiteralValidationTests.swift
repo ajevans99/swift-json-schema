@@ -344,4 +344,60 @@ struct NumberLiteralValidationTests {
       #expect(result.errors?.contains { $0.keyword == name } == true)
     }
   }
+
+  /// Bounds that are valid nonnegative integers but too large for `Int` are reported as numeric
+  /// validation failures rather than narrowed to a misleading value.
+  @Test(arguments: ["1e400", "9223372036854775808"])
+  func unrepresentableCountBoundsReportNumericValidationFailures(token: String) throws {
+    let bound = try JSONValue.parse(token)
+    var annotations = AnnotationContainer()
+    annotations.insert(
+      Annotation<Keywords.Contains>(
+        keyword: "contains",
+        instanceLocation: .init(),
+        schemaLocation: .init(),
+        value: .everyIndex
+      )
+    )
+
+    let unsatisfiable: [(String, any AssertionKeyword, JSONValue)] = [
+      ("minLength", Keywords.MinLength(value: bound), "abc"),
+      ("minItems", Keywords.MinItems(value: bound), [1, 2]),
+      ("minContains", Keywords.MinContains(value: bound), [1, 2]),
+      ("minProperties", Keywords.MinProperties(value: bound), ["a": 1]),
+    ]
+
+    for (name, keyword, input) in unsatisfiable {
+      do {
+        try keyword.validate(input, at: .init(), using: annotations)
+        Issue.record("Expected \(name) to reject the unrepresentable bound \(token)")
+      } catch {
+        guard case .numericValidationFailure(let reason) = error else {
+          Issue.record("Expected numericValidationFailure for \(name), received \(error)")
+          continue
+        }
+        #expect(reason.contains(name))
+        #expect(reason.contains(token))
+      }
+
+      let schema = try Schema(instance: #"{"contains":true,"\#(name)":\#(token)}"#)
+      #expect(!schema.validate(input).isValid)
+    }
+
+    // A bound this large can never be exceeded, so the failure path never narrows it.
+    let satisfiable: [(String, any AssertionKeyword, JSONValue)] = [
+      ("maxLength", Keywords.MaxLength(value: bound), "abc"),
+      ("maxItems", Keywords.MaxItems(value: bound), [1, 2]),
+      ("maxContains", Keywords.MaxContains(value: bound), [1, 2]),
+      ("maxProperties", Keywords.MaxProperties(value: bound), ["a": 1]),
+    ]
+
+    for (name, keyword, input) in satisfiable {
+      do {
+        try keyword.validate(input, at: .init(), using: annotations)
+      } catch {
+        Issue.record("Expected \(name) to accept \(token), received \(error)")
+      }
+    }
+  }
 }

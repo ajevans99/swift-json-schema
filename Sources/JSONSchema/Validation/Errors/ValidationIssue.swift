@@ -15,22 +15,22 @@ public enum ValidationIssue: Error, Codable, Equatable {
   case evaluationFailed(errors: [ValidationError])
 
   // String
-  case exceedsMaxLength(string: String, maxLength: JSONNumberLiteral)
-  case belowMinLength(string: String, minLength: JSONNumberLiteral)
+  case exceedsMaxLength(string: String, maxLength: Int)
+  case belowMinLength(string: String, minLength: Int)
   case patternMismatch(string: String, pattern: String)
   case invalidFormat(name: String, value: String)
 
   // Arrays
-  case exceedsMaxItems(count: Int, maxItems: JSONNumberLiteral)
-  case belowMinItems(count: Int, minItems: JSONNumberLiteral)
+  case exceedsMaxItems(count: Int, maxItems: Int)
+  case belowMinItems(count: Int, minItems: Int)
   case itemsNotUnique
-  case containsInsufficientMatches(count: Int, required: JSONNumberLiteral)
-  case containsExcessiveMatches(count: Int, maxAllowed: JSONNumberLiteral)
+  case containsInsufficientMatches(count: Int, required: Int)
+  case containsExcessiveMatches(count: Int, maxAllowed: Int)
   case invalidItem(index: Int, error: ValidationError)
 
   // Objects
-  case exceedsMaxProperties(count: Int, maxProperties: JSONNumberLiteral)
-  case belowMinProperties(count: Int, minProperties: JSONNumberLiteral)
+  case exceedsMaxProperties(count: Int, maxProperties: Int)
+  case belowMinProperties(count: Int, minProperties: Int)
   case missingRequiredProperty(key: String)
   case missingDependentProperty(key: String, dependentOn: String)
   case invalidProperty(key: String, error: ValidationError)
