@@ -341,6 +341,30 @@ instance list, then run the full JSONSchema suite to exercise its preflight chec
 
 ## Baselines and CI
 
+### Numeric representation changes
+
+The lossless-number migration intentionally changes the numeric work in
+`parse.*.JSONDecoder`, `serialize.*.JSONEncoder.sortedKeys`, and
+`roundtrip.*.JSONDecoder.JSONEncoder.sortedKeys`. These cases use `JSONValue`,
+not an unchanged Foundation-only model. Decimal-first decoding retains values
+that the previous Int/Double representation rounded; encoding uses a Double
+only if its round-trippable decimal spelling has the same mathematical value,
+and otherwise requires an exact Decimal.
+
+For example, the previous Canada path could emit `-65.61361699999998` for
+`-65.613616999999977`. Keeping the latter value requires additional conversion
+and Decimal-formatting work on Linux. The Foundation/JSONValue cohort is
+explicitly rebaselined on the pinned CI runner for this precision change.
+Native OrderedJSON, JSONSerialization, and JSONSchema thresholds are retained,
+and the existing relative and absolute tolerances are unchanged.
+
+`Dialect.loadMetaSchema()` caches only immutable bundled JSON documents; it
+still constructs an independent Schema and Context per call. Its benchmark
+therefore continues to measure schema construction, without repeatedly reading
+and parsing the same bundled documents.
+
+### Enforcement
+
 Committed p90 allocation thresholds live in [`Baselines/`](./Baselines/). Capture
 and enforcement both select **only `mallocCountTotal`** so instrumentation is
 identical; collecting clock/CPU metrics also allocates and is not an equivalent

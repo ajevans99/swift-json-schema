@@ -157,6 +157,33 @@ struct SchemaTests {
     #expect(result.isValid == true)
   }
 
+  @Test func metaSchemaLoadsHaveIndependentContexts() throws {
+    let first = try Dialect.draft2020_12.loadMetaSchema()
+    let second = try Dialect.draft2020_12.loadMetaSchema()
+    #expect(first.context !== second.context)
+    #expect(first.rawSchema == second.rawSchema)
+    #expect(!first.validate(["properties": ["name": ["type": 1]]]).isValid)
+    #expect(second.validate(["properties": ["name": ["type": "string"]]]).isValid)
+    #expect(first.validate(["minLength": 1]).isValid)
+  }
+
+  @Test func cachedMetaSchemaDocumentsSupportConcurrentLoads() async throws {
+    try await withThrowingTaskGroup(of: Bool.self) { group in
+      for index in 0 ..< 32 {
+        group.addTask {
+          let schema = try Dialect.draft2020_12.loadMetaSchema()
+          let valid = index.isMultiple(of: 2)
+          let instance: JSONValue = ["properties": ["name": ["type": valid ? "string" : 1]]]
+          let result = schema.validate(instance)
+          return result.isEvaluationComplete && result.isValid == valid
+        }
+      }
+      for try await correct in group {
+        #expect(correct)
+      }
+    }
+  }
+
   @Test func formatValidators() throws {
     let rawSchema: JSONValue = [
       "type": "string",

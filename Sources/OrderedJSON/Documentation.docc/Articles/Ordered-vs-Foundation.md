@@ -33,14 +33,17 @@ but passing it through these APIs does not preserve its ordering or number-token
 `JSONNumberLiteral` also conforms to `Codable`. Foundation's `JSONEncoder` encodes the
 standalone literal as a JSON number, not as a string or an object containing `rawValue`.
 
-Numeric encoding tries `Int`, then an exact `Decimal`, then `Double` only when constructing
-a `JSONNumberLiteral` from that double equals the original value. Otherwise it throws
+Numeric encoding tries `Int`, then `Double` only when constructing a `JSONNumberLiteral`
+from that double equals the original value, then an exact `Decimal`. Otherwise it throws
 `EncodingError` rather than silently rounding. Even successful encoding can change spelling,
 such as emitting `1` for `1.0`.
 
-Numeric decoding tries `Int`, `Decimal`, then `Double`. A generic `Decoder` does not expose
-raw JSON tokens, and Foundation may already have rounded a value before the library receives
-it. Decoding therefore cannot promise original precision. `OrderedJSON` does not provide a
+Numeric decoding prefers `Decimal` and uses a decoded `Int` only when it agrees with that
+decimal. This avoids accepting large fractional numbers as integers after binary rounding.
+If the decoder cannot provide a decimal, it tries `Int`, then `Double`.
+A generic `Decoder` does not expose raw JSON tokens, and Foundation may already have rounded
+a value before the library receives it. Decoding therefore cannot promise original precision.
+`OrderedJSON` does not provide a
 replacement general-purpose `Codable` encoder or decoder.
 
 For schema-driven conversion into Swift models, use the separate
@@ -76,6 +79,12 @@ Benchmark the API that matches your workload rather than assuming ordering impli
 performance advantage. Foundation and `OrderedJSON` make different representation tradeoffs.
 The repository's [benchmark guide](https://github.com/ajevans99/swift-json-schema/blob/main/Benchmarks/README.md)
 describes the parser and serializer benchmarks.
+
+The Foundation `JSONValue` benchmarks now retain decimal precision that the previous
+`Int`/`Double` representation discarded. Their numeric work is therefore not equivalent
+to the old baseline: a token such as `-65.613616999999977` must not silently become
+`-65.61361699999998`. Exact `Decimal` conversion and Foundation's decimal formatting
+can cost more than binary floating-point conversion, particularly on Linux.
 
 ## See also
 

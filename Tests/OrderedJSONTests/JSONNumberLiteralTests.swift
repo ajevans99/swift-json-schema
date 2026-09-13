@@ -117,6 +117,7 @@ struct JSONNumberLiteralTests {
       "0", "-0", "-9.27", "12345678901234567890123456789012345678",
       "9007199254740993", "340282366920938463463374607431768211455",
       "340282366920938463463374607431768211455e127", "1e128", "1e-128",
+      "18446744073709551615e128", "18446744073709551615e146",
       "100e-130", "1.230000000000000000000000000000000000000000000000000000000",
       "0." + String(repeating: "0", count: 200) + "927e203",
     ] {
@@ -124,6 +125,14 @@ struct JSONNumberLiteralTests {
       #expect(try JSONNumberLiteral(original.decimalValue()) == original)
     }
     #expect(throws: ConversionError.nonFinite) { try JSONNumberLiteral(Decimal.nan) }
+  }
+
+  @Test(arguments: [UInt64(1), UInt64.max], -128 ... 127)
+  func compactDecimalConversion(coefficient: UInt64, exponent: Int) throws {
+    for sign in ["", "-"] {
+      let literal = try JSONNumberLiteral("\(sign)\(coefficient)e\(exponent)")
+      #expect(try JSONNumberLiteral(literal.decimalValue()) == literal)
+    }
   }
 
   @Test func decimalConversionRejectsSilentRounding() {
@@ -360,5 +369,23 @@ struct JSONNumberLiteralTests {
     ] {
       #expect(!error.description.isEmpty)
     }
+  }
+
+  @Test(arguments: [
+    "9.27", "-123.41666699999999", "-65.613616999999977", "43.420273000000009",
+    "9.270000000000000001", "9007199254740993.25",
+    "1.0000000000000001", "-1.0000000000000001", "9223372036854775806.5",
+    "12345678901234567890.123456789012345678", "1e-128", "1e128",
+    "340282366920938463463374607431768211455",
+  ])
+  func codablePreservesExactJSONNumbers(_ text: String) throws {
+    let original = try JSONNumberLiteral(text)
+    let encoded = try JSONEncoder().encode(original)
+    #expect(try JSONValue.parse(encoded).numberLiteral == original)
+    #expect(try JSONDecoder().decode(JSONNumberLiteral.self, from: Data(text.utf8)) == original)
+    #expect(try JSONDecoder().decode(JSONNumberLiteral.self, from: encoded) == original)
+    let value = JSONValue.numberLiteral(original)
+    #expect(try JSONDecoder().decode(JSONValue.self, from: Data(text.utf8)) == value)
+    #expect(try JSONValue.parse(JSONEncoder().encode(value)) == value)
   }
 }

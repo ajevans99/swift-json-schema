@@ -5,11 +5,19 @@ import OrderedCollections
 /// JSON tokens. Use `JSONValue.parse` and `serialized` for lossless JSON I/O.
 extension JSONNumberLiteral: Codable {
   public init(from decoder: any Decoder) throws {
-    let container = try decoder.singleValueContainer()
-    if let integer = try? container.decode(Int.self) {
+    try self.init(from: decoder.singleValueContainer())
+  }
+
+  fileprivate init(from container: any SingleValueDecodingContainer) throws {
+    if let decimal = try? container.decode(Decimal.self), !decimal.isNaN {
+      // Some decoders accept a large fractional token as an Int after binary rounding.
+      if let integer = try? container.decode(Int.self), Decimal(integer) == decimal {
+        self.init(integer)
+      } else {
+        try self.init(decimal)
+      }
+    } else if let integer = try? container.decode(Int.self) {
       self.init(integer)
-    } else if let decimal = try? container.decode(Decimal.self), !decimal.isNaN {
-      try self.init(decimal)
     } else if let double = try? container.decode(Double.self), double.isFinite {
       try self.init(double)
     } else {
@@ -24,12 +32,12 @@ extension JSONNumberLiteral: Codable {
     var container = encoder.singleValueContainer()
     if let integer = try? integerValue() {
       try container.encode(integer)
-    } else if let decimal = try? decimalValue() {
-      try container.encode(decimal)
     } else if let double = try? doubleValue(),
       let roundTrip = try? JSONNumberLiteral(double), roundTrip == self
     {
       try container.encode(double)
+    } else if let decimal = try? decimalValue() {
+      try container.encode(decimal)
     } else {
       throw EncodingError.invalidValue(
         self,
@@ -104,7 +112,7 @@ extension JSONValue: Codable {
       self = .string(string)
       return
     }
-    if let number = try? container.decode(JSONNumberLiteral.self) {
+    if let number = try? JSONNumberLiteral(from: container) {
       self = .numberLiteral(number)
       return
     }

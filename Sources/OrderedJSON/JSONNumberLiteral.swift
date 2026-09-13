@@ -100,8 +100,7 @@ public struct JSONNumberLiteral: Hashable, Comparable, Sendable, CustomStringCon
   /// Uses Foundation's locale-independent decimal spelling and rejects NaN.
   public init(_ value: Decimal) throws {
     guard !value.isNaN else { throw ConversionError.nonFinite }
-    var value = value
-    self.init(validatedLiteral: NSDecimalString(&value, Locale(identifier: "en_US_POSIX")))
+    self.init(validatedLiteral: value.description)
   }
 
   public var description: String { rawValue }
@@ -123,8 +122,8 @@ public struct JSONNumberLiteral: Hashable, Comparable, Sendable, CustomStringCon
 
   /// Converts exactly, rejecting range loss and finite precision loss.
   ///
-  /// The normalized value is parsed with the POSIX locale, then compared against the normalized
-  /// decimal round-trip. Foundation's otherwise silent decimal rounding is never accepted.
+  /// Uses checked decimal arithmetic for compact values. Larger values use a POSIX-locale parse
+  /// and an exact decimal round-trip check. Foundation's silent decimal rounding is never accepted.
   public func decimalValue() throws -> Decimal {
     try JSONNumberNormalized(rawValue).decimalValue()
   }
@@ -215,6 +214,25 @@ private enum JSONNumberNormalized: Hashable, Comparable {
         throw ConversionError.outOfRange
       }
       guard value.exponent >= -128 else { throw ConversionError.inexactConversion }
+      if value.exponent <= 127 {
+        var significand = Decimal(value.coefficient)
+        var decimal = Decimal.zero
+        switch NSDecimalMultiplyByPowerOf10(
+          &decimal,
+          &significand,
+          Int16(value.exponent),
+          .plain
+        ) {
+        case .noError:
+          return value.negative ? -decimal : decimal
+        case .lossOfPrecision:
+          throw ConversionError.inexactConversion
+        case .underflow, .overflow, .divideByZero:
+          throw ConversionError.outOfRange
+        @unknown default:
+          throw ConversionError.inexactConversion
+        }
+      }
       negative = value.negative
       digits = String(value.coefficient)
       power = value.exponent

@@ -145,12 +145,13 @@ With Foundation's `JSONEncoder`, a standalone `JSONNumberLiteral` encodes as a J
 not a quoted `rawValue` string or a wrapper object. For example, a literal constructed from
 `"1.0"` can encode as the JSON number `1`.
 
-- Encoding tries an exact `Int`, then an exact `Decimal`. It uses `Double` only if
-  constructing `JSONNumberLiteral` from that double equals the original number. Otherwise
-  encoding throws `EncodingError`. Successful encoding still need not retain token spelling.
-- Decoding tries `Int`, `Decimal`, then `Double`. A generic `Decoder` cannot supply the
-  original token, and Foundation may round before the library sees the value. Original
-  precision is therefore not guaranteed.
+- Encoding tries an exact `Int`, then `Double` only if constructing `JSONNumberLiteral`
+  from that double equals the original number, then an exact `Decimal`. Otherwise encoding
+  throws `EncodingError`. Successful encoding still need not retain token spelling.
+- Decoding prefers `Decimal`, accepting a decoded `Int` only when it agrees with that decimal.
+  If the decoder cannot provide a decimal, it tries `Int`, then `Double`.
+  A generic `Decoder` cannot supply the original token, and Foundation may round before the
+  library sees the value. Original precision is therefore not guaranteed.
 
 Use `JSONValue.parse` and `serialized` for token-preserving JSON I/O. This migration does
 not add a complete custom `Codable` encoder or decoder.
