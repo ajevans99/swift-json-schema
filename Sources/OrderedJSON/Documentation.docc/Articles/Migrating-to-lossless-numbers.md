@@ -169,16 +169,19 @@ and `Foundation.Decimal`, including optional properties and collection values.
 
 Numeric constraints accept `JSONNumberLiteral` alongside their existing `Double` overloads,
 including the `@NumberOptions` traits. Construct precise bounds from strings rather than Swift
-floating-point literals. Numeric values and keyword bounds in `ValidationIssue` also use
-`JSONNumberLiteral`; inspect `rawValue` or explicitly convert instead of assuming a `Double`
-payload. Measured counts and array indexes remain `Int`.
+floating-point literals. Numeric operands in `ValidationIssue` cases such as `exceedsMaximum`
+and `notMultipleOf` use `JSONNumberLiteral`; inspect `rawValue` or explicitly convert instead
+of assuming a `Double` payload.
 
 Count constraints also compare exact literals: `minLength`, `maxLength`, `minItems`,
 `maxItems`, `minProperties`, `maxProperties`, `minContains`, and `maxContains`. Their bounds
 must be mathematical nonnegative integers, so `2.0` is accepted. A bound larger than `Int`
 or `Double` can represent is not replaced with a permissive default. For example,
-`"minItems": 1e1000` rejects an empty array. Corresponding `ValidationIssue` bound payloads
-use `JSONNumberLiteral`, while actual counts remain `Int`.
+`"minItems": 1e1000` rejects an empty array. Public count/length `ValidationIssue` bound
+payloads remain `Int`, as do actual counts and array indexes. Bounds are narrowed only when
+reporting a failed constraint, after the exact comparison. If a failed bound cannot be
+represented as `Int`, `numericValidationFailure` reports the exact bound in its reason
+instead of clamping it or substituting a default.
 
 See the [builder validation guide](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschemabuilder/validation)
 for examples of exact decimal parsing and constraints.

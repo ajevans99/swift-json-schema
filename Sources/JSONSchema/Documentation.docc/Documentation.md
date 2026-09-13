@@ -91,9 +91,6 @@ let manyItems = try Schema(instance: #"{"type":"array","minItems":1e1000}"#)
 print(manyItems.validate([]).isValid) // false
 ```
 
-Numeric values and keyword bounds in ``ValidationIssue`` now contain `JSONNumberLiteral`.
-This includes count-constraint bounds; measured counts and array indexes remain `Int`. Use `rawValue` to
-inspect the token or the literal's throwing conversion methods when a Swift number is needed.
 See the [numeric migration guide](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/orderedjson/migrating-to-lossless-numbers)
 for enum-case, accessor, and `Codable` changes.
 
