@@ -213,6 +213,97 @@ struct JSONProjectionTests {
     #expect(try enclosing.parseAndValidate(["value": "hello"]) == "hello")
   }
 
+  private static var scopeSensitiveData: [JSONValue] {
+    [
+      ["$ref": "#/missing"],
+      ["$dynamicRef": "#/missing"],
+      ["$schema": "https://json-schema.org/draft/2019-09/schema"],
+      ["$vocabulary": ["https://example.com/custom": true]],
+    ]
+  }
+
+  @Test(arguments: ["$recursiveRef", "$recursiveAnchor"], Self.scopeSensitiveData)
+  func unmatchedCompositionIgnoresReservedKeywordContents(
+    keyword: String,
+    data: JSONValue
+  ) throws {
+    for onEnclosingSchema in [false, true] {
+      var enclosing = JSONString().minLength(2)
+      var branch = JSONString().minLength(2)
+      if onEnclosingSchema {
+        enclosing.schemaValue[keyword] = [data]
+      } else {
+        branch.schemaValue[keyword] = [data]
+      }
+      let branchSchema = branch.schemaValue
+      let flatMapped = enclosing.flatMap { _ in
+        var parser = JSONString()
+        parser.schemaValue = branchSchema
+        return JSONComposition.AnyOf(into: String.self) { parser }
+      }
+      var erased = JSONComposition.AnyOf(into: String.self) { branch }
+        .eraseToAnySchemaComponent()
+      erased.schemaValue = enclosing.schemaValue
+
+      for parser in [flatMapped.eraseToAnySchemaComponent(), erased] {
+        let complete = parser.schemaValue
+        let projection = parser.projection(schemaValue: complete)
+        #expect(parser.definition().validate("hello").isValid)
+        #expect(try parser.parseAndValidate("hello") == "hello")
+        #expect(projection.parse("hello") == .valid("hello"))
+        #expect(try projection.parseAndValidate("hello") == "hello")
+        #expect(projection.parse("x").errors != nil)
+        #expect(throws: ParseAndValidateIssue.self) { try projection.parseAndValidate("x") }
+        #expect(try projection.schemaValue.value.serialized() == complete.value.serialized())
+      }
+    }
+  }
+
+  @Test(arguments: ["$recursiveRef", "$recursiveAnchor"], Self.scopeSensitiveData)
+  func legacyNamedSubschemasCannotHideActiveScopeKeywords(
+    name: String,
+    activeSchema: JSONValue
+  ) throws {
+    for mapKeyword in [
+      "$defs", "definitions", "properties", "patternProperties", "dependentSchemas", "dependencies",
+    ] {
+      var branch = JSONString()
+      branch.schemaValue["allOf"] = [
+        .object([mapKeyword: .object([name: activeSchema])])
+      ]
+      var erased = JSONComposition.AnyOf(into: String.self) { branch }
+        .eraseToAnySchemaComponent()
+      erased.schemaValue = ["type": "string"]
+      let issues = try #require(
+        erased.projection(schemaValue: erased.schemaValue).parse("hello").errors
+      )
+      guard case .compositionFailure(.anyOf, let reason, _) = issues.first else {
+        Issue.record("An active scope keyword under \(mapKeyword)/\(name) must remain blocked")
+        continue
+      }
+      #expect(reason.contains("branch validation is unavailable"))
+    }
+  }
+
+  @Test(arguments: Self.scopeSensitiveData)
+  func inertLegacyValuesDoNotHideActiveSiblingScopeKeywords(activeSchema: JSONValue) throws {
+    var branch = JSONString()
+    branch.schemaValue["$recursiveRef"] = ["$dynamicRef": "#/inert"]
+    branch.schemaValue["$recursiveAnchor"] = ["$schema": "inert"]
+    branch.schemaValue["allOf"] = [activeSchema]
+    var erased = JSONComposition.AnyOf(into: String.self) { branch }
+      .eraseToAnySchemaComponent()
+    erased.schemaValue = ["type": "string"]
+    let issues = try #require(
+      erased.projection(schemaValue: erased.schemaValue).parse("hello").errors
+    )
+    guard case .compositionFailure(.anyOf, let reason, _) = issues.first else {
+      Issue.record("Only inert keyword contents may be excluded from the scope checks")
+      return
+    }
+    #expect(reason.contains("branch validation is unavailable"))
+  }
+
   @Test(arguments: [
     (JSONValue.object(["type": "and", "filters": []]), true),
     (

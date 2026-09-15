@@ -268,7 +268,10 @@ the standard dialect's vocabulary also require the full standard vocabulary set.
 
 The legacy `$recursiveRef` and `$recursiveAnchor` keywords are reserved but inert in draft
 2020-12. Projections preserve their raw values, including in unused definitions, without resolving
-them, traversing their values as schemas, or treating them as identifiers. In particular,
+them, traversing their values as schemas, or treating them as identifiers. This also applies to
+the independent branch checks used by `flatMap` and type-erased parsers with mismatched schema
+shapes. Property and definition names that spell these keywords do not exempt their actual
+subschemas from reference and vocabulary checks. In particular,
 `"$recursiveRef": "#"` does not enable recursion. A `oneOf` branch containing only that keyword
 matches every instance: an instance matching another branch therefore fails `oneOf`, while an
 instance matching no other branch can pass. Projection preserves these literal validation
