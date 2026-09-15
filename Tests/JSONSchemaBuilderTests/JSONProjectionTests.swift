@@ -89,6 +89,292 @@ struct JSONProjectionTests {
     }
   }
 
+  private static var comparisonFilter: JSONValue {
+    [
+      "type": "object",
+      "properties": [
+        "type": ["const": "eq"],
+        "key": ["type": "string"],
+        "value": ["type": "string"],
+      ],
+      "required": ["type", "key", "value"],
+    ]
+  }
+
+  private static var compoundFilter: SchemaValue {
+    [
+      "$recursiveAnchor": true,
+      "type": "object",
+      "properties": [
+        "type": ["enum": ["and", "or"]],
+        "filters": [
+          "type": "array",
+          "items": [
+            "oneOf": [
+              ["$ref": "#/$defs/comparison"],
+              ["$recursiveRef": "#"],
+            ]
+          ],
+        ],
+      ],
+      "required": ["type", "filters"],
+    ]
+  }
+
+  @Test(arguments: ["#", "#/$defs/reject", "#/missing", "https://example.com/missing"])
+  func legacyReferencesAreInertInValidationAndParsingSchemas(reference: String) throws {
+    let complete: SchemaValue = [
+      "$schema": .string(Dialect.draft2020_12.rawValue),
+      "$defs": ["reject": false],
+      "$recursiveRef": .string(reference),
+      "type": "string",
+      "title": "Reserved reference",
+      "description": "Preserved, not resolved",
+    ]
+    var parser = JSONString()
+    parser.schemaValue = complete
+    let projection = parser.projection(schemaValue: complete)
+    let direct = try Schema(rawSchema: complete.value, context: Context(dialect: .draft2020_12))
+
+    #expect(direct.validate("hello").isValid)
+    #expect(!direct.validate(42).isValid)
+    #expect(projection.parse("hello") == .valid("hello"))
+    #expect(try projection.parseAndValidate("hello") == "hello")
+    #expect(throws: ParseAndValidateIssue.self) { try projection.parseAndValidate(42) }
+    #expect(direct.jsonValue == complete.value)
+    #expect(projection.schemaValue == complete)
+    #expect(try projection.schemaValue.value.serialized() == complete.value.serialized())
+  }
+
+  @Test(arguments: [true, false])
+  func reservedRecursiveAnchorsDoNotChangeLocalStaticReferenceScope(anchor: Bool) throws {
+    var complete = Self.complete
+    complete["$recursiveAnchor"] = .boolean(anchor)
+    complete["$defs"] = [
+      "name": ["type": "string", "$recursiveAnchor": .boolean(anchor)]
+    ]
+    var parser = Self.union
+    parser.schemaValue["$recursiveAnchor"] = .boolean(anchor)
+    let projection = parser.projection(schemaValue: complete)
+    let direct = try Schema(rawSchema: complete.value, context: Context(dialect: .draft2020_12))
+
+    #expect(direct.validate("hello").isValid)
+    #expect(!direct.validate(42).isValid)
+    #expect(projection.parse("hello") == .valid(.name(ProjectionName(value: "hello"))))
+    #expect(try projection.parseAndValidate("hello") == .name(ProjectionName(value: "hello")))
+    #expect(throws: ParseAndValidateIssue.self) { try projection.parseAndValidate(42) }
+    #expect(projection.schemaValue == complete)
+  }
+
+  @Test(arguments: ["$recursiveRef", "$recursiveAnchor"])
+  func reservedKeywordValuesAreRetainedWithoutSchemaTraversal(keyword: String) throws {
+    let data: JSONValue = [
+      "$schema": "https://json-schema.org/draft/2019-09/schema",
+      "$dynamicRef": "#/missing",
+      "$id": "not-a-schema",
+      "allOf": [42],
+    ]
+    var parser = JSONString()
+    parser.schemaValue[keyword] = data
+    let complete = parser.schemaValue
+    let direct = try Schema(rawSchema: complete.value, context: Context(dialect: .draft2020_12))
+    let projection = parser.projection(schemaValue: complete)
+
+    #expect(direct.validate("hello").isValid)
+    #expect(direct.jsonValue == complete.value)
+    #expect(projection.parse("hello") == .valid("hello"))
+    #expect(try projection.parseAndValidate("hello") == "hello")
+    #expect(projection.schemaValue == complete)
+  }
+
+  @Test(arguments: [
+    SchemaValue.object(["$recursiveRef": "#"]),
+    Self.compoundFilter,
+  ])
+  func unusedLegacyDefinitionsDoNotBlockTypedProjections(unused: SchemaValue) throws {
+    let complete: SchemaValue = [
+      "type": "string",
+      "$defs": ["unused": unused.value, "comparison": Self.comparisonFilter],
+    ]
+    let projection = JSONString().projection(schemaValue: complete)
+    #expect(projection.definition().validate("hello").isValid)
+    #expect(projection.parse("hello") == .valid("hello"))
+    #expect(try projection.parseAndValidate("hello") == "hello")
+    #expect(projection.schemaValue == complete)
+
+    var enclosing = JSONObject {
+      JSONProperty(key: "value") {
+        JSONString().projection(schemaValue: ["type": "string"])
+      }
+      .required()
+    }
+    enclosing.schemaValue["$defs"] = complete["$defs"]
+    #expect(enclosing.parse(["value": "hello"]) == .valid("hello"))
+    #expect(try enclosing.parseAndValidate(["value": "hello"]) == "hello")
+  }
+
+  private static var scopeSensitiveData: [JSONValue] {
+    [
+      ["$ref": "#/missing"],
+      ["$dynamicRef": "#/missing"],
+      ["$schema": "https://json-schema.org/draft/2019-09/schema"],
+      ["$vocabulary": ["https://example.com/custom": true]],
+    ]
+  }
+
+  @Test(arguments: ["$recursiveRef", "$recursiveAnchor"], Self.scopeSensitiveData)
+  func unmatchedCompositionIgnoresReservedKeywordContents(
+    keyword: String,
+    data: JSONValue
+  ) throws {
+    for onEnclosingSchema in [false, true] {
+      var enclosing = JSONString().minLength(2)
+      var branch = JSONString().minLength(2)
+      if onEnclosingSchema {
+        enclosing.schemaValue[keyword] = [data]
+      } else {
+        branch.schemaValue[keyword] = [data]
+      }
+      let branchSchema = branch.schemaValue
+      let flatMapped = enclosing.flatMap { _ in
+        var parser = JSONString()
+        parser.schemaValue = branchSchema
+        return JSONComposition.AnyOf(into: String.self) { parser }
+      }
+      var erased = JSONComposition.AnyOf(into: String.self) { branch }
+        .eraseToAnySchemaComponent()
+      erased.schemaValue = enclosing.schemaValue
+
+      for parser in [flatMapped.eraseToAnySchemaComponent(), erased] {
+        let complete = parser.schemaValue
+        let projection = parser.projection(schemaValue: complete)
+        #expect(parser.definition().validate("hello").isValid)
+        #expect(try parser.parseAndValidate("hello") == "hello")
+        #expect(projection.parse("hello") == .valid("hello"))
+        #expect(try projection.parseAndValidate("hello") == "hello")
+        #expect(projection.parse("x").errors != nil)
+        #expect(throws: ParseAndValidateIssue.self) { try projection.parseAndValidate("x") }
+        #expect(try projection.schemaValue.value.serialized() == complete.value.serialized())
+      }
+    }
+  }
+
+  @Test(arguments: ["$recursiveRef", "$recursiveAnchor"], Self.scopeSensitiveData)
+  func legacyNamedSubschemasCannotHideActiveScopeKeywords(
+    name: String,
+    activeSchema: JSONValue
+  ) throws {
+    for mapKeyword in [
+      "$defs", "definitions", "properties", "patternProperties", "dependentSchemas", "dependencies",
+    ] {
+      var branch = JSONString()
+      branch.schemaValue["allOf"] = [
+        .object([mapKeyword: .object([name: activeSchema])])
+      ]
+      var erased = JSONComposition.AnyOf(into: String.self) { branch }
+        .eraseToAnySchemaComponent()
+      erased.schemaValue = ["type": "string"]
+      let issues = try #require(
+        erased.projection(schemaValue: erased.schemaValue).parse("hello").errors
+      )
+      guard case .compositionFailure(.anyOf, let reason, _) = issues.first else {
+        Issue.record("An active scope keyword under \(mapKeyword)/\(name) must remain blocked")
+        continue
+      }
+      #expect(reason.contains("branch validation is unavailable"))
+    }
+  }
+
+  @Test(arguments: Self.scopeSensitiveData)
+  func inertLegacyValuesDoNotHideActiveSiblingScopeKeywords(activeSchema: JSONValue) throws {
+    var branch = JSONString()
+    branch.schemaValue["$recursiveRef"] = ["$dynamicRef": "#/inert"]
+    branch.schemaValue["$recursiveAnchor"] = ["$schema": "inert"]
+    branch.schemaValue["allOf"] = [activeSchema]
+    var erased = JSONComposition.AnyOf(into: String.self) { branch }
+      .eraseToAnySchemaComponent()
+    erased.schemaValue = ["type": "string"]
+    let issues = try #require(
+      erased.projection(schemaValue: erased.schemaValue).parse("hello").errors
+    )
+    guard case .compositionFailure(.anyOf, let reason, _) = issues.first else {
+      Issue.record("Only inert keyword contents may be excluded from the scope checks")
+      return
+    }
+    #expect(reason.contains("branch validation is unavailable"))
+  }
+
+  @Test(arguments: [
+    (JSONValue.object(["type": "and", "filters": []]), true),
+    (
+      JSONValue.object([
+        "type": "and", "filters": [["type": "eq", "key": "status", "value": "active"]],
+      ]),
+      false
+    ),
+    (JSONValue.object(["type": "and", "filters": ["not a filter"]]), true),
+    (JSONValue.object(["type": "and", "filters": [["type": "and", "filters": 42]]]), true),
+    (JSONValue.object(["type": "and"]), false),
+  ])
+  func legacyOneOfKeepsLiteralDraft202012Validity(value: JSONValue, expected: Bool) throws {
+    var comparison = JSONAnyValue()
+    comparison.schemaValue = ["$ref": "#/$defs/comparison"]
+    var legacy = JSONAnyValue()
+    legacy.schemaValue = ["$recursiveRef": "#"]
+    let parser = JSONObject {
+      JSONProperty(key: "type") { JSONString() }.required()
+      JSONProperty(key: "filters") {
+        JSONArray {
+          JSONComposition.OneOf(into: JSONValue.self) {
+            [comparison.eraseToAnySchemaComponent(), legacy.eraseToAnySchemaComponent()]
+          }
+        }
+      }
+      .required()
+    }
+    .map { type, filters in
+      JSONValue.object(["type": .string(type), "filters": .array(filters)])
+    }
+    var complete = Self.compoundFilter
+    complete["$defs"] = ["comparison": Self.comparisonFilter]
+    let projection = parser.projection(schemaValue: complete)
+    let direct = try Schema(rawSchema: complete.value, context: Context(dialect: .draft2020_12))
+
+    // The legacy-only branch matches every item, so a valid comparison matches both branches.
+    #expect(direct.validate(value).isValid == expected)
+    #expect((projection.parse(value).value != nil) == expected)
+    if expected {
+      #expect(try projection.parseAndValidate(value) == value)
+    } else {
+      #expect(throws: ParseAndValidateIssue.self) { try projection.parseAndValidate(value) }
+    }
+    #expect(projection.schemaValue == complete)
+    #expect(try projection.schemaValue.value.serialized() == complete.value.serialized())
+  }
+
+  @Test func actualDynamicReferencesStillValidateAndFailStaticProjectionExplicitly() throws {
+    let complete: SchemaValue = [
+      "$defs": ["reject": false],
+      "$dynamicRef": "#/$defs/reject",
+    ]
+    let direct = try Schema(rawSchema: complete.value, context: Context(dialect: .draft2020_12))
+    #expect(!direct.validate("hello").isValid)
+    #expect(
+      JSONAnyValue().projection(schemaValue: complete).parse("hello").errors
+        == [
+          .projectionFailure(reason: "$dynamicRef is not supported in a static projection bundle")
+        ]
+    )
+  }
+
+  @Test func legacyAnchorsDoNotEnableRootStaticReferences() {
+    let complete: SchemaValue = ["$ref": "#", "$recursiveAnchor": true]
+    #expect(
+      JSONAnyValue().projection(schemaValue: complete).parse("hello").errors
+        == [.projectionFailure(reason: "projection references must use local #/$defs/... pointers")]
+    )
+  }
+
   @Test func referenceCompositionCanUseADifferentValidationShape() throws {
     let projection = JSONComponents.Projection(upstream: Self.union, schemaValue: Self.complete)
     #expect(projection.schemaValue == Self.complete)
@@ -256,28 +542,58 @@ struct JSONProjectionTests {
   }
 
   @Test func keywordLikeInstanceDataDoesNotChangeTheProjectionPolicy() throws {
-    let data: JSONValue = ["$id": "data", "$ref": "remote", "$vocabulary": ["custom": true]]
+    let data: JSONValue = [
+      "$id": "data", "$ref": "remote", "$vocabulary": ["custom": true],
+      "$recursiveRef": "#", "$recursiveAnchor": true,
+      "$dynamicRef": "remote", "$dynamicAnchor": "data",
+    ]
     let object = JSONObject {
       JSONProperty(key: "$schema") { JSONString() }.required()
       JSONProperty(key: "$vocabulary") { JSONAnyValue() }.required()
+      JSONProperty(key: "$recursiveRef") { JSONString() }.required()
+      JSONProperty(key: "$recursiveAnchor") { JSONBoolean() }.required()
+      JSONProperty(key: "$dynamicRef") { JSONString() }.required()
+      JSONProperty(key: "$dynamicAnchor") { JSONString() }.required()
     }
     var complete = SchemaValue.object(["allOf": [object.schemaValue.value]])
     complete["examples"] = [data]
     complete["default"] = data
-    let input: JSONValue = ["$schema": "data", "$vocabulary": data]
+    let input: JSONValue = [
+      "$schema": "data", "$vocabulary": data,
+      "$recursiveRef": "#", "$recursiveAnchor": true,
+      "$dynamicRef": "remote", "$dynamicAnchor": "data",
+    ]
     let output = try object.projection(schemaValue: complete).parseAndValidate(input)
     #expect(output.0 == "data")
     #expect(output.1 == data)
+    #expect(output.2 == "#")
+    #expect(output.3)
+    #expect(output.4 == "remote")
+    #expect(output.5 == "data")
   }
 
   @Test(arguments: [
     SchemaValue.object(["$vocabulary": ["https://json-schema.org/draft/2020-12/vocab/core": true]]),
     SchemaValue.object(["$vocabulary": ["https://example.com/custom": true]]),
     SchemaValue.object(["$schema": "https://example.com/custom"]),
+    SchemaValue.object([
+      "$schema": "https://json-schema.org/draft/2019-09/schema", "$recursiveRef": "#",
+    ]),
+    SchemaValue.object([
+      "$defs": [
+        "unused": [
+          "$schema": "https://json-schema.org/draft/2019-09/schema", "$recursiveAnchor": true,
+        ]
+      ]
+    ]),
     SchemaValue.object(["$dynamicRef": "#/$defs/name"]),
+    SchemaValue.object(["$defs": ["unused": ["$dynamicRef": "#"]]]),
     SchemaValue.object(["$ref": "https://example.com/remote"]),
     SchemaValue.object(["$ref": "#/$defs/missing"]),
+    SchemaValue.object(["$ref": "#/$defs/na%6De", "$defs": ["name": true]]),
     SchemaValue.object(["$ref": "#/$defs/name", "$id": "child", "$defs": ["name": true]]),
+    SchemaValue.object(["$ref": "#/$defs/name", "$anchor": "root", "$defs": ["name": true]]),
+    SchemaValue.object(["$ref": "#/$defs/name", "$dynamicAnchor": "root", "$defs": ["name": true]]),
     SchemaValue.object(["allOf": [42]]),
   ])
   func unsupportedOrMalformedBundlesFailExplicitly(complete: SchemaValue) throws {

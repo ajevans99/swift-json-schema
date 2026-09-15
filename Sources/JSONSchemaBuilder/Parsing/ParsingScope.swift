@@ -32,17 +32,9 @@ enum ParsingScope {
     }
 
     static func hasCustomVocabulary(_ value: JSONValue) -> Bool {
-      switch value {
-      case .object(let object):
-        if object["$vocabulary"] != nil { return true }
-        if let dialect = object["$schema"],
-          dialect != .string("https://json-schema.org/draft/2020-12/schema")
-        {
-          return true
-        }
-        return object.values.contains(where: hasCustomVocabulary)
-      case .array(let values): return values.contains(where: hasCustomVocabulary)
-      default: return false
+      containsScopeKeyword(value) { keyword, value in
+        keyword == "$vocabulary"
+          || (keyword == "$schema" && value != .string(Dialect.draft2020_12.rawValue))
       }
     }
   }
@@ -150,11 +142,34 @@ enum ParsingScope {
   }
 
   private static func containsReference(_ value: JSONValue) -> Bool {
+    containsScopeKeyword(value) { keyword, _ in
+      keyword == "$ref" || keyword == "$dynamicRef"
+    }
+  }
+
+  private static func containsScopeKeyword(
+    _ value: JSONValue,
+    matching predicate: (String, JSONValue) -> Bool
+  ) -> Bool {
     switch value {
     case .object(let object):
-      return object["$ref"] != nil || object["$dynamicRef"] != nil
-        || object.values.contains(where: containsReference)
-    case .array(let values): return values.contains(where: containsReference)
+      if object.contains(where: { predicate($0.key, $0.value) }) { return true }
+      return object.contains { keyword, value in
+        switch keyword {
+        case "$recursiveRef", "$recursiveAnchor":
+          return false
+        case "$defs", "definitions", "properties", "patternProperties", "dependentSchemas",
+          "dependencies":
+          // Map entry names are not keywords, even when named $recursiveRef or $recursiveAnchor.
+          if let entries = value.object {
+            return entries.values.contains { containsScopeKeyword($0, matching: predicate) }
+          }
+        default: break
+        }
+        return containsScopeKeyword(value, matching: predicate)
+      }
+    case .array(let values):
+      return values.contains { containsScopeKeyword($0, matching: predicate) }
     default: return false
     }
   }

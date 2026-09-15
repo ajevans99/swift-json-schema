@@ -21,6 +21,9 @@ extension JSONComponents {
   /// The parsing bundle must be self-contained draft 2020-12, with references exclusively to
   /// `#/$defs/...` (without percent encoding). Identifiers and anchors are supported only in
   /// reference-free bundles. Dynamic references and custom vocabularies are unsupported.
+  /// The legacy `$recursiveRef` and `$recursiveAnchor` keywords are inert in draft 2020-12:
+  /// their raw values are preserved, not resolved or interpreted as schemas or identifiers.
+  /// This does not enable draft 2019-09 recursion or support `$dynamicRef` evaluation.
   /// Standard vocabulary subsets must include core, applicator, and validation; omitted
   /// format, unevaluated, or content vocabularies must not have keywords in the bundle.
   /// Unsupported scope or schema construction is reported as ``ParseIssue/projectionFailure(reason:)``.

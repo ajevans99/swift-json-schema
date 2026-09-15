@@ -260,11 +260,24 @@ custom vocabulary declarations are rejected. Standard vocabulary subsets must in
 applicator, and validation; omitted format, unevaluated, or content vocabularies must not have
 keywords anywhere in the bundle. This prevents enabling assertions that the complete schema
 deliberately disables. Declaring all seven standard 2020-12 vocabularies is supported.
-Identifiers and anchors are allowed only when the bundle has no
+Identifiers (`$id`) and anchors (`$anchor`, `$dynamicAnchor`) are allowed only when the bundle has no
 references; reference-bearing bundles must remove them and resolve any dynamic scope before
 projection. These checks traverse schema keywords and reference targets, not arbitrary instance
 data in `const`, `enum`, `default`, `examples`, or extension annotations. Caller overrides of
 the standard dialect's vocabulary also require the full standard vocabulary set.
+
+The legacy `$recursiveRef` and `$recursiveAnchor` keywords are reserved but inert in draft
+2020-12. Projections preserve their raw values, including in unused definitions, without resolving
+them, traversing their values as schemas, or treating them as identifiers. This also applies to
+the independent branch checks used by `flatMap` and type-erased parsers with mismatched schema
+shapes. Property and definition names that spell these keywords do not exempt their actual
+subschemas from reference and vocabulary checks. In particular,
+`"$recursiveRef": "#"` does not enable recursion. A `oneOf` branch containing only that keyword
+matches every instance: an instance matching another branch therefore fails `oneOf`, while an
+instance matching no other branch can pass. Projection preserves these literal validation
+semantics; it does not repair schemas authored with legacy recursion intent. Explicit non-2020-12
+`$schema` declarations remain unsupported, as does actual `$dynamicRef` evaluation in a static
+projection bundle.
 
 Unsupported scopes, conflicting definitions, malformed parsing bundles, and parsing-schema
 construction failures produce `ParseIssue.projectionFailure` rather than silently changing

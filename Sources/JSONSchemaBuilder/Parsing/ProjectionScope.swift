@@ -143,11 +143,12 @@ private enum ProjectionScope {
     ] where object[keyword] != nil {
       scope.usedOptionalVocabularies.insert(vocabularyBase + vocabulary)
     }
+    // Draft 2020-12 reserves $recursiveRef and $recursiveAnchor without reference semantics.
     scope.hasIdentifiers =
       scope.hasIdentifiers
-      || ["$id", "$anchor", "$dynamicAnchor", "$recursiveAnchor"].contains { object[$0] != nil }
-    for keyword in ["$dynamicRef", "$recursiveRef"] where object[keyword] != nil {
-      throw .projectionFailure(reason: "\(keyword) is not supported in a static projection bundle")
+      || ["$id", "$anchor", "$dynamicAnchor"].contains { object[$0] != nil }
+    if object["$dynamicRef"] != nil {
+      throw .projectionFailure(reason: "$dynamicRef is not supported in a static projection bundle")
     }
     if let reference = object["$ref"] {
       guard let uri = reference.string, uri.hasPrefix("#/$defs/"),
