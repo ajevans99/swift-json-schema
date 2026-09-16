@@ -130,6 +130,13 @@ The six committed schemas in [`JSONSchemaBenchmarks/Resources/`](./JSONSchemaBen
 each have one valid and one invalid instance: **66 cases** total (6 construction,
 12 warmed validation, and 48 validation-plus-output).
 
+Two generated enum probes add **8 cases**, bringing the offline suite to **74**.
+`construct.enum-{8,128}.Schema.init` measures index construction cost;
+`validate.enum-{8,128}.{first,last,invalid}.Schema.validate` separates an early
+hit, a late hit, and a miss. Inputs and enum domains are created outside
+measurement. These probes use the same validity/error-output preflight as the
+resource corpus, but do not register separate output benchmarks.
+
 - **`construct.<schema>.Schema.init`** — one construction case per schema, not per instance
 - **`validate.<schema>[.<validity>].Schema.validate`** — one validation per measured iteration, using a warmed schema
 - **`output.<schema>[.<validity>].<level>`** — validation plus Flag, Basic, Detailed, or Verbose rendering; not rendering a cached result
@@ -271,8 +278,8 @@ Basic output for size-10 valid, Verbose for size-10 late-invalid, and Basic/Verb
 for many-error cases at every size. Names include source, size, and validity,
 for example `validate.openapi-3.1.100.invalid-late.Schema.validate`.
 
-This adds **30 cases** in the PR subset (**96 JSONSchema / 160 combined** with
-the full OrderedJSON corpus), or **42 cases** extended (**108 / 172 combined**).
+This adds **30 cases** in the PR subset (**104 JSONSchema / 168 combined** with
+the full OrderedJSON corpus), or **42 cases** extended (**116 / 180 combined**).
 All prior 66 JSONSchema and 64 OrderedJSON names are preserved. New cases use
 one warmup and at most 20 measured iterations or one second per case, whichever
 is reached first; preflight and an individual long operation can exceed that

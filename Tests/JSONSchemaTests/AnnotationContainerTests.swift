@@ -25,7 +25,9 @@ struct AnnotationContainerTests {
     var destination = AnnotationContainer()
     destination.merge(source)
 
-    #expect(destination.allAnnotations().map(\.instanceLocation) == [root, second.instanceLocation])
+    #expect(
+      destination.allAnnotations().map(\.instanceLocation) == [root, second.instanceLocation]
+    )
     let copied = try #require(destination.annotation(for: Keywords.Properties.self, at: root))
     #expect(copied.value == first.value)
     #expect(copied.schemaLocation == first.schemaLocation)
@@ -33,12 +35,15 @@ struct AnnotationContainerTests {
 
     destination.insert(
       Annotation<Keywords.Properties>(
-        keyword: "properties", instanceLocation: root,
+        keyword: "properties",
+        instanceLocation: root,
         schemaLocation: JSONPointer(tokens: ["allOf", "1", "properties"]),
         value: ["a", "b"]
       )
     )
-    #expect(destination.annotation(for: Keywords.Properties.self, at: root)?.value == ["z", "a", "b"])
+    #expect(
+      destination.annotation(for: Keywords.Properties.self, at: root)?.value == ["z", "a", "b"]
+    )
     #expect(source.annotation(for: Keywords.Properties.self, at: root)?.value == ["z", "a"])
     #expect(
       destination.annotation(for: Keywords.Properties.self, at: root)?.schemaLocation
@@ -47,8 +52,10 @@ struct AnnotationContainerTests {
 
     source.insert(
       Annotation<Keywords.Properties>(
-        keyword: "properties", instanceLocation: second.instanceLocation,
-        schemaLocation: second.schemaLocation, value: ["later"]
+        keyword: "properties",
+        instanceLocation: second.instanceLocation,
+        schemaLocation: second.schemaLocation,
+        value: ["later"]
       )
     )
     #expect(
@@ -56,6 +63,8 @@ struct AnnotationContainerTests {
         == ["nested"]
     )
     destination.merge(AnnotationContainer())
-    #expect(destination.allAnnotations().map(\.instanceLocation) == [root, second.instanceLocation])
+    #expect(
+      destination.allAnnotations().map(\.instanceLocation) == [root, second.instanceLocation]
+    )
   }
 }
