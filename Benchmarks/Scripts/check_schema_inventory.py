@@ -17,6 +17,10 @@ def expected_inventory(extended=False):
             expected.add(f"validate.{schema}{suffix}.Schema.validate")
             for level in ("flag", "basic", "detailed", "verbose"):
                 expected.add(f"output.{schema}{suffix}.{level}")
+    for count in (8, 128):
+        expected.add(f"construct.enum-{count}.Schema.init")
+        for variant in ("first", "last", "invalid"):
+            expected.add(f"validate.enum-{count}.{variant}.Schema.validate")
     for schema in ("openapi-3.1", "overlay-1.0"):
         expected.add(f"construct.{schema}.Schema.init")
         for size in ((10, 100, 1000) if extended else (10, 100)):

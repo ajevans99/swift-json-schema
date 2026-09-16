@@ -287,7 +287,28 @@ struct SchemaCorpus: Sendable {
         ]
       )
     }
-    return SchemaCorpus(samples: samples + RealWorldCorpus.load())
+    let enumSamples = [8, 128].map { count in
+      let values = (0..<count).map { JSONValue.string("option-\($0)") }
+      return Sample(
+        name: "enum-\(count)",
+        schemaSource: .resource(["enum": .array(values)]),
+        instances: [
+          Instance(
+            name: "first", value: values[0], expectedValidity: true,
+            expectedErrors: [], outputLevels: []
+          ),
+          Instance(
+            name: "last", value: values[count - 1], expectedValidity: true,
+            expectedErrors: [], outputLevels: []
+          ),
+          Instance(
+            name: "invalid", value: "unknown", expectedValidity: false,
+            expectedErrors: [.init(keyword: "enum", instanceLocation: "")], outputLevels: []
+          ),
+        ]
+      )
+    }
+    return SchemaCorpus(samples: samples + enumSamples + RealWorldCorpus.load())
   }
 
   static func loadJSONValue(named resourceName: String) -> JSONValue {
