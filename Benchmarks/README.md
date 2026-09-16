@@ -197,6 +197,87 @@ merge prerequisites for the benchmark-corpus change**:
 - [ ] Implement a measured, correctness-preserving optimization exceeding 10% on a representative case.
 - [ ] Publish repeated, same-environment before/after measurements and correctness results.
 
+### Validation optimization experiments
+
+The first pass experiments only with schema validation; OrderedJSON parsing and
+JSON equality/hashing implementations are unchanged.
+
+| Idea | Isolated result | Decision |
+|------|-----------------|----------|
+| Reuse ordered annotation storage when the destination is empty, rather than inserting every entry again | Valid meta-schema allocations: 26,627 → 26,075; Poll: 3,698 → 3,648; OpenAPI fragment: 4,121 → 4,059. Timing changes were small. | Keep the allocation reduction. Copy-on-write retains independent mutation and traversal order. |
+| Replace the temporary `additionalProperties` union with two membership checks | Regex workloads saved 5 allocations; validation medians varied from about -2% to +2% across the corpus. | Revert: no convincing overall timing improvement. |
+| Index large enum domains once, retaining the original array for diagnostics and an early-first-value check | 128-value late hit: 12.06 → 7.52 µs; miss: 31.79 → 28.64 µs. Small enums were effectively unchanged. | Keep for repeated validation; domains below 32 values stay linear. |
+
+The enum index has a deliberate tradeoff: in the isolated experiment construction
+rose from 12.10 to 44.74 µs (43 → 172 allocations), and a non-first lookup adds one
+allocation with the current JSONValue string hash. Roughly eight late-hit
+validations amortize construction in this particular 128-string workload.
+The cutoff of 32 is a conservative heuristic, not a measured universal crossover.
+One-shot schemas, large composite values, and other enum distributions may
+behave differently; these results do not imply a universal validation speedup.
+
+Measurements use Swift 6.3.3, Linux x86_64, a four-vCPU runner, the committed
+dependency locks, release optimization, jemalloc 5.3.0, and
+`SWIFT_DETERMINISTIC_HASHING=1`. Timing and allocations are measured separately.
+There are no concurrent test/build jobs during measurements. The suite runs
+2 warmups and up to 500 iterations / 1 second per case, without batching.
+Only the **74 offline cases** are included; downloaded production schemas are
+not part of this experiment.
+
+Final combined-candidate measurements (µs/operation; each triple is runs 1/2/3):
+
+| Case | Before p50 | After p50 | Before p90 | After p90 |
+|------|------------|-----------|------------|-----------|
+| enum-128, last | 12.06 / 12.22 / 12.34 | 7.53 / 7.55 / 7.55 | 12.18 / 12.30 / 12.42 | 7.59 / 7.63 / 7.63 |
+| enum-128, invalid | 31.79 / 31.31 / 31.54 | 28.67 / 28.41 / 28.59 | 32.27 / 32.37 / 32.11 | 29.25 / 29.01 / 29.01 |
+| enum-128, first | 7.19 / 7.36 / 7.18 | 7.32 / 7.33 / 7.25 | 7.25 / 7.43 / 7.25 | 7.38 / 7.39 / 7.32 |
+| enum-8, last | 7.43 / 7.49 / 7.51 | 7.47 / 7.62 / 7.50 | 7.51 / 7.59 / 7.63 | 7.54 / 7.67 / 7.55 |
+| construct enum-128 | 12.10 / 12.08 / 12.18 | 44.03 / 44.03 / 44.09 | 12.22 / 12.18 / 12.29 | 44.64 / 44.77 / 66.56 |
+| validate Poll | 1286.14 / 1299.45 / 1292.29 | 1289.21 / 1291.26 / 1289.21 | 1308.67 / 1325.06 / 1317.89 | 1318.91 / 2111.49 / 1319.93 |
+| validate meta-schema | 10960.90 / 10911.74 / 10969.09 | 10928.13 / 10985.47 / 10985.47 | 11042.82 / 11051.01 / 11059.20 | 11026.43 / 11083.77 / 11149.31 |
+
+Taking the median of the three p50s gives **38.3% less time** for the large-enum
+late hit and **9.3% less** for its miss. The first hit is **1.8% slower**;
+construction is **263.8% slower**. Across every non-enum case, median-of-p50
+changes are -0.4% to +1.5% for validation, -0.3% to +0.9% for construction,
+and -0.4% to +1.5% for validation-plus-output. These small changes are not
+evidence of a broad latency improvement. Tail noise is visible, notably Poll's
+second-run p90; it is not discarded. The separate combined allocation run
+reproduces the isolated annotation savings and enum overhead above.
+
+Correctness checks: all **706 Swift tests / 104 suites**, **25 benchmark-script
+tests**, changed-file Swift formatting, and all 74 benchmark preflights passed.
+The full Swift run used a temporary stdlib-only Python virtual environment:
+the runner's preinstalled `jsonschema` package otherwise triggered an optional
+`referencing` import failure in the fixture helper. No package locks, fixtures,
+or test expectations were changed to bypass that environment failure.
+
+The baseline is `273fad3` (benchmark probes/tests only), and the retained source
+candidate is `85c5953`. Each idea was applied independently to the baseline;
+the final candidate combines annotation reuse and enum indexing. To reproduce
+from the benchmark package directory at each revision:
+
+```bash
+export SWIFT_DETERMINISTIC_HASHING=1
+for run in 1 2 3; do
+  swift package --disable-automatic-resolution --allow-writing-to-package-directory benchmark \
+    baseline update before-time-$run --target JSONSchemaBenchmarks \
+    --metric wallClock --no-progress
+done
+swift package --disable-automatic-resolution --allow-writing-to-package-directory benchmark \
+  baseline update before-alloc --target JSONSchemaBenchmarks \
+  --metric mallocCountTotal --no-progress
+```
+
+Use `after-*` names for the candidate. For isolated validation probes, add
+`--filter 'validate.*'`; use `--filter '.*enum.*'` to include enum construction.
+Filters match whole names, so a prefix-only expression can silently select no
+cases. Check the resulting case inventory, not just the command's exit status.
+
+The eight new enum cases intentionally have no invented CI thresholds. The
+existing baseline-coverage mechanism will request a full same-runner capture;
+local measurements must not be copied into the committed Linux thresholds.
+
 ### Real-world JSONSchema corpus
 
 Two **unmodified production schemas**, published by the OpenAPI Initiative, are
