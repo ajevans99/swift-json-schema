@@ -104,4 +104,18 @@ struct JSONReferenceComponentTests {
     #expect(parsed.value == TestNode(name: "branch"))
   }
 
+  @Test func documentRejectsConflictingDynamicAnchors() {
+    var component = JSONAnyValue()
+    component.schemaValue = [
+      "properties": [
+        "string": ["$dynamicAnchor": "node", "type": "string"],
+        "number": ["$dynamicAnchor": "node", "type": "number"],
+      ]
+    ]
+
+    #expect(throws: SchemaDocumentError.self) {
+      try component.document()
+    }
+  }
+
 }
