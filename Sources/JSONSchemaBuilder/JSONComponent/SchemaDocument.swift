@@ -21,6 +21,11 @@ extension JSONSchemaComponent {
 }
 
 private enum SchemaDocument {
+  private struct AnchorEntry {
+    let schema: JSONValue
+    var count: Int
+  }
+
   // Both collection and transformation traverse these schema-bearing keywords.
   private static let objectSchemaKeywords = [
     "$defs", "definitions", "properties", "patternProperties", "dependentSchemas",
@@ -32,7 +37,7 @@ private enum SchemaDocument {
   ]
 
   static func bundle(_ schema: SchemaValue) throws(SchemaDocumentError) -> SchemaValue {
-    var anchors: [String: (schema: JSONValue, count: Int)] = [:]
+    var anchors: [String: AnchorEntry] = [:]
     try collectAnchors(in: schema.value, anchors: &anchors)
 
     let repeated = anchors.filter { $0.value.count > 1 }
@@ -45,7 +50,7 @@ private enum SchemaDocument {
     for anchor in repeated.keys.sorted() {
       guard let entry = repeated[anchor] else { continue }
       let definition = transformDefinition(entry.schema, repeated: repeated)
-      if let existing = definitions[anchor], existing != definition {
+      if definitions[anchor] != nil {
         throw .conflictingDefinition(anchor)
       }
       definitions[anchor] = definition
@@ -56,15 +61,15 @@ private enum SchemaDocument {
 
   private static func collectAnchors(
     in schema: JSONValue,
-    anchors: inout [String: (schema: JSONValue, count: Int)]
+    anchors: inout [String: AnchorEntry]
   ) throws(SchemaDocumentError) {
     guard case .object(let object) = schema else { return }
     if let anchor = object["$dynamicAnchor"]?.string {
       if let existing = anchors[anchor] {
         guard existing.schema == schema else { throw .conflictingDynamicAnchor(anchor) }
-        anchors[anchor] = (schema, existing.count + 1)
+        anchors[anchor] = .init(schema: schema, count: existing.count + 1)
       } else {
-        anchors[anchor] = (schema, 1)
+        anchors[anchor] = .init(schema: schema, count: 1)
       }
     }
     for child in childSchemas(of: object) {
@@ -74,7 +79,7 @@ private enum SchemaDocument {
 
   private static func transform(
     _ schema: JSONValue,
-    repeated: [String: (schema: JSONValue, count: Int)]
+    repeated: [String: AnchorEntry]
   ) -> JSONValue {
     guard case .object(var object) = schema else { return schema }
     transformChildSchemas(in: &object, repeated: repeated)
@@ -87,7 +92,7 @@ private enum SchemaDocument {
 
   private static func transformDefinition(
     _ schema: JSONValue,
-    repeated: [String: (schema: JSONValue, count: Int)]
+    repeated: [String: AnchorEntry]
   ) -> JSONValue {
     guard case .object(var object) = schema else { return schema }
     transformChildSchemas(in: &object, repeated: repeated)
@@ -116,7 +121,7 @@ private enum SchemaDocument {
 
   private static func transformChildSchemas(
     in object: inout OrderedDictionary<String, JSONValue>,
-    repeated: [String: (schema: JSONValue, count: Int)]
+    repeated: [String: AnchorEntry]
   ) {
     for keyword in objectSchemaKeywords {
       guard var entries = object[keyword]?.object else { continue }
@@ -132,6 +137,7 @@ private enum SchemaDocument {
       object[keyword] = transform(child, repeated: repeated)
     }
     if var dependencies = object["dependencies"]?.object {
+      // Retain traversal of the legacy schema form used by earlier drafts.
       for (name, child) in dependencies where child.array == nil {
         dependencies[name] = transform(child, repeated: repeated)
       }
