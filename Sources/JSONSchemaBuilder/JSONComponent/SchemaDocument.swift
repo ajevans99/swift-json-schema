@@ -42,7 +42,8 @@ private enum SchemaDocument {
     guard case .object(var root) = transformed else { return schema }
 
     var definitions = root["$defs"]?.object ?? OrderedDictionary()
-    for (anchor, entry) in repeated {
+    for anchor in repeated.keys.sorted() {
+      guard let entry = repeated[anchor] else { continue }
       let definition = transformDefinition(entry.schema, repeated: repeated)
       if let existing = definitions[anchor], existing != definition {
         throw .conflictingDefinition(anchor)
