@@ -21,6 +21,7 @@ extension JSONSchemaComponent {
 }
 
 private enum SchemaDocument {
+  // Both collection and transformation traverse these schema-bearing keywords.
   private static let objectSchemaKeywords = [
     "$defs", "definitions", "properties", "patternProperties", "dependentSchemas",
   ]
@@ -75,10 +76,11 @@ private enum SchemaDocument {
     repeated: [String: (schema: JSONValue, count: Int)]
   ) -> JSONValue {
     guard case .object(var object) = schema else { return schema }
-    if let anchor = object["$dynamicAnchor"]?.string, repeated[anchor] != nil {
-      return ["$ref": .string(JSONPointer.pointerString(from: ["$defs", anchor]))]
-    }
     transformChildSchemas(in: &object, repeated: repeated)
+    if let anchor = object["$dynamicAnchor"]?.string, repeated[anchor] != nil {
+      object["$dynamicAnchor"] = nil
+      object["$ref"] = .string(JSONPointer.pointerString(from: ["$defs", anchor]))
+    }
     return .object(object)
   }
 
