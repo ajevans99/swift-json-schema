@@ -21,6 +21,15 @@ extension JSONSchemaComponent {
 }
 
 private enum SchemaDocument {
+  private static let objectSchemaKeywords = [
+    "$defs", "definitions", "properties", "patternProperties", "dependentSchemas",
+  ]
+  private static let arraySchemaKeywords = ["allOf", "anyOf", "oneOf", "prefixItems"]
+  private static let singleSchemaKeywords = [
+    "additionalProperties", "unevaluatedProperties", "items", "unevaluatedItems", "contains",
+    "propertyNames", "not", "if", "then", "else", "contentSchema",
+  ]
+
   static func bundle(_ schema: SchemaValue) throws(SchemaDocumentError) -> SchemaValue {
     var anchors: [String: (schema: JSONValue, count: Int)] = [:]
     try collectAnchors(in: schema.value, anchors: &anchors)
@@ -33,10 +42,11 @@ private enum SchemaDocument {
 
     var definitions = root["$defs"]?.object ?? OrderedDictionary()
     for (anchor, entry) in repeated {
-      if let existing = definitions[anchor], existing != entry.schema {
+      let definition = transformDefinition(entry.schema, repeated: repeated)
+      if let existing = definitions[anchor], existing != definition {
         throw .conflictingDefinition(anchor)
       }
-      definitions[anchor] = transformDefinition(entry.schema, repeated: repeated)
+      definitions[anchor] = definition
     }
     root["$defs"] = .object(definitions)
     return .object(root)
@@ -83,21 +93,19 @@ private enum SchemaDocument {
 
   private static func childSchemas(of object: OrderedDictionary<String, JSONValue>) -> [JSONValue] {
     var result: [JSONValue] = []
-    for keyword in ["$defs", "definitions", "properties", "patternProperties", "dependentSchemas"] {
+    for keyword in objectSchemaKeywords {
       if let entries = object[keyword]?.object {
         result.append(contentsOf: entries.values)
       }
     }
-    for keyword in ["allOf", "anyOf", "oneOf", "prefixItems"] {
+    for keyword in arraySchemaKeywords {
       result.append(contentsOf: object[keyword]?.array ?? [])
     }
-    for keyword in [
-      "additionalProperties", "unevaluatedProperties", "items", "unevaluatedItems", "contains",
-      "propertyNames", "not", "if", "then", "else", "contentSchema",
-    ] {
+    for keyword in singleSchemaKeywords {
       if let child = object[keyword] { result.append(child) }
     }
     if let dependencies = object["dependencies"]?.object {
+      // Array-valued dependencies are property names, not subschemas.
       result.append(contentsOf: dependencies.values.filter { $0.array == nil })
     }
     return result
@@ -107,19 +115,16 @@ private enum SchemaDocument {
     in object: inout OrderedDictionary<String, JSONValue>,
     repeated: [String: (schema: JSONValue, count: Int)]
   ) {
-    for keyword in ["$defs", "definitions", "properties", "patternProperties", "dependentSchemas"] {
+    for keyword in objectSchemaKeywords {
       guard var entries = object[keyword]?.object else { continue }
       for (name, child) in entries { entries[name] = transform(child, repeated: repeated) }
       object[keyword] = .object(entries)
     }
-    for keyword in ["allOf", "anyOf", "oneOf", "prefixItems"] {
+    for keyword in arraySchemaKeywords {
       guard let entries = object[keyword]?.array else { continue }
       object[keyword] = .array(entries.map { transform($0, repeated: repeated) })
     }
-    for keyword in [
-      "additionalProperties", "unevaluatedProperties", "items", "unevaluatedItems", "contains",
-      "propertyNames", "not", "if", "then", "else", "contentSchema",
-    ] {
+    for keyword in singleSchemaKeywords {
       guard let child = object[keyword] else { continue }
       object[keyword] = transform(child, repeated: repeated)
     }
