@@ -6,7 +6,7 @@ public enum SchemaDocumentError: Error, Equatable {
   /// Multiple non-identical schemas declare the same dynamic anchor.
   case conflictingDynamicAnchor(String)
 
-  /// A generated definition would replace a different existing definition.
+  /// A generated definition conflicts with an existing definition.
   case conflictingDefinition(String)
 }
 
