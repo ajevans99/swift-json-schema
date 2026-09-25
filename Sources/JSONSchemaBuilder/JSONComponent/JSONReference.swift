@@ -49,8 +49,25 @@ public struct JSONReference<T: Schemable>: JSONSchemaComponent {
 
   /// Parses the referenced schema by delegating back to `T.schema`.
   public func parse(_ value: JSONValue) -> Parsed<T, ParseIssue> {
+    if let context = SchemaDocumentScope.current {
+      guard let schema = context.component(for: ObjectIdentifier(T.self)) else {
+        return .error(
+          .compositionFailure(
+            type: .allOf,
+            reason: "reference type is not registered in this SchemaDocument",
+            nestedErrors: []
+          )
+        )
+      }
+      return parse(schema, value: value)
+    }
+    return parse(T.schema, value: value)
+  }
+
+  private func parse<C: JSONSchemaComponent>(_ schema: C, value: JSONValue) -> Parsed<T, ParseIssue>
+  {
     ParsingScope.parseReference(
-      T.schema,
+      schema,
       value: value,
       keyword: Keywords.Reference.name,
       referenceSchema: schemaValue

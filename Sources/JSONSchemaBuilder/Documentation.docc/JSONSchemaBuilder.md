@@ -85,6 +85,12 @@ collection values. See <doc:Validation> for conversion failures and exact constr
 
 ## Reusing existing schemas with references
 
+For automatic definition collection, use `try Model.document()` on a `Schemable` type,
+or construct a ``SchemaDocument`` with ``JSONReusable`` components. The `.namedTypes`
+policy extracts nested named schemas into root `$defs` while retaining matching typed parsers.
+Regular `Model.schema` output stays inline. See <doc:Macros> for examples, naming,
+inline overrides, and the current self-contained-document restrictions.
+
 When you need to point at another schema fragment—either a local anchor or a remote definition—you can
 stay within the builder DSL while keeping strong typing:
 

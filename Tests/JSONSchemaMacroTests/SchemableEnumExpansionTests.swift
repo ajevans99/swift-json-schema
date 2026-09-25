@@ -562,11 +562,15 @@ import Testing
                 JSONProperty(key: "book") {
                   JSONObject {
                     JSONProperty(key: "details") {
-                      ItemDetails.schema
+                      JSONReusable(ItemDetails.self) {
+                          ItemDetails.schema
+                        }
                     }
                       .required()
                     JSONProperty(key: "category") {
-                      Category.schema
+                      JSONReusable(Category.self) {
+                          Category.schema
+                        }
                     }
                       .required()
                   }
@@ -580,11 +584,15 @@ import Testing
                 JSONProperty(key: "movie") {
                   JSONObject {
                     JSONProperty(key: "details") {
-                      ItemDetails.schema
+                      JSONReusable(ItemDetails.self) {
+                          ItemDetails.schema
+                        }
                     }
                       .required()
                     JSONProperty(key: "category") {
-                      Category.schema
+                      JSONReusable(Category.self) {
+                          Category.schema
+                        }
                     }
                       .required()
                     JSONProperty(key: "duration") {
@@ -602,11 +610,15 @@ import Testing
                 JSONProperty(key: "music") {
                   JSONObject {
                     JSONProperty(key: "details") {
-                      ItemDetails.schema
+                      JSONReusable(ItemDetails.self) {
+                          ItemDetails.schema
+                        }
                     }
                       .required()
                     JSONProperty(key: "category") {
-                      Category.schema
+                      JSONReusable(Category.self) {
+                          Category.schema
+                        }
                     }
                       .required()
                   }
