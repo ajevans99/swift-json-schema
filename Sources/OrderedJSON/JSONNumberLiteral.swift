@@ -120,6 +120,15 @@ public struct JSONNumberLiteral: Hashable, Comparable, Sendable, CustomStringCon
     return value
   }
 
+  /// Parses directly as `Float`, permitting rounding but rejecting overflow and nonzero underflow.
+  public func floatValue() throws -> Float {
+    if isZero { return rawValue.hasPrefix("-") ? -Float.zero : Float.zero }
+    guard let value = Float(rawValue), value.isFinite, value != 0 else {
+      throw ConversionError.outOfRange
+    }
+    return value
+  }
+
   /// Converts exactly, rejecting range loss and finite precision loss.
   ///
   /// Uses checked decimal arithmetic for compact values. Larger values use a POSIX-locale parse

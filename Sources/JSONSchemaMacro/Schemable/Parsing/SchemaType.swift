@@ -97,6 +97,14 @@ indirect enum SchemaType {
       )
     case .memberType(let member):
       if let base = member.baseType.as(IdentifierTypeSyntax.self),
+        ["Foundation", "CoreGraphics"].contains(base.name.text.trimmingBackticks()),
+        base.genericArgumentClause == nil,
+        member.name.text.trimmingBackticks() == "CGFloat",
+        member.genericArgumentClause == nil
+      {
+        return .scalar(.cgFloat)
+      }
+      if let base = member.baseType.as(IdentifierTypeSyntax.self),
         base.name.text.trimmingBackticks() == "Foundation",
         base.genericArgumentClause == nil,
         member.name.text.trimmingBackticks() == "Decimal",

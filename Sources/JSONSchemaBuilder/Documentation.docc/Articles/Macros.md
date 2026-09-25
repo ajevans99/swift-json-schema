@@ -34,7 +34,7 @@ schema calls `Type.init`, so an initializer must accept exactly the included
 properties, in the same order and with compatible types. A struct's synthesized
 memberwise initializer usually suffices; classes need an explicit initializer.
 
-## Supported types and collections
+## Supported Swift types
 
 | Swift property type | Generated component |
 | --- | --- |
@@ -42,14 +42,38 @@ memberwise initializer usually suffices; classes need an explicit initializer.
 | `Bool` | ``JSONBoolean`` |
 | `Int` | ``JSONInteger`` |
 | `Double` | ``JSONNumber`` |
-| `Decimal`, `Foundation.Decimal` | ``JSONDecimal`` |
+| `Float` | ``JSONFloat`` |
+| `CGFloat` | ``JSONCGFloat`` |
+| `Decimal` | ``JSONDecimal`` |
 | `[Element]`, `Array<Element>` | ``JSONArray`` with an element schema |
 | `[String: Value]`, `Dictionary<String, Value>` | ``JSONObject`` with an `additionalProperties` schema |
 | `[Key: Value]` with a suitable `Schemable` key | ``JSONObject`` with `propertyNames` and `additionalProperties` schemas |
-| Another `Schemable` model, including qualified names such as `Catalog.Book` | That type's `schema` |
-| `T?` | An optional property; see missing and null values below |
+| Another `Schemable` model | That type's `schema` |
+| `T?`, `Optional<T>` | An optional property; see missing fields and null below |
 
-Collections can contain other collections or models:
+Qualified spellings are also recognized: standard library types such as `Swift.Float`
+and `Swift.Array<Element>`, Foundation types `Foundation.Decimal` and
+`Foundation.CGFloat`, and `CoreGraphics.CGFloat` where CoreGraphics is available.
+Named models retain their full type names, including generic arguments and qualifiers
+such as `Catalog.Book`. Import Foundation when using `Decimal` or `CGFloat`;
+CoreGraphics can also provide `CGFloat` on supported platforms.
+
+### Numeric conversion
+
+Each numeric component produces its corresponding Swift type. `Int` and `Decimal`
+require exact conversion; `Double`, `Float`, and `CGFloat` allow ordinary binary rounding.
+`Float` is parsed directly from the original token, and `CGFloat` uses its native width.
+Out-of-range conversions, nonzero underflow to zero, and inexact integer or decimal
+conversions report `ParseIssue.numericConversionFailed`.
+
+All five numeric types support `@NumberOptions`. Constraints validate the original JSON
+number, not its rounded Swift output. See <doc:Validation> for conversion details and
+the numeric constraints example below.
+
+### Collections
+
+Supported scalar and model types can appear in arrays, dictionary values, and nested
+collections:
 
 ```swift
 @Schemable
@@ -76,30 +100,16 @@ Dictionary keys are still JSON strings. A custom key's schema must parse those
 strings into a hashable key value; simple `@Schemable` enums such as `Shelf` work.
 Primitive numeric dictionary keys are not supported.
 
-The macro recognizes `Float` but currently emits `JSONNumber()`, whose output is
-`Double`. Use `Double` or a custom schema that explicitly converts to `Float`.
-`Decimal` and `Foundation.Decimal` are recognized directly, including optional properties,
-array elements, and dictionary values. They use exact decimal conversion rather than
-converting a `Double`:
+### Inference limits
 
-```swift
-import Foundation
+Other named types are assumed to provide a static `schema`; `Set`, arbitrary numeric
+types, and other Foundation types need a schema provider or a hand-written schema.
+See custom schemas below.
 
-@Schemable
-struct Invoice {
-  let amount: Decimal
-  let discount: Foundation.Decimal?
-  let adjustments: [Decimal]
-  let totalsByCurrency: [String: Decimal]
-}
-```
-
-`JSONDecimal` rejects numbers that are inexact or out of range for Foundation `Decimal`.
-Other named types are assumed to provide a static `schema`; there is no automatic
-conversion for other Foundation types, `Set`, or arbitrary numeric types. Unsupported syntax such
-as tuples and function types is diagnosed and omitted, which can also cause an
-initializer mismatch. Prefer `T?` for optional properties; nullable collection
-elements and other unsupported type shapes need a hand-written schema.
+Unsupported syntax such as tuples and function types is diagnosed. Unsupported stored
+properties are omitted, which can also cause an initializer mismatch; unsupported enum
+payloads produce errors. Nullable collection elements need a hand-written schema rather
+than relying on the optional-property behavior described below.
 
 ## Enums
 
@@ -284,13 +294,29 @@ apply to the root schema. Use `@StringOptions`, `@NumberOptions`, `@ArrayOptions
 and `@ObjectOptions` for type-specific constraints. For example, the object option
 above rejects properties not declared in `Account`.
 
-`@NumberOptions` supports both `Double` and `JSONNumberLiteral` arguments for `minimum`,
-`maximum`, `exclusiveMinimum`, `exclusiveMaximum`, and `multipleOf`. Use a validated
-`JSONNumberLiteral` constant constructed from a string for bounds that must not first round
-through `Double`; for example, `.multipleOf(cent)` where
-`let cent = try JSONNumberLiteral("0.01")`. The `Double` overloads require finite inputs.
-Constraints are validated exactly regardless of whether the property is `Int`, `Double`,
-or `Decimal`. See <doc:Validation> for exact decimal parsing.
+### Numeric constraints
+
+Use `@NumberOptions` with any supported numeric property, including optional properties:
+
+```swift
+import Foundation
+
+@Schemable
+struct Layout {
+  @NumberOptions(.minimum(0), .maximum(1000))
+  var width: CGFloat = 100
+
+  @NumberOptions(.minimum(0), .maximum(1))
+  let opacity: Float
+}
+```
+
+`minimum`, `maximum`, `exclusiveMinimum`, `exclusiveMaximum`, and `multipleOf` accept
+either a finite `Double` or a `JSONNumberLiteral`. For bounds that must not first round
+through `Double`, construct a literal from a string; for example,
+`let cent = try JSONNumberLiteral("0.01")`, then use `.multipleOf(cent)`.
+
+### Enum parameter descriptions
 
 Documentation comments also work directly on enum associated-value parameters:
 

@@ -122,6 +122,9 @@ Typed parsing is a separate conversion step:
   Tokens such as `1.0` and `1e2` qualify; fractional and out-of-range values fail.
 - `JSONNumber` returns `Double`, allowing rounding but rejecting overflow or nonzero values
   that underflow to zero.
+- `JSONFloat` returns `Float` directly from the original token, avoiding intermediate
+  `Double` rounding. `JSONCGFloat` returns Foundation `CGFloat` using its native width.
+  Both allow rounding, preserve signed zero, and reject overflow or nonzero underflow to zero.
 - `JSONDecimal` returns Foundation `Decimal` without passing through `Double`. It rejects
   inexact and out-of-range conversions.
 
@@ -152,7 +155,9 @@ Swift floating-point literals have already been converted to `Double` and cannot
 lost source digits. The `Double` overloads require finite inputs.
 
 `@NumberOptions` supports the same exact-literal overloads, and `@Schemable` recognizes
-`Decimal` and `Foundation.Decimal`, including optional properties and collection values.
+`Float`, `CGFloat`, and `Decimal`, including their supported qualified spellings, optional
+properties, and collection values. Numeric modifiers remain available on `JSONFloat`
+and `JSONCGFloat` without a `.map` conversion.
 See <doc:Macros> and the
 [numeric migration guide](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/orderedjson/migrating-to-lossless-numbers)
 for the enum-case and accessor changes.

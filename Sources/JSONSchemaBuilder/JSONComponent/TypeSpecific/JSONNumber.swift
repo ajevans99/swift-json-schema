@@ -43,6 +43,53 @@ public struct JSONNumber: JSONNumberType {
   }
 }
 
+/// A JSON number schema that extracts a `Float` directly from the original number token.
+///
+/// Ordinary binary rounding is allowed; overflow and nonzero underflow to zero are rejected.
+public struct JSONFloat: JSONNumberType {
+  public var schemaValue = SchemaValue.object([:])
+
+  public init() {
+    schemaValue[Keywords.TypeKeyword.name] = .string(JSONType.number.rawValue)
+  }
+
+  public func parse(_ value: JSONValue) -> Parsed<Float, ParseIssue> {
+    guard let number = value.numberLiteral else {
+      return .error(.typeMismatch(expected: .number, actual: value))
+    }
+    do {
+      return .valid(try number.floatValue())
+    } catch {
+      return .error(.numericConversionFailed(value: value, target: "Float", reason: "\(error)"))
+    }
+  }
+}
+
+/// A JSON number schema that extracts a Foundation `CGFloat` using its native floating-point width.
+///
+/// Ordinary binary rounding is allowed; overflow and nonzero underflow to zero are rejected.
+public struct JSONCGFloat: JSONNumberType {
+  public var schemaValue = SchemaValue.object([:])
+
+  public init() {
+    schemaValue[Keywords.TypeKeyword.name] = .string(JSONType.number.rawValue)
+  }
+
+  public func parse(_ value: JSONValue) -> Parsed<CGFloat, ParseIssue> {
+    guard let number = value.numberLiteral else {
+      return .error(.typeMismatch(expected: .number, actual: value))
+    }
+    do {
+      if CGFloat.NativeType.self == Float.self {
+        return .valid(CGFloat(try number.floatValue()))
+      }
+      return .valid(CGFloat(try number.doubleValue()))
+    } catch {
+      return .error(.numericConversionFailed(value: value, target: "CGFloat", reason: "\(error)"))
+    }
+  }
+}
+
 /// A JSON number schema that extracts an exact Foundation `Decimal`.
 ///
 /// Unlike converting the output of ``JSONNumber``, this component never passes

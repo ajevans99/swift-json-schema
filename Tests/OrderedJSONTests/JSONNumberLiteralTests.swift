@@ -87,6 +87,35 @@ struct JSONNumberLiteralTests {
     }
   }
 
+  @Test func floatConversion() throws {
+    for number: Float in [
+      0.1, 9.27, -123.5, .leastNonzeroMagnitude, .leastNormalMagnitude, .greatestFiniteMagnitude,
+    ] {
+      #expect(try JSONNumberLiteral(String(number)).floatValue() == number)
+    }
+    #expect(try JSONNumberLiteral("16777217").floatValue() == 16_777_216)
+    #expect(try JSONNumberLiteral("1e-45").floatValue() == Float.leastNonzeroMagnitude)
+    for text in [
+      "1e39", "-1e39", "1e-46", "-1e-46",
+      "1e999999999999999999999999", "1e-999999999999999999999999",
+    ] {
+      #expect(throws: ConversionError.outOfRange) { try JSONNumberLiteral(text).floatValue() }
+    }
+  }
+
+  @Test func floatConversionAvoidsDoubleRounding() throws {
+    let literal = try JSONNumberLiteral("1.0000000596046447753906250000000001")
+    #expect(try literal.floatValue() == Float(1).nextUp)
+    #expect(try Float(literal.doubleValue()) == 1)
+  }
+
+  @Test(arguments: ["0", "-0", "0e999999999999999999999999", "-0e-999999999999999999999999"])
+  func floatConversionPreservesSignedZero(text: String) throws {
+    let value = try JSONNumberLiteral(text).floatValue()
+    #expect(value == 0)
+    #expect(value.sign == (text.hasPrefix("-") ? .minus : .plus))
+  }
+
   @Test func doubleConstructionPreservesExactIntegers() throws {
     for double in [
       Double(Int.min), Double(Int.min).nextUp, -100.0, 0.0, 100.0,

@@ -55,7 +55,7 @@ struct SchemableExpansionTests {
                 }
                 .flatMapOptional()
                 JSONProperty(key: "humidity") {
-                  JSONNumber()
+                  JSONFloat()
                 }
                 .required()
               }
@@ -410,7 +410,7 @@ struct SchemableExpansionTests {
                 }
                 .flatMapOptional()
                 JSONProperty(key: "humidity") {
-                  JSONNumber()
+                  JSONFloat()
                   .default(0.30)
                 }
                 .required()
@@ -706,7 +706,7 @@ struct SchemableExpansionTests {
                 }
                 .flatMapOptional()
                 JSONProperty(key: "humidity") {
-                  JSONNumber()
+                  JSONFloat()
                   .description(#\"\"\"
                   The relative humidity as a percentage
                   \"\"\"#)

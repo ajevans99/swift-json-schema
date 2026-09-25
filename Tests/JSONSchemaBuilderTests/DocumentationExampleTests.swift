@@ -1,3 +1,4 @@
+import Foundation
 import JSONSchema
 import OrderedCollections
 import Testing
@@ -5,6 +6,27 @@ import Testing
 @testable import JSONSchemaBuilder
 
 struct DocumentationExampleTests {
+  @Schemable
+  struct Layout {
+    @NumberOptions(.minimum(0), .maximum(1000))
+    var width: CGFloat = 100
+
+    @NumberOptions(.minimum(0), .maximum(1))
+    let opacity: Float
+  }
+
+  @Test func doccFloatingPointMacros() throws {
+    let layout = try Layout.schema.parseAndValidate(instance: #"{"width":320.5,"opacity":0.75}"#)
+    #expect(layout.width == 320.5)
+    #expect(layout.opacity == 0.75)
+    #expect(throws: ParseAndValidateIssue.self) {
+      try Layout.schema.parseAndValidate(instance: #"{"width":1001,"opacity":0.75}"#)
+    }
+    #expect(throws: ParseAndValidateIssue.self) {
+      try Layout.schema.parseAndValidate(instance: #"{"width":320.5,"opacity":1.1}"#)
+    }
+  }
+
   @Schemable
   struct QuickStartPerson {
     @StringOptions(.minLength(1))
