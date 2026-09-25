@@ -42,12 +42,13 @@ extension Keywords {
     ) throws(ValidationIssue) {
       let schema: Schema
       do {
-        if let cached = resolved.withLock({ $0 }) {
-          schema = cached
-        } else {
+        schema = try resolved.withLock { cached in
+          if let cached {
+            return cached
+          }
           let fresh = try resolver.resolveSchema(for: referenceURI, isDynamic: false)
-          resolved.withLock { $0 = fresh }
-          schema = fresh
+          cached = fresh
+          return fresh
         }
       } catch let error as ValidationIssue {
         throw error

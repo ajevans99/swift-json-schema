@@ -376,7 +376,8 @@ Committed p90 allocation thresholds live in [`Baselines/`](./Baselines/). Captur
 and enforcement both select **only `mallocCountTotal`** so instrumentation is
 identical; collecting clock/CPU metrics also allocates and is not an equivalent
 allocation baseline. CI runs
-both benchmark targets and the full reference corpus on `ubuntu-24.04`, writes
+both benchmark targets and the full reference corpus on `ubuntu-24.04` inside
+the `swift:6.3.3-noble` container, writes
 wall-clock / CPU / malloc tables to the GitHub Actions job summary, and checks
 malloc counts against the committed thresholds.
 
@@ -415,6 +416,8 @@ either suite's regression; this only preserves independent diagnostics.
 The committed PR corpus contains all **160 thresholds**: 64 OrderedJSON, 66 original
 JSONSchema workload cases, and 30 downloaded-schema cases. The workflow asserts
 Swift 6.3.3 and requires the fetched corpus and the small/medium PR subset.
+The container pins the toolchain independently of hosted-runner image updates;
+the version assertion remains a guard against accidental toolchain changes.
 The workflow currently targets PRs into `main`, so a
 draft targeting an intermediate stack branch may need an explicit workflow
 dispatch or later final-base run to obtain that artifact. Timing and throughput

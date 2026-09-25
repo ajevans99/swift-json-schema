@@ -4,6 +4,48 @@ import JSONSchema
 import Testing
 
 struct ConcurrentSchemaValidationTests {
+  @Test func concurrentColdReferencesValidateIndependently() throws {
+    let schema = try Schema(
+      instance: """
+        {
+          "$ref": "#/$defs/text",
+          "$defs": { "text": { "type": "string", "minLength": 2 } }
+        }
+        """
+    )
+    DispatchQueue.concurrentPerform(iterations: 32) { index in
+      let valid = index.isMultiple(of: 2)
+      let result = schema.validate(valid ? "hello" : 42)
+      #expect(result.isValid == valid)
+      if !valid {
+        #expect(
+          leafErrors(result.errors ?? []).map(\.keywordLocation.description) == ["#/$ref/type"]
+        )
+      }
+    }
+  }
+
+  @Test func referenceValidationDoesNotHoldTheResolutionLock() throws {
+    let gate = PausingFormatValidator()
+    let schema = try Schema(
+      instance: """
+        {
+          "$ref": "#/$defs/text",
+          "$defs": { "text": { "type": "string", "format": "pause-validation" } }
+        }
+        """,
+      formatValidators: [gate]
+    )
+    let (resumed, overlapping) = try overlap(
+      schema: schema,
+      first: "first",
+      second: "second",
+      gate: gate
+    )
+    #expect(resumed.isValid)
+    #expect(overlapping.isValid)
+  }
+
   @Test(arguments: [true, false])
   func concurrentConditionalsMatchSerialValidation(validInstances: Bool) throws {
     let gate = PausingFormatValidator()
