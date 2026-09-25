@@ -341,6 +341,37 @@ instance list, then run the full JSONSchema suite to exercise its preflight chec
 
 ## Baselines and CI
 
+### Reference caching and precomputed locations
+
+PR #207 trades additional one-time schema construction allocations for lower
+repeated validation costs. Eager absolute-location/resource URL construction and
+per-reference cache storage increase seven construction cases; validation and
+output cases improve. These are production-code changes, not container drift:
+in a same-container Swift 6.3.3 ARM64 comparison, base `1514dd2` versus candidate
+`81cfae3` measured Poll at 954 versus 3,255 allocations and regex-heavy at 460
+versus 657, matching the x86_64 CI counts.
+
+Only the following seven construction thresholds were adopted from
+[capture run 36111201120](https://github.com/ajevans99/swift-json-schema/actions/runs/36111201120)
+at `81cfae30592e626f078259645ad56093a6c9c534`, on the Ubuntu 24.04 x86_64
+runner inside `swift:6.3.3-noble`, with deterministic hashing and malloc-only
+measurement:
+
+| Construction case | Previous p90 allocations | Captured p90 allocations |
+|-------------------|-------------------------:|-------------------------:|
+| combinator-heavy | 389 | 1,004 |
+| openapi-3.1 | 8,422 | 33,399 |
+| openapi-fragment | 948 | 3,258 |
+| overlay-1.0 | 528 | 1,408 |
+| poll | 954 | 3,255 |
+| reference-heavy | 242 | 647 |
+| regex-heavy | 460 | 657 |
+
+The other 153 thresholds, including all validation/output thresholds and the
+meta-schema construction threshold, remain unchanged. Relative and absolute
+tolerances are unchanged. Construction-heavy consumers should account for this
+tradeoff rather than interpreting the warmed-validation gains as universal.
+
 ### Numeric representation changes
 
 The lossless-number migration intentionally changes the numeric work in
@@ -376,7 +407,8 @@ Committed p90 allocation thresholds live in [`Baselines/`](./Baselines/). Captur
 and enforcement both select **only `mallocCountTotal`** so instrumentation is
 identical; collecting clock/CPU metrics also allocates and is not an equivalent
 allocation baseline. CI runs
-both benchmark targets and the full reference corpus on `ubuntu-24.04`, writes
+both benchmark targets and the full reference corpus on `ubuntu-24.04` inside
+the `swift:6.3.3-noble` container, writes
 wall-clock / CPU / malloc tables to the GitHub Actions job summary, and checks
 malloc counts against the committed thresholds.
 
@@ -415,6 +447,8 @@ either suite's regression; this only preserves independent diagnostics.
 The committed PR corpus contains all **160 thresholds**: 64 OrderedJSON, 66 original
 JSONSchema workload cases, and 30 downloaded-schema cases. The workflow asserts
 Swift 6.3.3 and requires the fetched corpus and the small/medium PR subset.
+The container pins the toolchain independently of hosted-runner image updates;
+the version assertion remains a guard against accidental toolchain changes.
 The workflow currently targets PRs into `main`, so a
 draft targeting an intermediate stack branch may need an explicit workflow
 dispatch or later final-base run to obtain that artifact. Timing and throughput

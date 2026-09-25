@@ -19,7 +19,11 @@ jobs:
   benchmarks:
     name: ${{ github.event_name == 'workflow_dispatch' && inputs.refresh_baselines && 'Capture benchmark baselines' || 'Package benchmarks' }}
     runs-on: ubuntu-24.04
+    container: swift:6.3.3-noble
     timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
     env:
       SWIFT_DETERMINISTIC_HASHING: "1"
       JSONSCHEMA_BENCHMARK_CORPUS: required
@@ -27,6 +31,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v5
+    - name: Install benchmark system dependencies
+      run: |
+        apt-get update
+        apt-get install -y --no-install-recommends python3 curl ca-certificates libjemalloc-dev
     - name: Test baseline coverage gate
       run: |
         python3 Benchmarks/Scripts/test_baseline_coverage.py
@@ -35,8 +43,6 @@ jobs:
       run: |
         swift --version
         swift --version | grep -F 'Swift version 6.3.3'
-    - name: Install benchmark system dependencies
-      run: sudo apt-get update && sudo apt-get install -y libjemalloc-dev
     - name: Fetch reference corpus
       run: |
         Benchmarks/Scripts/fetch-reference-corpus.sh

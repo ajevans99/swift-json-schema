@@ -19,6 +19,7 @@ extension Keywords {
     package let context: KeywordContext
     private let referenceURI: String
     private let resolver: ReferenceResolver
+    private let resolved = LockIsolated<Schema?>(nil)
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
@@ -41,7 +42,14 @@ extension Keywords {
     ) throws(ValidationIssue) {
       let schema: Schema
       do {
-        schema = try resolver.resolveSchema(for: referenceURI, isDynamic: false)
+        schema = try resolved.withLock { cached in
+          if let cached {
+            return cached
+          }
+          let fresh = try resolver.resolveSchema(for: referenceURI, isDynamic: false)
+          cached = fresh
+          return fresh
+        }
       } catch let error as ValidationIssue {
         throw error
       } catch let error as ReferenceResolverError {

@@ -197,6 +197,8 @@ package struct ObjectSchema: ValidatableSchema {
   let documentURL: URL
   /// Name and base URI for any `$dynamicAnchor` declared on this schema.
   let dynamicAnchorInfo: (name: String, baseURI: URL)?
+  private let selfAbsoluteLocation: URL?
+  private let resourceURL: URL
 
   package init(
     schemaValue: [String: JSONValue],
@@ -218,6 +220,8 @@ package struct ObjectSchema: ValidatableSchema {
     self.keywords = keywords
     self.uri = processedURI
     self.dynamicAnchorInfo = dynamicAnchorInfo
+    self.selfAbsoluteLocation = location.absoluteLocation(relativeTo: processedURI ?? documentURL)
+    self.resourceURL = processedURI?.withoutFragment ?? documentURL
   }
 
   private static func collectKeywords(
@@ -340,7 +344,6 @@ package struct ObjectSchema: ValidatableSchema {
     // We deliberately do NOT fall back to a fragment-bearing `uri`, because
     // `documentDynamicAnchors` is keyed on resource URLs without fragments
     // and a fragment-bearing key would silently miss every anchor.
-    let resourceURL: URL = uri?.withoutFragment ?? documentURL
     let resourceAnchors = context.documentDynamicAnchors[resourceURL] ?? [:]
     var scopes: [Context.DynamicScope] = [
       resourceAnchors.mapValues {
@@ -429,7 +432,7 @@ package struct ObjectSchema: ValidatableSchema {
     return ValidationResult(
       valid: errors.isEmpty,
       keywordLocation: self.location,
-      absoluteKeywordLocation: absoluteKeywordLocation(forPointer: self.location),
+      absoluteKeywordLocation: selfAbsoluteLocation,
       instanceLocation: location,
       errors: errors.isEmpty ? nil : errors,
       evaluationErrors: evaluationErrors.isEmpty ? nil : evaluationErrors,
