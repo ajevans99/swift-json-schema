@@ -56,6 +56,10 @@ package struct AnnotationContainer {
   }
 
   mutating func merge(_ other: AnnotationContainer) {
+    if storage.isEmpty {
+      storage = other.storage
+      return
+    }
     for (key, otherAnnotation) in other.storage {
       if let existingAnnotation = storage[key] {
         let mergedAnnotation = existingAnnotation.merged(with: otherAnnotation)
