@@ -108,7 +108,10 @@ struct SchemableExpansionTests {
                 JSONProperty(key: "conditionsByLocation") {
                   JSONObject()
                   .additionalProperties {
-                    WeatherCondition.schema.eraseToAnySchemaComponent()
+                    JSONReusable(WeatherCondition.self) {
+                      WeatherCondition.schema
+                    }
+                    .eraseToAnySchemaComponent()
                   }
                   .map(\\.1)
                   .map(\\.matches)
@@ -233,13 +236,19 @@ struct SchemableExpansionTests {
                 }
                 .required()
                 JSONProperty(key: "value") {
-                  JSONValue.schema.eraseToAnySchemaComponent()
+                  JSONReusable(JSONValue.self) {
+                    JSONValue.schema
+                  }
+                  .eraseToAnySchemaComponent()
                 }
                 .required()
                 JSONProperty(key: "meta") {
                   JSONObject()
                   .additionalProperties {
-                    JSONValue.schema.eraseToAnySchemaComponent()
+                    JSONReusable(JSONValue.self) {
+                      JSONValue.schema
+                    }
+                    .eraseToAnySchemaComponent()
                   }
                   .map(\\.1)
                   .map(\\.matches)
@@ -385,7 +394,10 @@ struct SchemableExpansionTests {
                 }
                 .required()
                 JSONProperty(key: "units") {
-                  TemperatureType.schema.eraseToAnySchemaComponent()
+                  JSONReusable(TemperatureType.self) {
+                    TemperatureType.schema
+                  }
+                  .eraseToAnySchemaComponent()
                 }
                 .required()
                 JSONProperty(key: "location") {
@@ -924,7 +936,10 @@ struct SchemableExpansionTests {
                 JSONProperty(key: "emotions") {
                   JSONObject()
                   .propertyNames {
-                    TestEmotion.schema.eraseToAnySchemaComponent()
+                    JSONReusable(TestEmotion.self) {
+                      TestEmotion.schema
+                    }
+                    .eraseToAnySchemaComponent()
                   }
                   .additionalProperties {
                     JSONInteger()
@@ -1515,7 +1530,10 @@ struct SchemableExpansionTests {
                   }
                   .required()
                   JSONProperty(key: "element") {
-                    ModelElementType.DTO.schema.eraseToAnySchemaComponent()
+                    JSONReusable(ModelElementType.DTO.self) {
+                      ModelElementType.DTO.schema
+                    }
+                    .eraseToAnySchemaComponent()
                   }
                   .required()
                 }
@@ -1653,7 +1671,10 @@ struct SchemableExpansionTests {
                   }
                   .required()
                   JSONProperty(key: "other") {
-                    First.`Data`.schema.eraseToAnySchemaComponent()
+                    JSONReusable(First.`Data`.self) {
+                      First.`Data`.schema
+                    }
+                    .eraseToAnySchemaComponent()
                   }
                   .required()
                 }
