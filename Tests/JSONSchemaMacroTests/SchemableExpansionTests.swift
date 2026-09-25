@@ -108,7 +108,9 @@ struct SchemableExpansionTests {
                 JSONProperty(key: "conditionsByLocation") {
                   JSONObject()
                   .additionalProperties {
-                    WeatherCondition.schema
+                    JSONReusable(WeatherCondition.self) {
+                      WeatherCondition.schema
+                    }
                   }
                   .map(\\.1)
                   .map(\\.matches)
@@ -233,13 +235,17 @@ struct SchemableExpansionTests {
                 }
                 .required()
                 JSONProperty(key: "value") {
-                  JSONValue.schema
+                  JSONReusable(JSONValue.self) {
+                    JSONValue.schema
+                  }
                 }
                 .required()
                 JSONProperty(key: "meta") {
                   JSONObject()
                   .additionalProperties {
-                    JSONValue.schema
+                    JSONReusable(JSONValue.self) {
+                      JSONValue.schema
+                    }
                   }
                   .map(\\.1)
                   .map(\\.matches)
@@ -385,7 +391,9 @@ struct SchemableExpansionTests {
                 }
                 .required()
                 JSONProperty(key: "units") {
-                  TemperatureType.schema
+                  JSONReusable(TemperatureType.self) {
+                    TemperatureType.schema
+                  }
                 }
                 .required()
                 JSONProperty(key: "location") {
@@ -924,7 +932,9 @@ struct SchemableExpansionTests {
                 JSONProperty(key: "emotions") {
                   JSONObject()
                   .propertyNames {
-                    TestEmotion.schema
+                    JSONReusable(TestEmotion.self) {
+                      TestEmotion.schema
+                    }
                   }
                   .additionalProperties {
                     JSONInteger()
@@ -1515,7 +1525,9 @@ struct SchemableExpansionTests {
                   }
                   .required()
                   JSONProperty(key: "element") {
-                    ModelElementType.DTO.schema
+                    JSONReusable(ModelElementType.DTO.self) {
+                      ModelElementType.DTO.schema
+                    }
                   }
                   .required()
                 }
@@ -1653,7 +1665,9 @@ struct SchemableExpansionTests {
                   }
                   .required()
                   JSONProperty(key: "other") {
-                    First.`Data`.schema
+                    JSONReusable(First.`Data`.self) {
+                      First.`Data`.schema
+                    }
                   }
                   .required()
                 }
