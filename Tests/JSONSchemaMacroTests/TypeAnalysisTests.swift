@@ -128,7 +128,15 @@ struct TypeAnalysisTests {
     #expect(!type.isOptional)
     #expect(!type.isPrimitive)
     #expect(!type.isScalar)
-    #expect(TypeSchemaEmitter.expression(for: type).trimmedDescription == "\(source).schema")
+    let expected: ExprSyntax = """
+      JSONReusable(\(raw: source).self) {
+        \(raw: source).schema
+      }
+      """
+    #expect(
+      TypeSchemaEmitter.expression(for: type).tokens(viewMode: .sourceAccurate).map(\.text)
+        == expected.tokens(viewMode: .sourceAccurate).map(\.text)
+    )
   }
 
   @Test(arguments: ["[Key: String]", "[Key?: String]", "[String?: Key]"])
@@ -268,7 +276,9 @@ struct TypeAnalysisTests {
     let type = try parse("[Module.Key<String>?: Node?]").resolvingSelfReferences(named: "Node")
     let expected: ExprSyntax = """
       JSONObject()
-      .propertyNames { Module.Key<String>.schema }
+      .propertyNames {
+        JSONReusable(Module.Key<String>.self) { Module.Key<String>.schema }
+      }
       .additionalProperties {
         JSONDynamicReference<Self>()
       }

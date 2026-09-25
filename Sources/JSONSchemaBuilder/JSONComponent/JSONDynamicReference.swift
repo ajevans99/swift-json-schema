@@ -32,8 +32,20 @@ public struct JSONDynamicReference<T: Schemable>: JSONSchemaComponent {
   /// Parses the incoming value using `T`'s schema so the caller continues to work with strongly
   /// typed Swift values.
   public func parse(_ value: JSONValue) -> Parsed<T, ParseIssue> {
+    if let context = SchemaDocumentScope.current {
+      guard let schema = context.component(for: ObjectIdentifier(T.self)) else {
+        let inline = SchemaDocumentScope.$current.withValue(nil) { T.schema }
+        return parse(inline, value: value)
+      }
+      return parse(schema, value: value)
+    }
+    return parse(T.schema, value: value)
+  }
+
+  private func parse<C: JSONSchemaComponent>(_ schema: C, value: JSONValue) -> Parsed<T, ParseIssue>
+  {
     ParsingScope.parseReference(
-      T.schema,
+      schema,
       value: value,
       keyword: Keywords.DynamicReference.name,
       referenceSchema: schemaValue

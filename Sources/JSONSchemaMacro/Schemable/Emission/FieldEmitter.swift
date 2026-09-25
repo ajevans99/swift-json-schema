@@ -8,7 +8,8 @@ enum FieldEmitter {
   ) -> CodeBlockItemSyntax {
     var schema: CodeBlockItemSyntax
     switch plan.base {
-    case .inferred(let type): schema = "\(TypeSchemaEmitter.expression(for: type))"
+    case .inferred(let type):
+      schema = "\(TypeSchemaEmitter.expression(for: type, inlineNamedTypes: plan.inlineNamedTypes))"
     case .custom(let value): schema = "\(value).schema"
     }
     if let defaultValue = plan.defaultValue {

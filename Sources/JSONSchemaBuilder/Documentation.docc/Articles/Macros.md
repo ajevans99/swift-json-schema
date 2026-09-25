@@ -34,6 +34,126 @@ schema calls `Type.init`, so an initializer must accept exactly the included
 properties, in the same order and with compatible types. A struct's synthesized
 memberwise initializer usually suffices; classes need an explicit initializer.
 
+## Publish a document with shared definitions
+
+Use `Type.document()` to build a self-contained Draft 2020-12 document with `$ref` and
+root `$defs`. This is an opt-in construction policy: `Type.schema` and its existing
+inline JSON representation are unchanged.
+
+```swift
+@Schemable
+struct Address {
+  static var schemaDefinitionName: String { "Address" }
+  let street: String
+}
+
+@Schemable
+struct Order {
+  let shipping: Address
+
+  @SchemaOptions(.description("Billing address"))
+  let billing: Address
+}
+
+let document = try Order.document(references: .namedTypes)
+let jsonSchema = document.definition()
+let order = try document.parseAndValidate(
+  instance: #"{"shipping":{"street":"A"},"billing":{"street":"B"}}"#
+)
+```
+
+The root stays inline, while nested named types are extracted even if used only once:
+
+```json
+{
+  "type": "object",
+  "required": ["shipping", "billing"],
+  "properties": {
+    "shipping": { "$ref": "#/$defs/Address" },
+    "billing": { "$ref": "#/$defs/Address", "description": "Billing address" }
+  },
+  "$defs": {
+    "Address": {
+      "type": "object",
+      "required": ["street"],
+      "properties": { "street": { "type": "string" } }
+    }
+  }
+}
+```
+
+``SchemaDocument`` is a typed ``JSONSchemaComponent``. `schemaValue`, `definition()`,
+`parse`, and `parseAndValidate` use the same document structure, including references.
+Construction retains the registered definition parsers rather than rebuilding them when parsing.
+`parse` retains the usual parsing-only contract; use `parseAndValidate` to enforce every constraint.
+
+For a modified or hand-written root, construct it inside the document closure:
+
+```swift
+let titled = try SchemaDocument {
+  Order.schema.title("Checkout request")
+}
+
+let addresses = try SchemaDocument {
+  JSONArray {
+    JSONReusable(Address.self)
+  }
+}
+```
+
+``JSONReusable`` passes through its schema when no document is being constructed. Inside a
+document it registers the type's schema once and emits a reference. The macro uses the same
+building block for inferred named types, including array elements, dictionary keys and values,
+and enum payloads. Explicit `.customSchema(...)` conversions stay inline.
+Named schema providers do not need to conform to `Schemable`: the macro supplies their `.schema`
+through the `JSONReusable(_:inline:schema:)` closure initializer, preserving their output type.
+That closure must supply the type's canonical schema; apply per-use modifications outside it.
+
+### Names and inline overrides
+
+Definition keys default to sanitized, fully qualified Swift type names. Private/local compiler
+context addresses are removed. Keys are not based on schema equality: distinct Swift types are
+not merged merely because their schemas have the same shape. Definitions are emitted in sorted
+key order. Sanitization can cause collisions; collisions with other generated definitions or
+existing root `$defs` entries throw ``SchemaDocumentError`` instead of renaming or overwriting.
+
+Override `schemaDefinitionName` for a stable published name, as above. Explicit keys are escaped
+as JSON Pointer tokens and URI fragments. To opt a type out of extraction, implement:
+
+```swift
+static var schemaDocumentBehavior: SchemaDocumentBehavior { .inline }
+```
+
+For one hand-written use, choose `JSONReusable(Address.self, inline: true)`.
+
+### Current document boundaries
+
+- `.namedTypes` is the only policy currently supported; repeated-use-only extraction is deferred.
+- Construction uses a scoped registration context. Build components inside the closure.
+  Already-built children, including those in a cached `static let schema`, are not traversed
+  to discover reuse. A new `JSONReusable` wrapper can register a cached schema as a whole,
+  but cannot retroactively extract its children. There is no general JSON deduplication pass.
+- Finish schema modifications inside the closure. Do not replace generated reference JSON or
+  structurally mutate a finalized document. Document-created reusable components must be parsed
+  through their owning document.
+- Only annotations (`title`, `description`, `default`, `examples`, `deprecated`, `readOnly`,
+  `writeOnly`, and `$comment`) may sit beside generated `$ref`s. Other sibling keywords throw.
+  The macro conservatively keeps named fields inline when they have constraint modifiers or
+  type-style nullability. For nullable references in hand-written builders, use
+  `.orNull(style: .union)` or `.unionAnyOf`, not `.type`.
+- Recursive named definitions retain one `$dynamicAnchor`, and recursive parsing uses the retained
+  parser. Duplicate anchors, including duplicates caused by customized inline recursive uses,
+  throw rather than silently changing recursive constraints. Mutual construction cycles throw;
+  use the existing macro self-reference support for direct recursion.
+- Documents currently reject `$id`, explicit `$schema`, `$vocabulary`, `$anchor`, legacy recursive
+  keywords, and non-generated `$ref` targets. `$dynamicRef` must target a local declared dynamic
+  anchor. External resources and arbitrary existing-reference bundles should continue to use
+  the regular builder/reference APIs and a validation context, not this document API.
+- Constructing a document inside another document's construction closure throws. Each independent
+  document owns its registration state; parsing does not add definitions. A completed document
+  must be used as a root, not embedded in another schema: its local references address its root
+  `$defs`. Compose original `.schema` values or `JSONReusable` components instead.
+
 ## Supported types and collections
 
 | Swift property type | Generated component |
