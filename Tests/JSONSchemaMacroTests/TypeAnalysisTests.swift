@@ -69,7 +69,7 @@ struct TypeAnalysisTests {
 
   @Test(arguments: SupportedPrimitive.allCases.filter(\.isScalar))
   func scalarSpellings(primitive: SupportedPrimitive) throws {
-    let module = primitive == .decimal ? "Foundation" : "Swift"
+    let module = primitive == .decimal || primitive == .cgFloat ? "Foundation" : "Swift"
     for source in [primitive.rawValue, "\(module).\(primitive.rawValue)"] {
       let type = try parse(source)
       guard case .scalar(let parsed) = type else {
@@ -107,6 +107,18 @@ struct TypeAnalysisTests {
     #expect(!type.usesSelfReference)
   }
 
+  @Test(arguments: ["CGFloat", "Foundation.CGFloat", "CoreGraphics.CGFloat"])
+  func cgFloatSpellingsInNestedCollections(source: String) throws {
+    let type = try parse("Swift.Optional<Swift.Array<Swift.Dictionary<Swift.String, \(source)>>>")
+    guard
+      case .optional(.array(.dictionary(key: .scalar(.string), value: .scalar(.cgFloat)))) =
+        type
+    else {
+      Issue.record("Expected a nested CGFloat scalar for \(source)")
+      return
+    }
+  }
+
   @Test(arguments: [
     "Box<String>",
     "Box<(Int, Int)>",
@@ -115,6 +127,8 @@ struct TypeAnalysisTests {
     "Outer.`default`",
     "Other.Array<Int>",
     "Outer.Swift.Dictionary<String, Int>",
+    "Other.CGFloat",
+    "Other.Float",
   ])
   func namedTypesPreserveTheirFullSyntax(source: String) throws {
     let syntax = TypeSyntax(stringLiteral: source)
@@ -252,7 +266,7 @@ struct TypeAnalysisTests {
       JSONObject()
       .additionalProperties {
         JSONArray {
-          JSONNumber()
+          JSONFloat()
         }
       }
       .map(\\.1)

@@ -7,6 +7,60 @@ struct NumberOptionsTests {
     "Schemable": SchemableMacro.self, "NumberOptions": NumberOptionsMacro.self,
   ]
 
+  @Test(arguments: [
+    ("Float", "JSONFloat"),
+    ("Swift.Float", "JSONFloat"),
+    ("CGFloat", "JSONCGFloat"),
+    ("Foundation.CGFloat", "JSONCGFloat"),
+    ("CoreGraphics.CGFloat", "JSONCGFloat"),
+  ])
+  func typedFloatingPointOptions(type: String, component: String) {
+    assertMacroExpansion(
+      """
+      @Schemable
+      struct Measurement {
+        @NumberOptions(.minimum(0), .maximum(10), .multipleOf(0.25))
+        var value: \(type) = 1.25
+        @NumberOptions(.exclusiveMinimum(0), .exclusiveMaximum(10))
+        let optional: Swift.Optional<\(type)>
+      }
+      """,
+      expandedSource: """
+        struct Measurement {
+          var value: \(type) = 1.25
+          let optional: Swift.Optional<\(type)>
+
+          @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+          static var schema: some JSONSchemaComponent<Measurement> {
+            JSONSchema(Measurement.init) {
+              JSONObject {
+                JSONProperty(key: "value") {
+                  \(component)()
+                  .default(1.25)
+                  .minimum(0)
+                  .maximum(10)
+                  .multipleOf(0.25)
+                }
+                .required()
+                JSONProperty(key: "optional") {
+                  \(component)()
+                  .exclusiveMinimum(0)
+                  .exclusiveMaximum(10)
+                  .orNull(style: .type)
+                }
+                .flatMapOptional()
+              }
+            }
+          }
+        }
+
+        extension Measurement: Schemable {
+        }
+        """,
+      macros: testMacros
+    )
+  }
+
   @Test func inclusiveMinimumMaximum() {
     assertMacroExpansion(
       """

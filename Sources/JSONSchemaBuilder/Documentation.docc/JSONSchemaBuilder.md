@@ -64,6 +64,8 @@ For string-to-`UUID`, `URL`, and `Date` conversions, see
 | --- | --- | --- |
 | ``JSONInteger`` | `Int` | Exact integral value within `Int` range, including tokens such as `1.0` and `1e2`. |
 | ``JSONNumber`` | `Double` | Allows rounding; rejects overflow and nonzero underflow to zero. |
+| ``JSONFloat`` | `Float` | Parses directly at Float precision; rejects overflow and nonzero underflow to zero. |
+| ``JSONCGFloat`` | Foundation `CGFloat` | Uses the platform's native width; rejects overflow and nonzero underflow to zero. |
 | ``JSONDecimal`` | Foundation `Decimal` | Exact decimal value; rejects inexact or out-of-range conversion. |
 
 Numeric schema constraints use exact JSON values regardless of the output type. Use
@@ -79,9 +81,11 @@ let amount: Decimal = try JSONDecimal()
   .parseAndValidate(instance: "9.270")
 ```
 
-The string parsing overloads preserve numeric tokens by default. `@Schemable` maps `Decimal`
-and `Foundation.Decimal` properties to `JSONDecimal`, including optional properties and
-collection values. See <doc:Validation> for conversion failures and exact constraints.
+The string parsing overloads preserve numeric tokens by default. `@Schemable` maps `Float`,
+`CGFloat`, and `Decimal` to their matching components, including supported qualified
+spellings, optional properties, and collection values. All support `@NumberOptions`.
+See <doc:Macros> for recognized spellings and <doc:Validation> for conversion failures
+and exact constraints.
 
 ## Reusing existing schemas with references
 

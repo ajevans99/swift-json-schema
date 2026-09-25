@@ -250,7 +250,7 @@ struct OptionalNullsExpansionTests {
                 }
                 .flatMapOptional()
                 JSONProperty(key: "windSpeed") {
-                  JSONNumber()
+                  JSONFloat()
                   .orNull(style: .type)
                 }
                 .flatMapOptional()

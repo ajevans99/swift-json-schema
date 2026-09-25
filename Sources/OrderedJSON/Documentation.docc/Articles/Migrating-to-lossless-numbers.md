@@ -69,6 +69,7 @@ spellings such as `9.270`. Construct `JSONNumberLiteral("9.270")` with `try` ins
 | `JSONNumberLiteral(Decimal)` | Throwing construction from a Foundation decimal without passing through `Double`. |
 | `integerValue()` | Throws unless the mathematical value fits `Int` exactly. |
 | `doubleValue()` | Allows rounding to a finite `Double`; rejects overflow and nonzero values that underflow to zero. |
+| `floatValue()` | Parses directly as `Float`, allowing rounding but rejecting overflow and nonzero underflow to zero. |
 | `decimalValue()` | Returns an exact Foundation `Decimal`, or throws for an inexact or out-of-range conversion. |
 
 `isInteger` describes mathematical integrality, not token syntax or `Int` range. `isZero`
@@ -163,9 +164,11 @@ parser by default. Overloads accepting an explicit `JSONDecoder` remain availabl
 deprecated compatibility paths; omit `decoder:` to preserve number tokens.
 
 `JSONInteger` returns an exact `Int`, `JSONNumber` returns a potentially rounded `Double`,
-and `JSONDecimal` returns an exact Foundation `Decimal`. An otherwise valid JSON number can
-fail typed parsing if the destination cannot represent it. `@Schemable` recognizes `Decimal`
-and `Foundation.Decimal`, including optional properties and collection values.
+`JSONFloat` returns `Float`, `JSONCGFloat` returns Foundation `CGFloat`, and `JSONDecimal`
+returns an exact Foundation `Decimal`. Floating-point conversions reject overflow and
+nonzero underflow to zero. An otherwise valid JSON number can fail typed parsing if the
+destination cannot represent it. `@Schemable` recognizes these types and their supported
+qualified spellings, including optional properties and collection values.
 
 Numeric constraints accept `JSONNumberLiteral` alongside their existing `Double` overloads,
 including the `@NumberOptions` traits. Construct precise bounds from strings rather than Swift

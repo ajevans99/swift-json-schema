@@ -42,6 +42,8 @@ memberwise initializer usually suffices; classes need an explicit initializer.
 | `Bool` | ``JSONBoolean`` |
 | `Int` | ``JSONInteger`` |
 | `Double` | ``JSONNumber`` |
+| `Float`, `Swift.Float` | ``JSONFloat`` |
+| `CGFloat`, `Foundation.CGFloat`, `CoreGraphics.CGFloat` | ``JSONCGFloat`` |
 | `Decimal`, `Foundation.Decimal` | ``JSONDecimal`` |
 | `[Element]`, `Array<Element>` | ``JSONArray`` with an element schema |
 | `[String: Value]`, `Dictionary<String, Value>` | ``JSONObject`` with an `additionalProperties` schema |
@@ -76,8 +78,29 @@ Dictionary keys are still JSON strings. A custom key's schema must parse those
 strings into a hashable key value; simple `@Schemable` enums such as `Shelf` work.
 Primitive numeric dictionary keys are not supported.
 
-The macro recognizes `Float` but currently emits `JSONNumber()`, whose output is
-`Double`. Use `Double` or a custom schema that explicitly converts to `Float`.
+`Float` and `CGFloat` generate schemas with matching Swift output types, including
+optional properties, array elements, dictionary values, and enum associated values.
+Import Foundation (or CoreGraphics where available) when using `CGFloat`.
+Both types support `@NumberOptions` without a custom conversion:
+
+```swift
+import Foundation
+
+@Schemable
+struct Layout {
+  @NumberOptions(.minimum(0), .maximum(1000))
+  var width: CGFloat = 100
+
+  @NumberOptions(.minimum(0), .maximum(1))
+  let opacity: Float
+}
+```
+
+`JSONFloat` parses the original number token directly as `Float`; `JSONCGFloat` uses
+the platform's native `CGFloat` width. Both allow ordinary binary rounding, preserve
+signed zero, and reject overflow or nonzero underflow to zero with
+`ParseIssue.numericConversionFailed`. `JSONNumber` continues to return `Double`.
+
 `Decimal` and `Foundation.Decimal` are recognized directly, including optional properties,
 array elements, and dictionary values. They use exact decimal conversion rather than
 converting a `Double`:
@@ -290,7 +313,7 @@ above rejects properties not declared in `Account`.
 through `Double`; for example, `.multipleOf(cent)` where
 `let cent = try JSONNumberLiteral("0.01")`. The `Double` overloads require finite inputs.
 Constraints are validated exactly regardless of whether the property is `Int`, `Double`,
-or `Decimal`. See <doc:Validation> for exact decimal parsing.
+`Float`, `CGFloat`, or `Decimal`. See <doc:Validation> for numeric conversion behavior.
 
 Documentation comments also work directly on enum associated-value parameters:
 

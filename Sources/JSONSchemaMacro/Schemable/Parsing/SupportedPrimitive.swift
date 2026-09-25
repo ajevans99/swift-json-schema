@@ -1,6 +1,7 @@
 enum SupportedPrimitive: String, CaseIterable {
   case double = "Double"
   case float = "Float"
+  case cgFloat = "CGFloat"
   case decimal = "Decimal"
   case string = "String"
   case int = "Int"
@@ -10,7 +11,9 @@ enum SupportedPrimitive: String, CaseIterable {
 
   var schema: String {
     switch self {
-    case .double, .float: "JSONNumber"
+    case .double: "JSONNumber"
+    case .float: "JSONFloat"
+    case .cgFloat: "JSONCGFloat"
     case .decimal: "JSONDecimal"
     case .string: "JSONString"
     case .int: "JSONInteger"
@@ -23,7 +26,7 @@ enum SupportedPrimitive: String, CaseIterable {
   /// Returns true if this is a scalar primitive (not array or dictionary)
   var isScalar: Bool {
     switch self {
-    case .double, .float, .decimal, .string, .int, .bool:
+    case .double, .float, .cgFloat, .decimal, .string, .int, .bool:
       return true
     case .array, .dictionary:
       return false
