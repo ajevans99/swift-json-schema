@@ -316,7 +316,7 @@ extension Keywords {
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
       let maxLength = try countBound()
-      if let string = input.string, JSONNumberLiteral(string.count) > maxLength {
+      if let string = input.string, JSONNumberLiteral(string.unicodeScalars.count) > maxLength {
         throw ValidationIssue.exceedsMaxLength(
           string: string,
           maxLength: try maxLength.intBound(for: Self.name)
@@ -343,7 +343,7 @@ extension Keywords {
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
       let minLength = try countBound()
-      if let string = input.string, JSONNumberLiteral(string.count) < minLength {
+      if let string = input.string, JSONNumberLiteral(string.unicodeScalars.count) < minLength {
         throw ValidationIssue.belowMinLength(
           string: string,
           minLength: try minLength.intBound(for: Self.name)
