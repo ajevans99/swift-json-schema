@@ -128,7 +128,7 @@ For one hand-written use, choose `JSONReusable(Address.self, inline: true)`.
 
 ### Current document boundaries
 
-- `.namedTypes` is the only policy currently supported; repeated-use-only extraction is deferred.
+- `.namedTypes` extracts every named type. `.reusedTypes` extracts a named type only when it is used at least twice (or is recursive) and inlines the rest, merging use-site annotations such as `description`.
 - Construction uses a scoped registration context. Build components inside the closure.
   Already-built children, including those in a cached `static let schema`, are not traversed
   to discover reuse. A new `JSONReusable` wrapper can register a cached schema as a whole,

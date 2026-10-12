@@ -119,6 +119,23 @@ private indirect enum DocumentMutualB: Schemable {
   }
 }
 
+@Schemable
+private struct DocumentSingleUse: Equatable {
+  @SchemaOptions(.description("Home address"))
+  let home: DocumentAddress
+}
+
+@Schemable
+private struct DocumentNestedSingle: Equatable {
+  let single: DocumentSingleUse
+  let other: DocumentAddress
+}
+
+@Schemable
+private struct DocumentSingleTree: Equatable {
+  let tree: DocumentTree
+}
+
 struct SchemaDocumentTests {
   @Test func namedTypesPreserveInlineOutputAndUseSiteDescriptions() throws {
     let inline = DocumentOrder.schema.schemaValue
@@ -458,5 +475,72 @@ struct SchemaDocumentTests {
     }
     _ = try SchemaDocument { attemptNestedDocument() }
     #expect(try DocumentOrder.document().schemaValue["$defs"] != nil)
+  }
+
+  @Test func reusedTypesInlineSingleUsesAndMergeAnnotations() throws {
+    let doc = try DocumentSingleUse.document(references: .reusedTypes)
+    expectNoDifference(
+      doc.schemaValue.value,
+      [
+        "type": "object",
+        "required": ["home"],
+        "properties": [
+          "home": [
+            "type": "object",
+            "required": ["street"],
+            "properties": ["street": ["type": "string"]],
+            "description": "Home address",
+          ]
+        ],
+      ]
+    )
+    let json: JSONValue = ["home": ["street": "A"]]
+    #expect(try doc.parseAndValidate(json) == DocumentSingleUse(home: .init(street: "A")))
+    #expect(throws: ParseAndValidateIssue.self) {
+      try doc.parseAndValidate(["home": ["street": 4]])
+    }
+  }
+
+  @Test func reusedTypesExtractRepeatedUsesIncludingNestedOnes() throws {
+    let order = try DocumentOrder.document(references: .reusedTypes)
+    expectNoDifference(
+      order.schemaValue.value,
+      try DocumentOrder.document(references: .namedTypes).schemaValue.value
+    )
+
+    let nested = try DocumentNestedSingle.document(references: .reusedTypes)
+    #expect(nested.schemaValue["$defs"]?.object?.keys.sorted() == ["Address"])
+    let properties = nested.schemaValue["properties"]?.object
+    #expect(properties?["other"]?.object?["$ref"]?.string == "#/$defs/Address")
+    #expect(properties?["single"]?.object?["properties"]?.object?["home"]?.object?["$ref"] != nil)
+    let json: JSONValue = ["single": ["home": ["street": "A"]], "other": ["street": "B"]]
+    #expect(
+      try nested.parseAndValidate(json)
+        == DocumentNestedSingle(
+          single: .init(home: .init(street: "A")),
+          other: .init(street: "B")
+        )
+    )
+    #expect(nested.definition().validate(json).isValid)
+    #expect(throws: ParseAndValidateIssue.self) {
+      try nested.parseAndValidate(["single": ["home": ["street": 1]], "other": ["street": "B"]])
+    }
+  }
+
+  @Test func reusedTypesKeepRecursiveDefinitionsExtracted() throws {
+    let doc = try DocumentSingleTree.document(references: .reusedTypes)
+    #expect(doc.schemaValue["$defs"]?.object?["Tree"]?.object?["$dynamicAnchor"] != nil)
+    let tree: JSONValue = ["name": "root", "children": [["name": "leaf", "children": []]]]
+    #expect(try doc.parseAndValidate(["tree": tree]).tree.children.count == 1)
+    #expect(doc.definition().validate(["tree": tree]).isValid)
+  }
+
+  @Test func reusedTypesHandleManualBuilders() throws {
+    let once = try SchemaDocument(references: .reusedTypes) {
+      JSONArray { JSONReusable(DocumentAddress.self) }
+    }
+    #expect(once.schemaValue["$defs"] == nil)
+    #expect(once.schemaValue["items"]?.object?["type"]?.string == "object")
+    #expect(try once.parseAndValidate([["street": "A"]]).count == 1)
   }
 }
