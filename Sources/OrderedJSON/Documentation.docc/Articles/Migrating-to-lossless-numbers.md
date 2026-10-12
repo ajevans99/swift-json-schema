@@ -172,7 +172,7 @@ qualified spellings, including optional properties and collection values.
 
 Numeric constraints accept `JSONNumberLiteral` alongside their existing `Double` overloads,
 including the `@NumberOptions` traits. Construct precise bounds from strings rather than Swift
-floating-point literals. Numeric operands in `ValidationIssue` cases such as `exceedsMaximum`
+floating-point literals. Numeric operands in `ValidationIssue` payloads for codes such as `exceedsMaximum`
 and `notMultipleOf` use `JSONNumberLiteral`; inspect `rawValue` or explicitly convert instead
 of assuming a `Double` payload.
 

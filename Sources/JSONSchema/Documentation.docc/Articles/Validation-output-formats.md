@@ -75,7 +75,7 @@ if you subsequently use a `Codable` encoding path, such as `JSONEncoder.encode`.
 The rendered diagnostic structure is separate from ``ValidationResult/jsonValue``, which
 exposes the library's ordered representation of the original result.
 
-Numeric operands in ``ValidationIssue`` cases such as `exceedsMaximum` and `notMultipleOf`
+Numeric operands in ``ValidationIssue`` payloads for codes such as `exceedsMaximum` and `notMultipleOf`
 use `JSONNumberLiteral`. When handling those issues directly, read `rawValue` for the numeric
 token or use an explicit throwing conversion instead of assuming a `Double` payload.
 Public error bound payloads for lengths, item counts, property counts, and `contains`
