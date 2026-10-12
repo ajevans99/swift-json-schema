@@ -244,7 +244,8 @@ struct JSONValueCodableTests {
     }
 
     // Foundation JSONDecoder may permissively accept trailing commas depending on platform/parser
-    let decodedObject = try JSONDecoder().decode(JSONValue.self, from: Data(trailingCommaObject.utf8))
+    let decodedObject = try JSONDecoder()
+      .decode(JSONValue.self, from: Data(trailingCommaObject.utf8))
     #expect(decodedObject == .object(["a": .integer(1)]))
 
     let decodedArray = try JSONDecoder().decode(JSONValue.self, from: Data(trailingCommaArray.utf8))
