@@ -332,6 +332,16 @@ struct KeywordTests {
       }
     }
 
+    @Test func patternUncompilableFailsClosed() {
+      let keyword = Keywords.Pattern(value: "^(ab$")
+      #expect(throws: ValidationIssue.invalidPattern(pattern: "^(ab$")) {
+        try keyword.validate("anything", at: .init(), using: AnnotationContainer())
+      }
+      #expect(throws: Never.self) {
+        try keyword.validate(1, at: .init(), using: AnnotationContainer())
+      }
+    }
+
     @Test(arguments: [
       (JSONValue.string("test@example.com"), true),
       (JSONValue.string("invalid"), false),

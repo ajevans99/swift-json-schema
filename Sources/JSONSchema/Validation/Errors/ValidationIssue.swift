@@ -18,6 +18,7 @@ public enum ValidationIssue: Error, Codable, Equatable {
   case exceedsMaxLength(string: String, maxLength: Int)
   case belowMinLength(string: String, minLength: Int)
   case patternMismatch(string: String, pattern: String)
+  case invalidPattern(pattern: String)
   case invalidFormat(name: String, value: String)
 
   // Arrays
@@ -152,6 +153,8 @@ extension ValidationIssue: CustomStringConvertible {
       return "String '\(string)' is shorter than minimum length of \(minLength)"
     case .patternMismatch(let string, let pattern):
       return "String '\(string)' does not match pattern '\(pattern)'"
+    case .invalidPattern(let pattern):
+      return "Pattern '\(pattern)' is not a valid regular expression"
     case .invalidFormat(let name, let value):
       return "String '\(value)' is not valid for format '\(name)'"
 

@@ -361,6 +361,7 @@ extension Keywords {
 
     nonisolated(unsafe)
       private let regex: Regex<AnyRegexOutput>?
+    private let isUncompilable: Bool
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
@@ -368,8 +369,10 @@ extension Keywords {
 
       if let patternString = value.string {
         self.regex = try? Regex(patternString)
+        self.isUncompilable = regex == nil
       } else {
         self.regex = nil
+        self.isUncompilable = false
       }
     }
 
@@ -378,7 +381,12 @@ extension Keywords {
       at location: JSONPointer,
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
-      if let string = input.string, let regex = regex {
+      guard let string = input.string else { return }
+      // Fail closed: a pattern that can't be compiled can't be satisfied.
+      if isUncompilable {
+        throw ValidationIssue.invalidPattern(pattern: value.string ?? "")
+      }
+      if let regex = regex {
         if string.firstMatch(of: regex) == nil {
           throw ValidationIssue.patternMismatch(string: string, pattern: value.string ?? "")
         }

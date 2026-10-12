@@ -313,15 +313,20 @@ extension Keywords {
 
     nonisolated(unsafe)
       private let patterns: [(Regex<AnyRegexOutput>, Schema)]
+    private let uncompilablePattern: String?
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
 
+      var uncompilable: String?
       self.patterns =
         value.object?
         .compactMap { key, rawSchema in
-          guard let regex = try? Regex(key) else { return nil }
+          guard let regex = try? Regex(key) else {
+            uncompilable = uncompilable ?? key
+            return nil
+          }
           guard
             let subschema = try? Schema(
               rawSchema: rawSchema,
@@ -332,6 +337,7 @@ extension Keywords {
           else { return nil }
           return (regex, subschema)
         } ?? []
+      self.uncompilablePattern = uncompilable
     }
 
     package typealias AnnotationValue = OrderedSet<String>
@@ -342,6 +348,10 @@ extension Keywords {
       using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
       guard let instanceObject = input.object else { return }
+      // Fail closed: with an uncompilable pattern we can't tell which properties it applies to.
+      if let uncompilablePattern, !instanceObject.isEmpty {
+        throw ValidationIssue.invalidPattern(pattern: uncompilablePattern)
+      }
 
       var matchedPropertyNames: OrderedSet<String> = []
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
