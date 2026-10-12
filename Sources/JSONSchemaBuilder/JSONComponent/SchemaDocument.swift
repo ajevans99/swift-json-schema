@@ -1,10 +1,17 @@
 import Foundation
 import JSONSchema
+import OrderedCollections
 
 /// Controls which named schemas a document extracts.
 public enum SchemaDocumentReferences: Sendable {
-  /// Extract nested named types into root `$defs`.
+  /// Extract nested named types into root `$defs`, even when used only once.
   case namedTypes
+  /// Extract named types into root `$defs` only when the document uses them more than once.
+  ///
+  /// Types used once stay inline, with use-site annotations merged into the inlined schema.
+  /// Types whose schema is recursive (uses `$dynamicRef` or `$dynamicAnchor`) are always
+  /// extracted when referenced, so their anchors stay unique.
+  case reusedTypes
 }
 
 /// Controls a type's participation in document construction.
@@ -56,7 +63,8 @@ public struct SchemaDocument<Output>: JSONSchemaComponent {
     guard SchemaDocumentScope.current == nil else { throw .nestedDocument }
     let context: SchemaDocumentContext
     switch references {
-    case .namedTypes: context = SchemaDocumentContext(rootType: rootType)
+    case .namedTypes: context = SchemaDocumentContext(rootType: rootType, policy: references)
+    case .reusedTypes: context = SchemaDocumentContext(rootType: rootType, policy: references)
     }
     let component = SchemaDocumentScope.$current.withValue(context, operation: schema)
     if let rootType {
@@ -130,7 +138,7 @@ public struct JSONReusable<Component: JSONSchemaComponent>: JSONSchemaComponent 
         )
       )
     }
-    if isReference {
+    if isReference, context.isExtracted(typeID) {
       return ParsingScope.parseReference(
         component,
         value: value,
@@ -153,6 +161,7 @@ final class SchemaDocumentContext: @unchecked Sendable {
     let reference: String
     let component: any JSONSchemaComponent
     var extracted: Bool
+    var uses: Int
   }
 
   private let lock = NSRecursiveLock()
@@ -161,9 +170,16 @@ final class SchemaDocumentContext: @unchecked Sendable {
   private var building: Set<ObjectIdentifier> = []
   private var error: SchemaDocumentError?
   private var frozen = false
+  private var extractedIDs: Set<ObjectIdentifier> = []
+  private let policy: SchemaDocumentReferences
 
-  init(rootType: (any Schemable.Type)?) {
+  init(rootType: (any Schemable.Type)?, policy: SchemaDocumentReferences) {
     rootID = rootType.map { ObjectIdentifier($0) }
+    self.policy = policy
+  }
+
+  func isExtracted(_ id: ObjectIdentifier) -> Bool {
+    lock.withLock { extractedIDs.contains(id) }
   }
 
   func record(_ error: SchemaDocumentError) {
@@ -180,7 +196,13 @@ final class SchemaDocumentContext: @unchecked Sendable {
     lock.withLock {
       let id = ObjectIdentifier(type)
       if entries[id] == nil {
-        entries[id] = Entry(name: "", reference: "#", component: component, extracted: false)
+        entries[id] = Entry(
+          name: "",
+          reference: "#",
+          component: component,
+          extracted: false,
+          uses: 0
+        )
       }
       building.remove(id)
     }
@@ -228,6 +250,7 @@ final class SchemaDocumentContext: @unchecked Sendable {
         }
         if extract && !frozen {
           entry.extracted = true
+          entry.uses += 1
           entries[id] = entry
         }
         return extract ? (reference, true) : (entry.component.schemaValue, false)
@@ -239,7 +262,13 @@ final class SchemaDocumentContext: @unchecked Sendable {
       building.insert(id)
       let component = schema()
       building.remove(id)
-      entries[id] = Entry(name: name, reference: uri, component: component, extracted: extract)
+      entries[id] = Entry(
+        name: name,
+        reference: uri,
+        component: component,
+        extracted: extract,
+        uses: extract ? 1 : 0
+      )
       return extract ? (reference, true) : (component.schemaValue, false)
     }
   }
@@ -248,21 +277,46 @@ final class SchemaDocumentContext: @unchecked Sendable {
     lock.lock()
     defer { lock.unlock() }
     if let error { throw error }
+    let extractedEntries = entries.filter { _, entry in
+      guard entry.extracted else { return false }
+      switch policy {
+      case .namedTypes: return true
+      case .reusedTypes: return entry.uses > 1 || Self.containsDynamicKeyword(entry.component)
+      }
+    }
+    let extracted = extractedEntries.values.sorted { $0.name < $1.name }
+    let extractedReferences = Set(extracted.map(\.reference))
+    let inlined = Dictionary(
+      uniqueKeysWithValues: entries.values
+        .filter { $0.extracted && !extractedReferences.contains($0.reference) }
+        .map { ($0.reference, $0.component.schemaValue.value) }
+    )
+    func resolved(_ value: JSONValue) throws(SchemaDocumentError) -> JSONValue {
+      inlined.isEmpty ? value : try Self.inline(value, definitions: inlined)
+    }
     var result = root
-    let extracted = entries.values.filter(\.extracted).sorted { $0.name < $1.name }
+    if !inlined.isEmpty {
+      guard case .object(let object) = try resolved(root.value) else {
+        throw .unsupportedKeyword("boolean root")
+      }
+      result = .object(object)
+    }
     if !extracted.isEmpty {
-      guard case .object = root else { throw .unsupportedKeyword("boolean root with definitions") }
-      if let existing = root["$defs"], existing.object == nil {
+      guard case .object = result else {
+        throw .unsupportedKeyword("boolean root with definitions")
+      }
+      if let existing = result["$defs"], existing.object == nil {
         throw .unsupportedKeyword("$defs must be an object")
       }
-      var definitions = SchemaValue.object(root["$defs"]?.object ?? [:])
+      var definitions = SchemaValue.object(result["$defs"]?.object ?? [:])
       for entry in extracted {
         guard definitions[entry.name] == nil else { throw .conflictingDefinition(entry.name) }
-        definitions[entry.name] = entry.component.schemaValue.value
+        definitions[entry.name] = try resolved(entry.component.schemaValue.value)
       }
       result["$defs"] = definitions.value
     }
-    let references = Set(extracted.map(\.reference))
+    extractedIDs = Set(extractedEntries.keys)
+    let references = extractedReferences
     var anchors: Set<String> = []
     var dynamicReferences: Set<String> = []
     try inspect(
@@ -277,6 +331,83 @@ final class SchemaDocumentContext: @unchecked Sendable {
     }
     frozen = true
     return result
+  }
+
+  private static let referenceAnnotations: Set<String> = [
+    "title", "description", "default", "examples", "deprecated",
+    "readOnly", "writeOnly", "$comment",
+  ]
+
+  private static func containsDynamicKeyword(_ component: any JSONSchemaComponent) -> Bool {
+    func contains(_ value: JSONValue) -> Bool {
+      guard let object = value.object else { return false }
+      if object["$dynamicAnchor"] != nil || object["$dynamicRef"] != nil { return true }
+      var found = false
+      _ = mapSubschemas(of: object) { child in
+        found = found || contains(child)
+        return child
+      }
+      return found
+    }
+    return contains(component.schemaValue.value)
+  }
+
+  // Replaces `$ref`s to `definitions` with the referenced schema, merging use-site annotations.
+  private static func inline(
+    _ value: JSONValue,
+    definitions: [String: JSONValue]
+  ) throws(SchemaDocumentError) -> JSONValue {
+    guard let object = value.object else { return value }
+    if let uri = object["$ref"]?.string, let definition = definitions[uri] {
+      var siblings = object
+      siblings["$ref"] = nil
+      for keyword in siblings.keys where !referenceAnnotations.contains(keyword) {
+        throw .unsupportedKeyword("\(keyword) beside a generated $ref")
+      }
+      let base = try inline(definition, definitions: definitions)
+      guard var merged = base.object else {
+        if siblings.isEmpty { return base }
+        if base.boolean == true { return .object(siblings) }
+        siblings["not"] = .object([:])
+        return .object(siblings)
+      }
+      for (keyword, annotation) in siblings { merged[keyword] = annotation }
+      return .object(merged)
+    }
+    var failure: SchemaDocumentError?
+    let mapped = mapSubschemas(of: object) { child in
+      do throws(SchemaDocumentError) {
+        return try inline(child, definitions: definitions)
+      } catch {
+        failure = failure ?? error
+        return child
+      }
+    }
+    if let failure { throw failure }
+    return .object(mapped)
+  }
+
+  // Applies `transform` to every direct subschema position of a schema object.
+  private static func mapSubschemas(
+    of object: OrderedDictionary<String, JSONValue>,
+    _ transform: (JSONValue) -> JSONValue
+  ) -> OrderedDictionary<String, JSONValue> {
+    var object = object
+    for (keyword, child) in object {
+      switch keyword {
+      case "$defs", "definitions", "properties", "patternProperties", "dependentSchemas":
+        guard let children = child.object else { continue }
+        object[keyword] = .object(children.mapValues(transform))
+      case "allOf", "anyOf", "oneOf", "prefixItems":
+        guard let children = child.array else { continue }
+        object[keyword] = .array(children.map(transform))
+      case "additionalProperties", "unevaluatedProperties", "items", "unevaluatedItems",
+        "contains", "propertyNames", "not", "if", "then", "else", "contentSchema":
+        object[keyword] = transform(child)
+      default: break
+      }
+    }
+    return object
   }
 
   private func inspect(
@@ -297,10 +428,7 @@ final class SchemaDocumentContext: @unchecked Sendable {
       guard let uri = reference.string, references.contains(uri) else {
         throw .unsupportedReference(reference.string ?? "$ref must be a string")
       }
-      let allowed: Set<String> = [
-        "$ref", "title", "description", "default", "examples", "deprecated",
-        "readOnly", "writeOnly", "$comment",
-      ]
+      let allowed = Self.referenceAnnotations.union(["$ref"])
       for keyword in object.keys
       where !allowed.contains(keyword) && !(isRoot && keyword == "$defs") {
         throw .unsupportedKeyword("\(keyword) beside a generated $ref")
