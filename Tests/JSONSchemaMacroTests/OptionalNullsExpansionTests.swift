@@ -699,7 +699,9 @@ struct OptionalNullsExpansionTests {
             JSONSchema(Container.init) {
               JSONObject {
                 JSONProperty(key: "data") {
-                  CustomData.schema
+                  JSONReusable(CustomData.self) {
+                    CustomData.schema
+                  }
                   .orNull(style: .union)
                 }
                 .flatMapOptional()

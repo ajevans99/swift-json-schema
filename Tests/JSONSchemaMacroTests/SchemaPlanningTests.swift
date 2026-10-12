@@ -9,6 +9,26 @@ import Testing
 @testable import JSONSchemaMacro
 
 struct SchemaPlanningTests {
+  @Test func documentInliningIsPlannedBeforeEmission() throws {
+    let planned = try plan(
+      """
+      struct Example {
+        @SchemaOptions(.description("shared"))
+        let first: Address
+        @ObjectOptions(.additionalProperties(false))
+        let second: Address
+        @SchemaOptions(.orNull(style: OrNullStyle.type))
+        let third: Address?
+        @SchemaOptions(.orNull(style: .union))
+        let fourth: Address?
+        @SchemaOptions(.orNull(style: selectedStyle))
+        let fifth: Address?
+      }
+      """
+    )
+    #expect(try fields(planned).map(\.inlineNamedTypes) == [false, true, true, false, true])
+  }
+
   private func plan(_ source: String, arguments: String = "") throws -> SchemaPlan {
     let file = Parser.parse(source: source)
     let declaration = try #require(file.statements.first?.item.as(DeclSyntax.self))

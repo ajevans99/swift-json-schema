@@ -34,6 +34,14 @@ public protocol Schemable {
 
   @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
   static var defaultAnchor: String { get }
+
+  /// The definition key used by schema documents. Defaults to a qualified Swift type name.
+  @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+  static var schemaDefinitionName: String { get }
+
+  /// Override with `.inline` to opt out of automatic definition extraction.
+  @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+  static var schemaDocumentBehavior: SchemaDocumentBehavior { get }
 }
 
 @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
@@ -41,6 +49,20 @@ extension Schemable {
   public static var keyEncodingStrategy: KeyEncodingStrategies { .identity }
 
   public static var defaultAnchor: String {
-    SchemaAnchorName.sanitized(String(reflecting: Self.self))
+    if SchemaDocumentScope.current != nil {
+      return SchemaAnchorName.documentName(for: Self.self)
+    }
+    return SchemaAnchorName.sanitized(String(reflecting: Self.self))
+  }
+
+  public static var schemaDefinitionName: String { SchemaAnchorName.documentName(for: Self.self) }
+
+  public static var schemaDocumentBehavior: SchemaDocumentBehavior { .reusable }
+
+  /// Builds a document with an inline root and reusable nested definitions.
+  public static func document(
+    references: SchemaDocumentReferences = .namedTypes
+  ) throws(SchemaDocumentError) -> SchemaDocument<Schema.Output> {
+    try SchemaDocument(references: references, rootType: Self.self) { schema }
   }
 }
