@@ -1,68 +1,455 @@
 import Foundation
 
-public enum ValidationIssue: Error, Codable, Equatable {
-  case typeMismatch(expected: [JSONType], actual: JSONType)
-  case notEnumCase(value: JSONValue, allowedValues: [JSONValue])
-  case constantMismatch(expected: JSONValue, actual: JSONValue)
+/// A single reason a keyword rejected an instance.
+///
+/// Issues are identified by a stable ``Code`` rather than an enum case, so new built-in codes
+/// and custom keyword or format codes can be added without breaking source compatibility.
+/// Built-in issues are created with the static factories (for example
+/// ``patternMismatch(string:pattern:)``) and can be matched with `issue.code == .patternMismatch`.
+/// Applications can define their own codes and construct issues with
+/// ``init(code:message:payload:errors:)``. Public validators such as `FormatValidator` currently
+/// report only pass/fail, so custom codes are not yet surfaced by `Schema.validate`; the struct
+/// shape lets future hooks and built-in codes be added without another breaking change.
+public struct ValidationIssue: Error, Codable, Equatable, Sendable {
+  /// A stable, string-backed identifier for a kind of validation issue.
+  public struct Code: RawRepresentable, Hashable, Codable, Sendable,
+    ExpressibleByStringLiteral, CustomStringConvertible
+  {
+    public let rawValue: String
+
+    public init(rawValue: String) { self.rawValue = rawValue }
+    public init(_ rawValue: String) { self.rawValue = rawValue }
+    public init(stringLiteral value: String) { self.rawValue = value }
+
+    public init(from decoder: any Decoder) throws {
+      rawValue = try decoder.singleValueContainer().decode(String.self)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+      var container = encoder.singleValueContainer()
+      try container.encode(rawValue)
+    }
+
+    public var description: String { rawValue }
+  }
+
+  /// Identifies the kind of issue.
+  public let code: Code
+  /// A human-readable description of the issue.
+  public let message: String
+  /// Structured details about the failure, such as the offending value or limit.
+  public let payload: [String: JSONValue]
+  /// Nested validation errors, for issues produced by applicators and references.
+  public let errors: [ValidationError]
+
+  public init(
+    code: Code,
+    message: String,
+    payload: [String: JSONValue] = [:],
+    errors: [ValidationError] = []
+  ) {
+    self.code = code
+    self.message = message
+    self.payload = payload
+    self.errors = errors
+  }
+}
+
+extension ValidationIssue: CustomStringConvertible {
+  public var description: String { message }
+}
+
+extension ValidationIssue.Code {
+  public static let typeMismatch: Self = "typeMismatch"
+  public static let notEnumCase: Self = "notEnumCase"
+  public static let constantMismatch: Self = "constantMismatch"
 
   // Number
-  case notMultipleOf(number: JSONNumberLiteral, multiple: JSONNumberLiteral)
-  case exceedsMaximum(number: JSONNumberLiteral, maximum: JSONNumberLiteral)
-  case exceedsExclusiveMaximum(number: JSONNumberLiteral, maximum: JSONNumberLiteral)
-  case belowMinimum(number: JSONNumberLiteral, minimum: JSONNumberLiteral)
-  case belowExclusiveMinimum(number: JSONNumberLiteral, minimum: JSONNumberLiteral)
-  case numericValidationFailure(reason: String)
-  case evaluationFailed(errors: [ValidationError])
+  public static let notMultipleOf: Self = "notMultipleOf"
+  public static let exceedsMaximum: Self = "exceedsMaximum"
+  public static let exceedsExclusiveMaximum: Self = "exceedsExclusiveMaximum"
+  public static let belowMinimum: Self = "belowMinimum"
+  public static let belowExclusiveMinimum: Self = "belowExclusiveMinimum"
+  public static let numericValidationFailure: Self = "numericValidationFailure"
+  public static let evaluationFailed: Self = "evaluationFailed"
 
   // String
-  case exceedsMaxLength(string: String, maxLength: Int)
-  case belowMinLength(string: String, minLength: Int)
-  case patternMismatch(string: String, pattern: String)
-  case invalidPattern(pattern: String)
-  case invalidFormat(name: String, value: String)
+  public static let exceedsMaxLength: Self = "exceedsMaxLength"
+  public static let belowMinLength: Self = "belowMinLength"
+  public static let patternMismatch: Self = "patternMismatch"
+  public static let invalidPattern: Self = "invalidPattern"
+  public static let invalidFormat: Self = "invalidFormat"
 
   // Arrays
-  case exceedsMaxItems(count: Int, maxItems: Int)
-  case belowMinItems(count: Int, minItems: Int)
-  case itemsNotUnique
-  case containsInsufficientMatches(count: Int, required: Int)
-  case containsExcessiveMatches(count: Int, maxAllowed: Int)
-  case invalidItem(index: Int, error: ValidationError)
+  public static let exceedsMaxItems: Self = "exceedsMaxItems"
+  public static let belowMinItems: Self = "belowMinItems"
+  public static let itemsNotUnique: Self = "itemsNotUnique"
+  public static let containsInsufficientMatches: Self = "containsInsufficientMatches"
+  public static let containsExcessiveMatches: Self = "containsExcessiveMatches"
+  public static let invalidItem: Self = "invalidItem"
 
   // Objects
-  case exceedsMaxProperties(count: Int, maxProperties: Int)
-  case belowMinProperties(count: Int, minProperties: Int)
-  case missingRequiredProperty(key: String)
-  case missingDependentProperty(key: String, dependentOn: String)
-  case invalidProperty(key: String, error: ValidationError)
-  case invalidPatternProperty(key: String, pattern: String)
-  case invalidAdditionalProperty(key: String)
+  public static let exceedsMaxProperties: Self = "exceedsMaxProperties"
+  public static let belowMinProperties: Self = "belowMinProperties"
+  public static let missingRequiredProperty: Self = "missingRequiredProperty"
+  public static let missingDependentProperty: Self = "missingDependentProperty"
+  public static let invalidProperty: Self = "invalidProperty"
+  public static let invalidPatternProperty: Self = "invalidPatternProperty"
+  public static let invalidAdditionalProperty: Self = "invalidAdditionalProperty"
 
   // Logical
-  case allOfFailed(errors: [ValidationError])
-  case anyOfFailed(errors: [ValidationError])
-  case oneOfFailed(errors: [ValidationError])
-  case notFailed
+  public static let allOfFailed: Self = "allOfFailed"
+  public static let anyOfFailed: Self = "anyOfFailed"
+  public static let oneOfFailed: Self = "oneOfFailed"
+  public static let notFailed: Self = "notFailed"
 
   // Conditional
-  case conditionalFailed(condition: String, errors: [ValidationError])
-  case invalidDependentSchema(key: String, errors: [ValidationError])
-  case unevaluatedItemsFailed(errors: [ValidationError])
-  case unevaluatedPropertyFailed(errors: [ValidationError])
+  public static let conditionalFailed: Self = "conditionalFailed"
+  public static let invalidDependentSchema: Self = "invalidDependentSchema"
+  public static let unevaluatedItemsFailed: Self = "unevaluatedItemsFailed"
+  public static let unevaluatedPropertyFailed: Self = "unevaluatedPropertyFailed"
 
   // Reference
-  case invalidReference(String)
-  case referenceValidationFailure(ref: String, errors: [ValidationError])
+  public static let invalidReference: Self = "invalidReference"
+  public static let referenceValidationFailure: Self = "referenceValidationFailure"
 
-  case keywordFailure(keyword: KeywordIdentifier, errors: [ValidationError])
+  public static let keywordFailure: Self = "keywordFailure"
+}
+
+private func joined(_ errors: [ValidationError]) -> String {
+  errors.map { $0.message }.joined(separator: "; ")
+}
+
+extension ValidationIssue {
+  // General
+  public static func typeMismatch(expected: [JSONType], actual: JSONType) -> Self {
+    .init(
+      code: .typeMismatch,
+      message: "Expected type '\(expected)' but found '\(actual)'",
+      payload: [
+        "expected": .array(expected.map { .string($0.rawValue) }),
+        "actual": .string(actual.rawValue),
+      ]
+    )
+  }
+
+  public static func notEnumCase(value: JSONValue, allowedValues: [JSONValue]) -> Self {
+    .init(
+      code: .notEnumCase,
+      message:
+        "'\(value)' is not one of the allowed values: \(allowedValues.map(\.description).joined(separator: ", "))",
+      payload: ["value": value, "allowedValues": .array(allowedValues)]
+    )
+  }
+
+  public static func constantMismatch(expected: JSONValue, actual: JSONValue) -> Self {
+    .init(
+      code: .constantMismatch,
+      message: "Expected constant value '\(expected)' but found '\(actual)'",
+      payload: ["expected": expected, "actual": actual]
+    )
+  }
+
+  // Number
+  public static func notMultipleOf(number: JSONNumberLiteral, multiple: JSONNumberLiteral) -> Self {
+    .init(
+      code: .notMultipleOf,
+      message: "\(number) is not a multiple of \(multiple)",
+      payload: ["number": .numberLiteral(number), "multiple": .numberLiteral(multiple)]
+    )
+  }
+
+  public static func exceedsMaximum(number: JSONNumberLiteral, maximum: JSONNumberLiteral) -> Self {
+    .init(
+      code: .exceedsMaximum,
+      message: "\(number) exceeds maximum value of \(maximum)",
+      payload: ["number": .numberLiteral(number), "maximum": .numberLiteral(maximum)]
+    )
+  }
+
+  public static func exceedsExclusiveMaximum(
+    number: JSONNumberLiteral,
+    maximum: JSONNumberLiteral
+  ) -> Self {
+    .init(
+      code: .exceedsExclusiveMaximum,
+      message: "\(number) exceeds exclusive maximum value of \(maximum)",
+      payload: ["number": .numberLiteral(number), "maximum": .numberLiteral(maximum)]
+    )
+  }
+
+  public static func belowMinimum(number: JSONNumberLiteral, minimum: JSONNumberLiteral) -> Self {
+    .init(
+      code: .belowMinimum,
+      message: "\(number) is below minimum value of \(minimum)",
+      payload: ["number": .numberLiteral(number), "minimum": .numberLiteral(minimum)]
+    )
+  }
+
+  public static func belowExclusiveMinimum(
+    number: JSONNumberLiteral,
+    minimum: JSONNumberLiteral
+  ) -> Self {
+    .init(
+      code: .belowExclusiveMinimum,
+      message: "\(number) is below exclusive minimum value of \(minimum)",
+      payload: ["number": .numberLiteral(number), "minimum": .numberLiteral(minimum)]
+    )
+  }
+
+  public static func numericValidationFailure(reason: String) -> Self {
+    .init(code: .numericValidationFailure, message: reason, payload: ["reason": .string(reason)])
+  }
+
+  public static func evaluationFailed(errors: [ValidationError]) -> Self {
+    .init(
+      code: .evaluationFailed,
+      message: "Schema evaluation could not be completed",
+      errors: errors
+    )
+  }
+
+  // String
+  public static func exceedsMaxLength(string: String, maxLength: Int) -> Self {
+    .init(
+      code: .exceedsMaxLength,
+      message: "String '\(string)' exceeds maximum length of \(maxLength)",
+      payload: ["string": .string(string), "maxLength": .integer(maxLength)]
+    )
+  }
+
+  public static func belowMinLength(string: String, minLength: Int) -> Self {
+    .init(
+      code: .belowMinLength,
+      message: "String '\(string)' is shorter than minimum length of \(minLength)",
+      payload: ["string": .string(string), "minLength": .integer(minLength)]
+    )
+  }
+
+  public static func patternMismatch(string: String, pattern: String) -> Self {
+    .init(
+      code: .patternMismatch,
+      message: "String '\(string)' does not match pattern '\(pattern)'",
+      payload: ["string": .string(string), "pattern": .string(pattern)]
+    )
+  }
+
+  public static func invalidPattern(pattern: String) -> Self {
+    .init(
+      code: .invalidPattern,
+      message: "Pattern '\(pattern)' is not a valid regular expression",
+      payload: ["pattern": .string(pattern)]
+    )
+  }
+
+  public static func invalidFormat(name: String, value: String) -> Self {
+    .init(
+      code: .invalidFormat,
+      message: "String '\(value)' is not valid for format '\(name)'",
+      payload: ["name": .string(name), "value": .string(value)]
+    )
+  }
+
+  // Arrays
+  public static func exceedsMaxItems(count: Int, maxItems: Int) -> Self {
+    .init(
+      code: .exceedsMaxItems,
+      message: "Array has \(count) items which exceeds maximum of \(maxItems)",
+      payload: ["count": .integer(count), "maxItems": .integer(maxItems)]
+    )
+  }
+
+  public static func belowMinItems(count: Int, minItems: Int) -> Self {
+    .init(
+      code: .belowMinItems,
+      message: "Array has \(count) items which is less than minimum of \(minItems)",
+      payload: ["count": .integer(count), "minItems": .integer(minItems)]
+    )
+  }
+
+  public static var itemsNotUnique: Self {
+    .init(code: .itemsNotUnique, message: "Array items are not unique as required")
+  }
+
+  public static func containsInsufficientMatches(count: Int, required: Int) -> Self {
+    .init(
+      code: .containsInsufficientMatches,
+      message: "Array contains \(count) matching items but requires at least \(required)",
+      payload: ["count": .integer(count), "required": .integer(required)]
+    )
+  }
+
+  public static func containsExcessiveMatches(count: Int, maxAllowed: Int) -> Self {
+    .init(
+      code: .containsExcessiveMatches,
+      message:
+        "Array contains \(count) matching items which exceeds maximum allowed of \(maxAllowed)",
+      payload: ["count": .integer(count), "maxAllowed": .integer(maxAllowed)]
+    )
+  }
+
+  public static func invalidItem(index: Int, error: ValidationError) -> Self {
+    .init(
+      code: .invalidItem,
+      message: "Item at index \(index) failed validation: \(error.message)",
+      payload: ["index": .integer(index)],
+      errors: [error]
+    )
+  }
+
+  // Objects
+  public static func exceedsMaxProperties(count: Int, maxProperties: Int) -> Self {
+    .init(
+      code: .exceedsMaxProperties,
+      message: "Object has \(count) properties which exceeds maximum of \(maxProperties)",
+      payload: ["count": .integer(count), "maxProperties": .integer(maxProperties)]
+    )
+  }
+
+  public static func belowMinProperties(count: Int, minProperties: Int) -> Self {
+    .init(
+      code: .belowMinProperties,
+      message: "Object has \(count) properties which is less than minimum of \(minProperties)",
+      payload: ["count": .integer(count), "minProperties": .integer(minProperties)]
+    )
+  }
+
+  public static func missingRequiredProperty(key: String) -> Self {
+    .init(
+      code: .missingRequiredProperty,
+      message: "Required property '\(key)' is missing",
+      payload: ["key": .string(key)]
+    )
+  }
+
+  public static func missingDependentProperty(key: String, dependentOn: String) -> Self {
+    .init(
+      code: .missingDependentProperty,
+      message: "Property '\(key)' is missing, which is required when '\(dependentOn)' is present",
+      payload: ["key": .string(key), "dependentOn": .string(dependentOn)]
+    )
+  }
+
+  public static func invalidProperty(key: String, error: ValidationError) -> Self {
+    .init(
+      code: .invalidProperty,
+      message: "Property '\(key)' failed validation: \(error.message)",
+      payload: ["key": .string(key)],
+      errors: [error]
+    )
+  }
+
+  public static func invalidPatternProperty(key: String, pattern: String) -> Self {
+    .init(
+      code: .invalidPatternProperty,
+      message: "Property name '\(key)' does not match pattern '\(pattern)'",
+      payload: ["key": .string(key), "pattern": .string(pattern)]
+    )
+  }
+
+  public static func invalidAdditionalProperty(key: String) -> Self {
+    .init(
+      code: .invalidAdditionalProperty,
+      message: "Additional property '\(key)' is not allowed",
+      payload: ["key": .string(key)]
+    )
+  }
+
+  // Logical
+  public static func allOfFailed(errors: [ValidationError]) -> Self {
+    .init(
+      code: .allOfFailed,
+      message: "Failed to satisfy all schemas: \(joined(errors))",
+      errors: errors
+    )
+  }
+
+  public static func anyOfFailed(errors: [ValidationError]) -> Self {
+    .init(
+      code: .anyOfFailed,
+      message: "Failed to satisfy any schema: \(joined(errors))",
+      errors: errors
+    )
+  }
+
+  public static func oneOfFailed(errors: [ValidationError]) -> Self {
+    .init(
+      code: .oneOfFailed,
+      message: "Failed to satisfy exactly one schema: \(joined(errors))",
+      errors: errors
+    )
+  }
+
+  public static var notFailed: Self {
+    .init(code: .notFailed, message: "Instance should not match the schema")
+  }
+
+  // Conditional
+  public static func conditionalFailed(condition: String, errors: [ValidationError]) -> Self {
+    .init(
+      code: .conditionalFailed,
+      message: "Failed conditional validation for '\(condition)': \(joined(errors))",
+      payload: ["condition": .string(condition)],
+      errors: errors
+    )
+  }
+
+  public static func invalidDependentSchema(key: String, errors: [ValidationError]) -> Self {
+    .init(
+      code: .invalidDependentSchema,
+      message: "Failed dependent schema validation for '\(key)': \(joined(errors))",
+      payload: ["key": .string(key)],
+      errors: errors
+    )
+  }
+
+  public static func unevaluatedItemsFailed(errors: [ValidationError]) -> Self {
+    .init(
+      code: .unevaluatedItemsFailed,
+      message: "Failed unevaluated items validation: \(joined(errors))",
+      errors: errors
+    )
+  }
+
+  public static func unevaluatedPropertyFailed(errors: [ValidationError]) -> Self {
+    .init(
+      code: .unevaluatedPropertyFailed,
+      message: "Failed unevaluated properties validation: \(joined(errors))",
+      errors: errors
+    )
+  }
+
+  // Reference
+  public static func invalidReference(_ ref: String) -> Self {
+    .init(
+      code: .invalidReference,
+      message: "Invalid reference: \(ref)",
+      payload: ["ref": .string(ref)]
+    )
+  }
+
+  public static func referenceValidationFailure(ref: String, errors: [ValidationError]) -> Self {
+    .init(
+      code: .referenceValidationFailure,
+      message: "Validation failed for reference '\(ref)': \(joined(errors))",
+      payload: ["ref": .string(ref)],
+      errors: errors
+    )
+  }
+
+  public static func keywordFailure(keyword: KeywordIdentifier, errors: [ValidationError]) -> Self {
+    .init(
+      code: .keywordFailure,
+      message: "Validation failed for keyword '\(keyword)': \(joined(errors))",
+      payload: ["keyword": .string(keyword)],
+      errors: errors
+    )
+  }
 }
 
 extension ValidationIssue {
   var isEvaluationFailure: Bool {
-    switch self {
-    case .numericValidationFailure, .evaluationFailed: true
-    default: false
-    }
+    code == .numericValidationFailure || code == .evaluationFailed
   }
 
   func makeValidationError(
@@ -71,159 +458,34 @@ extension ValidationIssue {
     absoluteKeywordLocation: URL?,
     instanceLocation: JSONPointer
   ) -> ValidationError {
-    switch self {
-    case .keywordFailure(let keyword, let errors):
-      .init(
-        keyword: keyword,
-        message: "Validation failed for keyword '\(keyword)'",
+    let nested = errors.isEmpty ? nil : errors
+    if code == .keywordFailure, let name = payload["keyword"]?.string {
+      return .init(
+        keyword: name,
+        message: "Validation failed for keyword '\(name)'",
         keywordLocation: keywordLocation,
         absoluteKeywordLocation: absoluteKeywordLocation,
         instanceLocation: instanceLocation,
-        errors: errors
+        errors: nested
       )
-    case .referenceValidationFailure(let ref, let errors):
-      .init(
+    }
+    if code == .referenceValidationFailure, let ref = payload["ref"]?.string {
+      return .init(
         keyword: keyword,
         message: "Validation failed during reference validation '\(ref)'",
         keywordLocation: keywordLocation,
         absoluteKeywordLocation: absoluteKeywordLocation,
         instanceLocation: instanceLocation,
-        errors: errors
-      )
-    case .evaluationFailed(let errors),
-      .allOfFailed(let errors),
-      .anyOfFailed(let errors),
-      .oneOfFailed(let errors),
-      .conditionalFailed(_, let errors),
-      .invalidDependentSchema(_, let errors),
-      .unevaluatedItemsFailed(let errors),
-      .unevaluatedPropertyFailed(let errors):
-      .init(
-        keyword: keyword,
-        message: description,
-        keywordLocation: keywordLocation,
-        absoluteKeywordLocation: absoluteKeywordLocation,
-        instanceLocation: instanceLocation,
-        errors: errors
-      )
-    default:
-      .init(
-        keyword: keyword,
-        message: description,
-        keywordLocation: keywordLocation,
-        absoluteKeywordLocation: absoluteKeywordLocation,
-        instanceLocation: instanceLocation
+        errors: nested
       )
     }
-  }
-}
-
-extension ValidationIssue: CustomStringConvertible {
-  public var description: String {
-    switch self {
-    // General
-    case .typeMismatch(let expected, let actual):
-      return "Expected type '\(expected)' but found '\(actual)'"
-    case .notEnumCase(let value, let allowedValues):
-      return
-        "'\(value)' is not one of the allowed values: \(allowedValues.map(\.description).joined(separator: ", "))"
-    case .constantMismatch(let expected, let actual):
-      return "Expected constant value '\(expected)' but found '\(actual)'"
-
-    // Number
-    case .numericValidationFailure(let reason):
-      return reason
-    case .evaluationFailed:
-      return "Schema evaluation could not be completed"
-    case .notMultipleOf(let number, let multiple):
-      return "\(number) is not a multiple of \(multiple)"
-    case .exceedsMaximum(let number, let maximum):
-      return "\(number) exceeds maximum value of \(maximum)"
-    case .exceedsExclusiveMaximum(let number, let maximum):
-      return "\(number) exceeds exclusive maximum value of \(maximum)"
-    case .belowMinimum(let number, let minimum):
-      return "\(number) is below minimum value of \(minimum)"
-    case .belowExclusiveMinimum(let number, let minimum):
-      return "\(number) is below exclusive minimum value of \(minimum)"
-
-    // String
-    case .exceedsMaxLength(let string, let maxLength):
-      return "String '\(string)' exceeds maximum length of \(maxLength)"
-    case .belowMinLength(let string, let minLength):
-      return "String '\(string)' is shorter than minimum length of \(minLength)"
-    case .patternMismatch(let string, let pattern):
-      return "String '\(string)' does not match pattern '\(pattern)'"
-    case .invalidPattern(let pattern):
-      return "Pattern '\(pattern)' is not a valid regular expression"
-    case .invalidFormat(let name, let value):
-      return "String '\(value)' is not valid for format '\(name)'"
-
-    // Arrays
-    case .exceedsMaxItems(let count, let maxItems):
-      return "Array has \(count) items which exceeds maximum of \(maxItems)"
-    case .belowMinItems(let count, let minItems):
-      return "Array has \(count) items which is less than minimum of \(minItems)"
-    case .itemsNotUnique:
-      return "Array items are not unique as required"
-    case .containsInsufficientMatches(let count, let required):
-      return "Array contains \(count) matching items but requires at least \(required)"
-    case .containsExcessiveMatches(let count, let maxAllowed):
-      return "Array contains \(count) matching items which exceeds maximum allowed of \(maxAllowed)"
-    case .invalidItem(let index, let error):
-      return "Item at index \(index) failed validation: \(error.message)"
-
-    // Objects
-    case .exceedsMaxProperties(let count, let maxProperties):
-      return "Object has \(count) properties which exceeds maximum of \(maxProperties)"
-    case .belowMinProperties(let count, let minProperties):
-      return "Object has \(count) properties which is less than minimum of \(minProperties)"
-    case .missingRequiredProperty(let key):
-      return "Required property '\(key)' is missing"
-    case .missingDependentProperty(let key, let dependentOn):
-      return "Property '\(key)' is missing, which is required when '\(dependentOn)' is present"
-    case .invalidProperty(let key, let error):
-      return "Property '\(key)' failed validation: \(error.message)"
-    case .invalidPatternProperty(let key, let pattern):
-      return "Property name '\(key)' does not match pattern '\(pattern)'"
-    case .invalidAdditionalProperty(let key):
-      return "Additional property '\(key)' is not allowed"
-
-    // Logical
-    case .allOfFailed(let errors):
-      return "Failed to satisfy all schemas: \(errors.map { $0.message }.joined(separator: "; "))"
-    case .anyOfFailed(let errors):
-      return "Failed to satisfy any schema: \(errors.map { $0.message }.joined(separator: "; "))"
-    case .oneOfFailed(let errors):
-      return
-        "Failed to satisfy exactly one schema: \(errors.map { $0.message }.joined(separator: "; "))"
-    case .notFailed:
-      return "Instance should not match the schema"
-
-    // Conditional
-    case .conditionalFailed(let condition, let errors):
-      return
-        "Failed conditional validation for '\(condition)': \(errors.map { $0.message }.joined(separator: "; "))"
-    case .invalidDependentSchema(let key, let errors):
-      return
-        "Failed dependent schema validation for '\(key)': \(errors.map { $0.message }.joined(separator: "; "))"
-    case .unevaluatedItemsFailed(let errors):
-      return
-        "Failed unevaluated items validation: \(errors.map { $0.message }.joined(separator: "; "))"
-    case .unevaluatedPropertyFailed(let errors):
-      return
-        "Failed unevaluated properties validation: \(errors.map { $0.message }.joined(separator: "; "))"
-
-    // Reference
-    case .invalidReference(let ref):
-      return "Invalid reference: \(ref)"
-    case .referenceValidationFailure(let ref, let errors):
-      return
-        "Validation failed for reference '\(ref)': \(errors.map { $0.message }.joined(separator: "; "))"
-
-    // General
-    case .keywordFailure(let keyword, let errors):
-      return
-        "Validation failed for keyword '\(keyword)': \(errors.map { $0.message }.joined(separator: "; "))"
-    }
+    return .init(
+      keyword: keyword,
+      message: message,
+      keywordLocation: keywordLocation,
+      absoluteKeywordLocation: absoluteKeywordLocation,
+      instanceLocation: instanceLocation,
+      errors: nested
+    )
   }
 }

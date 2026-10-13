@@ -230,7 +230,7 @@ struct NumberLiteralValidationTests {
       try keyword.validate(input, at: .init(), using: AnnotationContainer())
       Issue.record("Expected an explicit numeric validation failure")
     } catch {
-      guard case .numericValidationFailure(let reason) = error else {
+      guard error.code == .numericValidationFailure, let reason = error.payload["reason"]?.string else {
         Issue.record("Expected numericValidationFailure, received \(error)")
         return
       }
@@ -257,12 +257,12 @@ struct NumberLiteralValidationTests {
       )
       Issue.record("Expected the exact maximum to be exceeded")
     } catch {
-      guard case .exceedsMaximum(let actual, let maximum) = error else {
+      guard error.code == .exceedsMaximum else {
         Issue.record("Expected exceedsMaximum, received \(error)")
         return
       }
-      #expect(actual.rawValue == number.rawValue)
-      #expect(maximum.rawValue == limit.rawValue)
+      #expect(error.payload["number"]?.numberLiteral?.rawValue == number.rawValue)
+      #expect(error.payload["maximum"]?.numberLiteral?.rawValue == limit.rawValue)
       #expect(error.description.contains(number.rawValue))
       #expect(error.description.contains(limit.rawValue))
     }
@@ -330,7 +330,7 @@ struct NumberLiteralValidationTests {
         try keyword.validate(input, at: .init(), using: annotations)
         Issue.record("Expected \(name) to reject invalid count bound \(token)")
       } catch {
-        guard case .numericValidationFailure(let reason) = error else {
+        guard error.code == .numericValidationFailure, let reason = error.payload["reason"]?.string else {
           Issue.record("Expected numericValidationFailure for \(name), received \(error)")
           continue
         }
@@ -372,7 +372,7 @@ struct NumberLiteralValidationTests {
         try keyword.validate(input, at: .init(), using: annotations)
         Issue.record("Expected \(name) to reject the unrepresentable bound \(token)")
       } catch {
-        guard case .numericValidationFailure(let reason) = error else {
+        guard error.code == .numericValidationFailure, let reason = error.payload["reason"]?.string else {
           Issue.record("Expected numericValidationFailure for \(name), received \(error)")
           continue
         }
