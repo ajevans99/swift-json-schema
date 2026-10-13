@@ -257,6 +257,10 @@ struct KeywordTests {
     @Test(arguments: [
       (JSONValue.string("hello"), true),
       (JSONValue.string("hello world"), false),
+      // Length counts Unicode code points, not grapheme clusters (validation §6.3.1).
+      // "e\u{301}" is one grapheme but two code points.
+      (JSONValue.string(String(repeating: "e\u{301}", count: 3)), false),
+      (JSONValue.string(String(repeating: "\u{1F600}", count: 5)), true),
       (JSONValue.number(123), true),
       (JSONValue.null, true),
     ])
@@ -284,6 +288,8 @@ struct KeywordTests {
     @Test(arguments: [
       (JSONValue.string("hello"), true),
       (JSONValue.string("hi"), false),
+      (JSONValue.string(String(repeating: "e\u{301}", count: 2)), true),
+      (JSONValue.string("\u{1F600}\u{1F600}"), false),
       (JSONValue.number(123), true),
       (JSONValue.null, true),
     ])
