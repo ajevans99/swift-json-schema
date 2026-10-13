@@ -6,7 +6,10 @@ import Foundation
 /// and custom keyword or format codes can be added without breaking source compatibility.
 /// Built-in issues are created with the static factories (for example
 /// ``patternMismatch(string:pattern:)``) and can be matched with `issue.code == .patternMismatch`.
-/// Custom validators define their own codes and use ``init(code:message:payload:errors:)``.
+/// Applications can define their own codes and construct issues with
+/// ``init(code:message:payload:errors:)``. Public validators such as `FormatValidator` currently
+/// report only pass/fail, so custom codes are not yet surfaced by `Schema.validate`; the struct
+/// shape lets future hooks and built-in codes be added without another breaking change.
 public struct ValidationIssue: Error, Codable, Equatable, Sendable {
   /// A stable, string-backed identifier for a kind of validation issue.
   public struct Code: RawRepresentable, Hashable, Codable, Sendable,
@@ -482,17 +485,7 @@ extension ValidationIssue {
       keywordLocation: keywordLocation,
       absoluteKeywordLocation: absoluteKeywordLocation,
       instanceLocation: instanceLocation,
-      errors: Self.nestsErrors(code) ? nested : nil
+      errors: nested
     )
-  }
-
-  private static func nestsErrors(_ code: Code) -> Bool {
-    switch code {
-    case .evaluationFailed, .allOfFailed, .anyOfFailed, .oneOfFailed, .conditionalFailed,
-      .invalidDependentSchema, .unevaluatedItemsFailed, .unevaluatedPropertyFailed:
-      true
-    default:
-      false
-    }
   }
 }
