@@ -91,8 +91,9 @@ extension JSONValue: Codable {
   public init(from decoder: Decoder) throws {
     if let keyed = try? decoder.container(keyedBy: AnyKey.self) {
       var dictionary = OrderedDictionary<String, Self>()
-      dictionary.reserveCapacity(keyed.allKeys.count)
-      for key in keyed.allKeys {
+      let keys = keyed.allKeys
+      dictionary.reserveCapacity(keys.count)
+      for key in keys {
         dictionary[key.stringValue] = try keyed.decode(Self.self, forKey: key)
       }
       self = .object(dictionary)
@@ -116,7 +117,14 @@ extension JSONValue: Codable {
       self = .numberLiteral(number)
       return
     }
-    if let array = try? container.decode([Self].self) {
+    if var unkeyed = try? decoder.unkeyedContainer() {
+      var array = [Self]()
+      if let count = unkeyed.count {
+        array.reserveCapacity(count)
+      }
+      while !unkeyed.isAtEnd {
+        array.append(try unkeyed.decode(Self.self))
+      }
       self = .array(array)
       return
     }
