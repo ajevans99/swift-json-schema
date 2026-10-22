@@ -266,12 +266,9 @@ public struct URIFormatValidator: FormatValidator {
       dot < bytes.count - 1,
       bytes[1 ..< dot].allSatisfy(isHexDigit)
     else { return false }
-    return isValidComponent(
-      Array(bytes[(dot + 1)...]),
-      allows: {
-        isUnreserved($0) || isSubDelimiter($0) || $0 == 58
-      }
-    )
+    return bytes[(dot + 1)...].allSatisfy {
+      isUnreserved($0) || isSubDelimiter($0) || $0 == 58
+    }
   }
 
   private static func isValidComponent(
