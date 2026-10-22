@@ -180,6 +180,24 @@ public struct URIFormatValidator: FormatValidator {
 public struct URIReferenceFormatValidator: FormatValidator {
   public let formatName = "uri-reference"
   public func validate(_ value: String) -> Bool {
-    URL(string: value) != nil
+    guard hasValidSchemeOrRelativePrefix(value) else { return false }
+    return URL(string: value) != nil
+  }
+
+  /// RFC 3986: a `:` before the first `/`, `?`, or `#` must terminate a valid scheme,
+  /// since a relative reference's first path segment cannot contain a colon.
+  private func hasValidSchemeOrRelativePrefix(_ value: String) -> Bool {
+    guard
+      let colon = value.firstIndex(where: { $0 == ":" || $0 == "/" || $0 == "?" || $0 == "#" }),
+      value[colon] == ":"
+    else { return true }
+    let scheme = value[..<colon]
+    guard let first = scheme.unicodeScalars.first, first.isASCII, first.properties.isAlphabetic
+    else { return false }
+    return scheme.unicodeScalars.allSatisfy { scalar in
+      scalar.isASCII
+        && (scalar.properties.isAlphabetic || ("0" ... "9").contains(scalar)
+          || scalar == "+" || scalar == "-" || scalar == ".")
+    }
   }
 }
