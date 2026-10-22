@@ -81,15 +81,14 @@ struct JSONValueCodableTests {
 
   @Test func finiteDoubleExtremes() throws {
     let decoder = JSONDecoder()
-    let minPositive = String(Double.leastNonzeroMagnitude)
-    let maxFinite = String(Double.greatestFiniteMagnitude)
-    for text in [minPositive, maxFinite] {
+    for expected in [Double.leastNonzeroMagnitude, Double.greatestFiniteMagnitude] {
+      let text = String(expected)
       let value = try decoder.decode(JSONValue.self, from: Data(text.utf8))
       guard case .numberLiteral(let literal) = value else {
         Issue.record("Expected numberLiteral for \(text)")
         continue
       }
-      #expect(try literal.doubleValue().isFinite)
+      #expect(try literal.doubleValue() == expected)
     }
   }
 
@@ -132,13 +131,15 @@ struct JSONValueCodableTests {
   // MARK: - Nested failure paths
 
   @Test func nestedFailureReportsCorrectCodingPath() {
-    // Malformed JSON inside nested structure
-    let malformedNested = """
-      {"outer": {"inner": [1, 2, "unclosed string]}}
-      """
-    let decoder = JSONDecoder()
-    #expect(throws: (any Error).self) {
-      try decoder.decode(JSONValue.self, from: Data(malformedNested.utf8))
+    let json = #"{"outer": {"inner": [1, 2, 1e4000]}}"#
+    do {
+      _ = try JSONDecoder().decode(JSONValue.self, from: Data(json.utf8))
+      Issue.record("Expected decoding to fail for an unrepresentable number")
+    } catch DecodingError.dataCorrupted(let context) {
+      #expect(context.codingPath.dropLast().map(\.stringValue) == ["outer", "inner"])
+      #expect(context.codingPath.last?.intValue == 2)
+    } catch {
+      Issue.record("Expected DecodingError.dataCorrupted, got \(error)")
     }
   }
 
