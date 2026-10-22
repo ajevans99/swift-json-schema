@@ -185,9 +185,12 @@ public struct URIFormatValidator: FormatValidator {
       let fragment = Array(hierarchy[(fragmentMarker + 1)...])
       guard
         !fragment.contains(35),
-        Self.isValidComponent(fragment, allows: {
-          Self.isPChar($0) || $0 == 47 || $0 == 63
-        })
+        Self.isValidComponent(
+          fragment,
+          allows: {
+            Self.isPChar($0) || $0 == 47 || $0 == 63
+          }
+        )
       else { return false }
       hierarchy = Array(hierarchy[..<fragmentMarker])
     }
@@ -219,9 +222,12 @@ public struct URIFormatValidator: FormatValidator {
     if let atSign = atSigns.first {
       let userInfo = Array(bytes[..<atSign])
       guard
-        isValidComponent(userInfo, allows: {
-          isUnreserved($0) || isSubDelimiter($0) || $0 == 58
-        })
+        isValidComponent(
+          userInfo,
+          allows: {
+            isUnreserved($0) || isSubDelimiter($0) || $0 == 58
+          }
+        )
       else { return false }
       hostPort = Array(bytes[(atSign + 1)...])
     }
@@ -260,9 +266,12 @@ public struct URIFormatValidator: FormatValidator {
       dot < bytes.count - 1,
       bytes[1 ..< dot].allSatisfy(isHexDigit)
     else { return false }
-    return isValidComponent(Array(bytes[(dot + 1)...]), allows: {
-      isUnreserved($0) || isSubDelimiter($0) || $0 == 58
-    })
+    return isValidComponent(
+      Array(bytes[(dot + 1)...]),
+      allows: {
+        isUnreserved($0) || isSubDelimiter($0) || $0 == 58
+      }
+    )
   }
 
   private static func isValidComponent(
@@ -295,7 +304,10 @@ public struct URIFormatValidator: FormatValidator {
   }
 
   private static func isSubDelimiter(_ byte: UInt8) -> Bool {
-    [33, 36, 38, 39, 40, 41, 42, 43, 44, 59, 61].contains(byte)
+    switch byte {
+    case 33, 36, 38, 39, 40, 41, 42, 43, 44, 59, 61: true
+    default: false
+    }
   }
 
   private static func isSchemeCharacter(_ byte: UInt8) -> Bool {
