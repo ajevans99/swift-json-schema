@@ -172,8 +172,146 @@ public struct UUIDFormatValidator: FormatValidator {
 public struct URIFormatValidator: FormatValidator {
   public let formatName = "uri"
   public func validate(_ value: String) -> Bool {
-    guard let url = URL(string: value) else { return false }
-    return url.scheme != nil
+    let bytes = Array(value.utf8)
+    guard
+      let colon = bytes.firstIndex(of: 58),
+      colon > 0,
+      Self.isAlpha(bytes[0]),
+      bytes[1 ..< colon].allSatisfy(Self.isSchemeCharacter)
+    else { return false }
+
+    var hierarchy = Array(bytes[(colon + 1)...])
+    if let fragmentMarker = hierarchy.firstIndex(of: 35) {
+      let fragment = Array(hierarchy[(fragmentMarker + 1)...])
+      guard
+        !fragment.contains(35),
+        Self.isValidComponent(fragment, allows: {
+          Self.isPChar($0) || $0 == 47 || $0 == 63
+        })
+      else { return false }
+      hierarchy = Array(hierarchy[..<fragmentMarker])
+    }
+
+    if let queryMarker = hierarchy.firstIndex(of: 63) {
+      let query = Array(hierarchy[(queryMarker + 1)...])
+      guard Self.isValidComponent(query, allows: { Self.isPChar($0) || $0 == 47 || $0 == 63 })
+      else { return false }
+      hierarchy = Array(hierarchy[..<queryMarker])
+    }
+
+    guard hierarchy.starts(with: [47, 47]) else {
+      return Self.isValidComponent(hierarchy, allows: { Self.isPChar($0) || $0 == 47 })
+    }
+
+    let authorityAndPath = Array(hierarchy.dropFirst(2))
+    let pathStart = authorityAndPath.firstIndex(of: 47) ?? authorityAndPath.endIndex
+    let authority = Array(authorityAndPath[..<pathStart])
+    let path = Array(authorityAndPath[pathStart...])
+    return Self.isValidAuthority(authority)
+      && Self.isValidComponent(path, allows: { Self.isPChar($0) || $0 == 47 })
+  }
+
+  private static func isValidAuthority(_ bytes: [UInt8]) -> Bool {
+    let atSigns = bytes.indices.filter { bytes[$0] == 64 }
+    guard atSigns.count <= 1 else { return false }
+
+    var hostPort = bytes
+    if let atSign = atSigns.first {
+      let userInfo = Array(bytes[..<atSign])
+      guard
+        isValidComponent(userInfo, allows: {
+          isUnreserved($0) || isSubDelimiter($0) || $0 == 58
+        })
+      else { return false }
+      hostPort = Array(bytes[(atSign + 1)...])
+    }
+
+    if hostPort.first == 91 {
+      guard
+        let closingBracket = hostPort.firstIndex(of: 93),
+        isValidIPLiteral(Array(hostPort[1 ..< closingBracket]))
+      else { return false }
+      let port = Array(hostPort[(closingBracket + 1)...])
+      return port.isEmpty || (port[0] == 58 && port.dropFirst().allSatisfy(isDigit))
+    }
+
+    guard !hostPort.contains(91), !hostPort.contains(93) else { return false }
+    let colons = hostPort.indices.filter { hostPort[$0] == 58 }
+    guard colons.count <= 1 else { return false }
+    let host = colons.first.map { Array(hostPort[..<$0]) } ?? hostPort
+    guard
+      isValidComponent(host, allows: { isUnreserved($0) || isSubDelimiter($0) })
+    else { return false }
+    guard let colon = colons.first else { return true }
+    return hostPort[(colon + 1)...].allSatisfy(isDigit)
+  }
+
+  private static func isValidIPLiteral(_ bytes: [UInt8]) -> Bool {
+    let value = String(decoding: bytes, as: UTF8.self)
+    if IPv6FormatValidator().validate(value) {
+      return true
+    }
+
+    guard
+      bytes.count > 3,
+      bytes[0] == 118 || bytes[0] == 86,
+      let dot = bytes.firstIndex(of: 46),
+      dot > 1,
+      dot < bytes.count - 1,
+      bytes[1 ..< dot].allSatisfy(isHexDigit)
+    else { return false }
+    return isValidComponent(Array(bytes[(dot + 1)...]), allows: {
+      isUnreserved($0) || isSubDelimiter($0) || $0 == 58
+    })
+  }
+
+  private static func isValidComponent(
+    _ bytes: [UInt8],
+    allows allowed: (UInt8) -> Bool
+  ) -> Bool {
+    var index = 0
+    while index < bytes.count {
+      if bytes[index] == 37 {
+        guard
+          index + 2 < bytes.count,
+          isHexDigit(bytes[index + 1]),
+          isHexDigit(bytes[index + 2])
+        else { return false }
+        index += 3
+      } else {
+        guard allowed(bytes[index]) else { return false }
+        index += 1
+      }
+    }
+    return true
+  }
+
+  private static func isPChar(_ byte: UInt8) -> Bool {
+    isUnreserved(byte) || isSubDelimiter(byte) || byte == 58 || byte == 64
+  }
+
+  private static func isUnreserved(_ byte: UInt8) -> Bool {
+    isAlpha(byte) || isDigit(byte) || byte == 45 || byte == 46 || byte == 95 || byte == 126
+  }
+
+  private static func isSubDelimiter(_ byte: UInt8) -> Bool {
+    [33, 36, 38, 39, 40, 41, 42, 43, 44, 59, 61].contains(byte)
+  }
+
+  private static func isSchemeCharacter(_ byte: UInt8) -> Bool {
+    isAlpha(byte) || isDigit(byte) || byte == 43 || byte == 45 || byte == 46
+  }
+
+  private static func isAlpha(_ byte: UInt8) -> Bool {
+    (65 ... 90).contains(byte) || (97 ... 122).contains(byte)
+  }
+
+  private static func isDigit(_ byte: UInt8) -> Bool {
+    (48 ... 57).contains(byte)
+  }
+
+  private static func isHexDigit(_ byte: UInt8) -> Bool {
+    isDigit(byte) || (65 ... 70).contains(byte) || (97 ... 102).contains(byte)
   }
 }
 

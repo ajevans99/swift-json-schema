@@ -93,4 +93,31 @@ struct FormatValidatorTests {
     let validator = URIReferenceFormatValidator()
     #expect(validator.validate(value) == isValid)
   }
+
+  @Test func officialURIFormatCorpus() throws {
+    let loader = try FileLoader<[JSONSchemaTest]>(
+      subdirectory: "JSON-Schema-Test-Suite/tests/draft2020-12/optional/format"
+    )
+    let groups = try loader.loadFile(named: "uri")
+    try #require(!groups.isEmpty)
+
+    for group in groups {
+      let schema = try Schema(
+        rawSchema: group.schema,
+        context: .init(dialect: .draft2020_12, formatValidators: DefaultFormatValidators.all)
+      )
+      for testCase in group.tests {
+        if let value = testCase.data.string {
+          #expect(
+            URIFormatValidator().validate(value) == testCase.valid,
+            "\(testCase.description): \(value)"
+          )
+        }
+        #expect(
+          schema.validate(testCase.data).isValid == testCase.valid,
+          "\(testCase.description): \(testCase.data)"
+        )
+      }
+    }
+  }
 }
