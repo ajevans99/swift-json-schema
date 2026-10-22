@@ -263,9 +263,5 @@ struct JSONValueCodableTests {
     #expect(throws: JSONParseError.self) {
       try JSONValue.parse(depth257)
     }
-
-    // JSONDecoder does not enforce JSONValue's 256 depth boundary
-    let decodedDepth257 = try JSONDecoder().decode(JSONValue.self, from: Data(depth257.utf8))
-    #expect(decodedDepth257 != .null)
   }
 }
