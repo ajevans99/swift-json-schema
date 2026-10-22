@@ -38,6 +38,15 @@ struct JSONSchemaTestSuite {
     #expect(fixture.tests.first?.data.numberLiteral?.rawValue == "1e1000")
   }
 
+  @Test func fixtureLoadingSupportsValidationSpecifications() throws {
+    let data = Data(
+      #"[{"description":"maxProperties","specification":[{"validation":"6.5.1"}],"schema":{"maxProperties":2},"tests":[{"description":"valid","data":{},"valid":true}]}]"#
+        .utf8
+    )
+    let fixture = try #require(JSONSchemaTest.parseFixtures(data).first)
+    #expect(fixture.specification?.first?.validation == "6.5.1")
+  }
+
   @Test(arguments: flattenedArguments)
   func schemaTest(_ schemaTest: JSONSchemaTest, path: URL) throws {
     try #require(
@@ -120,7 +129,8 @@ struct JSONSchemaTestSuite {
 
 struct JSONSchemaTest: Sendable, Codable {
   struct Spec: Sendable, Codable {
-    let core: String
+    let core: String?
+    let validation: String?
     let quote: String?
   }
 
@@ -151,8 +161,15 @@ struct JSONSchemaTest: Sendable, Codable {
       if let value = fields["specification"] {
         guard let specs = value.array else { throw malformed() }
         specification = try specs.map { spec in
-          guard let core = spec.object?["core"]?.string else { throw malformed() }
-          return Spec(core: core, quote: spec.object?["quote"]?.string)
+          guard let specFields = spec.object else { throw malformed() }
+          let core = specFields["core"]?.string
+          let validation = specFields["validation"]?.string
+          guard core != nil || validation != nil else { throw malformed() }
+          return Spec(
+            core: core,
+            validation: validation,
+            quote: specFields["quote"]?.string
+          )
         }
       } else {
         specification = nil
