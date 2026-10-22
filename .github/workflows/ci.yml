@@ -33,7 +33,7 @@ jobs:
   build_linux:
     name: Test on Linux
     runs-on: ubuntu-latest
-    container: swift:6.3.3-noble
+    container: swift:6.4.1-noble
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v5
