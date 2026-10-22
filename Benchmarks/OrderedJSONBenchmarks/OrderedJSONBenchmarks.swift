@@ -173,11 +173,6 @@ private struct Corpus: Sendable {
       "deep-array",
       "poll-instance",
       "users-array",
-      "mixed-value",
-      "string-heavy",
-      "integer-heavy",
-      "fractional",
-      "boolean-null",
     ]
     let referenceNames = [
       "canada",
