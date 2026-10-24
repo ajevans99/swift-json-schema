@@ -34,6 +34,12 @@ extension JSONSchemaComponent {
   public func orNull(style: OrNullStyle) -> JSONComponents.AnySchemaComponent<Output?> {
     switch style {
     case .type:
+      if schemaValue["$ref"] != nil {
+        SchemaDocumentScope.current?
+          .record(
+            .unsupportedKeyword("orNull(style: .type) on a reference; use .union or .unionAnyOf")
+          )
+      }
       return OrNullTypeComponent<Output, Self>(wrapped: self).eraseToAnySchemaComponent()
     case .union:
       return OrNullUnionComponent<Output, Self>(

@@ -2,20 +2,20 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 
 enum TypeSchemaEmitter {
-  static func expression(for type: SchemaType) -> ExprSyntax {
+  static func expression(for type: SchemaType, inlineNamedTypes: Bool = false) -> ExprSyntax {
     switch type {
     case .scalar(let primitive):
       return "\(raw: primitive.schema)()"
     case .optional(let wrapped):
-      return expression(for: wrapped)
+      return expression(for: wrapped, inlineNamedTypes: inlineNamedTypes)
     case .array(let element):
       return """
         JSONArray {
-          \(expression(for: element))
+          \(expression(for: element, inlineNamedTypes: inlineNamedTypes))
         }
         """
     case .dictionary(let key, let value):
-      let valueSchema = expression(for: value)
+      let valueSchema = expression(for: value, inlineNamedTypes: inlineNamedTypes)
       if isStringKey(key) {
         return """
           JSONObject()
@@ -28,7 +28,7 @@ enum TypeSchemaEmitter {
       }
       return """
         JSONObject()
-        .propertyNames { \(expression(for: key)) }
+        .propertyNames { \(expression(for: key, inlineNamedTypes: inlineNamedTypes)) }
         .additionalProperties {
           \(valueSchema)
         }
@@ -46,7 +46,12 @@ enum TypeSchemaEmitter {
         }
         """
     case .named(let syntax):
-      return "\(syntax.trimmed).schema"
+      let argument = inlineNamedTypes ? ", inline: true" : ""
+      return """
+        JSONReusable(\(syntax.trimmed).self\(raw: argument)) {
+          \(syntax.trimmed).schema
+        }
+        """
     case .selfReference:
       return "JSONDynamicReference<Self>()"
     }
