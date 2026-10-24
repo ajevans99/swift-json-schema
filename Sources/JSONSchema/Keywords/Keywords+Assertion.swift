@@ -99,11 +99,14 @@ extension Keywords {
     package let context: KeywordContext
 
     private let enumCases: [JSONValue]
+    private let indexedCases: Set<JSONValue>?
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.enumCases = value.array ?? []
+      // Keep small domains allocation-free; amortize the index over repeated validations.
+      self.indexedCases = enumCases.count >= 32 ? Set(enumCases) : nil
     }
 
     package func validate(
@@ -111,7 +114,13 @@ extension Keywords {
       at location: JSONPointer,
       using annotations: AnnotationContainer
     ) throws(ValidationIssue) {
-      if !enumCases.contains(input) {
+      let isValid: Bool
+      if let indexedCases {
+        isValid = enumCases.first == input || indexedCases.contains(input)
+      } else {
+        isValid = enumCases.contains(input)
+      }
+      if !isValid {
         throw ValidationIssue.notEnumCase(value: input, allowedValues: enumCases)
       }
     }
