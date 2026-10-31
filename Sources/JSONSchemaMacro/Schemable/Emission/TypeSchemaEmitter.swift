@@ -46,7 +46,7 @@ enum TypeSchemaEmitter {
         }
         """
     case .named(let syntax):
-      return "\(syntax.trimmed).schema"
+      return "\(syntax.trimmed).schema.eraseToAnySchemaComponent()"
     case .selfReference:
       return "JSONDynamicReference<Self>()"
     }

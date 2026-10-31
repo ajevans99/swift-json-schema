@@ -108,7 +108,7 @@ struct SchemableExpansionTests {
                 JSONProperty(key: "conditionsByLocation") {
                   JSONObject()
                   .additionalProperties {
-                    WeatherCondition.schema
+                    WeatherCondition.schema.eraseToAnySchemaComponent()
                   }
                   .map(\\.1)
                   .map(\\.matches)
@@ -233,13 +233,13 @@ struct SchemableExpansionTests {
                 }
                 .required()
                 JSONProperty(key: "value") {
-                  JSONValue.schema
+                  JSONValue.schema.eraseToAnySchemaComponent()
                 }
                 .required()
                 JSONProperty(key: "meta") {
                   JSONObject()
                   .additionalProperties {
-                    JSONValue.schema
+                    JSONValue.schema.eraseToAnySchemaComponent()
                   }
                   .map(\\.1)
                   .map(\\.matches)
@@ -385,7 +385,7 @@ struct SchemableExpansionTests {
                 }
                 .required()
                 JSONProperty(key: "units") {
-                  TemperatureType.schema
+                  TemperatureType.schema.eraseToAnySchemaComponent()
                 }
                 .required()
                 JSONProperty(key: "location") {
@@ -924,7 +924,7 @@ struct SchemableExpansionTests {
                 JSONProperty(key: "emotions") {
                   JSONObject()
                   .propertyNames {
-                    TestEmotion.schema
+                    TestEmotion.schema.eraseToAnySchemaComponent()
                   }
                   .additionalProperties {
                     JSONInteger()
@@ -1515,7 +1515,7 @@ struct SchemableExpansionTests {
                   }
                   .required()
                   JSONProperty(key: "element") {
-                    ModelElementType.DTO.schema
+                    ModelElementType.DTO.schema.eraseToAnySchemaComponent()
                   }
                   .required()
                 }
@@ -1653,7 +1653,7 @@ struct SchemableExpansionTests {
                   }
                   .required()
                   JSONProperty(key: "other") {
-                    First.`Data`.schema
+                    First.`Data`.schema.eraseToAnySchemaComponent()
                   }
                   .required()
                 }
