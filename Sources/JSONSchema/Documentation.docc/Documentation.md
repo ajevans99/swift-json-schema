@@ -118,6 +118,9 @@ print(referenced.validate(.string("Ada")).isValid) // true
 
 The registry supplies the documents; validation does not automatically fetch them over the
 network. Load external resources in your application and pass their parsed JSON values here.
+An external document's registration URI may differ from its `$id`. Once loaded, the compiled
+document is cached under both URIs in the shared context. Keep the original `$id`: it still
+determines the base URI for relative references and canonical diagnostic locations.
 ``JSONPointer`` provides navigation through nested JSON documents.
 
 ## Enable format validation

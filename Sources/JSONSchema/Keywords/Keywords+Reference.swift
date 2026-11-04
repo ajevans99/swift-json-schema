@@ -187,6 +187,8 @@ struct ReferenceResolver {
       throw ReferenceResolverError.invalidReferenceURI(refURI)
     }
 
+    let schema = try schema(for: refURL)
+
     if isDynamic, let fragment = refURL.fragment, !fragment.isEmpty {
       // Per JSON Schema 2020-12 §8.2.3.2, a `$dynamicRef` only triggers
       // dynamic-scope traversal if the reference's INITIAL TARGET resource
@@ -195,10 +197,10 @@ struct ReferenceResolver {
       // ("bookending"). If not, the reference behaves like a regular `$ref`
       // to a same-named `$anchor`.
       //
-      // We detect bookending by checking whether the resource identified by
-      // `refURL` (without fragment) registered a `$dynamicAnchor` of this
-      // name in `documentDynamicAnchors`.
-      let targetResourceURL = refURL.withoutFragment ?? refURL
+      // Check the resolved target's resource so retrieval aliases use the
+      // canonical `$dynamicAnchor` registrations too.
+      let targetResourceURL =
+        (schema.schema as? ObjectSchema)?.uri?.withoutFragment ?? refURL.withoutFragment ?? refURL
       let isBookended =
         context.documentDynamicAnchors[targetResourceURL]?[fragment] != nil
       if isBookended {
@@ -220,9 +222,6 @@ struct ReferenceResolver {
       }
     }
 
-    // Fallback to regular reference resolution
-    // Attempt to retrieve the schema from cache or resolve it
-    let schema = try schema(for: refURL)
     return schema
   }
 
@@ -302,6 +301,7 @@ struct ReferenceResolver {
     )
     let uri = (schema.schema as? ObjectSchema)?.uri?.absoluteString ?? referenceURL.absoluteString
     context.cacheSchema(schema, at: uri)
+    context.cacheSchema(schema, at: referenceURL.absoluteString)
     return schema
   }
 
@@ -335,6 +335,18 @@ struct ReferenceResolver {
     }
     if let fragment, !fragment.isEmpty {
       guard fragment.hasPrefix("/") else {
+        if let uri = (baseSchema.schema as? ObjectSchema)?.uri,
+          var components = URLComponents(url: uri, resolvingAgainstBaseURL: true)
+        {
+          components.fragment = fragment
+          if let canonicalURL = components.url, let anchorLocation = context.anchors[canonicalURL] {
+            return try resolveSchemaFragment(
+              for: canonicalURL,
+              pointer: anchorLocation,
+              in: baseSchema
+            )
+          }
+        }
         throw ReferenceResolverError.unresolvedReference(referenceURL)
       }
       let pointer = JSONPointer(from: fragment)
@@ -349,6 +361,7 @@ struct ReferenceResolver {
     in schema: Schema
   ) throws -> Schema? {
     let adjustedPointer = pointer.relative(toBase: schema.location)
+    if adjustedPointer.isRoot { return schema }
 
     guard let objectSchema = schema.schema as? ObjectSchema else { return nil }
     guard
@@ -366,7 +379,7 @@ struct ReferenceResolver {
       rawSchema: subRawSchema,
       location: pointer,
       context: context,
-      baseURI: referenceURL
+      baseURI: objectSchema.uri ?? referenceURL
     )
   }
 }
