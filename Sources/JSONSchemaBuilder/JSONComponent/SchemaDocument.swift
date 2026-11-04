@@ -171,6 +171,7 @@ final class SchemaDocumentContext: @unchecked Sendable {
   private var frozen = false
   private var finalizedSchema: JSONValue?
   private var extractedIDs: Set<ObjectIdentifier> = []
+  private var inlinedDefinitions: [String: JSONValue] = [:]
   private let policy: SchemaDocumentReferences
 
   init(rootType: (any Schemable.Type)?, policy: SchemaDocumentReferences) {
@@ -190,6 +191,13 @@ final class SchemaDocumentContext: @unchecked Sendable {
 
   func component(for id: ObjectIdentifier) -> (any JSONSchemaComponent)? {
     lock.withLock { entries[id]?.component }
+  }
+
+  func resolvedSchema(_ value: JSONValue) throws(SchemaDocumentError) -> JSONValue {
+    lock.lock()
+    defer { lock.unlock() }
+    return inlinedDefinitions.isEmpty
+      ? value : try Self.inline(value, definitions: inlinedDefinitions)
   }
 
   func retainRecursive<Component: JSONSchemaComponent>(_ component: Component) {
@@ -306,8 +314,17 @@ final class SchemaDocumentContext: @unchecked Sendable {
     lock.lock()
     defer { lock.unlock() }
     if let error { throw error }
-    let extractedEntries = entries.filter { _, entry in
-      guard entry.extracted else { return false }
+    let candidates = entries.filter { $0.value.extracted }
+    if !candidates.isEmpty, let definitions = root["$defs"], definitions.object == nil {
+      throw .unsupportedKeyword("$defs must be an object")
+    }
+    var names: Set<String> = []
+    for entry in candidates.values.sorted(by: { $0.name < $1.name }) {
+      guard names.insert(entry.name).inserted,
+        root["$defs"]?.object?[entry.name] == nil
+      else { throw .conflictingDefinition(entry.name) }
+    }
+    let extractedEntries = candidates.filter { _, entry in
       switch policy {
       case .namedTypes: return true
       case .reusedTypes: return entry.uses > 1 || Self.containsDynamicKeyword(entry.component)
@@ -316,9 +333,10 @@ final class SchemaDocumentContext: @unchecked Sendable {
     let extracted = extractedEntries.values.sorted { $0.name < $1.name }
     let extractedReferences = Set(extracted.map(\.reference))
     let inlined = Dictionary(
-      uniqueKeysWithValues: entries.values
-        .filter { $0.extracted && !extractedReferences.contains($0.reference) }
-        .map { ($0.reference, $0.component.schemaValue.value) }
+      uniqueKeysWithValues:
+        candidates
+        .filter { extractedEntries[$0.key] == nil }
+        .map { ($0.value.reference, $0.value.component.schemaValue.value) }
     )
     func resolved(_ value: JSONValue) throws(SchemaDocumentError) -> JSONValue {
       inlined.isEmpty ? value : try Self.inline(value, definitions: inlined)
@@ -333,9 +351,6 @@ final class SchemaDocumentContext: @unchecked Sendable {
     if !extracted.isEmpty {
       guard case .object = result else {
         throw .unsupportedKeyword("boolean root with definitions")
-      }
-      if let existing = result["$defs"], existing.object == nil {
-        throw .unsupportedKeyword("$defs must be an object")
       }
       var definitions = SchemaValue.object(result["$defs"]?.object ?? [:])
       for entry in extracted {
@@ -358,6 +373,7 @@ final class SchemaDocumentContext: @unchecked Sendable {
     for anchor in dynamicReferences.sorted() where !anchors.contains(anchor) {
       throw .missingDynamicAnchor(anchor)
     }
+    inlinedDefinitions = inlined
     frozen = true
     finalizedSchema = result.value
     return result
