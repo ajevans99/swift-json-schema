@@ -6,6 +6,33 @@ import Testing
 
 struct KeywordTests {
   struct AssertionKeywords {
+    @Test func largeEnumPreservesJSONEqualityAndErrorOrder() throws {
+      let values: [JSONValue] =
+        (0 ..< 32).map { .string("option-\($0)") }
+        + [
+          try JSONValue.parse("1.0"),
+          try JSONValue.parse(#"{"a":1,"b":[true,null]}"#),
+          .string("\u{00E4}"),
+          .string("option-0"),
+        ]
+      let keyword = Keywords.Enum(value: .array(values))
+      for input in [
+        JSONValue.string("option-0"), .string("option-31"),
+        try JSONValue.parse("1e0"),
+        try JSONValue.parse(#"{"b":[true,null],"a":1.00}"#),
+        .string("\u{00E4}"),
+      ] {
+        #expect(throws: Never.self) {
+          try keyword.validate(input, at: .init(), using: AnnotationContainer())
+        }
+      }
+      for input in [JSONValue.string("absent"), .string("a\u{0308}"), .boolean(true)] {
+        #expect(throws: ValidationIssue.notEnumCase(value: input, allowedValues: values)) {
+          try keyword.validate(input, at: .init(), using: AnnotationContainer())
+        }
+      }
+    }
+
     @Test(arguments: [
       (JSONValue.string("hello"), true),
       (JSONValue.boolean(true), false),

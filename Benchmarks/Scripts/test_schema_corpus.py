@@ -172,7 +172,7 @@ class SchemaCorpusTests(unittest.TestCase):
                 read_manifest(path)
 
     def test_full_inventory_rejects_partial_discovery_and_duplicates(self):
-        for extended, count in ((False, 96), (True, 108)):
+        for extended, count in ((False, 104), (True, 116)):
             names = sorted(expected_inventory(extended))
             self.assertEqual(check("\n".join(names), extended), count)
             for broken in (names[:-1], names + [names[0]], []):
