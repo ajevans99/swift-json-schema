@@ -22,6 +22,8 @@ public struct JSONSchema<Components: JSONSchemaComponent, NewOutput>: JSONSchema
   ) {
     self.transform = transform
     self.components = component()
+    // Capture the canonical recursive parser before callers add root-only transformations.
+    SchemaDocumentScope.current?.retainRecursive(self)
   }
 
   public func parse(_ value: JSONValue) -> Parsed<NewOutput, ParseIssue> {

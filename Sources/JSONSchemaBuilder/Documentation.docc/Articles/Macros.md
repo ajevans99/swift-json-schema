@@ -85,6 +85,9 @@ The root stays inline, while nested named types are extracted even if used only 
 ``SchemaDocument`` is a typed ``JSONSchemaComponent``. `schemaValue`, `definition()`,
 `parse`, and `parseAndValidate` use the same document structure, including references.
 Construction retains the registered definition parsers rather than rebuilding them when parsing.
+Inline recursive bodies built inside the document retain their construction-time parsers too.
+Transformations applied to the document root do not become recursive transformations: mapping
+the root changes the root output only, just as it does for an ordinary schema.
 `parse` retains the usual parsing-only contract; use `parseAndValidate` to enforce every constraint.
 
 For a modified or hand-written root, construct it inside the document closure:

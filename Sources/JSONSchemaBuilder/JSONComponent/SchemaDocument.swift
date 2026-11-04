@@ -59,9 +59,6 @@ public struct SchemaDocument<Output>: JSONSchemaComponent {
     case .namedTypes: context = SchemaDocumentContext(rootType: rootType)
     }
     let component = SchemaDocumentScope.$current.withValue(context, operation: schema)
-    if let rootType {
-      context.storeRoot(component, type: rootType)
-    }
     self.schemaValue = try context.finish(component.schemaValue)
     self.root = component.eraseToAnySchemaComponent()
     self.context = context
@@ -135,7 +132,8 @@ public struct JSONReusable<Component: JSONSchemaComponent>: JSONSchemaComponent 
         component,
         value: value,
         keyword: "$ref",
-        referenceSchema: schemaValue
+        referenceSchema: schemaValue,
+        documentContext: context
       )
     }
     return component.parse(value)
@@ -158,9 +156,11 @@ final class SchemaDocumentContext: @unchecked Sendable {
   private let lock = NSRecursiveLock()
   private let rootID: ObjectIdentifier?
   private var entries: [ObjectIdentifier: Entry] = [:]
+  private var recursiveComponents: [ObjectIdentifier: any JSONSchemaComponent] = [:]
   private var building: Set<ObjectIdentifier> = []
   private var error: SchemaDocumentError?
   private var frozen = false
+  private var finalizedSchema: JSONValue?
 
   init(rootType: (any Schemable.Type)?) {
     rootID = rootType.map { ObjectIdentifier($0) }
@@ -176,13 +176,48 @@ final class SchemaDocumentContext: @unchecked Sendable {
     lock.withLock { entries[id]?.component }
   }
 
-  func storeRoot<Component: JSONSchemaComponent>(_ component: Component, type: any Schemable.Type) {
+  func retainRecursive<Component: JSONSchemaComponent>(_ component: Component) {
     lock.withLock {
-      let id = ObjectIdentifier(type)
-      if entries[id] == nil {
-        entries[id] = Entry(name: "", reference: "#", component: component, extracted: false)
+      guard !frozen,
+        #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *),
+        let type = Component.Output.self as? any Schemable.Type,
+        component.schemaValue["$dynamicAnchor"]?.string == type.defaultAnchor
+      else { return }
+      let id = ObjectIdentifier(Component.Output.self)
+      if recursiveComponents[id] == nil {
+        recursiveComponents[id] = component
       }
-      building.remove(id)
+    }
+  }
+
+  func recursiveComponent(for id: ObjectIdentifier) -> (any JSONSchemaComponent)? {
+    lock.withLock { recursiveComponents[id] ?? entries[id]?.component }
+  }
+
+  func matchesReference(
+    source: JSONValue,
+    referenceSchema: SchemaValue,
+    rootSchema: JSONValue
+  ) -> Bool {
+    lock.withLock {
+      guard frozen, var sourceObject = source.object,
+        var expected = referenceSchema.object,
+        let reference = expected["$ref"]?.string,
+        entries.values.contains(where: { $0.reference == reference })
+      else { return false }
+      // Only document-approved annotations may differ after type erasure. Constraints,
+      // reference targets, and all other structural keywords must still match exactly.
+      for key in [
+        "title", "description", "default", "examples", "deprecated", "readOnly", "writeOnly",
+        "$comment",
+      ] {
+        sourceObject[key] = nil
+        expected[key] = nil
+      }
+      if source == finalizedSchema, source == rootSchema {
+        sourceObject["$defs"] = nil
+      }
+      return SchemaValue.object(sourceObject) == SchemaValue.object(expected)
     }
   }
 
@@ -276,6 +311,7 @@ final class SchemaDocumentContext: @unchecked Sendable {
       throw .missingDynamicAnchor(anchor)
     }
     frozen = true
+    finalizedSchema = result.value
     return result
   }
 

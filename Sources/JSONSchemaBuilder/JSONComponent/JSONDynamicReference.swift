@@ -33,9 +33,9 @@ public struct JSONDynamicReference<T: Schemable>: JSONSchemaComponent {
   /// typed Swift values.
   public func parse(_ value: JSONValue) -> Parsed<T, ParseIssue> {
     if let context = SchemaDocumentScope.current {
-      guard let schema = context.component(for: ObjectIdentifier(T.self)) else {
-        let inline = SchemaDocumentScope.$current.withValue(nil) { T.schema }
-        return parse(inline, value: value)
+      guard let schema = context.recursiveComponent(for: ObjectIdentifier(T.self)) else {
+        // A cached inline schema was built outside the document's construction scope.
+        return SchemaDocumentScope.$current.withValue(nil) { parse(T.schema, value: value) }
       }
       return parse(schema, value: value)
     }

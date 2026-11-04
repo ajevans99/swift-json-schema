@@ -31,6 +31,17 @@ private enum DocumentChoice: Equatable {
 }
 
 @Schemable
+private struct DocumentAnnotatedChoice: Equatable {
+  @SchemaOptions(.description("Selected address"))
+  let choice: DocumentChoice
+}
+
+private enum DocumentRootSelection: Equatable {
+  case first(DocumentAddress)
+  case second(DocumentAddress)
+}
+
+@Schemable
 private struct DocumentTree: Equatable {
   static var schemaDefinitionName: String { "Tree" }
   let name: String
@@ -120,6 +131,99 @@ private indirect enum DocumentMutualB: Schemable {
 }
 
 struct SchemaDocumentTests {
+  @Test func inlineRecursiveArrayRetainsGrandchildCompositionParser() throws {
+    let value: JSONValue = [
+      [
+        "name": "root",
+        "children": [
+          [
+            "name": "child",
+            "children": [
+              [
+                "name": "grandchild", "children": [],
+                "choice": ["second": ["_0": ["street": "A"]]],
+              ]
+            ],
+          ]
+        ],
+      ]
+    ]
+    let document = try SchemaDocument { JSONArray { DocumentTree.schema } }
+    #expect(document.definition().validate(value).isValid)
+    let parsed = try document.parseAndValidate(value)
+    expectNoDifference(
+      parsed.first?.children.first?.children.first?.choice,
+      .second(.init(street: "A"))
+    )
+    expectNoDifference(document.parse(value).value, parsed)
+  }
+
+  @Test func rootMapperDoesNotTransformRecursiveDescendants() throws {
+    let value: JSONValue = [
+      "name": "root",
+      "children": [["name": "child", "children": [["name": "grandchild", "children": []]]]],
+    ]
+    let ordinary = DocumentTree.schema.map {
+      DocumentTree(name: "root-" + $0.name, children: $0.children, choice: $0.choice)
+    }
+    let document = try SchemaDocument {
+      DocumentTree.schema.map {
+        DocumentTree(name: "root-" + $0.name, children: $0.children, choice: $0.choice)
+      }
+    }
+    #expect(document.definition().validate(value).isValid)
+    expectNoDifference(
+      try document.parseAndValidate(value),
+      try ordinary.parseAndValidate(value)
+    )
+    let projectedRoot = try SchemaDocument { DocumentTree.schema.map { $0.children.count } }
+    #expect(try projectedRoot.parseAndValidate(value) == 1)
+  }
+
+  @Test func annotatedExtractedCompositionRetainsReferenceEvaluation() throws {
+    let document = try DocumentAnnotatedChoice.document()
+    let value: JSONValue = ["choice": ["first": ["_0": ["street": "A"]]]]
+    #expect(document.definition().validate(value).isValid)
+    expectNoDifference(
+      try document.parseAndValidate(value),
+      DocumentAnnotatedChoice(choice: .first(.init(street: "A")))
+    )
+    expectNoDifference(
+      document.parse(value).value,
+      DocumentAnnotatedChoice(choice: .first(.init(street: "A")))
+    )
+    #expect(throws: ParseAndValidateIssue.self) {
+      try document.parseAndValidate(["choice": ["first": ["_0": ["street": 42]]]])
+    }
+  }
+
+  @Test func reusableCompositionRootRetainsFinalizedEvaluation() throws {
+    enum Identity {}
+    let document = try SchemaDocument {
+      JSONReusable(Identity.self) {
+        JSONComposition.OneOf(into: DocumentRootSelection.self) {
+          JSONObject {
+            JSONProperty(key: "first") { JSONReusable(DocumentAddress.self) }.required()
+          }
+          .map(DocumentRootSelection.first)
+          JSONObject {
+            JSONProperty(key: "second") { JSONReusable(DocumentAddress.self) }.required()
+          }
+          .map(DocumentRootSelection.second)
+        }
+      }
+    }
+    let value: JSONValue = ["first": ["street": "A"]]
+    #expect(document.definition().validate(value).isValid)
+    expectNoDifference(
+      try document.parseAndValidate(value),
+      DocumentRootSelection.first(.init(street: "A"))
+    )
+    #expect(throws: ParseAndValidateIssue.self) {
+      try document.parseAndValidate(["first": ["street": 42]])
+    }
+  }
+
   @Test func namedTypesPreserveInlineOutputAndUseSiteDescriptions() throws {
     let inline = DocumentOrder.schema.schemaValue
     #expect(inline["$defs"] == nil)
@@ -373,9 +477,27 @@ struct SchemaDocumentTests {
       JSONArray { cached }
     }
     let value: JSONValue = [
-      ["name": "A", "children": [["name": "B", "children": []]]]
+      [
+        "name": "A",
+        "children": [
+          [
+            "name": "B",
+            "children": [
+              [
+                "name": "C", "children": [],
+                "choice": ["second": ["_0": ["street": "Cached"]]],
+              ]
+            ],
+          ]
+        ],
+      ]
     ]
-    #expect(try doc.parseAndValidate(value).first?.children.first?.name == "B")
+    let parsed = try doc.parseAndValidate(value)
+    #expect(parsed.first?.children.first?.name == "B")
+    expectNoDifference(
+      parsed.first?.children.first?.children.first?.choice,
+      .second(.init(street: "Cached"))
+    )
   }
 
   @Test func documentEncodingRoundTrips() throws {
