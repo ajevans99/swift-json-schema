@@ -125,6 +125,16 @@ document is cached under both URIs in the shared context. Keep the original `$id
 determines the base URI for relative references and canonical diagnostic locations.
 ``JSONPointer`` provides navigation through nested JSON documents.
 
+### Deploy command-line tools
+
+The built-in Draft 2020-12 meta-schema is a SwiftPM resource, used by
+``Dialect/loadMetaSchema()`` and references to the standard meta-schema URI.
+When relocating an executable or copying it into a container image, also copy
+`swift-json-schema_JSONSchema.bundle` (or `.resources`, depending on the SwiftPM
+build system) from `swift build -c release --show-bin-path` beside the executable.
+Copying only the executable, or leaving the resource bundle elsewhere in a copied
+`.build` tree, can cause SwiftPM's resource accessor to terminate the process.
+
 ## Enable format validation
 
 The default context has no format validators. To enforce supported string formats, provide

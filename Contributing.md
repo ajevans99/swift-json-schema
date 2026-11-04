@@ -35,6 +35,12 @@ git submodule update --init --recursive
 swift test
 ```
 
+`JSONSchemaTestSuite` runs the Draft 2020-12 core fixtures and the optional
+`bignum` and `float-overflow` fixtures using lossless number parsing. To update
+only that suite, run `git submodule update --remote Tests/JSONSchemaTests/JSON-Schema-Test-Suite`,
+then `swift test --filter JSONSchemaTests`. Commit the updated submodule revision
+with any required fixes; do not skip newly failing cases.
+
 The main package publishes libraries, not a demo executable. Add runnable examples and regressions to the existing test targets rather than a scratch client:
 
 - `Tests/JSONSchemaBuilderTests/CompileTimeMacroTests.swift` checks that generated macro expansions compile.
