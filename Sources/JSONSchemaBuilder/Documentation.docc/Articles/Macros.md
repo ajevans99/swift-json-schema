@@ -121,6 +121,8 @@ context addresses are removed. Keys are not based on schema equality: distinct S
 not merged merely because their schemas have the same shape. Definitions are emitted in sorted
 key order. Sanitization can cause collisions; collisions with other generated definitions or
 existing root `$defs` entries throw ``SchemaDocumentError`` instead of renaming or overwriting.
+These checks happen before the extraction policy is applied, including single-use named
+types that `.reusedTypes` would inline.
 
 Override `schemaDefinitionName` for a stable published name, as above. Explicit keys are escaped
 as JSON Pointer tokens and URI fragments. To opt a type out of extraction, implement:
@@ -133,7 +135,9 @@ For one hand-written use, choose `JSONReusable(Address.self, inline: true)`.
 
 ### Current document boundaries
 
-- `.namedTypes` is the only policy currently supported; repeated-use-only extraction is deferred.
+- `.namedTypes` extracts every named type. `.reusedTypes` extracts a named type only when it is used at least twice (or is recursive) and inlines the rest, merging use-site annotations such as `description`.
+  Typed composition parsing matches the finalized schema after single-use references are
+  inlined, including references written with `JSONReference`.
 - Construction uses a scoped registration context. Build components inside the closure.
   Already-built children, including those in a cached `static let schema`, are not traversed
   to discover reuse. A new `JSONReusable` wrapper can register a cached schema as a whole,
