@@ -712,6 +712,17 @@ struct SchemaDocumentTests {
     #expect(try once.parseAndValidate([["street": "A"]]).count == 1)
   }
 
+  @Test(arguments: [SchemaDocumentReferences.namedTypes, .reusedTypes])
+  func annotatedChoicesParseUnderBothPolicies(policy: SchemaDocumentReferences) throws {
+    let doc = try DocumentSingleChoiceHolder.document(references: policy)
+    let value: JSONValue = ["choice": ["address": ["_0": ["street": "A"]]]]
+    #expect(doc.definition().validate(value).isValid)
+    expectNoDifference(
+      try doc.parseAndValidate(value),
+      DocumentSingleChoiceHolder(choice: .address(.init(street: "A")))
+    )
+  }
+
   @Test func reusedTypesParseInlinedUnionPayloads() throws {
     let doc = try DocumentSingleChoiceHolder.document(references: .reusedTypes)
     let value: JSONValue = ["choice": ["address": ["_0": ["street": "A"]]]]
