@@ -15,15 +15,25 @@ struct JSONSchemaTestSuite {
     [(path: String, description: String, testCase: String?, reason: String)] = []
 
   static let flattenedArguments: [(schemaTest: JSONSchemaTest, path: URL)] = requiredFixtures {
-    try FileLoader<[JSONSchemaTest]>(
+    let loader = try FileLoader<[JSONSchemaTest]>(
       subdirectory: "JSON-Schema-Test-Suite/tests/draft2020-12",
       decode: JSONSchemaTest.parseFixtures
     )
-    .loadNonEmptyFiles()
-    .filter { unsupportedFilePaths.contains($0.url.lastPathComponent) == false }
-    .flatMap { path, schemaTests in
-      schemaTests.map { ($0, path) }
+    var files = try loader.loadNonEmptyFiles()
+    for name in ["bignum", "float-overflow"] {
+      let path = loader.directory.appendingPathComponent("optional/\(name).json")
+      let groups = try loader.loadFile(at: path)
+      guard !groups.isEmpty else {
+        throw FixtureLoadingError(path: path, reason: "Fixture contains no test groups")
+      }
+      files.append((path, groups))
     }
+    return
+      files
+      .filter { unsupportedFilePaths.contains($0.url.lastPathComponent) == false }
+      .flatMap { path, schemaTests in
+        schemaTests.map { ($0, path) }
+      }
   }
 
   static let remotes = Result { try RemoteLoader().loadSchemas() }
@@ -106,25 +116,24 @@ struct JSONSchemaTestSuite {
     }
   }
 
-  // This is dynamic ref related
-  //  @Test func debugger() throws {
-  //    let testSchema = """
-  //      {
-  //          "$schema": "https://json-schema.org/draft/2020-12/schema",
-  //          "$ref": "https://json-schema.org/draft/2020-12/schema"
-  //      }
-  //      """
-  //
-  //    let testCase = """
-  //      {"$defs": {"foo": {"type": 1}}}
-  //      """
-  //
-  //    let rawSchema = try JSONDecoder().decode(JSONValue.self, from: testSchema.data(using: .utf8)!)
-  //    let schema = try Schema(rawSchema: rawSchema, context: .init(dialect: .draft2020_12, remoteSchema: Self.remotes))
-  //    let result = try schema.validate(instance: testCase)
-  //    dump(result)
-  //    #expect((result.isValid) == false, "\(result)")
-  //  }
+  @Test(arguments: [
+    (#"{"$defs":{"foo":{"type":"integer"}}}"#, true),
+    (#"{"$defs":{"foo":{"type":1}}}"#, false),
+    (#"{"minLength":1}"#, true),
+    (#"{"minLength":-1}"#, false),
+  ])
+  func bundledMetaSchemaReference(instance: String, isValid: Bool) throws {
+    let schema = try Schema(
+      rawSchema: [
+        "$schema": .string(Dialect.draft2020_12.rawValue),
+        "$ref": .string(Dialect.draft2020_12.rawValue),
+      ],
+      context: .init(dialect: .draft2020_12)
+    )
+    let result = schema.validate(try JSONValue.parse(instance))
+    #expect(result.isEvaluationComplete)
+    #expect(result.isValid == isValid)
+  }
 }
 
 struct JSONSchemaTest: Sendable, Codable {
