@@ -699,7 +699,7 @@ struct OptionalNullsExpansionTests {
             JSONSchema(Container.init) {
               JSONObject {
                 JSONProperty(key: "data") {
-                  CustomData.schema
+                  CustomData.schema.eraseToAnySchemaComponent()
                   .orNull(style: .union)
                 }
                 .flatMapOptional()

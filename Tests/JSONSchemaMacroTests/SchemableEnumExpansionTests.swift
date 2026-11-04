@@ -562,11 +562,11 @@ import Testing
                 JSONProperty(key: "book") {
                   JSONObject {
                     JSONProperty(key: "details") {
-                      ItemDetails.schema
+                      ItemDetails.schema.eraseToAnySchemaComponent()
                     }
                       .required()
                     JSONProperty(key: "category") {
-                      Category.schema
+                      Category.schema.eraseToAnySchemaComponent()
                     }
                       .required()
                   }
@@ -580,11 +580,11 @@ import Testing
                 JSONProperty(key: "movie") {
                   JSONObject {
                     JSONProperty(key: "details") {
-                      ItemDetails.schema
+                      ItemDetails.schema.eraseToAnySchemaComponent()
                     }
                       .required()
                     JSONProperty(key: "category") {
-                      Category.schema
+                      Category.schema.eraseToAnySchemaComponent()
                     }
                       .required()
                     JSONProperty(key: "duration") {
@@ -602,11 +602,11 @@ import Testing
                 JSONProperty(key: "music") {
                   JSONObject {
                     JSONProperty(key: "details") {
-                      ItemDetails.schema
+                      ItemDetails.schema.eraseToAnySchemaComponent()
                     }
                       .required()
                     JSONProperty(key: "category") {
-                      Category.schema
+                      Category.schema.eraseToAnySchemaComponent()
                     }
                       .required()
                   }
