@@ -16,6 +16,18 @@ public enum SchemaAnchorName {
     Self.sanitize(rawValue)
   }
 
+  static func documentName(for type: Any.Type) -> String {
+    // Private/local reflected names include an address that changes between processes.
+    sanitized(
+      String(reflecting: type)
+        .replacingOccurrences(
+          of: #"\(unknown context at \$[0-9a-fA-F]+\)\."#,
+          with: "",
+          options: .regularExpression
+        )
+    )
+  }
+
   private static func sanitize(_ rawValue: String) -> String {
     var transformed = rawValue.unicodeScalars.map { scalar -> Character in
       guard allowedCharacters.contains(scalar) else {

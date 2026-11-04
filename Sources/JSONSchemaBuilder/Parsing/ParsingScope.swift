@@ -178,11 +178,20 @@ enum ParsingScope {
     _ component: Component,
     value: JSONValue,
     keyword: String,
-    referenceSchema: SchemaValue
+    referenceSchema: SchemaValue,
+    documentContext: SchemaDocumentContext? = nil
   ) -> Parsed<Component.Output, ParseIssue> {
     guard let current else { return component.parse(value) }
     let target: SchemaEvaluation?
-    if let source = current.evaluation, source.schema == referenceSchema.value {
+    if let source = current.evaluation,
+      source.schema == referenceSchema.value
+        || documentContext?
+          .matchesReference(
+            source: source.schema,
+            referenceSchema: referenceSchema,
+            rootSchema: current.rootSchema
+          ) == true
+    {
       target = source.children.first { $0.reference == keyword && $0.instance == value }
     } else {
       target = nil
