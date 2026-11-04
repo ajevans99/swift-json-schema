@@ -19,7 +19,6 @@ extension Keywords {
     package let context: KeywordContext
     private let referenceURI: String
     private let resolver: ReferenceResolver
-    private let resolved = LockIsolated<Schema?>(nil)
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
@@ -42,14 +41,7 @@ extension Keywords {
     ) throws(ValidationIssue) {
       let schema: Schema
       do {
-        schema = try resolved.withLock { cached in
-          if let cached {
-            return cached
-          }
-          let fresh = try resolver.resolveSchema(for: referenceURI, isDynamic: false)
-          cached = fresh
-          return fresh
-        }
+        schema = try resolver.resolveSchema(isDynamic: false)
       } catch let error as ValidationIssue {
         throw error
       } catch let error as ReferenceResolverError {
@@ -113,7 +105,7 @@ extension Keywords {
     ) throws(ValidationIssue) {
       let schema: Schema
       do {
-        schema = try resolver.resolveSchema(for: referenceURI, isDynamic: true)
+        schema = try resolver.resolveSchema(isDynamic: true)
       } catch let error as ValidationIssue {
         throw error
       } catch let error as ReferenceResolverError {
@@ -180,14 +172,21 @@ struct ReferenceResolver {
   let referenceURI: String
   let location: JSONPointer
   let baseURI: URL
+  private let initialTarget = LockIsolated<Schema?>(nil)
 
-  func resolveSchema(for refURI: String, isDynamic: Bool) throws -> Schema {
+  func resolveSchema(isDynamic: Bool) throws -> Schema {
     // Resolve the reference URI against the base URI
-    guard let refURL = URL(string: refURI, relativeTo: baseURI)?.absoluteURL else {
-      throw ReferenceResolverError.invalidReferenceURI(refURI)
+    guard let refURL = URL(string: referenceURI, relativeTo: baseURI)?.absoluteURL else {
+      throw ReferenceResolverError.invalidReferenceURI(referenceURI)
     }
 
-    let schema = try schema(for: refURL)
+    // Share only the static target; dynamic overrides depend on the current evaluation.
+    let schema = try initialTarget.withLock { cached in
+      if let cached { return cached }
+      let fresh = try self.schema(for: refURL)
+      cached = fresh
+      return fresh
+    }
 
     if isDynamic, let fragment = refURL.fragment, !fragment.isEmpty {
       // Per JSON Schema 2020-12 §8.2.3.2, a `$dynamicRef` only triggers
