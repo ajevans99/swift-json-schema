@@ -166,6 +166,33 @@ private struct DocumentRepeatedChoiceHolder: Equatable {
   let second: DocumentSingleChoice
 }
 
+private struct DocumentNode: Schemable, Equatable {
+  let next: [DocumentNode]
+  static var schemaDefinitionName: String { "Node" }
+  static var schema: some JSONSchemaComponent<DocumentNode> {
+    JSONObject {
+      JSONProperty(key: "next") {
+        JSONArray { JSONReference<DocumentNode>.definition(named: "Node") }
+      }
+    }
+    .map { DocumentNode(next: $0 ?? []) }
+  }
+}
+
+private struct DocumentChoiceAlias: Schemable, Equatable {
+  let choice: DocumentSingleChoice
+  static var schemaDefinitionName: String { "ChoiceAlias" }
+  static var schema: some JSONSchemaComponent<DocumentChoiceAlias> {
+    JSONReusable(DocumentSingleChoice.self).map(DocumentChoiceAlias.init)
+  }
+}
+
+private struct DocumentTrueSchema: Schemable {
+  static var schema: some JSONSchemaComponent<Bool> {
+    JSONBooleanSchema(booleanLiteral: true)
+  }
+}
+
 struct SchemaDocumentTests {
   @Test func inlineRecursiveArrayRetainsGrandchildCompositionParser() throws {
     let value: JSONValue = [
@@ -800,5 +827,40 @@ struct SchemaDocumentTests {
         return component
       }
     }
+  }
+
+  @Test func reusedTypesKeepStaticallySelfReferencingDefinitionsExtracted() throws {
+    let doc = try SchemaDocument(references: .reusedTypes) {
+      JSONObject { JSONProperty(key: "node") { JSONReusable(DocumentNode.self) } }
+    }
+    #expect(doc.schemaValue["$defs"]?.object?.keys.sorted() == ["Node"])
+    let node: JSONValue = ["node": ["next": [["next": []]]]]
+    #expect(doc.definition().validate(node).isValid)
+    #expect(try doc.parseAndValidate(node) != nil)
+  }
+
+  @Test func reusedTypesParseInlinedAliasesThatResolveToExtractedReferences() throws {
+    let doc = try SchemaDocument(references: .reusedTypes) {
+      JSONObject {
+        JSONProperty(key: "a") { JSONReusable(DocumentChoiceAlias.self) }
+        JSONProperty(key: "b") { JSONReusable(DocumentSingleChoice.self) }
+        JSONProperty(key: "c") {
+          JSONReference<DocumentChoiceAlias>.definition(named: "ChoiceAlias")
+        }
+      }
+    }
+    let choice: JSONValue = ["address": ["_0": ["street": "A"]]]
+    let value: JSONValue = ["a": choice, "b": choice, "c": choice]
+    #expect(doc.definition().validate(value).isValid)
+    let parsed = try doc.parseAndValidate(value)
+    expectNoDifference(parsed.0?.choice, DocumentSingleChoice.address(.init(street: "A")))
+    expectNoDifference(parsed.2?.choice, DocumentSingleChoice.address(.init(street: "A")))
+  }
+
+  @Test func reusedTypesAllowBooleanRootsAfterInlining() throws {
+    let wrapped = try SchemaDocument(references: .reusedTypes) {
+      JSONReusable(DocumentTrueSchema.self)
+    }
+    #expect(wrapped.schemaValue == .boolean(true))
   }
 }

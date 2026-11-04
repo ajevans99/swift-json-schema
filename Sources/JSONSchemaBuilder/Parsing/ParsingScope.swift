@@ -221,7 +221,9 @@ enum ParsingScope {
             rootSchema: current.rootSchema
           ) == true
     {
-      if referenceSchema[keyword] != nil, matchingSchema.object?[keyword] == nil {
+      if let uri = referenceSchema[keyword]?.string,
+        SchemaDocumentScope.current?.isInlined(uri) == true
+      {
         // An inlined reference is evaluated directly at its use site.
         return component.parse(value)
       }

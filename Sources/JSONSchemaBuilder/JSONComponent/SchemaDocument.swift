@@ -324,10 +324,28 @@ final class SchemaDocumentContext: @unchecked Sendable {
         root["$defs"]?.object?[entry.name] == nil
       else { throw .conflictingDefinition(entry.name) }
     }
-    let extractedEntries = candidates.filter { _, entry in
+    var extractedEntries = candidates.filter { _, entry in
       switch policy {
       case .namedTypes: return true
       case .reusedTypes: return entry.uses > 1 || Self.containsDynamicKeyword(entry.component)
+      }
+    }
+    // A definition that reaches itself through inlined definitions must stay extracted.
+    var changed = true
+    while changed {
+      changed = false
+      let inlinedByReference = Dictionary(
+        uniqueKeysWithValues:
+          candidates
+          .filter { extractedEntries[$0.key] == nil }
+          .map { ($0.value.reference, $0.value.component.schemaValue.value) }
+      )
+      for (id, entry) in candidates where extractedEntries[id] == nil {
+        if Self.reaches(entry.reference, in: inlinedByReference) {
+          extractedEntries[id] = entry
+          changed = true
+          break
+        }
       }
     }
     let extracted = extractedEntries.values.sorted { $0.name < $1.name }
@@ -343,10 +361,11 @@ final class SchemaDocumentContext: @unchecked Sendable {
     }
     var result = root
     if !inlined.isEmpty {
-      guard case .object(let object) = try resolved(root.value) else {
-        throw .unsupportedKeyword("boolean root")
+      switch try resolved(root.value) {
+      case .object(let object): result = .object(object)
+      case .boolean(let boolean): result = .boolean(boolean)
+      default: throw .unsupportedKeyword("root must be a schema")
       }
-      result = .object(object)
     }
     if !extracted.isEmpty {
       guard case .object = result else {
@@ -377,6 +396,31 @@ final class SchemaDocumentContext: @unchecked Sendable {
     frozen = true
     finalizedSchema = result.value
     return result
+  }
+
+  func isInlined(_ uri: String) -> Bool {
+    lock.withLock { inlinedDefinitions[uri] != nil }
+  }
+
+  private static func reaches(_ target: String, in definitions: [String: JSONValue]) -> Bool {
+    func references(_ value: JSONValue) -> [String] {
+      guard let object = value.object else { return [] }
+      var found: [String] = []
+      if let uri = object["$ref"]?.string { found.append(uri) }
+      _ = mapSubschemas(of: object) { child in
+        found += references(child)
+        return child
+      }
+      return found
+    }
+    var visited: Set<String> = []
+    var pending = references(definitions[target] ?? .null)
+    while let uri = pending.popLast() {
+      if uri == target { return true }
+      guard visited.insert(uri).inserted, let definition = definitions[uri] else { continue }
+      pending += references(definition)
+    }
+    return false
   }
 
   private static let referenceAnnotations: Set<String> = [
