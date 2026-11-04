@@ -60,6 +60,8 @@ A `Schema` is `Sendable` and can be cached and validated concurrently. Each publ
 call has independent conditional results and dynamic-reference scopes, including a reentrant
 call from a custom format validator. Nested applicators and references retain the scope of their
 own evaluation. Reference definitions and caches are shared, with synchronized updates.
+Each reference caches its static target; `$dynamicRef` still selects overrides from the
+current evaluation's scope on every call.
 
 Custom format validators are also `Sendable`; synchronize any mutable state they own.
 
@@ -118,6 +120,9 @@ print(referenced.validate(.string("Ada")).isValid) // true
 
 The registry supplies the documents; validation does not automatically fetch them over the
 network. Load external resources in your application and pass their parsed JSON values here.
+An external document's registration URI may differ from its `$id`. Once loaded, the compiled
+document is cached under both URIs in the shared context. Keep the original `$id`: it still
+determines the base URI for relative references and canonical diagnostic locations.
 ``JSONPointer`` provides navigation through nested JSON documents.
 
 ## Enable format validation

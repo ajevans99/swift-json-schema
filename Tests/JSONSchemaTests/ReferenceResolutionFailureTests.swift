@@ -3,11 +3,12 @@ import Testing
 @testable import JSONSchema
 
 struct ReferenceResolutionFailureTests {
-  @Test func failedResolutionCanBeRetriedAndSuccessIsCached() throws {
+  @Test(arguments: ["$ref", "$dynamicRef"])
+  func failedResolutionCanBeRetriedAndSuccessIsCached(keyword: String) throws {
     let context = Context(dialect: .draft2020_12)
     let reference = "https://example.com/eventually-available"
     let schema = try Schema(
-      rawSchema: ["$ref": .string(reference)],
+      rawSchema: .object([keyword: .string(reference)]),
       context: context
     )
 
