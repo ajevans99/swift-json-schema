@@ -219,7 +219,7 @@ package struct ObjectSchema: ValidatableSchema {
       baseURI: baseURI
     )
     self.keywords = keywords
-    let knownKeywords = Set(context.dialect.keywords.map { $0.name })
+    let knownKeywords = Set(keywords.map { type(of: $0).name })
     self.unknownKeywords = schemaValue.keys.filter { !knownKeywords.contains($0) }.sorted()
     self.uri = processedURI
     self.dynamicAnchorInfo = dynamicAnchorInfo

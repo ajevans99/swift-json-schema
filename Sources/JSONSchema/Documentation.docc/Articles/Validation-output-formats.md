@@ -91,7 +91,8 @@ sources; nonmatching branches do not contribute annotations to the surrounding
 schema. `format` is collected as an annotation without enabling format assertions.
 The content keywords annotate string instances only, and `contentSchema` requires
 `contentMediaType`. Unrecognized keywords are collected without interpreting their
-values as schemas.
+values as schemas. Keywords from inactive vocabularies follow the same literal
+annotation path rather than being evaluated.
 
 Each record includes `absoluteSchemaLocation` (serialized as
 `absoluteKeywordLocation`), resolved against the keyword's schema resource.
@@ -101,6 +102,11 @@ under `$defs` in another document. Remote records use their remote resource URI,
 not a fragment relative to the root document. `schemaLocation` continues to
 identify the keyword's pointer within its original document; it must not be
 assumed to identify a location in the root document for external references.
+References directly into an embedded resource inherit that resource's URI,
+including when reached through a pointer from the enclosing document.
+Records with the same absolute keyword URI and instance location share a source,
+even when reached through different reference paths. When no absolute URI is
+available, source identity falls back to the schema pointer.
 Record order remains validation traversal order, and annotation values retain
 their original JSON number tokens.
 

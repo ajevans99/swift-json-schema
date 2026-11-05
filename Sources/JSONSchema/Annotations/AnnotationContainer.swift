@@ -9,9 +9,13 @@ package struct AnnotationContainer {
   }
 
   private struct SourceKey: Hashable {
+    enum Location: Hashable {
+      case absolute(URL)
+      case relative(JSONPointer)
+    }
+
     let annotation: AnnotationKey
-    let schemaLocation: JSONPointer
-    let absoluteSchemaLocation: URL?
+    let location: Location
   }
 
   // OrderedDictionary so `allAnnotations()` returns annotations in the
@@ -70,8 +74,8 @@ package struct AnnotationContainer {
   private mutating func insert(_ annotation: AnyAnnotation, for key: AnnotationKey) {
     let source = SourceKey(
       annotation: key,
-      schemaLocation: annotation.schemaLocation,
-      absoluteSchemaLocation: annotation.absoluteSchemaLocation
+      location: annotation.absoluteSchemaLocation.map(SourceKey.Location.absolute)
+        ?? .relative(annotation.schemaLocation)
     )
     if let existing = storage[source] {
       if existing.jsonValue != annotation.jsonValue {
