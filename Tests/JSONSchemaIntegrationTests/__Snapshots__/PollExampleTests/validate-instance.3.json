@@ -2,51 +2,151 @@
   "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#",
   "annotations" : [
     {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/title",
       "annotation" : "Poll",
       "instanceLocation" : "",
       "keywordLocation" : "\/title"
     },
     {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/description",
       "annotation" : "A schema for representing a poll with options and metadata.",
       "instanceLocation" : "",
       "keywordLocation" : "\/description"
     },
     {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/id\/description",
       "annotation" : "Unique identifier for the poll",
       "instanceLocation" : "\/id",
       "keywordLocation" : "\/properties\/id\/description"
     },
     {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/title\/description",
       "annotation" : "The title of the poll",
       "instanceLocation" : "\/title",
       "keywordLocation" : "\/properties\/title\/description"
     },
     {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/description",
       "annotation" : "List of options available in the poll",
       "instanceLocation" : "\/options",
       "keywordLocation" : "\/properties\/options\/description"
     },
     {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/properties\/id\/description",
+      "annotation" : "Unique identifier for the poll",
+      "instanceLocation" : "\/options\/0\/id",
+      "keywordLocation" : "\/properties\/options\/items\/properties\/id\/description"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/properties\/text\/description",
+      "annotation" : "Option text",
+      "instanceLocation" : "\/options\/0\/text",
+      "keywordLocation" : "\/properties\/options\/items\/properties\/text\/description"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/properties\/voteCount\/description",
+      "annotation" : "Number of votes received",
+      "instanceLocation" : "\/options\/0\/voteCount",
+      "keywordLocation" : "\/properties\/options\/items\/properties\/voteCount\/description"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/properties\/voteCount\/default",
+      "annotation" : 0,
+      "instanceLocation" : "\/options\/0\/voteCount",
+      "keywordLocation" : "\/properties\/options\/items\/properties\/voteCount\/default"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/properties",
+      "annotation" : [
+        "id",
+        "text",
+        "voteCount"
+      ],
+      "instanceLocation" : "\/options\/0",
+      "keywordLocation" : "\/properties\/options\/items\/properties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/additionalProperties",
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "\/options\/0",
+      "keywordLocation" : "\/properties\/options\/items\/additionalProperties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/properties\/id\/description",
+      "annotation" : "Unique identifier for the poll",
+      "instanceLocation" : "\/options\/1\/id",
+      "keywordLocation" : "\/properties\/options\/items\/properties\/id\/description"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/properties\/text\/description",
+      "annotation" : "Option text",
+      "instanceLocation" : "\/options\/1\/text",
+      "keywordLocation" : "\/properties\/options\/items\/properties\/text\/description"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/properties\/voteCount\/description",
+      "annotation" : "Number of votes received",
+      "instanceLocation" : "\/options\/1\/voteCount",
+      "keywordLocation" : "\/properties\/options\/items\/properties\/voteCount\/description"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/properties\/voteCount\/default",
+      "annotation" : 0,
+      "instanceLocation" : "\/options\/1\/voteCount",
+      "keywordLocation" : "\/properties\/options\/items\/properties\/voteCount\/default"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/properties",
+      "annotation" : [
+        "id",
+        "text",
+        "voteCount"
+      ],
+      "instanceLocation" : "\/options\/1",
+      "keywordLocation" : "\/properties\/options\/items\/properties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items\/additionalProperties",
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "\/options\/1",
+      "keywordLocation" : "\/properties\/options\/items\/additionalProperties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/options\/items",
       "annotation" : true,
       "instanceLocation" : "\/options",
       "keywordLocation" : "\/properties\/options\/items"
     },
     {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/createdAt\/format",
+      "annotation" : "date-time",
+      "instanceLocation" : "\/createdAt",
+      "keywordLocation" : "\/properties\/createdAt\/format"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/isActive\/description",
       "annotation" : "Whether the poll is currently active",
       "instanceLocation" : "\/isActive",
       "keywordLocation" : "\/properties\/isActive\/description"
     },
     {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/isActive\/default",
       "annotation" : true,
       "instanceLocation" : "\/isActive",
       "keywordLocation" : "\/properties\/isActive\/default"
     },
     {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties\/category\/description",
       "annotation" : "Category of the poll, limited to specific types",
       "instanceLocation" : "\/category",
       "keywordLocation" : "\/properties\/category\/description"
     },
     {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties",
       "annotation" : [
         "id",
         "title",

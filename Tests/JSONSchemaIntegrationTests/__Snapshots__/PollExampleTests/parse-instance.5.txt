@@ -5,14 +5,15 @@
         - type: JSONComposition.oneOf
         - reason: "no match found"
         ▿ nestedErrors: 4 elements
-          ▿ Runtime validation issue: ValidationResult(isValid: false, keywordLocation: #/properties/category/oneOf/0, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/0), instanceLocation: #/category, errors: Optional([JSONSchema.ValidationError(keyword: "required", message: "Required property \'technology\' is missing", keywordLocation: #/properties/category/oneOf/0/required, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/0/required), instanceLocation: #/category, errors: nil)]), evaluationErrors: nil, annotations: Optional([JSONSchema.Annotation<JSONSchema.Keywords.Properties>(keyword: "properties", instanceLocation: #/category, schemaLocation: #/properties/category/oneOf/0/properties, absoluteSchemaLocation: nil, value: [])]))
+          ▿ Runtime validation issue: ValidationResult(isValid: false, keywordLocation: #/properties/category/oneOf/0, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/0), instanceLocation: #/category, errors: Optional([JSONSchema.ValidationError(keyword: "required", message: "Required property \'technology\' is missing", keywordLocation: #/properties/category/oneOf/0/required, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/0/required), instanceLocation: #/category, errors: nil)]), evaluationErrors: nil, annotations: Optional([JSONSchema.Annotation<JSONSchema.Keywords.Properties>(keyword: "properties", instanceLocation: #/category, schemaLocation: #/properties/category/oneOf/0/properties, absoluteSchemaLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/0/properties), value: [])]))
             ▿ runtimeValidationIssue: ValidationResult
               ▿ absoluteKeywordLocation: Optional<URL>
                 - some: https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/0
               ▿ annotations: Optional<Array<AnyAnnotation>>
                 ▿ some: 1 element
                   ▿ Annotation<Properties>
-                    - absoluteSchemaLocation: Optional<URL>.none
+                    ▿ absoluteSchemaLocation: Optional<URL>
+                      - some: https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/0/properties
                     ▿ instanceLocation: #/category
                       ▿ path: 1 element
                         ▿ Component
@@ -71,14 +72,15 @@
                     - key: "oneOf"
                   ▿ Component
                     - index: 0
-          ▿ Runtime validation issue: ValidationResult(isValid: false, keywordLocation: #/properties/category/oneOf/1, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/1), instanceLocation: #/category, errors: Optional([JSONSchema.ValidationError(keyword: "required", message: "Required property \'entertainment\' is missing", keywordLocation: #/properties/category/oneOf/1/required, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/1/required), instanceLocation: #/category, errors: nil)]), evaluationErrors: nil, annotations: Optional([JSONSchema.Annotation<JSONSchema.Keywords.Properties>(keyword: "properties", instanceLocation: #/category, schemaLocation: #/properties/category/oneOf/1/properties, absoluteSchemaLocation: nil, value: [])]))
+          ▿ Runtime validation issue: ValidationResult(isValid: false, keywordLocation: #/properties/category/oneOf/1, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/1), instanceLocation: #/category, errors: Optional([JSONSchema.ValidationError(keyword: "required", message: "Required property \'entertainment\' is missing", keywordLocation: #/properties/category/oneOf/1/required, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/1/required), instanceLocation: #/category, errors: nil)]), evaluationErrors: nil, annotations: Optional([JSONSchema.Annotation<JSONSchema.Keywords.Properties>(keyword: "properties", instanceLocation: #/category, schemaLocation: #/properties/category/oneOf/1/properties, absoluteSchemaLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/1/properties), value: [])]))
             ▿ runtimeValidationIssue: ValidationResult
               ▿ absoluteKeywordLocation: Optional<URL>
                 - some: https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/1
               ▿ annotations: Optional<Array<AnyAnnotation>>
                 ▿ some: 1 element
                   ▿ Annotation<Properties>
-                    - absoluteSchemaLocation: Optional<URL>.none
+                    ▿ absoluteSchemaLocation: Optional<URL>
+                      - some: https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/1/properties
                     ▿ instanceLocation: #/category
                       ▿ path: 1 element
                         ▿ Component
@@ -137,14 +139,15 @@
                     - key: "oneOf"
                   ▿ Component
                     - index: 1
-          ▿ Runtime validation issue: ValidationResult(isValid: false, keywordLocation: #/properties/category/oneOf/2, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/2), instanceLocation: #/category, errors: Optional([JSONSchema.ValidationError(keyword: "required", message: "Required property \'education\' is missing", keywordLocation: #/properties/category/oneOf/2/required, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/2/required), instanceLocation: #/category, errors: nil)]), evaluationErrors: nil, annotations: Optional([JSONSchema.Annotation<JSONSchema.Keywords.Properties>(keyword: "properties", instanceLocation: #/category, schemaLocation: #/properties/category/oneOf/2/properties, absoluteSchemaLocation: nil, value: [])]))
+          ▿ Runtime validation issue: ValidationResult(isValid: false, keywordLocation: #/properties/category/oneOf/2, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/2), instanceLocation: #/category, errors: Optional([JSONSchema.ValidationError(keyword: "required", message: "Required property \'education\' is missing", keywordLocation: #/properties/category/oneOf/2/required, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/2/required), instanceLocation: #/category, errors: nil)]), evaluationErrors: nil, annotations: Optional([JSONSchema.Annotation<JSONSchema.Keywords.Properties>(keyword: "properties", instanceLocation: #/category, schemaLocation: #/properties/category/oneOf/2/properties, absoluteSchemaLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/2/properties), value: [])]))
             ▿ runtimeValidationIssue: ValidationResult
               ▿ absoluteKeywordLocation: Optional<URL>
                 - some: https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/2
               ▿ annotations: Optional<Array<AnyAnnotation>>
                 ▿ some: 1 element
                   ▿ Annotation<Properties>
-                    - absoluteSchemaLocation: Optional<URL>.none
+                    ▿ absoluteSchemaLocation: Optional<URL>
+                      - some: https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/2/properties
                     ▿ instanceLocation: #/category
                       ▿ path: 1 element
                         ▿ Component

@@ -2,6 +2,7 @@
   "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#",
   "annotations" : [
     {
+      "absoluteKeywordLocation" : "https:\/\/swift-json-schema.invalid\/in-memory#\/properties",
       "annotation" : [
         "name",
         "children"

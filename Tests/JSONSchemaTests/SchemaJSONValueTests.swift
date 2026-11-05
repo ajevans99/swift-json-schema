@@ -144,8 +144,6 @@ struct SchemaJSONValueTests {
     let result = schema.validate(instance, at: JSONPointer(tokens: ["payload"]))
     #expect(result.isValid)
 
-    // AnnotationContainer supplies relative locations only. Its optional
-    // absolute locations are nil and must be omitted by both serializers.
     let expected: JSONValue = [
       "valid": true,
       "keywordLocation": "",
@@ -154,21 +152,25 @@ struct SchemaJSONValueTests {
       "annotations": [
         [
           "keywordLocation": "/title",
+          "absoluteKeywordLocation": "https://example.com/annotated#/title",
           "instanceLocation": "/payload",
           "annotation": "outer",
         ],
         [
           "keywordLocation": "/properties/y/title",
+          "absoluteKeywordLocation": "https://example.com/annotated#/properties/y/title",
           "instanceLocation": "/payload/y",
           "annotation": "y-title",
         ],
         [
           "keywordLocation": "/properties/x/title",
+          "absoluteKeywordLocation": "https://example.com/annotated#/properties/x/title",
           "instanceLocation": "/payload/x",
           "annotation": "x-title",
         ],
         [
           "keywordLocation": "/properties",
+          "absoluteKeywordLocation": "https://example.com/annotated#/properties",
           "instanceLocation": "/payload",
           "annotation": ["y", "x"],
         ],
@@ -255,6 +257,7 @@ struct SchemaJSONValueTests {
       "annotations": [
         [
           "keywordLocation": "/properties",
+          "absoluteKeywordLocation": "https://example.com/choices#/properties",
           "instanceLocation": "",
           "annotation": ["value"],
         ]

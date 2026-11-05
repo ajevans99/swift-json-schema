@@ -41,6 +41,13 @@ only that suite, run `git submodule update --remote Tests/JSONSchemaTests/JSON-S
 then `swift test --filter JSONSchemaTests`. Commit the updated submodule revision
 with any required fixes; do not skip newly failing cases.
 
+`AnnotationTestSuite` also runs every Draft 2020-12-compatible case from the
+official `annotations/tests` fixtures in `JSONSchemaTests`. It reads the
+top-level `suite` object, applies the declared dialect compatibility constraints,
+and compares each assertion's complete set of source locations and annotation
+values. Run it with `swift test --filter AnnotationTestSuite`; incompatible
+drafts and future (`9999`) cases are excluded, not failing compatible cases.
+
 The main package publishes libraries, not a demo executable. Add runnable examples and regressions to the existing test targets rather than a scratch client:
 
 - `Tests/JSONSchemaBuilderTests/CompileTimeMacroTests.swift` checks that generated macro expansions compile.

@@ -104,13 +104,13 @@ struct HostnameTests {
     #expect(validationResult.isValid)
 
     let annotations = validationResult.annotations ?? []
-    // Expect exactly three annotations with the correct keywords
     #expect(
       Set(annotations.map { $0.keyword })
         == Set([
           Keywords.Properties.name,
           Keywords.PatternProperties.name,
           Keywords.UnevaluatedProperties.name,
+          Keywords.Items.name,
         ])
     )
 

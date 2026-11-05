@@ -348,7 +348,7 @@ struct ReferenceResolver {
         }
         throw ReferenceResolverError.unresolvedReference(referenceURL)
       }
-      let pointer = JSONPointer(from: fragment)
+      let pointer = baseSchema.location.appending(pointer: JSONPointer(from: fragment))
       return try resolveSchemaFragment(for: referenceURL, pointer: pointer, in: baseSchema)
     }
     return nil
@@ -363,22 +363,29 @@ struct ReferenceResolver {
     if adjustedPointer.isRoot { return schema }
 
     guard let objectSchema = schema.schema as? ObjectSchema else { return nil }
-    guard
-      let subRawSchema =
-        JSONValue.object(
-          OrderedDictionary(
-            uniqueKeysWithValues: objectSchema.schemaValue.map { ($0.key, $0.value) }
-          )
-        )
-        .value(at: adjustedPointer)
-    else {
-      return nil
+    var subRawSchema = JSONValue.object(
+      OrderedDictionary(
+        uniqueKeysWithValues: objectSchema.schemaValue.map { ($0.key, $0.value) }
+      )
+    )
+    var targetBaseURI = objectSchema.uri ?? referenceURL
+    for (index, component) in adjustedPointer.path.enumerated() {
+      guard let child = subRawSchema.value(at: JSONPointer(path: [component])) else { return nil }
+      subRawSchema = child
+      // The starting schema has already processed its ID; the target processes
+      // its own ID during construction. Only intermediate resources need rebasing.
+      if index < adjustedPointer.path.count - 1,
+        let identifier = child.object?["$id"]?.string,
+        let resource = URL(string: identifier, relativeTo: targetBaseURI)?.absoluteURL
+      {
+        targetBaseURI = resource
+      }
     }
     return try Schema(
       rawSchema: subRawSchema,
       location: pointer,
       context: context,
-      baseURI: objectSchema.uri ?? referenceURL
+      baseURI: targetBaseURI
     )
   }
 }
