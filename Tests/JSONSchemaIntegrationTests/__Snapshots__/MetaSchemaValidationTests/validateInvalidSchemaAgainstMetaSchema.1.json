@@ -2,18 +2,41 @@
   "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#",
   "annotations" : [
     {
-      "annotation" : "Content vocabulary meta-schema",
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#\/title",
+      "annotation" : "Core and Validation specifications meta-schema",
       "instanceLocation" : "",
       "keywordLocation" : "\/title"
     },
     {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#\/properties",
       "annotation" : [
-        "properties"
+
       ],
       "instanceLocation" : "",
       "keywordLocation" : "\/properties"
     },
     {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/core#\/title",
+      "annotation" : "Core vocabulary meta-schema",
+      "instanceLocation" : "",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/core#\/properties",
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "",
+      "keywordLocation" : "\/properties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/applicator#\/title",
+      "annotation" : "Applicator vocabulary meta-schema",
+      "instanceLocation" : "",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/applicator#\/properties\/properties\/default",
       "annotation" : {
 
       },
@@ -21,11 +44,188 @@
       "keywordLocation" : "\/properties\/properties\/default"
     },
     {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#\/title",
+      "annotation" : "Core and Validation specifications meta-schema",
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/schema#\/properties",
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/properties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/core#\/title",
+      "annotation" : "Core vocabulary meta-schema",
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/core#\/properties",
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/properties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/applicator#\/title",
+      "annotation" : "Applicator vocabulary meta-schema",
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/applicator#\/properties",
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/properties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/unevaluated#\/title",
+      "annotation" : "Unevaluated applicator vocabulary meta-schema",
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/unevaluated#\/properties",
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/properties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/title",
+      "annotation" : "Validation vocabulary meta-schema",
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/validation#\/properties",
+      "annotation" : [
+        "type"
+      ],
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/properties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/meta-data#\/title",
+      "annotation" : "Meta-data vocabulary meta-schema",
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/meta-data#\/properties",
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/properties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/format-annotation#\/title",
+      "annotation" : "Format vocabulary meta-schema for annotation results",
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/format-annotation#\/properties",
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/properties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/content#\/title",
+      "annotation" : "Content vocabulary meta-schema",
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/content#\/properties",
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "\/properties\/name",
+      "keywordLocation" : "\/properties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/applicator#\/properties\/properties\/additionalProperties",
       "annotation" : [
         "name"
       ],
       "instanceLocation" : "\/properties",
       "keywordLocation" : "\/properties\/properties\/additionalProperties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/applicator#\/properties",
+      "annotation" : [
+        "properties"
+      ],
+      "instanceLocation" : "",
+      "keywordLocation" : "\/properties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/unevaluated#\/title",
+      "annotation" : "Unevaluated applicator vocabulary meta-schema",
+      "instanceLocation" : "",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/unevaluated#\/properties",
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "",
+      "keywordLocation" : "\/properties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/meta-data#\/title",
+      "annotation" : "Meta-data vocabulary meta-schema",
+      "instanceLocation" : "",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/meta-data#\/properties",
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "",
+      "keywordLocation" : "\/properties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/format-annotation#\/title",
+      "annotation" : "Format vocabulary meta-schema for annotation results",
+      "instanceLocation" : "",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/format-annotation#\/properties",
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "",
+      "keywordLocation" : "\/properties"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/content#\/title",
+      "annotation" : "Content vocabulary meta-schema",
+      "instanceLocation" : "",
+      "keywordLocation" : "\/title"
+    },
+    {
+      "absoluteKeywordLocation" : "https:\/\/json-schema.org\/draft\/2020-12\/meta\/content#\/properties",
+      "annotation" : [
+
+      ],
+      "instanceLocation" : "",
+      "keywordLocation" : "\/properties"
     }
   ],
   "errors" : [

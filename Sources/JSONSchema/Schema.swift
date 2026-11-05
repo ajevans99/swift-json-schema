@@ -193,6 +193,7 @@ package struct ObjectSchema: ValidatableSchema {
   let location: JSONPointer
   let context: Context
   let keywords: [any Keyword]
+  private let unknownKeywords: [String]
   let uri: URL?
   let documentURL: URL
   /// Name and base URI for any `$dynamicAnchor` declared on this schema.
@@ -218,6 +219,8 @@ package struct ObjectSchema: ValidatableSchema {
       baseURI: baseURI
     )
     self.keywords = keywords
+    let knownKeywords = Set(context.dialect.keywords.map { $0.name })
+    self.unknownKeywords = schemaValue.keys.filter { !knownKeywords.contains($0) }.sorted()
     self.uri = processedURI
     self.dynamicAnchorInfo = dynamicAnchorInfo
     self.selfAbsoluteLocation = location.absoluteLocation(relativeTo: processedURI ?? documentURL)
@@ -404,10 +407,20 @@ package struct ObjectSchema: ValidatableSchema {
           )
         case let applicator as any ApplicatorKeyword:
           try applicator.validate(instance, at: location, using: &annotations)
+        case let format as Keywords.Format:
+          try format.validate(instance, at: location, using: annotations)
+          annotations.insert(keyword: format, at: location, value: format.value)
         case let assertion as any AssertionKeyword:
           try assertion.validate(instance, at: location, using: annotations)
         case let metadata as any MetadataKeyword:
           metadata.recordAnnotation(at: location, using: &annotations)
+        case let content as any ContentKeyword:
+          if instance.string != nil,
+            !(content is Keywords.ContentSchema)
+              || schemaValue[Keywords.ContentMediaType.name] != nil
+          {
+            annotations.insert(keyword: content, at: location, value: content.value)
+          }
         default:
           continue
         }
@@ -425,6 +438,19 @@ package struct ObjectSchema: ValidatableSchema {
           break
         }
       }
+    }
+
+    for keyword in unknownKeywords {
+      annotations.insertUnknown(
+        keyword: keyword,
+        context: .init(
+          location: self.location.appending(.key(keyword)),
+          context: context,
+          uri: baseURIForAbsoluteLocation()
+        ),
+        at: location,
+        value: schemaValue[keyword]!
+      )
     }
 
     let collectedAnnotations = annotations.allAnnotations()

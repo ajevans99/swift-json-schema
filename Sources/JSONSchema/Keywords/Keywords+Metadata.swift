@@ -14,7 +14,7 @@ extension MetadataKeyword {
   }
 }
 
-protocol ContentKeyword: Keyword {}
+protocol ContentKeyword: AnnotationProducingKeyword where AnnotationValue == JSONValue {}
 
 extension ContentKeyword {
   package static var vocabulary: String {

@@ -403,8 +403,9 @@ extension Keywords {
     }
   }
 
-  package struct Format: FormatKeyword {
+  package struct Format: FormatKeyword, AnnotationProducingKeyword {
     package static let name = "format"
+    package typealias AnnotationValue = JSONValue
 
     package let value: JSONValue
     package let context: KeywordContext

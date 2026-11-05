@@ -34,6 +34,8 @@ package struct KeywordContext {
 extension KeywordContext {
   func absoluteKeywordLocation(for pointer: JSONPointer? = nil) -> URL? {
     let pointer = pointer ?? location
-    return pointer.absoluteLocation(relativeTo: uri)
+    let resource = uri.withoutFragment ?? uri
+    let resourceRoot = context.identifierRegistry[resource]?.pointer ?? .init()
+    return pointer.relative(toBase: resourceRoot).absoluteLocation(relativeTo: resource)
   }
 }
