@@ -66,6 +66,7 @@ private final class ConstrainedStackTask: @unchecked Sendable {
   func run() {
     outcome = Result {
       _ = NestedSchemaStackFixtures.Root.schema.definition()
+      _ = try NestedSchemaStackFixtures.Root.document().definition()
     }
   }
 }

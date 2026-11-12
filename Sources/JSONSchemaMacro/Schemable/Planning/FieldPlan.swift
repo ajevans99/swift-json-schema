@@ -13,6 +13,7 @@ struct FieldPlan {
   let description: String?
   let nullStyle: ExprSyntax?
   let isRequired: Bool
+  let inlineNamedTypes: Bool
 
   var usesSelfReference: Bool {
     if case .inferred(let type) = base { return type.usesSelfReference }
@@ -52,7 +53,19 @@ enum FieldPlanner {
       modifiers: modifiers,
       description: options.contains { $0.name.text == "description" } ? nil : docString,
       nullStyle: type.isOptional ? nullStyle : nil,
-      isRequired: !type.isOptional
+      isRequired: !type.isOptional,
+      inlineNamedTypes: modifiers.contains {
+        ![
+          "title", "description", "default", "examples", "deprecated", "readOnly", "writeOnly",
+          "comment",
+        ]
+        .contains($0.name.text)
+      }
+        || (type.isOptional && nullStyle != nil
+          && !["union", "unionAnyOf"]
+            .contains(
+              nullStyle?.as(MemberAccessExprSyntax.self)?.declName.baseName.text ?? ""
+            ))
     )
   }
 }
