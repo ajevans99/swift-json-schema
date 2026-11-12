@@ -9,6 +9,24 @@ import Testing
 @testable import JSONSchemaMacro
 
 struct SchemaPlanningTests {
+  @Test(arguments: ["Tree", "Tree?", "[Tree]", "[String: Tree]"])
+  func recursiveEnumPayloadHasAnExplicitDiagnostic(type: String) throws {
+    let planned = try plan("indirect enum Tree { case leaf(Int); case node(\(type)) }")
+    let diagnostic = try #require(planned.diagnostics.first)
+    #expect(diagnostic.diagMessage.severity == .error)
+    #expect(
+      diagnostic.message
+        == "Recursive enum payloads are not supported by @Schemable (case 'node'); provide a manual schema"
+    )
+    guard case .enumeration(let cases) = planned.body,
+      let last = cases.last,
+      case .unsupported = last
+    else {
+      Issue.record("Recursive payload must not emit a self-instantiating schema")
+      return
+    }
+  }
+
   @Test func documentInliningIsPlannedBeforeEmission() throws {
     let planned = try plan(
       """
@@ -269,7 +287,7 @@ struct SchemaPlanningTests {
     }
     #expect(fields.count == 2)
     #expect(fields[0].label == nil)
-    #expect(fields[0].field.key.trimmedDescription == "\"_\"")
+    #expect(fields[0].field.key.trimmedDescription == "\"_0\"")
     #expect(fields[1].label?.text == "count")
     #expect(!fields[1].field.isRequired)
     #expect(fields[1].field.nullStyle == nil)

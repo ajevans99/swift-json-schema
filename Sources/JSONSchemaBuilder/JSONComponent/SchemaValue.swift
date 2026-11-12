@@ -49,8 +49,11 @@ public enum SchemaValue: Sendable, Equatable {
     }
     set {
       switch self {
-      case .boolean:
-        self = .object([key: newValue!])
+      case .boolean(let allowed):
+        guard let newValue else { return }
+        var object: OrderedDictionary<KeywordIdentifier, JSONValue> = allowed ? [:] : ["not": [:]]
+        object[key] = newValue
+        self = .object(object)
       case .object(var dict):
         dict[key] = newValue
         self = .object(dict)

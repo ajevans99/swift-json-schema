@@ -84,7 +84,11 @@ enum SchemaPlanner {
       .emitDiagnostics(for: members.compactMap(\.included).map(\.source))
       body = .object(members)
     case .enumeration:
-      body = .enumeration(declaration.cases.map { planCase($0, diagnostics: diagnostics) })
+      body = .enumeration(
+        declaration.cases.map {
+          planCase($0, declaration: declaration, diagnostics: diagnostics)
+        }
+      )
     }
     return SchemaPlan(
       declaration: declaration,
@@ -170,6 +174,7 @@ enum SchemaPlanner {
 
   private static func planCase(
     _ enumCase: SchemableEnumCase,
+    declaration: SchemableDeclaration,
     diagnostics: DiagnosticCollector
   ) -> EnumCasePlan {
     guard let parameters = enumCase.associatedValues else { return .simple(enumCase) }
@@ -178,8 +183,22 @@ enum SchemaPlanner {
     for (index, parameter) in parameters.enumerated() {
       switch SchemaType.parse(parameter.type) {
       case .success(let type):
+        if type.resolvingSelfReferences(named: declaration.name.text.trimmingBackticks())
+          .usesSelfReference
+        {
+          isUnsupported = true
+          diagnostics.diagnose(
+            Diagnostic(
+              node: parameter.type,
+              message: UnsupportedTypeDiagnostic.recursiveEnumPayload(
+                caseName: enumCase.identifier.text
+              )
+            )
+          )
+          continue
+        }
         let label = parameter.firstName.flatMap { $0.text == "_" ? nil : $0.trimmed }
-        let key = parameter.firstName?.text.trimmingBackticks() ?? "_\(index)"
+        let key = label?.text.trimmingBackticks() ?? "_\(index)"
         fields.append(
           PayloadField(
             label: label,

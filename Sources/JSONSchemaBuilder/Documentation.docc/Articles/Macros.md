@@ -283,6 +283,15 @@ The corresponding JSON shapes are:
 "clear"
 ```
 
+Explicit `_` labels use positional keys too: `case pair(_ lhs: Int, _ rhs: Int)`
+uses `"_0"` and `"_1"`. Earlier versions emitted `"_"` for these labels; update
+stored JSON and consumers when adopting the corrected positional spelling.
+
+Recursive enum payloads are not currently supported by `@Schemable`. The macro
+diagnoses direct self-references, including those nested in collections. Provide
+a manual schema instead; constructing the old generated schema outside a
+`SchemaDocument` could recurse without a bound.
+
 The case name is a required object property. Labeled associated values use their
 labels; unlabeled values use `_0`, `_1`, and so on. Non-optional associated values
 are required. Cases without associated values remain strings, even in a mixed enum.

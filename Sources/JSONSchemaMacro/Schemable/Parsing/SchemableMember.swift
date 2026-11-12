@@ -29,6 +29,7 @@ struct SchemableMember {
 enum UnsupportedTypeDiagnostic: DiagnosticMessage {
   case propertyTypeNotSupported(propertyName: String, typeName: String)
   case enumPayloadNotSupported(caseName: String, typeName: String)
+  case recursiveEnumPayload(caseName: String)
   case missingTypeAnnotation
 
   var message: String {
@@ -42,6 +43,9 @@ enum UnsupportedTypeDiagnostic: DiagnosticMessage {
     case .enumPayloadNotSupported(let caseName, let typeName):
       return
         "Enum case '\(caseName)' has unsupported associated value type '\(typeName)'; the case cannot be included in the generated schema"
+    case .recursiveEnumPayload(let caseName):
+      return
+        "Recursive enum payloads are not supported by @Schemable (case '\(caseName)'); provide a manual schema"
     case .missingTypeAnnotation:
       return "Stored properties included by @Schemable must have an explicit type annotation"
     }
@@ -53,6 +57,8 @@ enum UnsupportedTypeDiagnostic: DiagnosticMessage {
       return MessageID(domain: "JSONSchemaMacro", id: "unsupportedType")
     case .enumPayloadNotSupported:
       return MessageID(domain: "JSONSchemaMacro", id: "unsupportedEnumPayload")
+    case .recursiveEnumPayload:
+      return MessageID(domain: "JSONSchemaMacro", id: "recursiveEnumPayload")
     case .missingTypeAnnotation:
       return MessageID(domain: "JSONSchemaMacro", id: "missingTypeAnnotation")
     }
@@ -61,7 +67,7 @@ enum UnsupportedTypeDiagnostic: DiagnosticMessage {
   var severity: DiagnosticSeverity {
     switch self {
     case .propertyTypeNotSupported: .warning
-    case .enumPayloadNotSupported, .missingTypeAnnotation: .error
+    case .enumPayloadNotSupported, .recursiveEnumPayload, .missingTypeAnnotation: .error
     }
   }
 }

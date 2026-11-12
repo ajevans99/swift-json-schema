@@ -424,7 +424,7 @@ import Testing
               JSONObject {
                 JSONProperty(key: "flightNumber") {
                   JSONObject {
-                    JSONProperty(key: "_") {
+                    JSONProperty(key: "_0") {
                       JSONInteger()
                         .default(0)
                     }

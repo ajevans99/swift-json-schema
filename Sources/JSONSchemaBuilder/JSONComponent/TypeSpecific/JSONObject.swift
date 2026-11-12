@@ -97,7 +97,9 @@ extension JSONSchemaComponent {
   /// - Parameter flag: The boolean schema used for the keyword.
   /// - Returns: A copy of the receiver with the keyword set.
   public func additionalProperties(_ flag: JSONBooleanSchema) -> Self {
-    additionalProperties(flag.value)
+    var copy = self
+    copy.schemaValue[Keywords.AdditionalProperties.name] = flag.schemaValue.value
+    return copy
   }
 
   /// Adds unevaluated properties to the schema.

@@ -1,16 +1,17 @@
 import JSONSchema
 
 public struct JSONBooleanSchema: JSONSchemaComponent {
-  public var schemaValue: SchemaValue {
-    get { .boolean(value) }
-    set { fatalError("Cannot set schemaValue on JSONBooleanSchema") }
-  }
+  public var schemaValue: SchemaValue
 
   let value: Bool
 
+  init(value: Bool) {
+    self.value = value
+    self.schemaValue = .boolean(value)
+  }
+
   public func schema() -> Schema {
-    BooleanSchema(schemaValue: value, location: .init(), context: .init(dialect: .draft2020_12))
-      .asSchema()
+    definition()
   }
 
   public func parse(_ value: JSONValue) -> Parsed<Bool, ParseIssue> {
