@@ -1,3 +1,5 @@
+import OrderedCollections
+
 package protocol AssertionKeyword: Keyword {
   func validate(
     _ input: JSONValue,
@@ -538,7 +540,13 @@ extension Keywords {
     ) throws(ValidationIssue) {
       guard let array = input.array else { return }
 
-      guard let containsAnnotation = annotations.annotation(for: Contains.self, at: location) else {
+      guard
+        let containsAnnotation = annotations.annotation(
+          for: Contains.self,
+          at: location,
+          adjacentTo: context
+        )
+      else {
         return
       }
 
@@ -581,7 +589,13 @@ extension Keywords {
     ) throws(ValidationIssue) {
       guard let array = input.array else { return }
 
-      guard let containsAnnotation = annotations.annotation(for: Contains.self, at: location) else {
+      guard
+        let containsAnnotation = annotations.annotation(
+          for: Contains.self,
+          at: location,
+          adjacentTo: context
+        )
+      else {
         return
       }
 
@@ -702,12 +716,12 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let dependencies: [String: [String]]
+    private let dependencies: OrderedDictionary<String, [String]>
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.dependencies = Dictionary(
+      self.dependencies = OrderedDictionary(
         uniqueKeysWithValues: value.object?
           .compactMap { (key, value) -> (String, [String])? in
             guard let array = value.array?.compactMap({ $0.string }) else { return nil }

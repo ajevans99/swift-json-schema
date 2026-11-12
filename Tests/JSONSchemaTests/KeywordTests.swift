@@ -939,11 +939,14 @@ extension AnnotationContainer {
     _ value: K.AnnotationValue,
     to keywordType: K.Type
   ) {
+    let location = JSONPointer(tokens: [keywordType.name])
+    let context = KeywordContext(location: location, uri: URL(fileURLWithPath: #file))
     self.insert(
       Annotation<K>(
         keyword: keywordType.name,
         instanceLocation: .init(),
-        schemaLocation: .init(),
+        schemaLocation: location,
+        absoluteSchemaLocation: context.absoluteKeywordLocation(),
         value: value
       )
     )

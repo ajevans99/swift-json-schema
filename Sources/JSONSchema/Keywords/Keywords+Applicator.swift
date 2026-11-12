@@ -125,7 +125,8 @@ extension Keywords {
 
       let prefixItemsAnnotation = annotations.annotation(
         for: PrefixItems.self,
-        at: instanceLocation
+        at: instanceLocation,
+        adjacentTo: context
       )
       let relevantInstanceItems: ArraySlice<JSONValue> =
         switch prefixItemsAnnotation?.value {
@@ -416,9 +417,15 @@ extension Keywords {
       guard let instanceObject = input.object else { return }
 
       let previouslyValidatedKeys =
-        (annotations.annotation(for: Properties.self, at: instanceLocation)?.value ?? [])
+        (annotations.annotation(for: Properties.self, at: instanceLocation, adjacentTo: context)?
+        .value ?? [])
         .union(
-          annotations.annotation(for: PatternProperties.self, at: instanceLocation)?.value ?? []
+          annotations.annotation(
+            for: PatternProperties.self,
+            at: instanceLocation,
+            adjacentTo: context
+          )?
+          .value ?? []
         )
 
       var validatedKeys: OrderedSet<String> = []
@@ -936,7 +943,7 @@ extension Keywords {
         }
       }
 
-      let unevaluatedIndices = Set(instances.indices).subtracting(evaluatedIndices)
+      let unevaluatedIndices = instances.indices.filter { !evaluatedIndices.contains($0) }
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
       for index in unevaluatedIndices {
