@@ -27,6 +27,81 @@ struct SchemaPlanningTests {
     }
   }
 
+  @Test(arguments: ["Outer.Tree", "Outer.Tree?", "[Outer.Tree]", "[String: Outer.Tree]"])
+  func qualifiedNestedEnumPayloadHasAnExplicitDiagnostic(type: String) throws {
+    let outer = try StructDeclSyntax("struct Outer {}")
+    let declaration = try EnumDeclSyntax("indirect enum Tree { case node(\(raw: type)) }")
+    let parsed = try SchemableDeclaration(declaration, lexicalContext: [Syntax(outer)])
+    let planned = SchemaPlanner.plan(
+      parsed,
+      configuration: try MacroConfiguration(attribute: AttributeSyntax("@Schemable"))
+    )
+    #expect(planned.diagnostics.count == 1)
+    #expect(planned.diagnostics.first?.diagMessage.severity == .error)
+    guard case .enumeration(let cases) = planned.body,
+      case .unsupported = cases.first
+    else {
+      Issue.record("Qualified recursive payload must not emit a self-instantiating schema")
+      return
+    }
+  }
+
+  @Test(arguments: ["_ lhs: Int, _0 rhs: Int", "Int, _0: Int", "_1: Int, _ rhs: Int"])
+  func collidingEnumPayloadKeysHaveAnExplicitDiagnostic(parameters: String) throws {
+    let planned = try plan("enum Pair { case pair(\(parameters)) }")
+    let diagnostic = try #require(planned.diagnostics.first)
+    #expect(diagnostic.diagMessage.severity == .error)
+    #expect(diagnostic.message.contains("duplicate JSON key"))
+    guard case .enumeration(let cases) = planned.body,
+      case .unsupported = cases.first
+    else {
+      Issue.record("Colliding payload keys must not emit a lossy schema")
+      return
+    }
+  }
+
+  @Test func qualifiedReferencesToOtherEnumsRemainSupported() throws {
+    let outer = try StructDeclSyntax("struct Outer {}")
+    let declaration = try EnumDeclSyntax("enum Tree { case node(Other.Tree) }")
+    let parsed = try SchemableDeclaration(declaration, lexicalContext: [Syntax(outer)])
+    let planned = SchemaPlanner.plan(
+      parsed,
+      configuration: try MacroConfiguration(attribute: AttributeSyntax("@Schemable"))
+    )
+    #expect(planned.diagnostics.isEmpty)
+    guard case .enumeration(let cases) = planned.body,
+      case .payload = cases.first
+    else {
+      Issue.record("A different qualified type must not be diagnosed as recursive")
+      return
+    }
+  }
+
+  @Test func enumInExtensionRetainsLexicalQualification() throws {
+    let outer = try ExtensionDeclSyntax("extension Outer.Inner {}")
+    let declaration = try EnumDeclSyntax("indirect enum Tree { case node(Outer.Inner.Tree) }")
+    let parsed = try SchemableDeclaration(declaration, lexicalContext: [Syntax(outer)])
+    let planned = SchemaPlanner.plan(
+      parsed,
+      configuration: try MacroConfiguration(attribute: AttributeSyntax("@Schemable"))
+    )
+    #expect(parsed.qualifiedName == "Outer.Inner.Tree")
+    #expect(planned.diagnostics.count == 1)
+    #expect(planned.diagnostics.first?.diagMessage.severity == .error)
+  }
+
+  @Test func distinctIndexedLabelsRemainSupported() throws {
+    let planned = try plan("enum Pair { case pair(_ lhs: Int, _2 rhs: Int) }")
+    #expect(planned.diagnostics.isEmpty)
+    guard case .enumeration(let cases) = planned.body,
+      case .payload(_, let fields) = cases.first
+    else {
+      Issue.record("Distinct payload keys must remain supported")
+      return
+    }
+    #expect(fields.map { $0.field.key.trimmedDescription } == ["\"_0\"", "\"_2\""])
+  }
+
   @Test func documentInliningIsPlannedBeforeEmission() throws {
     let planned = try plan(
       """

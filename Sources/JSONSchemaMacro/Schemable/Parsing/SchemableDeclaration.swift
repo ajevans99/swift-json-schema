@@ -52,6 +52,7 @@ struct SchemableDeclaration {
 
   let kind: Kind
   let name: TokenSyntax
+  let qualifiedName: String
   let accessModifier: DeclModifierSyntax?
   let options: ParsedOptions
   let properties: [SchemableMember]
@@ -73,6 +74,19 @@ struct SchemableDeclaration {
     } else {
       throw SchemableError.unsupportedDeclaration
     }
+
+    let enclosingNames = lexicalContext.reversed()
+      .compactMap { context -> String? in
+        if let value = context.as(StructDeclSyntax.self) { return value.name.text }
+        if let value = context.as(ClassDeclSyntax.self) { return value.name.text }
+        if let value = context.as(EnumDeclSyntax.self) { return value.name.text }
+        if let value = context.as(ActorDeclSyntax.self) { return value.name.text }
+        if let value = context.as(ExtensionDeclSyntax.self) {
+          return value.extendedType.trimmedDescription
+        }
+        return nil
+      }
+    qualifiedName = (enclosingNames + [name.text]).joined(separator: ".")
 
     accessModifier = Self.accessModifier(for: declaration, lexicalContext: lexicalContext)
     options = ParsedOptions(attributes: declaration.attributes)

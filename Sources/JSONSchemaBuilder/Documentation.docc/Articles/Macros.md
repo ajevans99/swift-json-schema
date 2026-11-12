@@ -286,9 +286,12 @@ The corresponding JSON shapes are:
 Explicit `_` labels use positional keys too: `case pair(_ lhs: Int, _ rhs: Int)`
 uses `"_0"` and `"_1"`. Earlier versions emitted `"_"` for these labels; update
 stored JSON and consumers when adopting the corrected positional spelling.
+Payload keys must be unique: `case pair(_ lhs: Int, _0 rhs: Int)` is diagnosed
+because both values map to `"_0"`. Give the second value a distinct label.
 
 Recursive enum payloads are not currently supported by `@Schemable`. The macro
-diagnoses direct self-references, including those nested in collections. Provide
+diagnoses direct self-references, including lexically qualified names such as
+`Outer.Tree` and references nested in collections. Provide
 a manual schema instead; constructing the old generated schema outside a
 `SchemaDocument` could recurse without a bound.
 

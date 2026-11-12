@@ -30,6 +30,7 @@ enum UnsupportedTypeDiagnostic: DiagnosticMessage {
   case propertyTypeNotSupported(propertyName: String, typeName: String)
   case enumPayloadNotSupported(caseName: String, typeName: String)
   case recursiveEnumPayload(caseName: String)
+  case duplicateEnumPayloadKey(caseName: String, key: String)
   case missingTypeAnnotation
 
   var message: String {
@@ -46,6 +47,9 @@ enum UnsupportedTypeDiagnostic: DiagnosticMessage {
     case .recursiveEnumPayload(let caseName):
       return
         "Recursive enum payloads are not supported by @Schemable (case '\(caseName)'); provide a manual schema"
+    case .duplicateEnumPayloadKey(let caseName, let key):
+      return
+        "Enum case '\(caseName)' has duplicate JSON key '\(key)'; use distinct associated value labels"
     case .missingTypeAnnotation:
       return "Stored properties included by @Schemable must have an explicit type annotation"
     }
@@ -59,6 +63,8 @@ enum UnsupportedTypeDiagnostic: DiagnosticMessage {
       return MessageID(domain: "JSONSchemaMacro", id: "unsupportedEnumPayload")
     case .recursiveEnumPayload:
       return MessageID(domain: "JSONSchemaMacro", id: "recursiveEnumPayload")
+    case .duplicateEnumPayloadKey:
+      return MessageID(domain: "JSONSchemaMacro", id: "duplicateEnumPayloadKey")
     case .missingTypeAnnotation:
       return MessageID(domain: "JSONSchemaMacro", id: "missingTypeAnnotation")
     }
@@ -67,7 +73,9 @@ enum UnsupportedTypeDiagnostic: DiagnosticMessage {
   var severity: DiagnosticSeverity {
     switch self {
     case .propertyTypeNotSupported: .warning
-    case .enumPayloadNotSupported, .recursiveEnumPayload, .missingTypeAnnotation: .error
+    case .enumPayloadNotSupported, .recursiveEnumPayload, .duplicateEnumPayloadKey,
+      .missingTypeAnnotation:
+      .error
     }
   }
 }

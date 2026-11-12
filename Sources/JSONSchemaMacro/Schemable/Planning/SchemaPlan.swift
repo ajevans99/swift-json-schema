@@ -180,10 +180,27 @@ enum SchemaPlanner {
     guard let parameters = enumCase.associatedValues else { return .simple(enumCase) }
     var fields: [PayloadField] = []
     var isUnsupported = false
+    var keys: Set<String> = []
     for (index, parameter) in parameters.enumerated() {
+      let label = parameter.firstName.flatMap { $0.text == "_" ? nil : $0.trimmed }
+      let key = label?.text.trimmingBackticks() ?? "_\(index)"
+      guard keys.insert(key).inserted else {
+        isUnsupported = true
+        diagnostics.diagnose(
+          Diagnostic(
+            node: parameter,
+            message: UnsupportedTypeDiagnostic.duplicateEnumPayloadKey(
+              caseName: enumCase.identifier.text,
+              key: key
+            )
+          )
+        )
+        continue
+      }
       switch SchemaType.parse(parameter.type) {
       case .success(let type):
         if type.resolvingSelfReferences(named: declaration.name.text.trimmingBackticks())
+          .resolvingSelfReferences(named: declaration.qualifiedName)
           .usesSelfReference
         {
           isUnsupported = true
@@ -197,8 +214,6 @@ enum SchemaPlanner {
           )
           continue
         }
-        let label = parameter.firstName.flatMap { $0.text == "_" ? nil : $0.trimmed }
-        let key = label?.text.trimmingBackticks() ?? "_\(index)"
         fields.append(
           PayloadField(
             label: label,
