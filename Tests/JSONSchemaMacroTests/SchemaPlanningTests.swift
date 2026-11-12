@@ -50,7 +50,7 @@ struct SchemaPlanningTests {
   func qualifiedGenericSelfReferenceIsDiagnosed(type: String) throws {
     let outer = try StructDeclSyntax("struct Outer<U> {}")
     let declaration = try EnumDeclSyntax(
-      "indirect enum Tree<T> { case node(Outer<U>.Tree<T>) }"
+      "indirect enum Tree<T> { case node(\(raw: type)) }"
     )
     let parsed = try SchemableDeclaration(declaration, lexicalContext: [Syntax(outer)])
     let planned = SchemaPlanner.plan(
