@@ -156,7 +156,7 @@ enum ParsingScope {
     )
   }
 
-  private static func containsReference(_ value: JSONValue) -> Bool {
+  static func containsReference(_ value: JSONValue) -> Bool {
     containsScopeKeyword(value) { keyword, _ in
       keyword == "$ref" || keyword == "$dynamicRef"
     }

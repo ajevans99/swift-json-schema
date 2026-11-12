@@ -69,4 +69,43 @@ struct BooleanSchemaRegressionTests {
     #expect(!schema.validate("anything").isValid)
   }
 
+  @Test(arguments: [SchemaDocumentReferences.namedTypes, .reusedTypes])
+  func copiedReusableBooleanUsesFinalizedDocument(references: SchemaDocumentReferences) throws {
+    let document = try SchemaDocument(references: references) {
+      let reusable = JSONReusable(String.self) { JSONString() }
+      var boolean: JSONBooleanSchema = false
+      boolean.schemaValue = reusable.schemaValue
+      return boolean
+    }
+    #expect(document.definition().validate("hello").isValid)
+    #expect(document.parse("hello").value == true)
+    #expect(try document.parseAndValidate("hello"))
+    #expect(document.parse(42).value == nil)
+  }
+
+  @Test func booleanProjectionCannotEscapeRestrictedScope() {
+    var boolean: JSONBooleanSchema = false
+    boolean.schemaValue = ["type": "string"]
+    let context = Context(dialect: .draft2020_12)
+    let root = JSONAnyValue().definition(context: context).evaluate("hello")
+    let scope = ParsingScope.State(evaluation: root, context: context)
+      .descending(to: nil, throughReference: true)
+    let result = ParsingScope.$current.withValue(scope) { boolean.parse("hello") }
+    #expect(result.value == nil)
+  }
+
+  @Test(arguments: [
+    SchemaValue.object(["$ref": "#/$defs/Missing"]),
+    SchemaValue.object(["$vocabulary": ["https://example.com/custom": true]]),
+  ])
+  func booleanProjectionRejectsDetachedScopedSchemas(schema: SchemaValue) {
+    var boolean: JSONBooleanSchema = false
+    boolean.schemaValue = schema
+    let context = Context(dialect: .draft2020_12)
+    let root = JSONAnyValue().definition(context: context).evaluate("hello")
+    let scope = ParsingScope.State(evaluation: root, context: context)
+    let result = ParsingScope.$current.withValue(scope) { boolean.parse("hello") }
+    #expect(result.value == nil)
+  }
+
 }
