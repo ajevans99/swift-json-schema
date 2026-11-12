@@ -17,12 +17,13 @@ public struct JSONKey: RawRepresentable, Hashable, Sendable, ExpressibleByString
   public var description: String { rawValue }
 
   public static func == (lhs: Self, rhs: Self) -> Bool {
-    lhs.rawValue.unicodeScalars.elementsEqual(rhs.rawValue.unicodeScalars)
+    lhs.rawValue.utf8.elementsEqual(rhs.rawValue.utf8)
   }
 
   public func hash(into hasher: inout Hasher) {
-    hasher.combine(rawValue.unicodeScalars.count)
-    for scalar in rawValue.unicodeScalars { hasher.combine(scalar.value) }
+    // UTF-8 uniquely encodes decoded scalars, without String's canonical equivalence.
+    var spelling = rawValue
+    spelling.withUTF8 { hasher.combine(bytes: UnsafeRawBufferPointer($0)) }
   }
 
   public static func < (lhs: Self, rhs: Self) -> Bool {

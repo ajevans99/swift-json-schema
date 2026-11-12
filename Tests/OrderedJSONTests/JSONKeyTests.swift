@@ -13,6 +13,14 @@ struct JSONKeyTests {
     let decoded = try JSONDecoder().decode(JSONKey.self, from: JSONEncoder().encode(decomposed))
     #expect(decoded == decomposed)
     #expect(Array(decoded.rawValue.unicodeScalars) == Array("e\u{301}".unicodeScalars))
+    for name in [
+      "", "ascii", "e\u{301}", "\u{1f600}", "a\0b", String(repeating: "e\u{301}", count: 40),
+    ] {
+      let native = JSONKey(name)
+      let bridged = JSONKey(NSString(string: name) as String)
+      #expect(native == bridged)
+      #expect(native.hashValue == bridged.hashValue)
+    }
   }
 
   @Test func strictExportsAndExactDuplicatePosition() throws {
