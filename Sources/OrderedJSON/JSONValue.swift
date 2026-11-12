@@ -24,9 +24,14 @@ import OrderedCollections
 ///
 /// - SeeAlso: ``JSONType``
 public enum JSONValue: Hashable, Equatable, Sendable {
+  /// Insertion-ordered members with decoded Unicode-scalar-exact names.
+  ///
+  /// Export with `stringKeyed()` or `stringKeyedDictionary()` to reject Swift String
+  /// collisions explicitly. Generic keyed Codable encoding rejects them as well.
+  public typealias Object = OrderedDictionary<JSONKey, JSONValue>
   case string(String)
   case numberLiteral(JSONNumberLiteral)
-  case object(OrderedDictionary<String, Self>)
+  case object(Object)
   case array([Self])
   case boolean(Bool)
   case null
@@ -147,7 +152,7 @@ extension JSONValue {
     try? numberLiteral?.integerValue()
   }
 
-  public var object: OrderedDictionary<String, JSONValue>? {
+  public var object: Object? {
     if case .object(let value) = self { return value }
     return nil
   }

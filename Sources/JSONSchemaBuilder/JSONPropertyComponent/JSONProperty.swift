@@ -36,7 +36,7 @@ public struct JSONProperty<Value: JSONSchemaComponent>: JSONPropertyComponent {
     self.value = JSONAnyValue()
   }
 
-  public func parse(_ input: [String: JSONValue]) -> Parsed<Value.Output?, ParseIssue> {
+  public func parse(_ input: [JSONKey: JSONValue]) -> Parsed<Value.Output?, ParseIssue> {
     if let jsonValue = input[key] {
       return
         ParsingScope.parse(

@@ -81,7 +81,7 @@ struct JSONReferenceComponentTests {
       .required()
     }
     component.schemaValue["$defs"] = .object([
-      name: TestNode.schema.schemaValue.value
+      JSONKey(name): TestNode.schema.schemaValue.value
     ])
 
     let schema = component.definition()

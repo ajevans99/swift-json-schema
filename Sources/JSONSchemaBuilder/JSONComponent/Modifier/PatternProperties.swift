@@ -2,7 +2,7 @@ import JSONSchema
 
 /// The result of validating `patternProperties` against an input object.
 public struct PatternPropertiesParseResult<PatternOut> {
-  public typealias MatchingKey = String
+  public typealias MatchingKey = JSONKey
 
   public struct Match {
     /// The instance value for the match.
@@ -50,26 +50,26 @@ extension JSONComponents {
 
       let baseResult = base.parse(input)
 
-      var matches = [String: PatternPropertiesParseResult<PatternProps.Output>.Match]()
+      var matches = [JSONKey: PatternPropertiesParseResult<PatternProps.Output>.Match]()
       for (patternString, _) in patternPropertiesSchema.schemaValue.object ?? [:] {
         let regex: Regex<AnyRegexOutput>
         do {
-          regex = try compileSchemaRegex(patternString)
+          regex = try compileSchemaRegex(patternString.rawValue)
         } catch {
           return .error(
-            .invalidRegularExpression(pattern: patternString, reason: String(describing: error))
+            .invalidRegularExpression(pattern: patternString.rawValue, reason: String(describing: error))
           )
         }
-        for (key, value) in dict where key.firstMatch(of: regex) != nil {
+        for (key, value) in dict where key.rawValue.firstMatch(of: regex) != nil {
           let singleKeyDict = [patternString: value]
           let parsed = ParsingScope.$propertyLocation.withValue(
-            .init(keyword: Keywords.PatternProperties.name, instanceKey: key)
+            .init(keyword: Keywords.PatternProperties.name, instanceKey: key.rawValue)
           ) {
             patternPropertiesSchema.validate(singleKeyDict)
           }
           switch parsed {
           case .valid(let out):
-            matches[key] = .init(value: out, regex: patternString)
+            matches[key] = .init(value: out, regex: patternString.rawValue)
           case .invalid:
             continue
           }

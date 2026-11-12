@@ -91,7 +91,7 @@ extension JSONValue {
           out.append("\n")
           out.append(String(repeating: options.indent, count: level + 1))
         }
-        JSONValue.appendQuoted(key, to: &out)
+        JSONValue.appendQuoted(key.rawValue, to: &out)
         out.append(options.prettyPrinted ? " : " : ":")
         try value.write(to: &out, level: level + 1, options: options)
       }

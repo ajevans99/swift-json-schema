@@ -8,7 +8,7 @@ struct NumericPointerReferenceTests {
   func localReferencePreservesDefinitionName(name: String) throws {
     let pointer = JSONPointer(tokens: ["$defs", name])
     let rawSchema: JSONValue = [
-      "$defs": .object([name: ["type": "string"]]),
+      "$defs": .object([JSONKey(name): ["type": "string"]]),
       "properties": [
         "value": ["$ref": .string(pointer.description)]
       ],
@@ -37,7 +37,7 @@ struct NumericPointerReferenceTests {
     let rawSchema: JSONValue = [
       "$id": "https://example.com/root",
       "$defs": .object([
-        name: [
+        JSONKey(name): [
           "$id": "target",
           "type": "string",
         ]

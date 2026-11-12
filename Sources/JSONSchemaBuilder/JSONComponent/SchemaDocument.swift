@@ -315,9 +315,9 @@ final class SchemaDocumentContext: @unchecked Sendable {
     if !candidates.isEmpty, let definitions = root["$defs"], definitions.object == nil {
       throw .unsupportedKeyword("$defs must be an object")
     }
-    var names: Set<String> = []
-    for entry in candidates.values.sorted(by: { $0.name < $1.name }) {
-      guard names.insert(entry.name).inserted,
+    var names: Set<JSONKey> = []
+    for entry in candidates.values.sorted(by: { JSONKey($0.name) < JSONKey($1.name) }) {
+      guard names.insert(JSONKey(entry.name)).inserted,
         root["$defs"]?.object?[entry.name] == nil
       else { throw .conflictingDefinition(entry.name) }
     }
@@ -345,7 +345,7 @@ final class SchemaDocumentContext: @unchecked Sendable {
         }
       }
     }
-    let extracted = extractedEntries.values.sorted { $0.name < $1.name }
+    let extracted = extractedEntries.values.sorted { JSONKey($0.name) < JSONKey($1.name) }
     let extractedReferences = Set(extracted.map(\.reference))
     let inlined = Dictionary(
       uniqueKeysWithValues:
@@ -448,7 +448,7 @@ final class SchemaDocumentContext: @unchecked Sendable {
     if let uri = object["$ref"]?.string, let definition = definitions[uri] {
       var siblings = object
       siblings["$ref"] = nil
-      for keyword in siblings.keys where !referenceAnnotations.contains(keyword) {
+      for keyword in siblings.keys where !referenceAnnotations.contains(keyword.rawValue) {
         throw .unsupportedKeyword("\(keyword) beside a generated $ref")
       }
       let base = try inline(definition, definitions: definitions)
@@ -476,9 +476,9 @@ final class SchemaDocumentContext: @unchecked Sendable {
 
   // Applies `transform` to every direct subschema position of a schema object.
   private static func mapSubschemas(
-    of object: OrderedDictionary<String, JSONValue>,
+    of object: JSONValue.Object,
     _ transform: (JSONValue) -> JSONValue
-  ) -> OrderedDictionary<String, JSONValue> {
+  ) -> JSONValue.Object {
     var object = object
     for (keyword, child) in object {
       switch keyword {
@@ -517,7 +517,7 @@ final class SchemaDocumentContext: @unchecked Sendable {
       }
       let allowed = Self.referenceAnnotations.union(["$ref"])
       for keyword in object.keys
-      where !allowed.contains(keyword) && !(isRoot && keyword == "$defs") {
+      where !allowed.contains(keyword.rawValue) && !(isRoot && keyword == "$defs") {
         throw .unsupportedKeyword("\(keyword) beside a generated $ref")
       }
     }

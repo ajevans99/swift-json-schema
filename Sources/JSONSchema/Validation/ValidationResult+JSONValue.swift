@@ -12,7 +12,7 @@ extension ValidationResult {
   /// ``OrderedJSON/JSONValue/serialized(options:)``) without routing
   /// through `JSONEncoder` first. See issue #161.
   public var jsonValue: JSONValue {
-    var dict = OrderedDictionary<String, JSONValue>()
+    var dict = JSONValue.Object()
     dict["valid"] = .boolean(isValid)
     dict["keywordLocation"] = .string(keywordLocation.jsonPointerString)
     if let absoluteKeywordLocation {
@@ -35,7 +35,7 @@ extension ValidationResult {
 extension ValidationError {
   /// JSON representation matching the existing ``encode(to:)`` contract.
   public var jsonValue: JSONValue {
-    var dict = OrderedDictionary<String, JSONValue>()
+    var dict = JSONValue.Object()
     dict["keyword"] = .string(keyword)
     dict["message"] = .string(message)
     dict["keywordLocation"] = .string(keywordLocation.jsonPointerString)
@@ -54,7 +54,7 @@ extension AnyAnnotation {
   /// JSON representation matching the existing
   /// ``AnyAnnotationWrapper/encode(to:)`` contract.
   var annotationJSONValue: JSONValue {
-    var dict = OrderedDictionary<String, JSONValue>()
+    var dict = JSONValue.Object()
     dict["keywordLocation"] = .string(schemaLocation.jsonPointerString)
     if let absoluteSchemaLocation {
       dict["absoluteKeywordLocation"] = .string(absoluteSchemaLocation.absoluteString)

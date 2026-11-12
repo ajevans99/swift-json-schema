@@ -30,7 +30,7 @@ struct JSONCompositionTests {
       }
     }
 
-    let expected: OrderedDictionary<String, JSONValue> = [
+    let expected: JSONValue.Object = [
       "anyOf": [
         ["type": "string"],
         ["type": "number", "minimum": 0],
@@ -48,7 +48,7 @@ struct JSONCompositionTests {
       }
     }
 
-    let expected: OrderedDictionary<String, JSONValue> = [
+    let expected: JSONValue.Object = [
       "allOf": [
         ["type": "string"],
         ["type": "number", "maximum": 10],
@@ -66,7 +66,7 @@ struct JSONCompositionTests {
       }
     }
 
-    let expected: OrderedDictionary<String, JSONValue> = [
+    let expected: JSONValue.Object = [
       "oneOf": [
         ["type": "string", "pattern": "^[a-zA-Z]+$"],
         ["type": "boolean"],
@@ -81,7 +81,7 @@ struct JSONCompositionTests {
       JSONComposition.Not { JSONString() }
     }
 
-    let expected: OrderedDictionary<String, JSONValue> = [
+    let expected: JSONValue.Object = [
       "not": ["type": "string"]
     ]
 
@@ -98,7 +98,7 @@ struct JSONCompositionTests {
       .description("This is the description")
     }
 
-    let expected: OrderedDictionary<String, JSONValue> = [
+    let expected: JSONValue.Object = [
       "title": "Item",
       "description": "This is the description",
       "allOf": [

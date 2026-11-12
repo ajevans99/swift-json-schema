@@ -79,12 +79,12 @@ private enum ProjectionScope {
       "$defs": definitions.value,
       "allOf": [parsing.value],
     ]
-    var checkedReferences: Set<String> = []
+    var checkedReferences: Set<JSONKey> = []
     var index = 0
     while index < scope.references.count {
       let reference = scope.references[index]
       index += 1
-      guard checkedReferences.insert(reference).inserted else { continue }
+      guard checkedReferences.insert(JSONKey(reference)).inserted else { continue }
       guard let target = root.value(at: JSONPointer(from: reference)),
         target.object != nil || target.boolean != nil
       else {
@@ -123,8 +123,8 @@ private enum ProjectionScope {
     if let vocabulary = object["$vocabulary"] {
       let required = Set(["core", "applicator", "validation"].map { vocabularyBase + $0 })
       guard case .object(let entries) = vocabulary,
-        required.isSubset(of: Set(entries.keys)),
-        Set(entries.keys).isSubset(of: Dialect.draft2020_12.supportedVocabularies),
+        required.isSubset(of: Set(entries.keys.map(\.rawValue))),
+        Set(entries.keys.map(\.rawValue)).isSubset(of: Dialect.draft2020_12.supportedVocabularies),
         entries.values.allSatisfy({ $0.boolean != nil })
       else {
         throw .projectionFailure(
@@ -133,7 +133,7 @@ private enum ProjectionScope {
         )
       }
       scope.disabledVocabularies.formUnion(
-        Dialect.draft2020_12.supportedVocabularies.subtracting(entries.keys)
+        Dialect.draft2020_12.supportedVocabularies.subtracting(entries.keys.map(\.rawValue))
       )
     }
     for (keyword, vocabulary) in [

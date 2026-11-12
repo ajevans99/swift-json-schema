@@ -12,7 +12,7 @@ struct ContentMediaTypeBuilderTests {
         .contentMediaType("image/png")
     }
 
-    let expected: OrderedDictionary<String, JSONValue> = [
+    let expected: JSONValue.Object = [
       "type": "string",
       "contentEncoding": "base64",
       "contentMediaType": "image/png",

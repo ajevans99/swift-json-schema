@@ -168,7 +168,7 @@ enum ParsingScope {
   ) -> Bool {
     switch value {
     case .object(let object):
-      if object.contains(where: { predicate($0.key, $0.value) }) { return true }
+      if object.contains(where: { predicate($0.key.rawValue, $0.value) }) { return true }
       return object.contains { keyword, value in
         switch keyword {
         case "$recursiveRef", "$recursiveAnchor":

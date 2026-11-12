@@ -251,7 +251,7 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let schemaMap: [String: Schema]
+    private let schemaMap: [JSONKey: Schema]
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
@@ -273,7 +273,7 @@ extension Keywords {
         } ?? [:]
     }
 
-    package typealias AnnotationValue = OrderedSet<String>
+    package typealias AnnotationValue = OrderedSet<JSONKey>
 
     package func validate(
       _ input: JSONValue,
@@ -284,7 +284,7 @@ extension Keywords {
         return
       }
 
-      var instancePropertyNames: OrderedSet<String> = []
+      var instancePropertyNames: OrderedSet<JSONKey> = []
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
       for (key, value) in instanceObject {
@@ -336,8 +336,8 @@ extension Keywords {
       self.patterns =
         value.object?
         .compactMap { key, rawSchema in
-          guard let regex = try? compileSchemaRegex(key) else {
-            uncompilable = uncompilable ?? key
+          guard let regex = try? compileSchemaRegex(key.rawValue) else {
+            uncompilable = uncompilable ?? key.rawValue
             return nil
           }
           guard
@@ -353,7 +353,7 @@ extension Keywords {
       self.uncompilablePattern = uncompilable
     }
 
-    package typealias AnnotationValue = OrderedSet<String>
+    package typealias AnnotationValue = OrderedSet<JSONKey>
 
     package func validate(
       _ input: JSONValue,
@@ -366,11 +366,11 @@ extension Keywords {
         throw ValidationIssue.invalidPattern(pattern: uncompilablePattern)
       }
 
-      var matchedPropertyNames: OrderedSet<String> = []
+      var matchedPropertyNames: OrderedSet<JSONKey> = []
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
       for (key, value) in instanceObject {
-        for (regex, schema) in patterns where key.firstMatch(of: regex) != nil {
+        for (regex, schema) in patterns where key.rawValue.firstMatch(of: regex) != nil {
           let propertyLocation = instanceLocation.appending(.key(key))
           var subAnnotations = AnnotationContainer()
           let result =
@@ -407,7 +407,7 @@ extension Keywords {
       self.subschema = value.extractSubschema(using: context)
     }
 
-    package typealias AnnotationValue = OrderedSet<String>
+    package typealias AnnotationValue = OrderedSet<JSONKey>
 
     package func validate(
       _ input: JSONValue,
@@ -428,7 +428,7 @@ extension Keywords {
           .value ?? []
         )
 
-      var validatedKeys: OrderedSet<String> = []
+      var validatedKeys: OrderedSet<JSONKey> = []
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
       for (key, value) in instanceObject where !previouslyValidatedKeys.contains(key) {
@@ -479,7 +479,7 @@ extension Keywords {
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
       for key in instanceObject.keys {
-        let keyValue = JSONValue.string(key)
+        let keyValue = JSONValue.string(key.rawValue)
         let result =
           try subschema.validateSubschema(
             keyValue,
@@ -821,7 +821,7 @@ extension Keywords {
     // OrderedDictionary so iteration in `validate(...)` happens in declared
     // schema order — the order the user wrote properties in `dependentSchemas`
     // — rather than randomized Dictionary order. Required for #149.
-    private let schemaMap: OrderedDictionary<String, Schema>
+    private let schemaMap: OrderedDictionary<JSONKey, Schema>
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
@@ -829,7 +829,7 @@ extension Keywords {
 
       self.schemaMap = OrderedDictionary(
         uniqueKeysWithValues: value.object?
-          .compactMap { (key, rawSchema) -> (String, Schema)? in
+          .compactMap { (key, rawSchema) -> (JSONKey, Schema)? in
             // Each per-property sub-schema lives at `<keyword>/<key>` and
             // must inherit the enclosing schema's `$id`-resolved URI so that
             // relative `$ref`s inside it (e.g. `#/$defs/...`) resolve
@@ -980,7 +980,7 @@ extension Keywords {
       self.subschema = value.extractSubschema(using: context)
     }
 
-    package typealias AnnotationValue = OrderedSet<String>
+    package typealias AnnotationValue = OrderedSet<JSONKey>
 
     package func validate(
       _ input: JSONValue,
@@ -993,7 +993,7 @@ extension Keywords {
       // See "unevaluatedProperties with nested unevaluatedProperties" from JSON schema test suite.
       guard annotations.annotation(for: Self.self, at: instanceLocation) == nil else { return }
 
-      var evaluatedPropertyNames = OrderedSet<String>()
+      var evaluatedPropertyNames = OrderedSet<JSONKey>()
 
       if let propertiesAnnotation = annotations.annotation(
         for: Properties.self,
@@ -1026,7 +1026,7 @@ extension Keywords {
         !evaluatedPropertyNames.contains($0)
       }
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
-      var validatedPropertyNames = OrderedSet<String>()
+      var validatedPropertyNames = OrderedSet<JSONKey>()
 
       for propertyName in unevaluatedPropertyNames {
         guard let propertyValue = instanceObject[propertyName] else { continue }
@@ -1059,12 +1059,12 @@ extension Never: AnnotationValueConvertible {
   package func merged(with other: Never) -> Never {}
 }
 
-extension OrderedSet: AnnotationValueConvertible where Element == String {
+extension OrderedSet: AnnotationValueConvertible where Element == JSONKey {
   package var value: JSONSchema.JSONValue {
-    .array(self.map { .string($0) })
+    .array(self.map { .string($0.rawValue) })
   }
 
-  package func merged(with other: OrderedSet<String>) -> OrderedSet<String> {
+  package func merged(with other: OrderedSet<JSONKey>) -> OrderedSet<JSONKey> {
     self.union(other)
   }
 }

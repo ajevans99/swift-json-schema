@@ -32,7 +32,7 @@ public struct Schema: ValidatableSchema {
       )
     case .object(let schemaDict):
       self.schema = try ObjectSchema(
-        schemaValue: Dictionary(uniqueKeysWithValues: schemaDict.map { ($0.key, $0.value) }),
+        schemaValue: schemaDict,
         location: location,
         context: context,
         baseURI: baseURI,
@@ -211,7 +211,7 @@ package struct BooleanSchema: ValidatableSchema {
 }
 
 package struct ObjectSchema: ValidatableSchema {
-  let schemaValue: [String: JSONValue]
+  let schemaValue: JSONValue.Object
   let location: JSONPointer
   let context: Context
   let keywords: [any Keyword]
@@ -224,7 +224,7 @@ package struct ObjectSchema: ValidatableSchema {
   private let resourceURL: URL
 
   package init(
-    schemaValue: [String: JSONValue],
+    schemaValue: JSONValue.Object,
     location: JSONPointer,
     context: Context,
     baseURI: URL = URL(string: "https://swift-json-schema.invalid/in-memory")!,
@@ -242,7 +242,8 @@ package struct ObjectSchema: ValidatableSchema {
     )
     self.keywords = keywords
     let knownKeywords = Set(keywords.map { type(of: $0).name })
-    self.unknownKeywords = schemaValue.keys.filter { !knownKeywords.contains($0) }.sorted()
+    self.unknownKeywords = schemaValue.keys
+      .filter { !knownKeywords.contains($0.rawValue) }.sorted().map(\.rawValue)
     self.uri = processedURI
     self.dynamicAnchorInfo = dynamicAnchorInfo
     self.selfAbsoluteLocation = location.absoluteLocation(relativeTo: processedURI ?? documentURL)
@@ -250,7 +251,7 @@ package struct ObjectSchema: ValidatableSchema {
   }
 
   private static func collectKeywords(
-    from schemaValue: [String: JSONValue],
+    from schemaValue: JSONValue.Object,
     location: JSONPointer,
     context: Context,
     baseURI: URL
@@ -303,7 +304,7 @@ package struct ObjectSchema: ValidatableSchema {
 
     return context.withActiveVocabularies(activeVocabularies) {
       // Second pass: Process all other keywords using filtered keyword list
-      for keywordType in availableKeywords where schemaValue.keys.contains(keywordType.name) {
+      for keywordType in availableKeywords where schemaValue[keywordType.name] != nil {
         // Skip vocabulary keyword as it's already processed
         if keywordType.name == Keywords.Vocabulary.name
           || keywordType.name == Keywords.SchemaKeyword.name

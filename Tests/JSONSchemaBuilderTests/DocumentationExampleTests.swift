@@ -200,7 +200,7 @@ struct DocumentationExampleTests {
       .title("Person")
     }
 
-    let expected: OrderedDictionary<String, JSONValue> = [
+    let expected: JSONValue.Object = [
       "title": "Person",
       "type": "object",
       "required": ["firstName", "age"],
@@ -322,7 +322,7 @@ struct DocumentationExampleTests {
   }
 
   @Test func readMeEnumMacro() {
-    let expected: OrderedDictionary<String, JSONValue> = [
+    let expected: JSONValue.Object = [
       "type": "string", "enum": ["active", "inactive"],
     ]
     #expect(Status.schema.schemaValue == .object(expected))

@@ -103,6 +103,7 @@ struct SchemableExpansionTests {
                   }
                   .map(\\.1)
                   .map(\\.matches)
+                  .stringKeyedDictionary()
                 }
                 .required()
                 JSONProperty(key: "conditionsByLocation") {
@@ -115,6 +116,7 @@ struct SchemableExpansionTests {
                   }
                   .map(\\.1)
                   .map(\\.matches)
+                  .stringKeyedDictionary()
                 }
                 .required()
               }
@@ -197,6 +199,7 @@ struct SchemableExpansionTests {
                   }
                   .map(\\.1)
                   .map(\\.matches)
+                  .stringKeyedDictionary()
                 }
                 .required()
               }
@@ -252,6 +255,7 @@ struct SchemableExpansionTests {
                   }
                   .map(\\.1)
                   .map(\\.matches)
+                  .stringKeyedDictionary()
                 }
                 .required()
               }
@@ -997,6 +1001,7 @@ struct SchemableExpansionTests {
                   }
                   .map(\\.1)
                   .map(\\.matches)
+                  .stringKeyedDictionary()
                 }
                 .required()
               }

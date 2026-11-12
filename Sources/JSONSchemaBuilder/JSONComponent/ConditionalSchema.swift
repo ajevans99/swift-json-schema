@@ -18,9 +18,9 @@ public struct ConditionalSchema: JSONSchemaComponent {
     self.thenSchema = thenSchema
     self.elseSchema = elseSchema
 
-    var dict: OrderedDictionary<String, JSONValue> = [
-      Keywords.If.name: ifSchema.schemaValue.value,
-      Keywords.Then.name: thenSchema.schemaValue.value,
+    var dict: JSONValue.Object = [
+      JSONKey(Keywords.If.name): ifSchema.schemaValue.value,
+      JSONKey(Keywords.Then.name): thenSchema.schemaValue.value,
     ]
     if let e = elseSchema {
       dict[Keywords.Else.name] = e.schemaValue.value

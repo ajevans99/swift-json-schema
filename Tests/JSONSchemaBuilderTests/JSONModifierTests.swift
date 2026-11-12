@@ -67,7 +67,7 @@ struct JSONEnumTests {
         .enumValues { "red" }
     }
 
-    let expected: OrderedDictionary<String, JSONValue> = [
+    let expected: JSONValue.Object = [
       "type": "string",
       "enum": ["red"],
     ]
@@ -85,7 +85,7 @@ struct JSONEnumTests {
         }
     }
 
-    let expected: OrderedDictionary<String, JSONValue> = [
+    let expected: JSONValue.Object = [
       "type": "string",
       "enum": ["red", "amber", "green"],
     ]
@@ -105,7 +105,7 @@ struct JSONEnumTests {
         }
     }
 
-    let expected: OrderedDictionary<String, JSONValue> = [
+    let expected: JSONValue.Object = [
       "enum": ["red", "amber", "green", nil, 42]
     ]
 
@@ -123,7 +123,7 @@ struct JSONEnumTests {
         .title("Color")
     }
 
-    let expected: OrderedDictionary<String, JSONValue> = [
+    let expected: JSONValue.Object = [
       "title": "Color",
       "type": "string",
       "enum": ["red", "amber", "green"],
@@ -140,7 +140,7 @@ struct JSONConstantTests {
         .constant("red")
     }
 
-    let expected: OrderedDictionary<String, JSONValue> = [
+    let expected: JSONValue.Object = [
       "const": "red"
     ]
 
@@ -153,7 +153,7 @@ struct JSONConstantTests {
         .constant("red")
     }
 
-    let expected: OrderedDictionary<String, JSONValue> = [
+    let expected: JSONValue.Object = [
       "type": "string",
       "const": "red",
     ]

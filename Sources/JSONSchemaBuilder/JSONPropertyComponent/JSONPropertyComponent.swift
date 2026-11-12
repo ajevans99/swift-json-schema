@@ -10,5 +10,5 @@ public protocol JSONPropertyComponent {
   var isRequired: Bool { get }
   var value: Value { get }
 
-  func parse(_ input: [String: JSONValue]) -> Parsed<Output, ParseIssue>
+  func parse(_ input: [JSONKey: JSONValue]) -> Parsed<Output, ParseIssue>
 }

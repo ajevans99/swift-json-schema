@@ -72,8 +72,21 @@ extension JSONValue: Codable {
     case .numberLiteral(let number):
       try number.encode(to: encoder)
     case .object(let dictionary):
+      let exported: OrderedDictionary<String, JSONValue>
+      do {
+        exported = try dictionary.stringKeyed()
+      } catch {
+        throw EncodingError.invalidValue(
+          self,
+          .init(
+            codingPath: encoder.codingPath,
+            debugDescription: "Object names collide as Swift String keys; use serialized()",
+            underlyingError: error
+          )
+        )
+      }
       var container = encoder.container(keyedBy: AnyKey.self)
-      for (key, value) in dictionary {
+      for (key, value) in exported {
         try container.encode(value, forKey: AnyKey(stringValue: key))
       }
     case .array(let array):
@@ -90,7 +103,7 @@ extension JSONValue: Codable {
 
   public init(from decoder: Decoder) throws {
     if let keyed = try? decoder.container(keyedBy: AnyKey.self) {
-      var dictionary = OrderedDictionary<String, Self>()
+      var dictionary = Object()
       let keys = keyed.allKeys
       dictionary.reserveCapacity(keys.count)
       for key in keys {

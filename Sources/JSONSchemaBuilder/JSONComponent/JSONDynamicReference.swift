@@ -20,7 +20,7 @@ public struct JSONDynamicReference<T: Schemable>: JSONSchemaComponent {
   ///   ``JSONSchemaComponent/dynamicAnchor(_:)`` declaration.
   public init(anchor: String) {
     self.anchor = anchor
-    self.schemaValue = .object([Keywords.DynamicReference.name: .string("#\(anchor)")])
+    self.schemaValue = .object([JSONKey(Keywords.DynamicReference.name): .string("#\(anchor)")])
   }
 
   /// Creates a dynamic reference that automatically resolves its anchor name from the

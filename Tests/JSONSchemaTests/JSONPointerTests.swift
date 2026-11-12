@@ -51,7 +51,7 @@ struct JSONPointerTests {
 
   @Test(arguments: numericTokens)
   func numericObjectKeys(token: String) {
-    let document: JSONValue = .object([token: .string(token)])
+    let document: JSONValue = .object([JSONKey(token): .string(token)])
     #expect(document.value(at: JSONPointer(from: "/\(token)")) == .string(token))
     #expect(document.value(at: JSONPointer(tokens: [token])) == .string(token))
   }

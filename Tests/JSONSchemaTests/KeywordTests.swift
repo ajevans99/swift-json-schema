@@ -785,7 +785,7 @@ struct KeywordTests {
       (JSONValue.object(["c": 3]), OrderedSet([]), true),
       (JSONValue.string("not an object"), nil, true),
     ])
-    func properties(instance: JSONValue, expectedAnnotation: OrderedSet<String>?, isValid: Bool) {
+    func properties(instance: JSONValue, expectedAnnotation: OrderedSet<JSONKey>?, isValid: Bool) {
       let schemaValue: JSONValue = [
         "a": ["type": "integer"],
         "b": ["type": "integer"],
@@ -821,7 +821,7 @@ struct KeywordTests {
     ])
     func patternProperties(
       instance: JSONValue,
-      expectedAnnotation: OrderedSet<String>?,
+      expectedAnnotation: OrderedSet<JSONKey>?,
       isValid: Bool
     ) {
       let schemaValue: JSONValue = [
@@ -859,7 +859,7 @@ struct KeywordTests {
     ])
     func additionalProperties(
       instance: JSONValue,
-      expectedAnnotation: OrderedSet<String>?,
+      expectedAnnotation: OrderedSet<JSONKey>?,
       isValid: Bool
     ) {
       let schemaValue: JSONValue = ["type": "integer"]

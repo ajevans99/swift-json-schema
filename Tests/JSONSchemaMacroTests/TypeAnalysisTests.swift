@@ -280,6 +280,7 @@ struct TypeAnalysisTests {
       }
       .map(\\.1)
       .map(\\.matches)
+      .stringKeyedDictionary()
       """
     #expect(
       TypeSchemaEmitter.expression(for: type).tokens(viewMode: .sourceAccurate).map(\.text)

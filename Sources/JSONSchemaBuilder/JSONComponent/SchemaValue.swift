@@ -3,7 +3,7 @@ import OrderedCollections
 
 public enum SchemaValue: Sendable, Equatable {
   case boolean(Bool)
-  case object(OrderedDictionary<KeywordIdentifier, JSONValue>)
+  case object(JSONValue.Object)
 
   public static func == (lhs: SchemaValue, rhs: SchemaValue) -> Bool {
     switch (lhs, rhs) {
@@ -22,7 +22,7 @@ public enum SchemaValue: Sendable, Equatable {
     }
   }
 
-  public var object: OrderedDictionary<KeywordIdentifier, JSONValue>? {
+  public var object: JSONValue.Object? {
     switch self {
     case .boolean: return nil
     case .object(let dict): return dict
@@ -38,7 +38,7 @@ public enum SchemaValue: Sendable, Equatable {
     }
   }
 
-  public subscript(key: KeywordIdentifier) -> JSONValue? {
+  public subscript(key: JSONKey) -> JSONValue? {
     get {
       switch self {
       case .boolean:
@@ -56,6 +56,11 @@ public enum SchemaValue: Sendable, Equatable {
         self = .object(dict)
       }
     }
+  }
+
+  public subscript(key: String) -> JSONValue? {
+    get { self[JSONKey(key)] }
+    set { self[JSONKey(key)] = newValue }
   }
 
   public mutating func merge(_ other: SchemaValue) {
@@ -84,12 +89,7 @@ public enum SchemaValue: Sendable, Equatable {
 
 extension SchemaValue: ExpressibleByDictionaryLiteral {
   public init(dictionaryLiteral elements: (KeywordIdentifier, JSONValue)...) {
-    var dictionary = OrderedDictionary<KeywordIdentifier, JSONValue>()
-    dictionary.reserveCapacity(elements.count)
-    for (key, value) in elements {
-      dictionary[key] = value
-    }
-    self = .object(dictionary)
+    self = .object(JSONValue.Object(stringKeyedPairs: elements))
   }
 }
 

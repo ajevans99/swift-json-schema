@@ -14,5 +14,7 @@ extension BooleanSchema {
 }
 
 extension ObjectSchema {
-  public static func == (lhs: Self, rhs: Self) -> Bool { lhs.schemaValue == rhs.schemaValue }
+  public static func == (lhs: Self, rhs: Self) -> Bool {
+    JSONValue.object(lhs.schemaValue) == JSONValue.object(rhs.schemaValue)
+  }
 }

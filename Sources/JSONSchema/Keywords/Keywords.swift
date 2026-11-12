@@ -19,7 +19,7 @@ package enum Keywords {
       if let rawSchema = context.context.remoteSchemaStorage[schemaURI],
         let vocabObject = rawSchema.object?[Vocabulary.name]?.object
       {
-        return Set(vocabObject.keys)
+        return Set(vocabObject.keys.map(\.rawValue))
       }
       return nil
     }
@@ -50,8 +50,8 @@ package enum Keywords {
           throw .invalidVocabularyFormat
         }
 
-        if isRequired && !supportedVocabularies.contains(vocabularyURI) {
-          throw .unsupportedRequiredVocabulary(vocabularyURI)
+        if isRequired && !supportedVocabularies.contains(vocabularyURI.rawValue) {
+          throw .unsupportedRequiredVocabulary(vocabularyURI.rawValue)
         }
       }
     }
@@ -64,7 +64,7 @@ package enum Keywords {
 
       var activeVocabularies = Set<String>()
       for (vocabularyURI, _) in vocabObject {
-        activeVocabularies.insert(vocabularyURI)
+        activeVocabularies.insert(vocabularyURI.rawValue)
       }
 
       return activeVocabularies
