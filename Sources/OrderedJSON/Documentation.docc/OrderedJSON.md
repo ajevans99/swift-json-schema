@@ -39,6 +39,12 @@ let bytes = try value.serializedData()
 - ``JSONNumberLiteral``
 - ``JSONType``
 
+### Scalar-exact key utilities
+
+- ``JSONKey``
+- ``JSONKeyConversionError``
+- <doc:ScalarObjectKeyMigration>
+
 ### Exact numbers
 
 - <doc:Migrating-to-lossless-numbers>
