@@ -27,6 +27,40 @@ struct SchemaPlanningTests {
     }
   }
 
+  @Test(arguments: ["Tree<T>", "Tree< T >?", "[Tree<T>]", "[String: Tree<T>]"])
+  func genericRecursiveEnumPayloadHasAnExplicitDiagnostic(type: String) throws {
+    let planned = try plan("indirect enum Tree<T> { case leaf; case node(\(type)) }")
+    #expect(planned.diagnostics.count == 1)
+    #expect(planned.diagnostics.first?.diagMessage.severity == .error)
+    guard case .enumeration(let cases) = planned.body,
+      case .unsupported = cases.last
+    else {
+      Issue.record("Generic self-reference must not emit a self-instantiating schema")
+      return
+    }
+  }
+
+  @Test(arguments: ["Tree<Int>", "Other.Tree<T>", "Tree<[T]>"])
+  func otherGenericSpecializationsAreNotDirectSelfReferences(type: String) throws {
+    let planned = try plan("indirect enum Tree<T> { case node(\(type)) }")
+    #expect(planned.diagnostics.isEmpty)
+  }
+
+  @Test(arguments: ["Outer<U>.Tree<T>", "Outer.Tree<T>"])
+  func qualifiedGenericSelfReferenceIsDiagnosed(type: String) throws {
+    let outer = try StructDeclSyntax("struct Outer<U> {}")
+    let declaration = try EnumDeclSyntax(
+      "indirect enum Tree<T> { case node(Outer<U>.Tree<T>) }"
+    )
+    let parsed = try SchemableDeclaration(declaration, lexicalContext: [Syntax(outer)])
+    let planned = SchemaPlanner.plan(
+      parsed,
+      configuration: try MacroConfiguration(attribute: AttributeSyntax("@Schemable"))
+    )
+    #expect(planned.diagnostics.count == 1)
+    #expect(planned.diagnostics.first?.diagMessage.severity == .error)
+  }
+
   @Test(arguments: ["Outer.Tree", "Outer.Tree?", "[Outer.Tree]", "[String: Outer.Tree]"])
   func qualifiedNestedEnumPayloadHasAnExplicitDiagnostic(type: String) throws {
     let outer = try StructDeclSyntax("struct Outer {}")

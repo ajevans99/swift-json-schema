@@ -199,10 +199,9 @@ enum SchemaPlanner {
       }
       switch SchemaType.parse(parameter.type) {
       case .success(let type):
-        if type.resolvingSelfReferences(named: declaration.name.text.trimmingBackticks())
-          .resolvingSelfReferences(named: declaration.qualifiedName)
-          .usesSelfReference
-        {
+        if declaration.selfReferenceNames.contains(where: {
+          type.resolvingSelfReferences(named: $0).usesSelfReference
+        }) {
           isUnsupported = true
           diagnostics.diagnose(
             Diagnostic(

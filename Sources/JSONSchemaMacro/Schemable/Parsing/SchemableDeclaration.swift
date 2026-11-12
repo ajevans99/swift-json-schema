@@ -53,6 +53,7 @@ struct SchemableDeclaration {
   let kind: Kind
   let name: TokenSyntax
   let qualifiedName: String
+  let selfReferenceNames: [String]
   let accessModifier: DeclModifierSyntax?
   let options: ParsedOptions
   let properties: [SchemableMember]
@@ -87,6 +88,13 @@ struct SchemableDeclaration {
         return nil
       }
     qualifiedName = (enclosingNames + [name.text]).joined(separator: ".")
+    let specializedName = Self.specializedName(Syntax(declaration)) ?? name.text
+    let specializedEnclosingNames = lexicalContext.reversed().compactMap(Self.specializedName)
+    selfReferenceNames = [
+      name.text, qualifiedName, specializedName,
+      (enclosingNames + [specializedName]).joined(separator: "."),
+      (specializedEnclosingNames + [specializedName]).joined(separator: "."),
+    ]
 
     accessModifier = Self.accessModifier(for: declaration, lexicalContext: lexicalContext)
     options = ParsedOptions(attributes: declaration.attributes)
@@ -125,6 +133,32 @@ struct SchemableDeclaration {
     }
     self.properties = properties
     self.diagnostics = diagnostics
+  }
+
+  /// Retain the declaration's own generic arguments, not arbitrary specializations.
+  private static func specializedName(_ syntax: Syntax) -> String? {
+    let name: TokenSyntax
+    let parameters: GenericParameterClauseSyntax?
+    if let declaration = syntax.as(StructDeclSyntax.self) {
+      name = declaration.name
+      parameters = declaration.genericParameterClause
+    } else if let declaration = syntax.as(ClassDeclSyntax.self) {
+      name = declaration.name
+      parameters = declaration.genericParameterClause
+    } else if let declaration = syntax.as(EnumDeclSyntax.self) {
+      name = declaration.name
+      parameters = declaration.genericParameterClause
+    } else if let declaration = syntax.as(ActorDeclSyntax.self) {
+      name = declaration.name
+      parameters = declaration.genericParameterClause
+    } else if let declaration = syntax.as(ExtensionDeclSyntax.self) {
+      return declaration.extendedType.trimmedDescription
+    } else {
+      return nil
+    }
+    guard let parameters else { return name.text }
+    let arguments = parameters.parameters.map { $0.name.text }.joined(separator: ",")
+    return "\(name.text)<\(arguments)>"
   }
 
   private static func accessModifier(
