@@ -130,6 +130,69 @@ private indirect enum DocumentMutualB: Schemable {
   }
 }
 
+@Schemable
+private struct DocumentSingleUse: Equatable {
+  @SchemaOptions(.description("Home address"))
+  let home: DocumentAddress
+}
+
+@Schemable
+private struct DocumentNestedSingle: Equatable {
+  let single: DocumentSingleUse
+  let other: DocumentAddress
+}
+
+@Schemable
+private struct DocumentSingleTree: Equatable {
+  let tree: DocumentTree
+}
+
+@Schemable
+private enum DocumentSingleChoice: Equatable {
+  static var schemaDefinitionName: String { "SingleChoice" }
+  case address(DocumentAddress)
+  case empty
+}
+
+@Schemable
+private struct DocumentSingleChoiceHolder: Equatable {
+  @SchemaOptions(.description("Selected choice"))
+  let choice: DocumentSingleChoice
+}
+
+@Schemable
+private struct DocumentRepeatedChoiceHolder: Equatable {
+  let first: DocumentSingleChoice
+  let second: DocumentSingleChoice
+}
+
+private struct DocumentNode: Schemable, Equatable {
+  let next: [DocumentNode]
+  static var schemaDefinitionName: String { "Node" }
+  static var schema: some JSONSchemaComponent<DocumentNode> {
+    JSONObject {
+      JSONProperty(key: "next") {
+        JSONArray { JSONReference<DocumentNode>.definition(named: "Node") }
+      }
+    }
+    .map { DocumentNode(next: $0 ?? []) }
+  }
+}
+
+private struct DocumentChoiceAlias: Schemable, Equatable {
+  let choice: DocumentSingleChoice
+  static var schemaDefinitionName: String { "ChoiceAlias" }
+  static var schema: some JSONSchemaComponent<DocumentChoiceAlias> {
+    JSONReusable(DocumentSingleChoice.self).map(DocumentChoiceAlias.init)
+  }
+}
+
+private struct DocumentTrueSchema: Schemable {
+  static var schema: some JSONSchemaComponent<Bool> {
+    JSONBooleanSchema(booleanLiteral: true)
+  }
+}
+
 struct SchemaDocumentTests {
   @Test func inlineRecursiveArrayRetainsGrandchildCompositionParser() throws {
     let value: JSONValue = [
@@ -580,5 +643,235 @@ struct SchemaDocumentTests {
     }
     _ = try SchemaDocument { attemptNestedDocument() }
     #expect(try DocumentOrder.document().schemaValue["$defs"] != nil)
+  }
+
+  @Test func reusedTypesInlineSingleUsesAndMergeAnnotations() throws {
+    let doc = try DocumentSingleUse.document(references: .reusedTypes)
+    expectNoDifference(
+      doc.schemaValue.value,
+      [
+        "type": "object",
+        "required": ["home"],
+        "properties": [
+          "home": [
+            "type": "object",
+            "required": ["street"],
+            "properties": ["street": ["type": "string"]],
+            "description": "Home address",
+          ]
+        ],
+      ]
+    )
+    let json: JSONValue = ["home": ["street": "A"]]
+    #expect(try doc.parseAndValidate(json) == DocumentSingleUse(home: .init(street: "A")))
+    #expect(throws: ParseAndValidateIssue.self) {
+      try doc.parseAndValidate(["home": ["street": 4]])
+    }
+  }
+
+  @Test func reusedTypesExtractRepeatedUsesIncludingNestedOnes() throws {
+    let order = try DocumentOrder.document(references: .reusedTypes)
+    expectNoDifference(
+      order.schemaValue.value,
+      try DocumentOrder.document(references: .namedTypes).schemaValue.value
+    )
+
+    let nested = try DocumentNestedSingle.document(references: .reusedTypes)
+    #expect(nested.schemaValue["$defs"]?.object?.keys.sorted() == ["Address"])
+    let properties = nested.schemaValue["properties"]?.object
+    #expect(properties?["other"]?.object?["$ref"]?.string == "#/$defs/Address")
+    #expect(properties?["single"]?.object?["properties"]?.object?["home"]?.object?["$ref"] != nil)
+    let json: JSONValue = ["single": ["home": ["street": "A"]], "other": ["street": "B"]]
+    #expect(
+      try nested.parseAndValidate(json)
+        == DocumentNestedSingle(
+          single: .init(home: .init(street: "A")),
+          other: .init(street: "B")
+        )
+    )
+    #expect(nested.definition().validate(json).isValid)
+    #expect(throws: ParseAndValidateIssue.self) {
+      try nested.parseAndValidate(["single": ["home": ["street": 1]], "other": ["street": "B"]])
+    }
+  }
+
+  @Test func reusedTypesKeepRecursiveDefinitionsExtracted() throws {
+    let doc = try DocumentSingleTree.document(references: .reusedTypes)
+    #expect(doc.schemaValue["$defs"]?.object?["Tree"]?.object?["$dynamicAnchor"] != nil)
+    let tree: JSONValue = ["name": "root", "children": [["name": "leaf", "children": []]]]
+    #expect(try doc.parseAndValidate(["tree": tree]).tree.children.count == 1)
+    #expect(doc.definition().validate(["tree": tree]).isValid)
+  }
+
+  @Test func reusedTypesHandleManualBuilders() throws {
+    let once = try SchemaDocument(references: .reusedTypes) {
+      JSONArray { JSONReusable(DocumentAddress.self) }
+    }
+    #expect(once.schemaValue["$defs"] == nil)
+    #expect(once.schemaValue["items"]?.object?["type"]?.string == "object")
+    #expect(try once.parseAndValidate([["street": "A"]]).count == 1)
+  }
+
+  @Test(arguments: [SchemaDocumentReferences.namedTypes, .reusedTypes])
+  func annotatedChoicesParseUnderBothPolicies(policy: SchemaDocumentReferences) throws {
+    let doc = try DocumentSingleChoiceHolder.document(references: policy)
+    let value: JSONValue = ["choice": ["address": ["_0": ["street": "A"]]]]
+    #expect(doc.definition().validate(value).isValid)
+    expectNoDifference(
+      try doc.parseAndValidate(value),
+      DocumentSingleChoiceHolder(choice: .address(.init(street: "A")))
+    )
+  }
+
+  @Test func reusedTypesParseInlinedUnionPayloads() throws {
+    let doc = try DocumentSingleChoiceHolder.document(references: .reusedTypes)
+    let value: JSONValue = ["choice": ["address": ["_0": ["street": "A"]]]]
+    let expected = DocumentSingleChoiceHolder(choice: .address(.init(street: "A")))
+    #expect(doc.schemaValue["$defs"] == nil)
+    #expect(doc.definition().validate(value).isValid)
+    expectNoDifference(try doc.parseAndValidate(value), expected)
+    expectNoDifference(doc.parse(value).value, expected)
+    #expect(throws: ParseAndValidateIssue.self) {
+      try doc.parseAndValidate(["choice": ["address": ["_0": ["street": 4]]]])
+    }
+  }
+
+  @Test func reusedTypesParseExtractedUnionsWithInlinedPayloads() throws {
+    let doc = try DocumentRepeatedChoiceHolder.document(references: .reusedTypes)
+    #expect(doc.schemaValue["$defs"]?.object?.keys.sorted() == ["SingleChoice"])
+    let choice: JSONValue = ["address": ["_0": ["street": "A"]]]
+    let value: JSONValue = ["first": choice, "second": choice]
+    #expect(doc.definition().validate(value).isValid)
+    expectNoDifference(
+      try doc.parseAndValidate(value),
+      DocumentRepeatedChoiceHolder(
+        first: .address(.init(street: "A")),
+        second: .address(.init(street: "A"))
+      )
+    )
+  }
+
+  @Test func reusedTypesParseInlinedManualReferences() throws {
+    let doc = try SchemaDocument(references: .reusedTypes) {
+      JSONObject {
+        JSONProperty(key: "first") { JSONReusable(DocumentSingleChoice.self) }
+        JSONProperty(key: "second") {
+          JSONReference<DocumentSingleChoice>.definition(named: "SingleChoice")
+            .description("Manual choice")
+        }
+      }
+    }
+    let choice: JSONValue = ["address": ["_0": ["street": "A"]]]
+    let value: JSONValue = ["first": choice, "second": choice]
+    #expect(doc.schemaValue["$defs"] == nil)
+    #expect(doc.definition().validate(value).isValid)
+    let parsed = try doc.parseAndValidate(value)
+    expectNoDifference(parsed.0, .address(.init(street: "A")))
+    expectNoDifference(parsed.1, .address(.init(street: "A")))
+  }
+
+  @Test(arguments: [
+    JSONComposition.anyOf, .allOf, .oneOf, .not,
+  ])
+  func reusedTypesMatchFinalizedCompositionBranches(composition: JSONComposition) throws {
+    let doc = try SchemaDocument(references: .reusedTypes) {
+      JSONArray {
+        let address = JSONReusable(DocumentAddress.self)
+        switch composition {
+        case .anyOf:
+          JSONComposition.AnyOf(into: DocumentAddress.self) { address }
+            .map { _ in JSONValue.null }.eraseToAnySchemaComponent()
+        case .allOf:
+          JSONComposition.AllOf(into: DocumentAddress.self) { address }
+            .map { _ in JSONValue.null }.eraseToAnySchemaComponent()
+        case .oneOf:
+          JSONComposition.OneOf(into: DocumentAddress.self) { address }
+            .map { _ in JSONValue.null }.eraseToAnySchemaComponent()
+        case .not:
+          JSONComposition.Not { address }.eraseToAnySchemaComponent()
+        }
+      }
+    }
+    let matching: JSONValue = [["street": "A"]]
+    let nonmatching: JSONValue = [["street": 4]]
+    let value = composition == .not ? nonmatching : matching
+    let invalid = composition == .not ? matching : nonmatching
+    #expect(doc.schemaValue["$defs"] == nil)
+    #expect(doc.definition().validate(value).isValid)
+    expectNoDifference(
+      try doc.parseAndValidate(value),
+      composition == .not ? [["street": 4]] : [.null]
+    )
+    #expect(throws: ParseAndValidateIssue.self) {
+      try doc.parseAndValidate(invalid)
+    }
+  }
+
+  @Test func reusedTypesRejectSingleUseNameCollisions() {
+    #expect(throws: SchemaDocumentError.conflictingDefinition("Address")) {
+      try SchemaDocument(references: .reusedTypes) {
+        JSONObject {
+          JSONProperty(key: "address") { JSONReusable(DocumentAddress.self) }
+          JSONProperty(key: "collision") { JSONReusable(DocumentNameCollision.self) }
+        }
+      }
+    }
+  }
+
+  @Test func reusedTypesRejectMixedUseNameCollisions() {
+    #expect(throws: SchemaDocumentError.conflictingDefinition("Address")) {
+      try SchemaDocument(references: .reusedTypes) {
+        JSONObject {
+          JSONProperty(key: "address") { JSONReusable(DocumentAddress.self) }
+          JSONProperty(key: "collision") { JSONReusable(DocumentNameCollision.self) }
+          JSONProperty(key: "repeated") { JSONReusable(DocumentAddress.self) }
+        }
+      }
+    }
+  }
+
+  @Test func reusedTypesRejectSingleUseCollisionsWithExistingDefinitions() {
+    #expect(throws: SchemaDocumentError.conflictingDefinition("Address")) {
+      try SchemaDocument(references: .reusedTypes) {
+        var component = JSONArray { JSONReusable(DocumentAddress.self) }
+        component.schemaValue["$defs"] = ["Address": false]
+        return component
+      }
+    }
+  }
+
+  @Test func reusedTypesKeepStaticallySelfReferencingDefinitionsExtracted() throws {
+    let doc = try SchemaDocument(references: .reusedTypes) {
+      JSONObject { JSONProperty(key: "node") { JSONReusable(DocumentNode.self) } }
+    }
+    #expect(doc.schemaValue["$defs"]?.object?.keys.sorted() == ["Node"])
+    let node: JSONValue = ["node": ["next": [["next": []]]]]
+    #expect(doc.definition().validate(node).isValid)
+    #expect(try doc.parseAndValidate(node) != nil)
+  }
+
+  @Test func reusedTypesParseInlinedAliasesThatResolveToExtractedReferences() throws {
+    let doc = try SchemaDocument(references: .reusedTypes) {
+      JSONObject {
+        JSONProperty(key: "a") { JSONReusable(DocumentChoiceAlias.self) }
+        JSONProperty(key: "b") { JSONReusable(DocumentSingleChoice.self) }
+        JSONProperty(key: "c") {
+          JSONReference<DocumentChoiceAlias>.definition(named: "ChoiceAlias")
+        }
+      }
+    }
+    let choice: JSONValue = ["address": ["_0": ["street": "A"]]]
+    let value: JSONValue = ["a": choice, "b": choice, "c": choice]
+    #expect(doc.definition().validate(value).isValid)
+    let parsed = try doc.parseAndValidate(value)
+    expectNoDifference(parsed.0?.choice, DocumentSingleChoice.address(.init(street: "A")))
+    expectNoDifference(parsed.2?.choice, DocumentSingleChoice.address(.init(street: "A")))
+  }
+
+  @Test func reusedTypesAllowBooleanRootsAfterInlining() throws {
+    let wrapped = try SchemaDocument(references: .reusedTypes) {
+      JSONReusable(DocumentTrueSchema.self)
+    }
+    #expect(wrapped.schemaValue == .boolean(true))
   }
 }

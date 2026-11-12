@@ -7,7 +7,7 @@ struct SchemaDocumentReferenceMatchingTests {
   private enum Identity {}
 
   @Test func documentMatchingOnlyIgnoresAnnotationsAndItsOwnRootDefinitions() throws {
-    let context = SchemaDocumentContext(rootType: nil)
+    let context = SchemaDocumentContext(rootType: nil, policy: .namedTypes)
     let reference = SchemaDocumentScope.$current
       .withValue(context) {
         JSONReusable(Identity.self) { JSONString() }
@@ -84,7 +84,7 @@ struct SchemaDocumentReferenceMatchingTests {
       )
     )
 
-    let otherContext = SchemaDocumentContext(rootType: nil)
+    let otherContext = SchemaDocumentContext(rootType: nil, policy: .namedTypes)
     _ = try otherContext.finish(["type": "string"])
     #expect(
       !otherContext.matchesReference(

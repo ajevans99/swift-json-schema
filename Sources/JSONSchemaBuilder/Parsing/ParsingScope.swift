@@ -112,11 +112,26 @@ enum ParsingScope {
     composition: JSONComposition
   ) -> Result<SchemaEvaluation, ParseIssue> {
     let tokens = [keyword] + (index.map { [String($0)] } ?? [])
+    // Retained components still contain the references rewritten during document finalization.
+    let matchingSchema: JSONValue
+    do {
+      matchingSchema =
+        try SchemaDocumentScope.current?.resolvedSchema(component.schemaValue.value)
+        ?? component.schemaValue.value
+    } catch {
+      return .failure(
+        .compositionFailure(
+          type: composition,
+          reason: "document schema resolution failed: \(error)",
+          nestedErrors: []
+        )
+      )
+    }
     if let evaluation = current?.evaluation?
       .child(
         schemaTokens: tokens,
         instance: value,
-        schema: component.schemaValue.value
+        schema: matchingSchema
       )
     {
       return .success(evaluation)
@@ -182,9 +197,23 @@ enum ParsingScope {
     documentContext: SchemaDocumentContext? = nil
   ) -> Parsed<Component.Output, ParseIssue> {
     guard let current else { return component.parse(value) }
+    let matchingSchema: JSONValue
+    do {
+      matchingSchema =
+        try SchemaDocumentScope.current?.resolvedSchema(referenceSchema.value)
+        ?? referenceSchema.value
+    } catch {
+      return .error(
+        .compositionFailure(
+          type: .allOf,
+          reason: "document schema resolution failed: \(error)",
+          nestedErrors: []
+        )
+      )
+    }
     let target: SchemaEvaluation?
     if let source = current.evaluation,
-      source.schema == referenceSchema.value
+      source.schema == matchingSchema
         || documentContext?
           .matchesReference(
             source: source.schema,
@@ -192,6 +221,12 @@ enum ParsingScope {
             rootSchema: current.rootSchema
           ) == true
     {
+      if let uri = referenceSchema[keyword]?.string,
+        SchemaDocumentScope.current?.isInlined(uri) == true
+      {
+        // An inlined reference is evaluated directly at its use site.
+        return component.parse(value)
+      }
       target = source.children.first { $0.reference == keyword && $0.instance == value }
     } else {
       target = nil
