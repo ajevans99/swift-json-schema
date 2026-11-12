@@ -31,16 +31,15 @@ public struct DateTimeFormatValidator: FormatValidator {
     guard day <= monthLength else { return false }
     guard second == 60 else { return true }
 
-    var offsetMinutes = 0
-    if let sign = match.7 {
-      guard
-        let offsetHour = match.8.flatMap({ Int($0) }),
-        let offsetMinute = match.9.flatMap({ Int($0) })
-      else { return false }
-      offsetMinutes = (offsetHour * 60 + offsetMinute) * (sign == "-" ? -1 : 1)
-    }
-
-    let utcMinutes = hour * 60 + minute - offsetMinutes
+    guard
+      let utcMinutes = TimeFormatValidator.utcMinutes(
+        hour: hour,
+        minute: minute,
+        sign: match.7,
+        offsetHour: match.8,
+        offsetMinute: match.9
+      )
+    else { return false }
     // An offset under 24 hours can put UTC 23:59 on this date or the previous date.
     if utcMinutes == -1 {
       return day == 1
@@ -61,29 +60,59 @@ public struct DateTimeFormatValidator: FormatValidator {
   }
 }
 
+/// Validates a zero-padded RFC 3339 full-date, including calendar boundaries.
 public struct DateFormatValidator: FormatValidator {
   public let formatName = "date"
-  private static let formatter: DateFormatter = {
-    let f = DateFormatter()
-    f.locale = Locale(identifier: "en_US_POSIX")
-    f.dateFormat = "yyyy-MM-dd"
-    f.timeZone = TimeZone(secondsFromGMT: 0)
-    return f
-  }()
 
   public func validate(_ value: String) -> Bool {
-    DateFormatValidator.formatter.date(from: value) != nil
+    DateTimeFormatValidator().validate(value + "T00:00:00Z")
   }
 }
 
+/// Validates RFC 3339 full-time with a required UTC marker or numeric offset.
+///
+/// Leap seconds must correspond to UTC 23:59; historical announcements are not checked.
 public struct TimeFormatValidator: FormatValidator {
   public let formatName = "time"
-  nonisolated(unsafe) private static let regex = try! Regex(
-    #"^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):?[0-5]\d)?$"#
-  )
+  nonisolated(unsafe) private static let regex =
+    #/
+    ([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)
+    (?:\.[0-9]+)?
+    (?:[Zz]|([+-])([01][0-9]|2[0-3]):([0-5][0-9]))
+    /#
 
   public func validate(_ value: String) -> Bool {
-    value.firstMatch(of: Self.regex) != nil
+    guard
+      let match = value.wholeMatch(of: Self.regex),
+      let hour = Int(match.1),
+      let minute = Int(match.2)
+    else { return false }
+    guard match.3 == "60" else { return true }
+    guard
+      let utcMinutes = Self.utcMinutes(
+        hour: hour,
+        minute: minute,
+        sign: match.4,
+        offsetHour: match.5,
+        offsetMinute: match.6
+      )
+    else { return false }
+    return utcMinutes == -1 || utcMinutes == 23 * 60 + 59
+  }
+
+  fileprivate static func utcMinutes(
+    hour: Int,
+    minute: Int,
+    sign: Substring?,
+    offsetHour: Substring?,
+    offsetMinute: Substring?
+  ) -> Int? {
+    guard let sign else { return hour * 60 + minute }
+    guard let offsetHour = offsetHour.flatMap({ Int($0) }),
+      let offsetMinute = offsetMinute.flatMap({ Int($0) })
+    else { return nil }
+    let offset = (offsetHour * 60 + offsetMinute) * (sign == "-" ? -1 : 1)
+    return hour * 60 + minute - offset
   }
 }
 
@@ -172,15 +201,23 @@ public struct UUIDFormatValidator: FormatValidator {
 public struct URIFormatValidator: FormatValidator {
   public let formatName = "uri"
   public func validate(_ value: String) -> Bool {
-    let bytes = Array(value.utf8)
-    guard
-      let colon = bytes.firstIndex(of: 58),
-      colon > 0,
-      Self.isAlpha(bytes[0]),
-      bytes[1 ..< colon].allSatisfy(Self.isSchemeCharacter)
-    else { return false }
+    Self.validateReference(value, requiresScheme: true)
+  }
 
-    var hierarchy = Array(bytes[(colon + 1)...])
+  fileprivate static func validateReference(_ value: String, requiresScheme: Bool) -> Bool {
+    let bytes = Array(value.utf8)
+    let prefixEnd = bytes.firstIndex { $0 == 47 || $0 == 63 || $0 == 35 } ?? bytes.endIndex
+    var hierarchy: [UInt8]
+    if let colon = bytes[..<prefixEnd].firstIndex(of: 58) {
+      guard colon > 0, Self.isAlpha(bytes[0]),
+        bytes[1 ..< colon].allSatisfy(Self.isSchemeCharacter)
+      else { return false }
+      hierarchy = Array(bytes[(colon + 1)...])
+    } else {
+      guard !requiresScheme else { return false }
+      hierarchy = bytes
+    }
+
     if let fragmentMarker = hierarchy.firstIndex(of: 35) {
       let fragment = Array(hierarchy[(fragmentMarker + 1)...])
       guard
@@ -325,27 +362,10 @@ public struct URIFormatValidator: FormatValidator {
   }
 }
 
+/// Validates raw URI-reference syntax without repairing or percent-encoding the input.
 public struct URIReferenceFormatValidator: FormatValidator {
   public let formatName = "uri-reference"
   public func validate(_ value: String) -> Bool {
-    guard hasValidSchemeOrRelativePrefix(value) else { return false }
-    return URL(string: value) != nil
-  }
-
-  /// RFC 3986: a `:` before the first `/`, `?`, or `#` must terminate a valid scheme,
-  /// since a relative reference's first path segment cannot contain a colon.
-  private func hasValidSchemeOrRelativePrefix(_ value: String) -> Bool {
-    guard
-      let colon = value.firstIndex(where: { $0 == ":" || $0 == "/" || $0 == "?" || $0 == "#" }),
-      value[colon] == ":"
-    else { return true }
-    let scheme = value[..<colon]
-    guard let first = scheme.unicodeScalars.first, first.isASCII, first.properties.isAlphabetic
-    else { return false }
-    return scheme.unicodeScalars.allSatisfy { scalar in
-      scalar.isASCII
-        && (scalar.properties.isAlphabetic || ("0" ... "9").contains(scalar)
-          || scalar == "+" || scalar == "-" || scalar == ".")
-    }
+    URIFormatValidator.validateReference(value, requiresScheme: false)
   }
 }
