@@ -3,10 +3,7 @@ import JSONSchema
 public struct JSONBooleanSchema: JSONSchemaComponent {
   public var schemaValue: SchemaValue
 
-  let value: Bool
-
   init(value: Bool) {
-    self.value = value
     self.schemaValue = .boolean(value)
   }
 
@@ -15,7 +12,22 @@ public struct JSONBooleanSchema: JSONSchemaComponent {
   }
 
   public func parse(_ value: JSONValue) -> Parsed<Bool, ParseIssue> {
-    self.value ? .valid(true) : .error(.typeMismatch(expected: .boolean, actual: value))
+    switch schemaValue {
+    case .boolean(let allowed):
+      return allowed ? .valid(true) : .error(.typeMismatch(expected: .boolean, actual: value))
+    case .object:
+      // The public schema can be replaced or annotated after initialization.
+      // Reuse its enclosing evaluation when available, rather than the original literal.
+      let result: ValidationResult
+      if let evaluation = ParsingScope.current?.evaluation,
+        evaluation.schema == schemaValue.value, evaluation.instance == value
+      {
+        result = evaluation.result
+      } else {
+        result = definition().validate(value)
+      }
+      return result.isValid ? .valid(true) : .error(.runtimeValidationIssue(result))
+    }
   }
 }
 

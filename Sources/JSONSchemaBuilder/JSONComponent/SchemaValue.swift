@@ -51,7 +51,12 @@ public enum SchemaValue: Sendable, Equatable {
       switch self {
       case .boolean(let allowed):
         guard let newValue else { return }
-        var object: OrderedDictionary<KeywordIdentifier, JSONValue> = allowed ? [:] : ["not": [:]]
+        // Keep the false-schema guard separate from the keyword being added.
+        // In particular, setting `not` must not overwrite the rejection itself.
+        var object: OrderedDictionary<KeywordIdentifier, JSONValue> = [:]
+        if !allowed {
+          object = key == "not" ? ["allOf": [false]] : ["not": [:]]
+        }
         object[key] = newValue
         self = .object(object)
       case .object(var dict):

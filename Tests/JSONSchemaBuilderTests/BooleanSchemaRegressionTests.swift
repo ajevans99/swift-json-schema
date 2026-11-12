@@ -43,4 +43,30 @@ struct BooleanSchemaRegressionTests {
     #expect(object.schemaValue["additionalProperties"]?.object?["title"] == "Annotated")
     #expect(object.definition().validate(["extra": 1]).isValid == allowed)
   }
+  @Test(arguments: [false, true])
+  func replacingBooleanSchemaUpdatesParsing(allowed: Bool) throws {
+    var component = JSONBooleanSchema(booleanLiteral: !allowed)
+    component.schemaValue = .boolean(allowed)
+    #expect(component.definition().validate(.null).isValid == allowed)
+    #expect((component.parse(.null).value != nil) == allowed)
+    if allowed { #expect(try component.parseAndValidate(.null)) }
+  }
+
+  @Test func replacingBooleanWithObjectUpdatesParsing() throws {
+    var component: JSONBooleanSchema = false
+    component.schemaValue = ["type": "string"]
+    #expect(component.parse("hello").value == true)
+    #expect(component.parse(1).value == nil)
+    #expect(try component.parseAndValidate("hello"))
+  }
+
+  @Test(arguments: ["not", "allOf"])
+  func falseSchemaKeywordCannotOverwriteRejection(keyword: String) throws {
+    var value = SchemaValue.boolean(false)
+    value[keyword] = keyword == "not" ? .boolean(false) : .array([.boolean(true)])
+    let schema = try Schema(rawSchema: value.value, context: .init(dialect: .draft2020_12))
+    #expect(!schema.validate(.null).isValid)
+    #expect(!schema.validate("anything").isValid)
+  }
+
 }
