@@ -54,10 +54,11 @@ extension JSONComponents {
       for (patternString, _) in patternPropertiesSchema.schemaValue.object ?? [:] {
         let regex: Regex<AnyRegexOutput>
         do {
-          regex = try Regex<AnyRegexOutput>(patternString)
+          regex = try compileSchemaRegex(patternString)
         } catch {
-          // Skip invalid regex patterns
-          continue
+          return .error(
+            .invalidRegularExpression(pattern: patternString, reason: String(describing: error))
+          )
         }
         for (key, value) in dict where key.firstMatch(of: regex) != nil {
           let singleKeyDict = [patternString: value]

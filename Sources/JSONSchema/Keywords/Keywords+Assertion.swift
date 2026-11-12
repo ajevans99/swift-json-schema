@@ -377,7 +377,7 @@ extension Keywords {
       self.context = context
 
       if let patternString = value.string {
-        self.regex = try? Regex(patternString)
+        self.regex = try? compileSchemaRegex(patternString)
         self.isUncompilable = regex == nil
       } else {
         self.regex = nil

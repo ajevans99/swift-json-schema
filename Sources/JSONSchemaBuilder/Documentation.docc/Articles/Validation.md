@@ -56,6 +56,11 @@ nor matched by `patternProperties`. Names such as `"type"` or `"properties"` in 
 ordinary extra keys, not schema metadata. Failed additional-value parsing now rejects the object
 instead of silently dropping those entries, including failures from nested models or enum keys.
 
+Pattern-property routing uses the validator's Unicode-scalar regex policy, with ASCII `\d`
+and `\w`. Swift Regex syntax is supported, not blanket ECMA-262 conformance. See the
+[core regex policy](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/jsonschema#Regular-expression-policy)
+for the remaining dialect limitations.
+
 ## Handle invalid input
 
 ```swift
