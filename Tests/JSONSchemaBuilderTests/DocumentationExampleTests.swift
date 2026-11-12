@@ -6,6 +6,19 @@ import Testing
 @testable import JSONSchemaBuilder
 
 struct DocumentationExampleTests {
+  @Test func additionalPropertiesDictionaryProjection() throws {
+    let schema = JSONObject()
+      .additionalProperties {
+        JSONString()
+      }
+      .map(\.1.matches)
+    let values: [String: String] = try schema.parseAndValidate(["name": "Ada"])
+    #expect(values == ["name": "Ada"])
+    #expect(throws: ParseAndValidateIssue.self) {
+      try schema.parseAndValidate(["name": 1])
+    }
+  }
+
   @Schemable
   struct Layout {
     @NumberOptions(.minimum(0), .maximum(1000))

@@ -4,7 +4,7 @@ Welcome to Swift JSON Schema! Contributions are welcome and greatly appreciated.
 
 ## Linux Testing
 
-Linux CI runs the full suite, including macro expansion and integration snapshots, in the `swift:6.3.3-noble` container. This pin defines the CI test environment, not a new package minimum.
+Linux CI runs the full suite, including macro expansion and integration snapshots, in the `swift:6.4.1-noble` container. This pin defines the CI test environment, not a new package minimum.
 
 The tested dependency resolution includes SwiftSyntax 601.0.1, built from source with this compiler. CI enforces `Package.resolved` and exercises macro compilation and expansion rather than assuming compiler and SwiftSyntax release numbers must match. Changing to Swift 6.1 or SwiftSyntax 603 is not an isolated CI adjustment: the locked Collections version requires Swift 6.2, and the locked SnapshotTesting version constrains SwiftSyntax to versions below 602.
 
@@ -28,7 +28,7 @@ Keep `Package.resolved` and the fixture revisions intact; do not update them jus
 
 ## Running Tests
 
-Use Swift 6.1 or later. Initialize the conformance suites at their committed revisions before running tests:
+The package declares a Swift 6.1 tools minimum, but the committed development dependencies require Swift 6.2 or later. Use the CI toolchain above to reproduce the locked resolution. Initialize the conformance suites at their committed revisions before running tests:
 
 ```bash
 git submodule update --init --recursive

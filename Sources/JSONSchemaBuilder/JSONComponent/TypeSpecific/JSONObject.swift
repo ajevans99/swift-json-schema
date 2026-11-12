@@ -58,22 +58,22 @@ extension JSONSchemaComponent {
     )
   }
 
-  /// Adds additional properties to the schema and modifies validation output to include any additional properties as part of the tuple.
+  /// Parses additional properties alongside the base component's output.
   ///
-  /// Note that using this on an empty object with ``JSONObject/init()`` will cause the validated output to include `Void`. For example,
+  /// The output is `(Output, AdditionalPropertiesParseResult<C.Output>)`. For an empty
+  /// ``JSONObject/init()``, the base output is `Void`; map the additional matches to
+  /// obtain a dictionary:
   /// ```swift
-  /// let myObj = JSONObject()
+  /// let schema = JSONObject()
   ///   .additionalProperties {
   ///     JSONString()
   ///   }
+  ///   .map(\.1.matches)
+  /// let values: [String: String] = try schema.parseAndValidate(["name": "Ada"])
   /// ```
-  /// `myObj.validate(/* some input */)` will have a type of `Parsed<(Void, String), String>`
-  ///
-  /// For now, to drop the `Void`, you can add a map, like `.map { $1 }`.
-  /// TODO: Drop `Void` values from tuple with builder.
   ///
   /// - Parameter additionalProperties: A closure that returns a JSON schema representing the additional properties.
-  /// - Returns: A new compoment with the additional properties set and validation modified.
+  /// - Returns: A component whose output includes successfully parsed additional properties.
   public func additionalProperties<C: JSONSchemaComponent>(
     @JSONSchemaBuilder _ additionalProperties: () -> C
   ) -> JSONComponents.AdditionalProperties<Self, C> {
