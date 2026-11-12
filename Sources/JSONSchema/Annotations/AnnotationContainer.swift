@@ -115,6 +115,24 @@ package struct AnnotationContainer {
     Array(storage.values)
   }
 
+  func annotation<K: AnnotationProducingKeyword>(
+    for keyword: K.Type,
+    at instanceLocation: JSONPointer,
+    adjacentTo context: KeywordContext
+  ) -> Annotation<K>? {
+    let location = context.location.dropLast().appending(.key(keyword.name))
+    let source = SourceKey(
+      annotation: AnnotationKey(
+        keywordType: ObjectIdentifier(keyword),
+        keyword: keyword.name,
+        instanceLocation: instanceLocation
+      ),
+      location: context.absoluteKeywordLocation(for: location).map(SourceKey.Location.absolute)
+        ?? .relative(location)
+    )
+    return storage[source] as? Annotation<K>
+  }
+
   mutating func merge(_ other: AnnotationContainer) {
     if storage.isEmpty {
       storage = other.storage

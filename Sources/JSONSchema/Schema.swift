@@ -162,9 +162,6 @@ public struct Schema: ValidatableSchema {
   /// ```
   public func validateAgainstMetaSchema() throws -> ValidationResult {
     let metaSchema = try context.dialect.loadMetaSchema()
-    guard let rawSchema = context.rootRawSchema else {
-      throw SchemaIssue.missingRootRawSchema
-    }
     return metaSchema.validate(rawSchema)
   }
 }

@@ -315,15 +315,7 @@ struct NumberLiteralValidationTests {
       ("minProperties", Keywords.MinProperties(value: bound), ["a": 1]),
       ("maxProperties", Keywords.MaxProperties(value: bound), ["a": 1]),
     ]
-    var annotations = AnnotationContainer()
-    annotations.insert(
-      Annotation<Keywords.Contains>(
-        keyword: "contains",
-        instanceLocation: .init(),
-        schemaLocation: .init(),
-        value: .everyIndex
-      )
-    )
+    let annotations = AnnotationContainer().applying(.everyIndex, to: Keywords.Contains.self)
 
     for (name, keyword, input) in cases {
       do {
@@ -350,15 +342,7 @@ struct NumberLiteralValidationTests {
   @Test(arguments: ["1e400", "9223372036854775808"])
   func unrepresentableCountBoundsReportNumericValidationFailures(token: String) throws {
     let bound = try JSONValue.parse(token)
-    var annotations = AnnotationContainer()
-    annotations.insert(
-      Annotation<Keywords.Contains>(
-        keyword: "contains",
-        instanceLocation: .init(),
-        schemaLocation: .init(),
-        value: .everyIndex
-      )
-    )
+    let annotations = AnnotationContainer().applying(.everyIndex, to: Keywords.Contains.self)
 
     let unsatisfiable: [(String, any AssertionKeyword, JSONValue)] = [
       ("minLength", Keywords.MinLength(value: bound), "abc"),

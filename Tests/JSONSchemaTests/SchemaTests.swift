@@ -4,6 +4,18 @@ import Testing
 @testable import JSONSchema
 
 struct SchemaTests {
+  @Test(arguments: [false, true])
+  func metaValidationUsesReceiverWhenContextIsShared(invalidFirst: Bool) throws {
+    let context = Context(dialect: .draft2020_12)
+    let documents: [JSONValue] =
+      invalidFirst ? [["minLength": -1], true] : [true, ["minLength": -1]]
+    for (index, document) in documents.enumerated() {
+      let uri = try #require(URL(string: "https://example.com/document-\(index)"))
+      let schema = try Schema(rawSchema: document, context: context, baseURI: uri)
+      #expect(try schema.validateAgainstMetaSchema().isValid == (document == true))
+    }
+  }
+
   @Test func trueBooleanSchema() throws {
     let truthy: JSONValue = .boolean(true)
     let schema = try Schema(rawSchema: truthy, context: Context(dialect: .draft2020_12))

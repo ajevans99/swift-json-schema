@@ -7,6 +7,23 @@ import Testing
 /// Phase 2 of #149 — validation output (annotations) must be deterministic.
 @Suite("Validation output determinism (#149 Phase 2)")
 struct ValidationOutputDeterminismTests {
+  @Test func unevaluatedItemErrorsFollowIndexOrder() throws {
+    let schema = try Schema(instance: #"{"unevaluatedItems":false}"#)
+    let result = schema.validate(.array((0 ..< 16).map { .integer($0) }))
+    let errors = try #require(result.errors?.first?.errors)
+    #expect(errors.map(\.instanceLocation.jsonPointerString) == (0 ..< 16).map { "/\($0)" })
+  }
+
+  @Test func dependentRequiredReportsFirstDeclaredMissingDependency() throws {
+    let schema = try Schema(
+      instance: """
+        {"dependentRequired":{"z":["missing-z"],"m":["missing-m"],"a":["missing-a"]}}
+        """
+    )
+    let result = schema.validate(["z": true, "m": true, "a": true])
+    let message = try #require(result.errors?.first?.message)
+    #expect(message.contains("missing-z"))
+  }
 
   @Test(arguments: [
     ValidationOutputLevel.basic, .detailed, .verbose,
