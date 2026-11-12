@@ -16,6 +16,9 @@ struct FormatValidatorTests {
   @Test(arguments: [
     ("2024-01-01", true),
     ("01-01-2024", false),
+    ("2024-1-1", false),
+    ("0000-02-29", true),
+    ("2024-02-30", false),
   ])
   func dateValidator(value: String, isValid: Bool) {
     let validator = DateFormatValidator()
@@ -25,6 +28,12 @@ struct FormatValidatorTests {
   @Test(arguments: [
     ("12:34:56Z", true),
     ("12:34", false),
+    ("12:34:56", false),
+    ("12:34:56+0100", false),
+    ("12:34:56z", true),
+    ("23:59:60Z", true),
+    ("00:59:60+01:00", true),
+    ("23:59:60+01:00", false),
   ])
   func timeValidator(value: String, isValid: Bool) {
     let validator = TimeFormatValidator()
@@ -94,12 +103,27 @@ struct FormatValidatorTests {
     #expect(validator.validate(value) == isValid)
   }
 
-  @Test func officialURIFormatCorpus() throws {
+  @Test(arguments: [
+    ("foo bar", false),
+    ("https://example.com/%zz", false),
+    ("https://example.com/[]", false),
+    ("", true),
+    ("../a:b?query#fragment", true),
+    ("//[::1]:8080/path", true),
+    ("0:a", false),
+  ])
+  func strictURIReferences(value: String, isValid: Bool) {
+    #expect(URIReferenceFormatValidator().validate(value) == isValid)
+  }
+
+  @Test(arguments: ["date", "time", "uri", "uri-reference"])
+  func officialFormatCorpus(format: String) throws {
     let loader = try FileLoader<[JSONSchemaTest]>(
       subdirectory: "JSON-Schema-Test-Suite/tests/draft2020-12/optional/format"
     )
-    let groups = try loader.loadFile(named: "uri")
+    let groups = try loader.loadFile(named: format)
     try #require(!groups.isEmpty)
+    let validator = try #require(DefaultFormatValidators.all.first { $0.formatName == format })
 
     for group in groups {
       let schema = try Schema(
@@ -109,7 +133,7 @@ struct FormatValidatorTests {
       for testCase in group.tests {
         if let value = testCase.data.string {
           #expect(
-            URIFormatValidator().validate(value) == testCase.valid,
+            validator.validate(value) == testCase.valid,
             "\(testCase.description): \(value)"
           )
         }
