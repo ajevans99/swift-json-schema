@@ -120,7 +120,7 @@ where Wrapped.Output == WrappedValue {
   public var schemaValue: SchemaValue {
     get {
       .object([
-        composition.keywordName: .array([
+        JSONKey(composition.keywordName): .array([
           wrapped.schemaValue.value,
           JSONNull().schemaValue.value,
         ])

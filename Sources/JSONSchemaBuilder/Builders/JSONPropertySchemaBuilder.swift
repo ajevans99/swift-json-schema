@@ -40,14 +40,16 @@ public protocol PropertyCollection {
 
   var schemaValue: SchemaValue { get }
   var requiredKeys: [String] { get }
-  func validate(_ dictionary: [String: JSONValue]) -> Parsed<Output, ParseIssue>
+  func validate(_ dictionary: [JSONKey: JSONValue]) -> Parsed<Output, ParseIssue>
 }
 
 public struct EmptyPropertyCollection: PropertyCollection {
   public let schemaValue: SchemaValue = .object([:])
   public let requiredKeys: [String] = []
 
-  public func validate(_ dictionary: [String: JSONValue]) -> Parsed<Void, ParseIssue> { .valid(()) }
+  public func validate(_ dictionary: [JSONKey: JSONValue]) -> Parsed<Void, ParseIssue> {
+    .valid(())
+  }
 }
 
 @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
@@ -77,7 +79,7 @@ public struct PropertyTuple<each Property: JSONPropertyComponent>: PropertyColle
   }
 
   public func validate(
-    _ dictionary: [String: JSONValue]
+    _ dictionary: [JSONKey: JSONValue]
   ) -> Parsed<(repeat (each Property).Output), ParseIssue> {
     zip(repeat (each property).parse(dictionary))
   }

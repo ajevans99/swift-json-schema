@@ -86,7 +86,7 @@ extension RealWorldCorpus {
     return [
       "openapi": variant == .early ? "3.0.3" : "3.1.0",
       "info": ["title": "Benchmark API", "version": "1.0.0"],
-      "paths": .object(.init(uniqueKeysWithValues: paths)),
+      "paths": .object(.init(stringKeyedPairs: paths)),
       "tags": .array((0 ..< count).map { ["name": .string("tag_\($0)")] }),
     ]
   }

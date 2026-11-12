@@ -92,7 +92,7 @@ struct JSONParser {
   static let maxDepth: Int = 256
 
   private enum Container {
-    case object(OrderedDictionary<String, JSONValue>, key: String)
+    case object(JSONValue.Object, key: JSONKey)
     case array([JSONValue])
   }
 
@@ -263,7 +263,7 @@ struct JSONParser {
 
   // MARK: - Structure
 
-  private mutating func parseObjectKey() throws -> String {
+  private mutating func parseObjectKey() throws -> JSONKey {
     skipWhitespace()
     guard peek() == Self.quote else {
       throw error("Expected string key in object")
@@ -271,7 +271,7 @@ struct JSONParser {
     let key = try parseString()
     skipWhitespace()
     try expect(Self.colon)
-    return key
+    return JSONKey(key)
   }
 
   // MARK: - Literals

@@ -10,6 +10,7 @@ public enum ParseIssue: Error, Equatable, Sendable {
   case runtimeValidationIssue(ValidationResult)
   case projectionFailure(reason: String)
   case invalidRegularExpression(pattern: String, reason: String)
+  case keyConversionFailed(JSONKeyConversionError)
 }
 
 extension ParseIssue: CustomStringConvertible {
@@ -33,6 +34,8 @@ extension ParseIssue: CustomStringConvertible {
       "Projection failure: \(reason)"
     case .invalidRegularExpression(let pattern, let reason):
       "Invalid regular expression `\(pattern)`: \(reason)"
+    case .keyConversionFailed(let error):
+      "Cannot export scalar-exact object names as Swift String keys: \(error)"
     }
   }
 }

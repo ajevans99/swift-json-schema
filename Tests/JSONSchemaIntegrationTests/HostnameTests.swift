@@ -33,6 +33,7 @@ struct FieldnameSchema: Equatable {
             .required()
           }
           .map { $1.matches.mapValues(\.value) }
+          .stringKeyedDictionary()
           .unevaluatedProperties { false }
       }
     }

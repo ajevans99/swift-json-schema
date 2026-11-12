@@ -7,7 +7,7 @@ public struct JSONObjectValue: JSONValueRepresentable {
     .object(properties.mapValues(\.value))
   }
 
-  let properties: OrderedDictionary<String, JSONValueRepresentable>
+  let properties: OrderedDictionary<JSONKey, JSONValueRepresentable>
 
   /// Constructs an empty object value.
   public init() {
@@ -20,13 +20,11 @@ public struct JSONObjectValue: JSONValueRepresentable {
   /// from the literal, unlike Swift's `Dictionary`, whose iteration order is
   /// hash-seed-dependent.
   public init(properties: KeyValuePairs<String, JSONValueRepresentable>) {
-    self.properties = OrderedDictionary(
-      uniqueKeysWithValues: properties.map { ($0.key, $0.value) }
-    )
+    self.properties = OrderedDictionary(stringKeyedPairs: properties.map { ($0.key, $0.value) })
   }
 
   /// Constructs an object value from an already-ordered map of properties.
-  public init(properties: OrderedDictionary<String, JSONValueRepresentable>) {
+  public init(properties: OrderedDictionary<JSONKey, JSONValueRepresentable>) {
     self.properties = properties
   }
 
@@ -36,9 +34,7 @@ public struct JSONObjectValue: JSONValueRepresentable {
   ///   so the resulting JSON key order is **not** stable across processes.
   ///   Prefer the dictionary-literal initializer for reproducible output.
   public init(dictionary properties: [String: JSONValueRepresentable]) {
-    self.properties = OrderedDictionary(
-      uniqueKeysWithValues: properties.map { ($0.key, $0.value) }
-    )
+    self.properties = OrderedDictionary(stringKeyed: properties)
   }
 }
 

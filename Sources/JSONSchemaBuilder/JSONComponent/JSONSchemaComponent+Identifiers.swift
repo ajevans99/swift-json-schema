@@ -24,7 +24,7 @@ extension JSONSchemaComponent {
   public func vocabulary(_ mapping: KeyValuePairs<String, Bool>) -> Self {
     var copy = self
     copy.schemaValue[Keywords.Vocabulary.name] = .object(
-      OrderedDictionary(uniqueKeysWithValues: mapping.map { ($0.key, JSONValue.boolean($0.value)) })
+      OrderedDictionary(stringKeyedPairs: mapping.map { ($0.key, JSONValue.boolean($0.value)) })
     )
     return copy
   }

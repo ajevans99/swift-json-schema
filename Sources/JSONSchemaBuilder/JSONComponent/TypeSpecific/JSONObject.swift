@@ -69,7 +69,7 @@ extension JSONSchemaComponent {
   ///     JSONString()
   ///   }
   ///   .map(\.1.matches)
-  /// let values: [String: String] = try schema.parseAndValidate(["name": "Ada"])
+  /// let values: [JSONKey: String] = try schema.parseAndValidate(["name": "Ada"])
   /// ```
   ///
   /// - Parameter additionalProperties: A closure that returns a JSON schema representing the additional properties.

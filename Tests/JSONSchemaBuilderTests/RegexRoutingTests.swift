@@ -23,7 +23,7 @@ struct RegexRoutingTests {
         JSONProperty(key: pattern) { JSONInteger() }
       }
       .additionalProperties { JSONString() }
-    let value: JSONValue = .object([key: matches ? 1 : "additional"])
+    let value: JSONValue = .object([JSONKey(key): matches ? 1 : "additional"])
     let output = try schema.parseAndValidate(value)
     #expect((output.0.1.matches[key] != nil) == matches)
     #expect((output.1.matches[key] != nil) == !matches)

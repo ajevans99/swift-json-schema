@@ -26,11 +26,11 @@ struct RegexSemanticsTests {
     #expect(string.validate(.string(input)).isValid == matches)
     let object = try Schema(
       rawSchema: [
-        "patternProperties": .object([pattern: true]),
+        "patternProperties": .object([JSONKey(pattern): true]),
         "additionalProperties": false,
       ],
       context: .init(dialect: .draft2020_12)
     )
-    #expect(object.validate(.object([input: 1])).isValid == matches)
+    #expect(object.validate(.object([JSONKey(input): 1])).isValid == matches)
   }
 }

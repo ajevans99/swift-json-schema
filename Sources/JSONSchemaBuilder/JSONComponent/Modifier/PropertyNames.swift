@@ -52,13 +52,13 @@ extension JSONComponents {
       for (key, _) in dict {
         switch ParsingScope.parse(
           propertyNamesSchema,
-          value: .string(key),
+          value: .string(key.rawValue),
           schemaTokens: [Keywords.PropertyNames.name],
-          instanceTokens: [key]
+          instanceTokens: [key.rawValue]
         ) {
         case .valid(let name):
           seen.append(name)
-          raw.append(key)
+          raw.append(key.rawValue)
         case .invalid:
           continue
         }

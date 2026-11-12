@@ -53,7 +53,7 @@ struct ValidationOutputDeterminismTests {
     )
 
     let output = try #require(result.renderedOutput(level: level).object)
-    let coreFields = [
+    let coreFields: [JSONKey] = [
       "valid", "keywordLocation", "absoluteKeywordLocation", "instanceLocation",
     ]
     #expect(Array(output.keys) == coreFields + ["errors"])

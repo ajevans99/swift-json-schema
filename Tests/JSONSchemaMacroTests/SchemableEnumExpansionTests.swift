@@ -380,6 +380,7 @@ import Testing
                         }
                         .map(\\.1)
                         .map(\\.matches)
+                        .stringKeyedDictionary()
                     }
                       .required()
                   }

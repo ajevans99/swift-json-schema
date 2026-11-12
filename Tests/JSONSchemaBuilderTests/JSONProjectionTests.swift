@@ -269,7 +269,7 @@ struct JSONProjectionTests {
     ] {
       var branch = JSONString()
       branch.schemaValue["allOf"] = [
-        .object([mapKeyword: .object([name: activeSchema])])
+        .object([JSONKey(mapKeyword): .object([JSONKey(name): activeSchema])])
       ]
       var erased = JSONComposition.AnyOf(into: String.self) { branch }
         .eraseToAnySchemaComponent()
@@ -710,7 +710,7 @@ struct JSONProjectionTests {
       JSONBoolean().map { ProjectionValue.flag($0) }
     }
     let complete: SchemaValue = [
-      "$defs": .object([name: ["type": "string", "minLength": 2]]),
+      "$defs": .object([JSONKey(name): ["type": "string", "minLength": 2]]),
       "allOf": [union.schemaValue.value],
     ]
     let projection = union.projection(schemaValue: complete)
@@ -797,7 +797,7 @@ struct JSONProjectionTests {
     complete["$vocabulary"] = .object(
       .init(
         uniqueKeysWithValues: vocabularies.map {
-          ($0, .boolean(true))
+          (JSONKey($0), .boolean(true))
         }
       )
     )

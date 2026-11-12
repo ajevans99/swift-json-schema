@@ -23,7 +23,7 @@ extension JSONPropertyComponents {
 
     public var value: Upstream.Value { upstream.value }
 
-    public func parse(_ input: [String: JSONValue]) -> Parsed<NewOutput, ParseIssue> {
+    public func parse(_ input: [JSONKey: JSONValue]) -> Parsed<NewOutput, ParseIssue> {
       switch upstream.parse(input) {
       case .valid(let output):
         guard let newOutput = transform(output) else {

@@ -23,7 +23,7 @@ extension BooleanSchema {
 
 extension ObjectSchema {
   package var jsonValue: JSONValue {
-    var dict = OrderedDictionary<String, JSONValue>()
+    var dict = JSONValue.Object()
     dict.reserveCapacity(keywords.count)
     for keyword in keywords {
       dict[type(of: keyword).name] = keyword.value

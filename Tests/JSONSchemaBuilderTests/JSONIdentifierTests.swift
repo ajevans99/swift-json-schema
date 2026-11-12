@@ -22,7 +22,7 @@ struct JSONIdentifierBuilderTests {
         .recursiveRef("#recAnchor")
     }
 
-    let expected: OrderedDictionary<String, JSONValue> = [
+    let expected: JSONValue.Object = [
       "$id": "https://example.com/schema",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$vocabulary": [

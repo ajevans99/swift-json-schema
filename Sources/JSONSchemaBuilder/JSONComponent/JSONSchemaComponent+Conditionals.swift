@@ -14,7 +14,7 @@ extension JSONSchemaComponent {
     var copy = self
     copy.schemaValue[Keywords.DependentRequired.name] = .object(
       OrderedDictionary(
-        uniqueKeysWithValues: mapping.map { (key, array) in
+        stringKeyedPairs: mapping.map { (key, array) in
           (key, JSONValue.array(array.map { .string($0) }))
         }
       )
@@ -35,7 +35,7 @@ extension JSONSchemaComponent {
     var copy = self
     copy.schemaValue[Keywords.DependentSchemas.name] = .object(
       OrderedDictionary(
-        uniqueKeysWithValues: mapping.map { (key, component) in
+        stringKeyedPairs: mapping.map { (key, component) in
           (key, component.schemaValue.value)
         }
       )

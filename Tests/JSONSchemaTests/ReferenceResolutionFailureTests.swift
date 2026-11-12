@@ -8,7 +8,7 @@ struct ReferenceResolutionFailureTests {
     let context = Context(dialect: .draft2020_12)
     let reference = "https://example.com/eventually-available"
     let schema = try Schema(
-      rawSchema: .object([keyword: .string(reference)]),
+      rawSchema: .object([JSONKey(keyword): .string(reference)]),
       context: context
     )
 
@@ -34,7 +34,7 @@ struct ReferenceResolutionFailureTests {
   ) throws {
     let schema = try Schema(
       rawSchema: .object([
-        keyword: .string(reference),
+        JSONKey(keyword): .string(reference),
         "$defs": ["text": ["type": "string"]],
       ]),
       context: Context(dialect: .draft2020_12)
@@ -49,7 +49,7 @@ struct ReferenceResolutionFailureTests {
   @Test(arguments: ["$ref", "$dynamicRef"])
   func aMissingFragmentInABooleanDocumentIsNotTheWholeDocument(keyword: String) throws {
     let schema = try Schema(
-      rawSchema: .object([keyword: "https://example.com/boolean#/missing"]),
+      rawSchema: .object([JSONKey(keyword): "https://example.com/boolean#/missing"]),
       context: Context(
         dialect: .draft2020_12,
         remoteSchema: ["https://example.com/boolean": true]

@@ -15,7 +15,7 @@ struct AdjacentKeywordTests {
   func referencedPropertiesDoNotExcludeLocalAdditionalProperties(keyword: String) throws {
     let schema = try Schema(
       rawSchema: [
-        "$defs": ["p": .object([keyword: ["x": true]])],
+        "$defs": ["p": .object([JSONKey(keyword): ["x": true]])],
         "$ref": "#/$defs/p",
         "additionalProperties": false,
       ],

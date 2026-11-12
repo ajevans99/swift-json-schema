@@ -24,6 +24,7 @@ enum TypeSchemaEmitter {
           }
           .map(\\.1)
           .map(\\.matches)
+          .stringKeyedDictionary()
           """
       }
       return """

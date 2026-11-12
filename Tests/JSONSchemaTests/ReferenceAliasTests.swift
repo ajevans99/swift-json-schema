@@ -19,7 +19,7 @@ struct ReferenceAliasTests {
     let first = try Schema(
       rawSchema: .object([
         "$id": "https://mirror.example.com/schemas/host.json",
-        keyword: .string((relative ? "common.json" : alias) + "#/$defs/text"),
+        JSONKey(keyword): .string((relative ? "common.json" : alias) + "#/$defs/text"),
       ]),
       context: context
     )
@@ -31,7 +31,7 @@ struct ReferenceAliasTests {
     context.remoteSchemaStorage = [:]
     for url in [alias, canonical] {
       let next = try Schema(
-        rawSchema: .object([keyword: .string(url + "#/$defs/text")]),
+        rawSchema: .object([JSONKey(keyword): .string(url + "#/$defs/text")]),
         context: context
       )
       #expect(next.validate("hello").isValid)
@@ -56,7 +56,7 @@ struct ReferenceAliasTests {
     )
     for url in [alias, canonical] {
       let schema = try Schema(
-        rawSchema: .object([keyword: .string(url + fragment)]),
+        rawSchema: .object([JSONKey(keyword): .string(url + fragment)]),
         context: context
       )
       #expect(schema.validate("hello").isValid)

@@ -76,11 +76,10 @@ extension ObjectSchema: Codable {
     }
   }
 
-  fileprivate static func decodeSchemaValue(from decoder: any Decoder) throws -> [String: JSONValue]
-  {
+  fileprivate static func decodeSchemaValue(from decoder: any Decoder) throws -> JSONValue.Object {
     let container = try decoder.container(keyedBy: DynamicCodingKey.self)
 
-    var schemaValue = [String: JSONValue]()
+    var schemaValue = JSONValue.Object()
 
     let dialect = Dialect.draft2020_12
 

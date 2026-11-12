@@ -17,20 +17,25 @@
                     ▿ instanceLocation: #/category
                       ▿ path: 1 element
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                     - keyword: "properties"
                     ▿ schemaLocation: #/properties/category/oneOf/0/properties
                       ▿ path: 5 elements
                         ▿ Component
-                          - key: "properties"
+                          ▿ key: properties
+                            - rawValue: "properties"
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                         ▿ Component
-                          - key: "oneOf"
+                          ▿ key: oneOf
+                            - rawValue: "oneOf"
                         ▿ Component
                           - index: 0
                         ▿ Component
-                          - key: "properties"
+                          ▿ key: properties
+                            - rawValue: "properties"
                     - value: 0 members
               ▿ errors: Optional<Array<ValidationError>>
                 ▿ some: 1 element
@@ -41,35 +46,44 @@
                     ▿ instanceLocation: #/category
                       ▿ path: 1 element
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                     - keyword: "required"
                     ▿ keywordLocation: #/properties/category/oneOf/0/required
                       ▿ path: 5 elements
                         ▿ Component
-                          - key: "properties"
+                          ▿ key: properties
+                            - rawValue: "properties"
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                         ▿ Component
-                          - key: "oneOf"
+                          ▿ key: oneOf
+                            - rawValue: "oneOf"
                         ▿ Component
                           - index: 0
                         ▿ Component
-                          - key: "required"
+                          ▿ key: required
+                            - rawValue: "required"
                     - message: "Required property \'technology\' is missing"
               - evaluationErrors: Optional<Array<ValidationError>>.none
               ▿ instanceLocation: #/category
                 ▿ path: 1 element
                   ▿ Component
-                    - key: "category"
+                    ▿ key: category
+                      - rawValue: "category"
               - isValid: false
               ▿ keywordLocation: #/properties/category/oneOf/0
                 ▿ path: 4 elements
                   ▿ Component
-                    - key: "properties"
+                    ▿ key: properties
+                      - rawValue: "properties"
                   ▿ Component
-                    - key: "category"
+                    ▿ key: category
+                      - rawValue: "category"
                   ▿ Component
-                    - key: "oneOf"
+                    ▿ key: oneOf
+                      - rawValue: "oneOf"
                   ▿ Component
                     - index: 0
           ▿ Runtime validation issue: ValidationResult(isValid: false, keywordLocation: #/properties/category/oneOf/1, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/1), instanceLocation: #/category, errors: Optional([JSONSchema.ValidationError(keyword: "required", message: "Required property \'entertainment\' is missing", keywordLocation: #/properties/category/oneOf/1/required, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/1/required), instanceLocation: #/category, errors: nil)]), evaluationErrors: nil, annotations: Optional([JSONSchema.Annotation<JSONSchema.Keywords.Properties>(keyword: "properties", instanceLocation: #/category, schemaLocation: #/properties/category/oneOf/1/properties, absoluteSchemaLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/1/properties), value: [])]))
@@ -84,20 +98,25 @@
                     ▿ instanceLocation: #/category
                       ▿ path: 1 element
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                     - keyword: "properties"
                     ▿ schemaLocation: #/properties/category/oneOf/1/properties
                       ▿ path: 5 elements
                         ▿ Component
-                          - key: "properties"
+                          ▿ key: properties
+                            - rawValue: "properties"
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                         ▿ Component
-                          - key: "oneOf"
+                          ▿ key: oneOf
+                            - rawValue: "oneOf"
                         ▿ Component
                           - index: 1
                         ▿ Component
-                          - key: "properties"
+                          ▿ key: properties
+                            - rawValue: "properties"
                     - value: 0 members
               ▿ errors: Optional<Array<ValidationError>>
                 ▿ some: 1 element
@@ -108,35 +127,44 @@
                     ▿ instanceLocation: #/category
                       ▿ path: 1 element
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                     - keyword: "required"
                     ▿ keywordLocation: #/properties/category/oneOf/1/required
                       ▿ path: 5 elements
                         ▿ Component
-                          - key: "properties"
+                          ▿ key: properties
+                            - rawValue: "properties"
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                         ▿ Component
-                          - key: "oneOf"
+                          ▿ key: oneOf
+                            - rawValue: "oneOf"
                         ▿ Component
                           - index: 1
                         ▿ Component
-                          - key: "required"
+                          ▿ key: required
+                            - rawValue: "required"
                     - message: "Required property \'entertainment\' is missing"
               - evaluationErrors: Optional<Array<ValidationError>>.none
               ▿ instanceLocation: #/category
                 ▿ path: 1 element
                   ▿ Component
-                    - key: "category"
+                    ▿ key: category
+                      - rawValue: "category"
               - isValid: false
               ▿ keywordLocation: #/properties/category/oneOf/1
                 ▿ path: 4 elements
                   ▿ Component
-                    - key: "properties"
+                    ▿ key: properties
+                      - rawValue: "properties"
                   ▿ Component
-                    - key: "category"
+                    ▿ key: category
+                      - rawValue: "category"
                   ▿ Component
-                    - key: "oneOf"
+                    ▿ key: oneOf
+                      - rawValue: "oneOf"
                   ▿ Component
                     - index: 1
           ▿ Runtime validation issue: ValidationResult(isValid: false, keywordLocation: #/properties/category/oneOf/2, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/2), instanceLocation: #/category, errors: Optional([JSONSchema.ValidationError(keyword: "required", message: "Required property \'education\' is missing", keywordLocation: #/properties/category/oneOf/2/required, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/2/required), instanceLocation: #/category, errors: nil)]), evaluationErrors: nil, annotations: Optional([JSONSchema.Annotation<JSONSchema.Keywords.Properties>(keyword: "properties", instanceLocation: #/category, schemaLocation: #/properties/category/oneOf/2/properties, absoluteSchemaLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/2/properties), value: [])]))
@@ -151,20 +179,25 @@
                     ▿ instanceLocation: #/category
                       ▿ path: 1 element
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                     - keyword: "properties"
                     ▿ schemaLocation: #/properties/category/oneOf/2/properties
                       ▿ path: 5 elements
                         ▿ Component
-                          - key: "properties"
+                          ▿ key: properties
+                            - rawValue: "properties"
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                         ▿ Component
-                          - key: "oneOf"
+                          ▿ key: oneOf
+                            - rawValue: "oneOf"
                         ▿ Component
                           - index: 2
                         ▿ Component
-                          - key: "properties"
+                          ▿ key: properties
+                            - rawValue: "properties"
                     - value: 0 members
               ▿ errors: Optional<Array<ValidationError>>
                 ▿ some: 1 element
@@ -175,35 +208,44 @@
                     ▿ instanceLocation: #/category
                       ▿ path: 1 element
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                     - keyword: "required"
                     ▿ keywordLocation: #/properties/category/oneOf/2/required
                       ▿ path: 5 elements
                         ▿ Component
-                          - key: "properties"
+                          ▿ key: properties
+                            - rawValue: "properties"
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                         ▿ Component
-                          - key: "oneOf"
+                          ▿ key: oneOf
+                            - rawValue: "oneOf"
                         ▿ Component
                           - index: 2
                         ▿ Component
-                          - key: "required"
+                          ▿ key: required
+                            - rawValue: "required"
                     - message: "Required property \'education\' is missing"
               - evaluationErrors: Optional<Array<ValidationError>>.none
               ▿ instanceLocation: #/category
                 ▿ path: 1 element
                   ▿ Component
-                    - key: "category"
+                    ▿ key: category
+                      - rawValue: "category"
               - isValid: false
               ▿ keywordLocation: #/properties/category/oneOf/2
                 ▿ path: 4 elements
                   ▿ Component
-                    - key: "properties"
+                    ▿ key: properties
+                      - rawValue: "properties"
                   ▿ Component
-                    - key: "category"
+                    ▿ key: category
+                      - rawValue: "category"
                   ▿ Component
-                    - key: "oneOf"
+                    ▿ key: oneOf
+                      - rawValue: "oneOf"
                   ▿ Component
                     - index: 2
           ▿ Runtime validation issue: ValidationResult(isValid: false, keywordLocation: #/properties/category/oneOf/3, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/3), instanceLocation: #/category, errors: Optional([JSONSchema.ValidationError(keyword: "type", message: "Expected type \'[OrderedJSON.JSONType.string]\' but found \'object\'", keywordLocation: #/properties/category/oneOf/3/type, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/3/type), instanceLocation: #/category, errors: nil), JSONSchema.ValidationError(keyword: "enum", message: "\'{\"food\": {\"_0\": {\"customDescription\": \"What\'s your favorite?\"}}}\' is not one of the allowed values: \"sports\", \"other\"", keywordLocation: #/properties/category/oneOf/3/enum, absoluteKeywordLocation: Optional(https://swift-json-schema.invalid/in-memory#/properties/category/oneOf/3/enum), instanceLocation: #/category, errors: nil)]), evaluationErrors: nil, annotations: nil)
@@ -220,20 +262,25 @@
                     ▿ instanceLocation: #/category
                       ▿ path: 1 element
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                     - keyword: "type"
                     ▿ keywordLocation: #/properties/category/oneOf/3/type
                       ▿ path: 5 elements
                         ▿ Component
-                          - key: "properties"
+                          ▿ key: properties
+                            - rawValue: "properties"
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                         ▿ Component
-                          - key: "oneOf"
+                          ▿ key: oneOf
+                            - rawValue: "oneOf"
                         ▿ Component
                           - index: 3
                         ▿ Component
-                          - key: "type"
+                          ▿ key: type
+                            - rawValue: "type"
                     - message: "Expected type \'[OrderedJSON.JSONType.string]\' but found \'object\'"
                   ▿ ValidationError
                     ▿ absoluteKeywordLocation: Optional<URL>
@@ -242,34 +289,43 @@
                     ▿ instanceLocation: #/category
                       ▿ path: 1 element
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                     - keyword: "enum"
                     ▿ keywordLocation: #/properties/category/oneOf/3/enum
                       ▿ path: 5 elements
                         ▿ Component
-                          - key: "properties"
+                          ▿ key: properties
+                            - rawValue: "properties"
                         ▿ Component
-                          - key: "category"
+                          ▿ key: category
+                            - rawValue: "category"
                         ▿ Component
-                          - key: "oneOf"
+                          ▿ key: oneOf
+                            - rawValue: "oneOf"
                         ▿ Component
                           - index: 3
                         ▿ Component
-                          - key: "enum"
+                          ▿ key: enum
+                            - rawValue: "enum"
                     - message: "\'{\"food\": {\"_0\": {\"customDescription\": \"What\'s your favorite?\"}}}\' is not one of the allowed values: \"sports\", \"other\""
               - evaluationErrors: Optional<Array<ValidationError>>.none
               ▿ instanceLocation: #/category
                 ▿ path: 1 element
                   ▿ Component
-                    - key: "category"
+                    ▿ key: category
+                      - rawValue: "category"
               - isValid: false
               ▿ keywordLocation: #/properties/category/oneOf/3
                 ▿ path: 4 elements
                   ▿ Component
-                    - key: "properties"
+                    ▿ key: properties
+                      - rawValue: "properties"
                   ▿ Component
-                    - key: "category"
+                    ▿ key: category
+                      - rawValue: "category"
                   ▿ Component
-                    - key: "oneOf"
+                    ▿ key: oneOf
+                      - rawValue: "oneOf"
                   ▿ Component
                     - index: 3

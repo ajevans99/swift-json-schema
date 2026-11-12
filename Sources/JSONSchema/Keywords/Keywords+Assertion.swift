@@ -688,12 +688,12 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let requiredKeys: [String]
+    private let requiredKeys: [JSONKey]
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
-      self.requiredKeys = value.array?.compactMap { $0.string } ?? []
+      self.requiredKeys = value.array?.compactMap { $0.string.map(JSONKey.init(_:)) } ?? []
     }
 
     package func validate(
@@ -704,7 +704,7 @@ extension Keywords {
       guard let object = input.object else { return }
 
       for key in requiredKeys where !object.keys.contains(key) {
-        throw ValidationIssue.missingRequiredProperty(key: key)
+        throw ValidationIssue.missingRequiredProperty(key: key.rawValue)
       }
     }
   }
@@ -716,15 +716,17 @@ extension Keywords {
     package let value: JSONValue
     package let context: KeywordContext
 
-    private let dependencies: OrderedDictionary<String, [String]>
+    private let dependencies: OrderedDictionary<JSONKey, [JSONKey]>
 
     package init(value: JSONValue, context: KeywordContext) {
       self.value = value
       self.context = context
       self.dependencies = OrderedDictionary(
         uniqueKeysWithValues: value.object?
-          .compactMap { (key, value) -> (String, [String])? in
-            guard let array = value.array?.compactMap({ $0.string }) else { return nil }
+          .compactMap { (key, value) -> (JSONKey, [JSONKey])? in
+            guard let array = value.array?.compactMap({ $0.string.map(JSONKey.init(_:)) }) else {
+              return nil
+            }
             return (key, array)
           } ?? []
       )
@@ -739,7 +741,10 @@ extension Keywords {
 
       for (key, dependentKeys) in dependencies where object.keys.contains(key) {
         for requiredKey in dependentKeys where !object.keys.contains(requiredKey) {
-          throw ValidationIssue.missingDependentProperty(key: requiredKey, dependentOn: key)
+          throw ValidationIssue.missingDependentProperty(
+            key: requiredKey.rawValue,
+            dependentOn: key.rawValue
+          )
         }
       }
     }

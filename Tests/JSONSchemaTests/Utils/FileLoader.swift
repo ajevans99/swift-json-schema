@@ -159,7 +159,7 @@ struct RemoteLoader {
           .init(codingPath: [], debugDescription: "Remote schemas must be an object")
         )
       }
-      remoteSchemas = Dictionary(uniqueKeysWithValues: object.map { ($0.key, $0.value) })
+      remoteSchemas = try object.stringKeyedDictionary()
     } catch {
       throw FixtureLoadingError(
         path: binDirectory,

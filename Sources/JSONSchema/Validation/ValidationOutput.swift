@@ -162,7 +162,7 @@ private struct ValidationOutputUnit {
   }
 
   static func jsonValue(from unit: ValidationOutputUnit) throws -> JSONValue {
-    var object = OrderedDictionary<String, JSONValue>()
+    var object = JSONValue.Object()
     object["valid"] = .boolean(unit.valid)
     object["keywordLocation"] = .string(unit.keywordLocation)
     if let absoluteKeywordLocation = unit.absoluteKeywordLocation {

@@ -18,7 +18,7 @@ public struct JSONReference<T: Schemable>: JSONSchemaComponent {
   /// - Parameter uri: The URI that will be stored in the generated `$ref` keyword.
   public init(uri: String) {
     self.uri = uri
-    self.schemaValue = .object([Keywords.Reference.name: .string(uri)])
+    self.schemaValue = .object([JSONKey(Keywords.Reference.name): .string(uri)])
   }
 
   /// Creates a reference using a prebuilt ``SchemaReferenceURI`` helper.

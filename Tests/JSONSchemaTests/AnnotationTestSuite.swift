@@ -30,9 +30,7 @@ struct AnnotationTestSuite {
           let schema = try #require(fields["schema"])
           var remotes: [String: JSONValue] = [:]
           if let external = fields["externalSchemas"] {
-            remotes = Dictionary(
-              uniqueKeysWithValues: try #require(external.object).map { ($0.key, $0.value) }
-            )
+            remotes = try #require(external.object).stringKeyedDictionary()
           }
           let tests = try #require(fields["tests"]?.array)
           try #require(!tests.isEmpty, "Empty annotation group at \(path): \(description)")
@@ -159,7 +157,7 @@ struct AnnotationTestSuite {
       }
       let expectedBySource = try Dictionary(
         uniqueKeysWithValues: expected.map {
-          (try #require($0.key.removingPercentEncoding), $0.value)
+          (try #require($0.key.rawValue.removingPercentEncoding), $0.value)
         }
       )
       #expect(

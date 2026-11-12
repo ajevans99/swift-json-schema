@@ -5,7 +5,9 @@ import Foundation
 public struct JSONPointer: Sendable, Hashable {
   enum Component: Hashable {
     case index(Int)
-    case key(String)
+    case key(JSONKey)
+
+    static func key(_ value: String) -> Self { .key(JSONKey(value)) }
   }
 
   var path: [Component] = []
@@ -136,7 +138,7 @@ extension JSONPointer: CustomStringConvertible, CustomDebugStringConvertible {
         partialResult += String(int)
       case .key(let string):
         partialResult +=
-          string
+          string.rawValue
           .replacingOccurrences(of: "~", with: "~0")
           .replacingOccurrences(of: "/", with: "~1")
       }
@@ -154,7 +156,7 @@ extension JSONPointer.Component {
   fileprivate var token: String {
     switch self {
     case .index(let index): return String(index)
-    case .key(let key): return key
+    case .key(let key): return key.rawValue
     }
   }
 
@@ -163,18 +165,20 @@ extension JSONPointer.Component {
     case .index(let index):
       return index >= 0 ? index : nil
     case .key(let key):
-      guard let index = Int(key), index >= 0, String(index) == key else { return nil }
+      guard let index = Int(key.rawValue), index >= 0, String(index) == key.rawValue else {
+        return nil
+      }
       return index
     }
   }
 
   // Parsed numeric tokens and object-key locations identify the same pointer.
   static func == (lhs: Self, rhs: Self) -> Bool {
-    lhs.token == rhs.token
+    JSONKey(lhs.token) == JSONKey(rhs.token)
   }
 
   func hash(into hasher: inout Hasher) {
-    hasher.combine(token)
+    hasher.combine(JSONKey(token))
   }
 
   fileprivate var encodedFragment: String {
@@ -182,7 +186,7 @@ extension JSONPointer.Component {
     case .index(let int):
       return String(int)
     case .key(let string):
-      return JSONPointer.escapeToken(string)
+      return JSONPointer.escapeToken(string.rawValue)
     }
   }
 }

@@ -96,6 +96,7 @@ struct OptionalNullsExpansionTests {
                   }
                   .map(\\.1)
                   .map(\\.matches)
+                  .stringKeyedDictionary()
                   .orNull(style: .union)
                 }
                 .flatMapOptional()
@@ -189,6 +190,7 @@ struct OptionalNullsExpansionTests {
                   }
                   .map(\\.1)
                   .map(\\.matches)
+                  .stringKeyedDictionary()
                   .orNull(style: .unionAnyOf)
                 }
                 .flatMapOptional()
@@ -298,6 +300,7 @@ struct OptionalNullsExpansionTests {
                   }
                   .map(\\.1)
                   .map(\\.matches)
+                  .stringKeyedDictionary()
                   .orNull(style: .unionAnyOf)
                 }
                 .flatMapOptional()
@@ -353,6 +356,7 @@ struct OptionalNullsExpansionTests {
                   }
                   .map(\\.1)
                   .map(\\.matches)
+                  .stringKeyedDictionary()
                   .orNull(style: .union)
                 }
                 .flatMapOptional()
@@ -430,6 +434,7 @@ struct OptionalNullsExpansionTests {
                   }
                   .map(\\.1)
                   .map(\\.matches)
+                  .stringKeyedDictionary()
                   .orNull(style: .union)
                 }
                 .flatMapOptional()

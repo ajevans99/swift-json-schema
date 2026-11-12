@@ -38,7 +38,7 @@ struct IntegralNumberTests {
     }
     for prefix in ["min", "max"] {
       let keyword = prefix + kind
-      var raw: JSONValue = .object([keyword: minimumValue])
+      var raw: JSONValue = .object([JSONKey(keyword): minimumValue])
       if kind == "Contains", case .object(var object) = raw {
         object["contains"] = true
         raw = .object(object)

@@ -3,7 +3,7 @@ import JSONSchema
 /// The result of validating additionalProperties against an input object.
 /// Stores all extra key-value pairs that were not handled by the base schema.
 public struct AdditionalPropertiesParseResult<AdditionalOut> {
-  public let matches: [String: AdditionalOut]
+  public let matches: [JSONKey: AdditionalOut]
 }
 
 extension JSONComponents {
@@ -52,26 +52,26 @@ extension JSONComponents {
       var patterns: [Regex<AnyRegexOutput>] = []
       for pattern in patternProperties.keys {
         do {
-          patterns.append(try compileSchemaRegex(pattern))
+          patterns.append(try compileSchemaRegex(pattern.rawValue))
         } catch {
           return .error(
-            .invalidRegularExpression(pattern: pattern, reason: String(describing: error))
+            .invalidRegularExpression(pattern: pattern.rawValue, reason: String(describing: error))
           )
         }
       }
 
-      var additionalProperties: [String: AdditionalProps.Output] = [:]
+      var additionalProperties: [JSONKey: AdditionalProps.Output] = [:]
       var additionalErrors: [ParseIssue] = []
       var hasAdditionalFailure = false
       for (key, value) in dictionary
       where declaredProperties[key] == nil
-        && !patterns.contains(where: { key.firstMatch(of: $0) != nil })
+        && !patterns.contains(where: { key.rawValue.firstMatch(of: $0) != nil })
       {
         switch ParsingScope.parse(
           additionalPropertiesSchema,
           value: value,
           schemaTokens: [Keywords.AdditionalProperties.name],
-          instanceTokens: [key]
+          instanceTokens: [key.rawValue]
         ) {
         case .valid(let output): additionalProperties[key] = output
         case .invalid(let errors):

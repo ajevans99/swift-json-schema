@@ -242,7 +242,7 @@ public final class Context: Sendable {
       return true
     }
     guard let entries = vocabulary.object else { return false }
-    return Set(entries.keys) == dialect.supportedVocabularies
+    return Set(entries.keys.map(\.rawValue)) == dialect.supportedVocabularies
       && entries.values.allSatisfy { $0.boolean != nil }
   }
 }
