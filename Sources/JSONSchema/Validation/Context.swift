@@ -4,7 +4,7 @@ import Foundation
 ///
 /// Dynamic scopes are local to each evaluation, not shared by concurrent callers.
 public final class Context: Sendable {
-  private let lockedDialect: LockIsolated<Dialect>
+  private var lockedDialect: LockIsolated<Dialect> { storage.dialect }
   var dialect: Dialect {
     get { lockedDialect.withLock { $0 } }
     set { lockedDialect.withLock { $0 = newValue } }
@@ -34,7 +34,7 @@ public final class Context: Sendable {
     registry.withLock { $0.dynamicAnchors }
   }
 
-  private let lockedRemoteSchemaStorage: LockIsolated<[String: JSONValue]>
+  private var lockedRemoteSchemaStorage: LockIsolated<[String: JSONValue]> { storage.remotes }
   var remoteSchemaStorage: [String: JSONValue] {
     get { lockedRemoteSchemaStorage.withLock { $0 } }
     set { lockedRemoteSchemaStorage.withLock { $0 = newValue } }
@@ -70,7 +70,7 @@ public final class Context: Sendable {
     // Materialize outermost-first order only for reference lookup, not on scope entry.
     var reversedScopes: [DynamicScope] = []
     var frame = Self.evaluationScope
-    let identifier = ObjectIdentifier(self)
+    let identifier = ObjectIdentifier(storage)
     while let current = frame {
       if current.context == identifier {
         reversedScopes.append(contentsOf: current.scopes.reversed())
@@ -86,7 +86,7 @@ public final class Context: Sendable {
 
   func withDynamicScopes<Result>(_ scopes: [DynamicScope], operation: () -> Result) -> Result {
     let frame = DynamicScopeFrame(
-      context: ObjectIdentifier(self),
+      context: ObjectIdentifier(storage),
       scopes: scopes,
       parent: Self.evaluationScope
     )
@@ -94,7 +94,9 @@ public final class Context: Sendable {
   }
 
   /// Validators used when the ``Keywords.Format`` keyword is present.
-  private let lockedFormatValidators: LockIsolated<[String: any FormatValidator]>
+  private var lockedFormatValidators: LockIsolated<[String: any FormatValidator]> {
+    storage.formats
+  }
   var formatValidators: [String: any FormatValidator] {
     get { lockedFormatValidators.withLock { $0 } }
     set { lockedFormatValidators.withLock { $0 = newValue } }
@@ -104,7 +106,7 @@ public final class Context: Sendable {
   /// If nil, all dialect keywords are available. If set, only keywords from
   /// these vocabularies will be processed.
   var activeVocabularies: Set<String>? {
-    Self.vocabularyScopes[ObjectIdentifier(self)]
+    Self.vocabularyScopes[ObjectIdentifier(storage)]
   }
 
   func withActiveVocabularies<Result>(
@@ -112,7 +114,7 @@ public final class Context: Sendable {
     operation: () -> Result
   ) -> Result {
     var scopes = Self.vocabularyScopes
-    scopes[ObjectIdentifier(self)] = vocabularies
+    scopes[ObjectIdentifier(storage)] = vocabularies
     return Self.$vocabularyScopes.withValue(scopes, operation: operation)
   }
 
@@ -122,10 +124,57 @@ public final class Context: Sendable {
     var documents: [URL: SchemaDocument] = [:]
     var dynamicAnchors: [URL: [String: (pointer: JSONPointer, baseURI: URL)]] = [:]
     var schemas: [String: Schema] = [:]
+    var referenceTargets: [URL: Schema] = [:]
     var anchors: [URL: JSONPointer] = [:]
   }
 
-  private let registry = LockIsolated(Registry())
+  /// Public schemas retain storage. Cached compiled graphs borrow it, so storage
+  /// can own those graphs without a back edge. Every escaping reference target
+  /// is promoted to an owning context before it is returned.
+  private final class Storage: Sendable {
+    let registry = LockIsolated(Registry())
+    let dialect: LockIsolated<Dialect>
+    let remotes: LockIsolated<[String: JSONValue]>
+    let formats: LockIsolated<[String: any FormatValidator]>
+
+    init(dialect: Dialect, remotes: [String: JSONValue], formats: [any FormatValidator]) {
+      self.dialect = LockIsolated(dialect)
+      self.remotes = LockIsolated(remotes)
+      self.formats = LockIsolated(
+        Dictionary(uniqueKeysWithValues: formats.map { ($0.formatName, $0) })
+      )
+    }
+  }
+
+  private let retainedStorage: Storage?
+  private unowned let storage: Storage
+  private var registry: LockIsolated<Registry> { storage.registry }
+
+  private init(storage: Storage, retaining: Bool) {
+    self.storage = storage
+    self.retainedStorage = retaining ? storage : nil
+  }
+
+  func borrowing() -> Context {
+    retainedStorage == nil ? self : Context(storage: storage, retaining: false)
+  }
+
+  func retaining() -> Context {
+    retainedStorage != nil ? self : Context(storage: storage, retaining: true)
+  }
+
+  func sharesStorage(with other: Context) -> Bool {
+    storage === other.storage
+  }
+
+  func referenceTarget(for key: URL) -> Schema? {
+    registry.withLock { $0.referenceTargets[key] }
+  }
+
+  func cacheReferenceTarget(_ schema: Schema, for key: URL) {
+    let cached = schema.cached(in: self)
+    registry.withLock { $0.referenceTargets[key] = cached }
+  }
 
   func registerDocument(_ rawSchema: JSONValue, at url: URL) {
     registry.withLock {
@@ -166,7 +215,8 @@ public final class Context: Sendable {
   }
 
   func cacheSchema(_ schema: Schema, at uri: String) {
-    registry.withLock { $0.schemas[uri] = schema }
+    let cached = schema.cached(in: self)
+    registry.withLock { $0.schemas[uri] = cached }
   }
 
   public init(
@@ -174,11 +224,9 @@ public final class Context: Sendable {
     remoteSchema: [String: JSONValue] = [:],
     formatValidators: [any FormatValidator] = []
   ) {
-    self.lockedDialect = LockIsolated(dialect)
-    self.lockedRemoteSchemaStorage = LockIsolated(remoteSchema)
-    self.lockedFormatValidators = LockIsolated(
-      Dictionary(uniqueKeysWithValues: formatValidators.map { ($0.formatName, $0) })
-    )
+    let storage = Storage(dialect: dialect, remotes: remoteSchema, formats: formatValidators)
+    self.storage = storage
+    self.retainedStorage = storage
   }
 
   package func independentContext() -> Context {

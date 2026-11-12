@@ -78,6 +78,6 @@ package struct SchemaEvaluation: Sendable {
 
 extension Schema {
   package func evaluate(_ instance: JSONValue) -> SchemaEvaluation {
-    SchemaEvaluation.capture(self, instance: instance)
+    withExtendedLifetime(context) { SchemaEvaluation.capture(self, instance: instance) }
   }
 }

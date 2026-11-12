@@ -21,6 +21,7 @@ public struct Schema: ValidatableSchema {
     self.documentURL = documentURL
     context.registerDocument(rawSchema, at: documentURL)
 
+    let context = context.borrowing()
     switch rawSchema {
     case .boolean(let boolValue):
       self.schema = BooleanSchema(
@@ -79,15 +80,35 @@ public struct Schema: ValidatableSchema {
 
   init(
     schema: any ValidatableSchema,
+    rawSchema: JSONValue? = nil,
     location: JSONPointer,
     context: Context,
     documentURL: URL = URL(string: "https://swift-json-schema.invalid/in-memory")!
   ) {
     self.schema = schema
-    self.rawSchema = schema.jsonValue
+    self.rawSchema = rawSchema ?? schema.jsonValue
     self.location = location
     self.context = context
     self.documentURL = documentURL
+  }
+
+  func cached(in owner: Context) -> Schema {
+    guard context.sharesStorage(with: owner) else { return self }
+    return withContext(context.borrowing())
+  }
+
+  func retainingContext() -> Schema {
+    withContext(context.retaining())
+  }
+
+  private func withContext(_ context: Context) -> Schema {
+    Schema(
+      schema: schema,
+      rawSchema: rawSchema,
+      location: location,
+      context: context,
+      documentURL: documentURL
+    )
   }
 
   /// Each call starts an independent evaluation, including calls made reentrantly
@@ -99,7 +120,9 @@ public struct Schema: ValidatableSchema {
   }
 
   func validateSubschema(_ instance: JSONValue, at location: JSONPointer) -> ValidationResult {
-    SchemaEvaluation.record(self, instance: instance) { schema.validate(instance, at: location) }
+    withExtendedLifetime(context) {
+      SchemaEvaluation.record(self, instance: instance) { schema.validate(instance, at: location) }
+    }
   }
 
   func validate(
@@ -107,9 +130,11 @@ public struct Schema: ValidatableSchema {
     at location: JSONPointer,
     annotations: inout AnnotationContainer
   ) -> ValidationResult {
-    SchemaEvaluation.record(self, instance: instance) {
-      (schema as? ObjectSchema)?.validate(instance, at: location, annotations: &annotations)
-        ?? schema.validate(instance, at: location)
+    withExtendedLifetime(context) {
+      SchemaEvaluation.record(self, instance: instance) {
+        (schema as? ObjectSchema)?.validate(instance, at: location, annotations: &annotations)
+          ?? schema.validate(instance, at: location)
+      }
     }
   }
 

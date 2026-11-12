@@ -172,7 +172,14 @@ struct ReferenceResolver {
   let referenceURI: String
   let location: JSONPointer
   let baseURI: URL
-  private let initialTarget = LockIsolated<Schema?>(nil)
+  private enum InitialTarget: Sendable {
+    // Local graphs are owned by storage, never by a resolver they may contain.
+    case local(URL)
+    // Metaschemas have independent contexts and cannot contain this resolver.
+    case external(Schema)
+  }
+
+  private let initialTarget = LockIsolated<InitialTarget?>(nil)
 
   func resolveSchema(isDynamic: Bool) throws -> Schema {
     // Resolve the reference URI against the base URI
@@ -182,10 +189,21 @@ struct ReferenceResolver {
 
     // Share only the static target; dynamic overrides depend on the current evaluation.
     let schema = try initialTarget.withLock { cached in
-      if let cached { return cached }
-      let fresh = try self.schema(for: refURL)
-      cached = fresh
-      return fresh
+      switch cached {
+      case .local(let key):
+        return context.referenceTarget(for: key)!.retainingContext()
+      case .external(let schema):
+        return schema
+      case nil:
+        let fresh = try context.referenceTarget(for: refURL) ?? self.schema(for: refURL)
+        if fresh.context.sharesStorage(with: context) {
+          context.cacheReferenceTarget(fresh, for: refURL)
+          cached = .local(refURL)
+        } else {
+          cached = .external(fresh)
+        }
+        return fresh.retainingContext()
+      }
     }
 
     if isDynamic, let fragment = refURL.fragment, !fragment.isEmpty {
@@ -216,6 +234,7 @@ struct ReferenceResolver {
               context: context,
               baseURI: entry.baseURI
             )
+            .retainingContext()
           }
         }
       }
