@@ -1,6 +1,9 @@
 # ReferenceResolver
 
-`ReferenceResolver` is responsible for turning the value of `$ref` or `$dynamicRef` keywords into an actual schema that can be used for validation. The resolver works relative to a base URI and relies on context information such as caches and registered identifiers.
+`ReferenceResolver` resolves `$ref` and `$dynamicRef` against a base URI using the
+context's registered documents, identifiers, anchors, and compiled-schema caches.
+It does not perform HTTP requests or asynchronous loading. Applications load external
+documents and supply their parsed values through `Context(remoteSchema:)`.
 
 ## Resolution Flow
 
@@ -14,22 +17,24 @@
 3. **Resolve fragments or anchors** – If the reference contains a fragment or anchor, `resolveFragmentOrAnchor` locates the subschema within the loaded base schema.
 4. **Return the resolved schema** – If none of the steps succeed, `ReferenceResolverError.unresolvedReference` is thrown.
 
-## Why load the meta‑schema?
+## Caching, dynamic scope, and ownership
 
-JSON Schema dialects are themselves described by a schema—often called the *meta‑schema*. When a schema uses `$ref` to point directly to the dialect's meta‑schema (e.g. `https://json-schema.org/draft/2020-12/schema`), the resolver must return that meta‑schema so the reference can be validated. Loading it on demand keeps the meta‑schemas out of the normal cache while still supporting references to them.
+The resolver caches its initial static target. Compiled remote documents are cached
+under their retrieval URI and canonical `$id`; relative references still use the
+document's declared base URI.
 
-## Opportunities for Improvement
+`$dynamicRef` rechecks the current evaluation's dynamic scope on every call when its
+initial target defines the matching `$dynamicAnchor`. Dynamic overrides are not cached
+as static targets or shared across independent evaluations.
 
-- **Cache management**: The resolver currently stores every loaded schema in a flat `schemaCache` dictionary. Introducing expiration policies, size limits, or tiered caches (e.g. in-memory versus on-disk) could reduce memory usage and repeated network fetches. A normalized cache key (such as the canonical URI of a schema) would help avoid duplicates.
-- **Asynchronous loading**: Reference resolution always blocks on loading remote schemas. Incorporating async/await would let the resolver fetch multiple references concurrently, improving throughput when validating large schemas with many remote references.
-- **Error reporting**: Exposing cache hits and misses in the error messages or diagnostics would make debugging reference issues easier.
+Public schemas retain context storage. Cached local graphs borrow that storage, and
+resolvers keep local target keys rather than owning the graphs they can belong to.
+Resolved schemas retain storage before escaping the cache. Meta-schema targets have
+independent contexts and can be retained directly. Preserve these ownership boundaries
+when changing caching; otherwise recursive references can create retain cycles.
 
-## Measuring Resolver Efficiency
+## Measuring changes
 
-To track performance improvements, we can add instrumentation around the resolver:
-
-1. **Time critical paths** – Use `DispatchTime` or `ContinuousClock` to measure how long it takes to resolve a reference and fetch a remote schema. Recording these metrics will highlight slow spots.
-2. **Count cache hits and misses** – Maintain counters for how often the cache returns a schema versus fetching or constructing it. These stats help determine whether cache strategies are effective.
-3. **Log unresolved references** – Keep a list of references that required remote loading or failed to resolve. This can guide where to pre-populate caches or adjust identifier registration.
-
-Recording these statistics during unit tests or integration benchmarks will provide concrete data to guide future optimizations.
+The [benchmark suite](Benchmarks/README.md) already includes reference-heavy construction,
+validation, and output workloads. Compare time and allocations before changing caches;
+there is no network-fetch cost in these paths.

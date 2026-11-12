@@ -161,10 +161,6 @@ struct KeywordTests {
     @Test(arguments: [
       (JSONValue.number(5), true),
       (JSONValue.number(10), false),
-      // TODO: Reenable, causes Xcode Internal inconsistency error
-      // https://forums.swift.org/t/fatal-error-internal-inconsistency-no-test-reporter-for-test-case-argumentids/75666
-      // (JSONValue.integer(5), true),
-      // (JSONValue.integer(10), false),
       (JSONValue.string("5"), true),
       (JSONValue.null, true),
     ])
@@ -191,9 +187,6 @@ struct KeywordTests {
       (JSONValue.number(4.9), true),
       (JSONValue.number(5), false),
       (JSONValue.integer(4), true),
-      // TODO: Reenable, causes Xcode Internal inconsistency error
-      // https://forums.swift.org/t/fatal-error-internal-inconsistency-no-test-reporter-for-test-case-argumentids/75666
-      // (JSONValue.integer(5), false),
       (JSONValue.string("4"), true),
       (JSONValue.null, true),
     ])
@@ -222,9 +215,6 @@ struct KeywordTests {
     @Test(arguments: [
       (JSONValue.number(5), true),
       (JSONValue.number(0), false),
-      // TODO: Reenable, causes Xcode Internal inconsistency error
-      // https://forums.swift.org/t/fatal-error-internal-inconsistency-no-test-reporter-for-test-case-argumentids/75666
-      // (JSONValue.integer(5), true),
       (JSONValue.integer(1), false),
       (JSONValue.string("5"), true),
       (JSONValue.null, true),
@@ -251,9 +241,6 @@ struct KeywordTests {
       (JSONValue.number(5.1), true),
       (JSONValue.number(5), false),
       (JSONValue.integer(6), true),
-      // TODO: Reenable, causes Xcode Internal inconsistency error
-      // https://forums.swift.org/t/fatal-error-internal-inconsistency-no-test-reporter-for-test-case-argumentids/75666
-      // (JSONValue.integer(5), false),
       (JSONValue.string("6"), true),
       (JSONValue.null, true),
     ])

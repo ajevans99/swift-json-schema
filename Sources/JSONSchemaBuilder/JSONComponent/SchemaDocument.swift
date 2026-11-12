@@ -231,10 +231,7 @@ final class SchemaDocumentContext: @unchecked Sendable {
       else { return false }
       // Only document-approved annotations may differ after type erasure. Constraints,
       // reference targets, and all other structural keywords must still match exactly.
-      for key in [
-        "title", "description", "default", "examples", "deprecated", "readOnly", "writeOnly",
-        "$comment",
-      ] {
+      for key in Self.referenceAnnotations {
         sourceObject[key] = nil
         expected[key] = nil
       }
