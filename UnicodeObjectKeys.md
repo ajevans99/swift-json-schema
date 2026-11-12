@@ -1,6 +1,9 @@
 # Proposal: scalar-exact JSON object keys
 
-**Status: decision required; no representation or runtime change in this proposal.**
+**Status: plan approved by Austin; implementation in progress, unreleased.**
+Austin's approval, relayed in the coordinating request: "234 plan seems reasonable to me".
+This design-only draft still makes no representation or runtime change. Additive utilities
+and their guide are reviewed separately in #235; the coordinated migration is a second layer.
 Baseline: `f8539c863d5651380b9a7b013e43ccc2b37e9e60`. This addresses quality-audit C1,
 separately from the scoped regex correction.
 
@@ -99,9 +102,9 @@ serializer remains the guaranteed scalar-exact route.
 
 ## Release and compatibility plan
 
-1. Approve a major-version/source-breaking migration, the public `JSONKey`/object
-   shape, and strict String-dictionary export policy. No such decision is implied
-   by this design-only draft.
+1. The source-breaking migration, public `JSONKey`/object shape, and strict
+   String-dictionary export policy are approved as a plan. The release version,
+   implementation review, merging, and publication remain separate decisions.
 2. Before switching defaults, land additive key/conversion utilities and a migration
    guide in a separately reviewed change. Do not route the existing parser into a
    new enum case that old `.object` consumers silently miss.
