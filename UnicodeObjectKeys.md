@@ -1,9 +1,13 @@
 # Proposal: scalar-exact JSON object keys
 
-**Status: plan approved by Austin; implementation in progress, unreleased.**
+**Status: plan approved by Austin; implemented in separate drafts, unreleased.**
 Austin's approval, relayed in the coordinating request: "234 plan seems reasonable to me".
 This design-only draft still makes no representation or runtime change. Additive utilities
-and their guide are reviewed separately in #235; the coordinated migration is a second layer.
+and their guide are reviewed separately in #235; the coordinated migration is #237,
+stacked on #235. Its public representation is source-breaking, and String dictionary/
+Codable exports reject canonical collisions. Generic Foundation decode still cannot
+promise preservation. Local migration debug/release suites passed; CI and the measured
+ASCII lookup/parsing tradeoff remain review concerns. No merge or release is approved here.
 Baseline: `f8539c863d5651380b9a7b013e43ccc2b37e9e60`. This addresses quality-audit C1,
 separately from the scoped regex correction.
 
