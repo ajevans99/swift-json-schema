@@ -251,20 +251,15 @@ struct SchemaCodableIntegrationTests {
   {
     var output = try #require(result.jsonValue.object)
     var annotations = try #require(output["annotations"]?.array)
-    let index = try #require(
-      result.annotations?
-        .firstIndex {
-          $0.keyword == "properties"
-            && $0.schemaLocation.description == "#/properties"
-            && $0.instanceLocation.description == "#"
-        }
-    )
-    var annotation = try #require(annotations[index].object)
-    let names = try #require(annotation["annotation"]?.array).map { try #require($0.string) }
-    // Only this annotation is a set of property names; JSONDecoder does not promise key order.
+    // Each source's properties annotation is a set; JSONDecoder does not promise key order.
     // Preserve duplicates and all other output, including order-sensitive annotation arrays.
-    annotation["annotation"] = .array(names.sorted().map(JSONValue.string))
-    annotations[index] = .object(annotation)
+    for (index, record) in (result.annotations ?? []).enumerated()
+    where record.keyword == "properties" {
+      var annotation = try #require(annotations[index].object)
+      let names = try #require(annotation["annotation"]?.array).map { try #require($0.string) }
+      annotation["annotation"] = .array(names.sorted().map(JSONValue.string))
+      annotations[index] = .object(annotation)
+    }
     output["annotations"] = .array(annotations)
     return .object(output)
   }

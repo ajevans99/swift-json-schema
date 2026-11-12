@@ -75,6 +75,43 @@ if you subsequently use a `Codable` encoding path, such as `JSONEncoder.encode`.
 The rendered diagnostic structure is separate from ``ValidationResult/jsonValue``, which
 exposes the library's ordered representation of the original result.
 
+## Annotation sources
+
+``ValidationResult/annotations`` preserves separate records for each keyword,
+instance location, and schema source. For example, successful `allOf` branches
+with `properties: {"x": {}}` and `properties: {"y": {}}` contribute `["x"]` and
+`["y"]` at their respective `/allOf/0/properties` and `/allOf/1/properties`
+locations, rather than one combined value attributed to the first branch.
+Validation still aggregates evaluated property names and array indices internally
+for `unevaluatedProperties` and `unevaluatedItems`.
+
+Annotations from successful child evaluations propagate through array and object
+applicators. Matching composition and conditional branches retain their own
+sources; nonmatching branches do not contribute annotations to the surrounding
+schema. `format` is collected as an annotation without enabling format assertions.
+The content keywords annotate string instances only, and `contentSchema` requires
+`contentMediaType`. Unrecognized keywords are collected without interpreting their
+values as schemas. Keywords from inactive vocabularies follow the same literal
+annotation path rather than being evaluated.
+
+Each record includes `absoluteSchemaLocation` (serialized as
+`absoluteKeywordLocation`), resolved against the keyword's schema resource.
+An embedded resource with `$id: "https://example.com/embedded"` reports its own
+`title` as `https://example.com/embedded#/title`, even when the resource is located
+under `$defs` in another document. Remote records use their remote resource URI,
+not a fragment relative to the root document. `schemaLocation` continues to
+identify the keyword's pointer within its original document; it must not be
+assumed to identify a location in the root document for external references.
+References directly into an embedded resource inherit that resource's URI,
+including when reached through a pointer from the enclosing document.
+Records with the same absolute keyword URI and instance location share a source,
+even when reached through different reference paths. When no absolute URI is
+available, source identity falls back to the schema pointer.
+Record order remains validation traversal order, and annotation values retain
+their original JSON number tokens.
+
+## Numeric diagnostics
+
 Numeric operands in ``ValidationIssue`` cases such as `exceedsMaximum` and `notMultipleOf`
 use `JSONNumberLiteral`. When handling those issues directly, read `rawValue` for the numeric
 token or use an explicit throwing conversion instead of assuming a `Double` payload.

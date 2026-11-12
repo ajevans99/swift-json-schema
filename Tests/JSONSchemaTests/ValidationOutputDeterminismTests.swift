@@ -69,7 +69,7 @@ struct ValidationOutputDeterminismTests {
     let annotation = try #require(output["annotations"]?.array?.first?.object)
     #expect(
       Array(annotation.keys) == [
-        "keywordLocation", "instanceLocation", "annotation",
+        "keywordLocation", "absoluteKeywordLocation", "instanceLocation", "annotation",
       ]
     )
     let value = try #require(annotation["annotation"])

@@ -74,15 +74,18 @@ extension Keywords {
       at instanceLocation: JSONPointer,
       using annotations: inout AnnotationContainer
     ) throws(ValidationIssue) {
-      guard let instances = input.array else { return }
+      guard let instances = input.array, !instances.isEmpty, !subschemas.isEmpty else { return }
 
       var largestIndex: Int = instances.startIndex
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
       for (offset, (instance, schema)) in zip(instances, subschemas).enumerated() {
         let prefixLocation = instanceLocation.appending(.index(offset))
-        let result = try schema.validateSubschema(instance, at: prefixLocation).requiringComplete()
+        var subAnnotations = AnnotationContainer()
+        let result = try schema.validate(instance, at: prefixLocation, annotations: &subAnnotations)
+          .requiringComplete()
         builder.merging(result)
+        if result.isValid { annotations.merge(subAnnotations) }
         largestIndex = offset
       }
 
@@ -131,13 +134,19 @@ extension Keywords {
         case .none: instances[...]
         }
 
+      guard !relevantInstanceItems.isEmpty else { return }
+
       var builder = ValidationResultBuilder(keyword: self, instanceLocation: instanceLocation)
 
       // With array slice, original array indicies are used which is important here.
       for (index, instance) in zip(relevantInstanceItems.indices, relevantInstanceItems) {
         let itemLocation = instanceLocation.appending(.index(index))
-        let result = try subschema.validateSubschema(instance, at: itemLocation).requiringComplete()
+        var subAnnotations = AnnotationContainer()
+        let result =
+          try subschema.validate(instance, at: itemLocation, annotations: &subAnnotations)
+          .requiringComplete()
         builder.merging(result)
+        if result.isValid { annotations.merge(subAnnotations) }
       }
 
       try builder.throwIfErrors()
@@ -207,9 +216,12 @@ extension Keywords {
       var validIndices = [Int]()
       for (index, instance) in instances.enumerated() {
         let pointer = instanceLocation.appending(.index(index))
-        let result = try subschema.validateSubschema(instance, at: pointer).requiringComplete()
+        var subAnnotations = AnnotationContainer()
+        let result = try subschema.validate(instance, at: pointer, annotations: &subAnnotations)
+          .requiringComplete()
         if result.isValid {
           validIndices.append(index)
+          annotations.merge(subAnnotations)
         }
       }
 
@@ -359,8 +371,12 @@ extension Keywords {
       for (key, value) in instanceObject {
         for (regex, schema) in patterns where key.firstMatch(of: regex) != nil {
           let propertyLocation = instanceLocation.appending(.key(key))
-          let result = try schema.validateSubschema(value, at: propertyLocation).requiringComplete()
+          var subAnnotations = AnnotationContainer()
+          let result =
+            try schema.validate(value, at: propertyLocation, annotations: &subAnnotations)
+            .requiringComplete()
           builder.merging(result)
+          if result.isValid { annotations.merge(subAnnotations) }
           matchedPropertyNames.append(key)
         }
       }
@@ -410,9 +426,12 @@ extension Keywords {
 
       for (key, value) in instanceObject where !previouslyValidatedKeys.contains(key) {
         let propertyLocation = instanceLocation.appending(.key(key))
-        let result = try subschema.validateSubschema(value, at: propertyLocation)
+        var subAnnotations = AnnotationContainer()
+        let result =
+          try subschema.validate(value, at: propertyLocation, annotations: &subAnnotations)
           .requiringComplete()
         builder.merging(result)
+        if result.isValid { annotations.merge(subAnnotations) }
         validatedKeys.append(key)
       }
 
