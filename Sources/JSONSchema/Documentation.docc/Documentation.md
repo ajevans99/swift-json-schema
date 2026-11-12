@@ -96,6 +96,22 @@ print(manyItems.validate([]).isValid) // false
 See the [numeric migration guide](https://swiftpackageindex.com/ajevans99/swift-json-schema/main/documentation/orderedjson/migrating-to-lossless-numbers)
 for enum-case, accessor, and `Codable` changes.
 
+## Regular expression policy
+
+`pattern` and `patternProperties` use Swift Regex syntax with Unicode-scalar matching,
+not Swift's default grapheme matching or canonical equivalence. `\d` and `\w` use ASCII
+digits and word characters (and `\D` / `\W` their complements). Typed builder property
+routing uses the same policy.
+
+This is not a complete ECMA-262 regex implementation. Other syntax and character classes,
+including Unicode whitespace handling for `\s`, retain Swift Regex behavior. Use explicit
+character classes when cross-engine portability matters. Uncompilable patterns fail
+validation; builder pattern parsing reports an invalid-regular-expression issue.
+
+These settings correct earlier behavior: `^.$` no longer matches a two-scalar combining
+sequence, canonically equivalent spellings do not automatically match literal patterns,
+and `\d` no longer matches non-ASCII digits.
+
 ## References and external schemas
 
 Schemas can use `$defs`, `$ref`, `$anchor`, and dynamic references. Register external documents

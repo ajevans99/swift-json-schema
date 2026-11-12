@@ -52,7 +52,7 @@ extension JSONComponents {
       var patterns: [Regex<AnyRegexOutput>] = []
       for pattern in patternProperties.keys {
         do {
-          patterns.append(try Regex(pattern))
+          patterns.append(try compileSchemaRegex(pattern))
         } catch {
           return .error(
             .invalidRegularExpression(pattern: pattern, reason: String(describing: error))

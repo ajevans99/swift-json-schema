@@ -336,7 +336,7 @@ extension Keywords {
       self.patterns =
         value.object?
         .compactMap { key, rawSchema in
-          guard let regex = try? Regex(key) else {
+          guard let regex = try? compileSchemaRegex(key) else {
             uncompilable = uncompilable ?? key
             return nil
           }
