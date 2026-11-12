@@ -12,7 +12,7 @@ struct DocumentationExampleTests {
         JSONString()
       }
       .map(\.1.matches)
-    let values: [String: String] = try schema.parseAndValidate(["name": "Ada"])
+    let values: [JSONKey: String] = try schema.parseAndValidate(["name": "Ada"])
     #expect(values == ["name": "Ada"])
     #expect(throws: ParseAndValidateIssue.self) {
       try schema.parseAndValidate(["name": 1])

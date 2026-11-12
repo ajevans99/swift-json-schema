@@ -57,7 +57,10 @@ extension JSONComponents {
           regex = try compileSchemaRegex(patternString.rawValue)
         } catch {
           return .error(
-            .invalidRegularExpression(pattern: patternString.rawValue, reason: String(describing: error))
+            .invalidRegularExpression(
+              pattern: patternString.rawValue,
+              reason: String(describing: error)
+            )
           )
         }
         for (key, value) in dict where key.rawValue.firstMatch(of: regex) != nil {
