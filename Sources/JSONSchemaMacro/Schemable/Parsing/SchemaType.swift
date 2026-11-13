@@ -62,8 +62,11 @@ indirect enum SchemaType {
         value: value.resolvingSelfReferences(named: name)
       )
     case .named(let syntax):
-      let typeName = syntax.trimmedDescription.sanitizingQualifiedTypeName()
-      if typeName == "Self" || typeName == name.sanitizingQualifiedTypeName() {
+      // Type trivia and escaped identifiers do not change specialization identity.
+      let typeName = syntax.tokens(viewMode: .sourceAccurate)
+        .map { $0.text.trimmingBackticks() }.joined()
+      let expectedName = name.filter { !$0.isWhitespace && $0 != "`" }
+      if typeName == "Self" || typeName == expectedName {
         return .selfReference
       }
       return self

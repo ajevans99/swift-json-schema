@@ -12,16 +12,13 @@ public struct JSONArray<T: JSONSchemaComponent>: JSONSchemaComponent {
     let items = items()
     self.items = items
     schemaValue[Keywords.TypeKeyword.name] = .string(JSONType.array.rawValue)
-    if items.schemaValue.object?.isEmpty == false {
-      schemaValue[Keywords.Items.name] = self.items.schemaValue.value
-    }
+    schemaValue[Keywords.Items.name] = items.schemaValue.value
   }
 
   /// Creates a new JSON array schema component.
   public init() where T == JSONAnyValue {
-    self.init {
-      JSONAnyValue()
-    }
+    items = JSONAnyValue()
+    schemaValue[Keywords.TypeKeyword.name] = .string(JSONType.array.rawValue)
   }
 
   public func parse(_ value: JSONValue) -> Parsed<[T.Output], ParseIssue> {

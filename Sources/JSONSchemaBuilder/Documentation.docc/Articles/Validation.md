@@ -293,3 +293,25 @@ Unsupported scopes, conflicting definitions, malformed parsing bundles, and pars
 construction failures produce `ParseIssue.projectionFailure` rather than silently changing
 reference scope or falling back to a default schema. The existing safety refusal still applies
 to arbitrary type-erased or custom parsers that do not explicitly preserve their parsing schema.
+
+## Migrating annotated false schemas
+
+`SchemaValue` now has an `annotatedFalse` case. Adding keywords to `.boolean(false)`
+retains its rejection constraint separately from the authored keywords. Replacing or removing
+`not` or `allOf` therefore cannot accidentally turn a false schema into an accepting schema.
+Ordinary `.object` values still use ordinary keyword replacement semantics.
+
+```swift
+var schema = SchemaValue.boolean(false)
+schema["title"] = "Never"
+schema["not"] = false
+schema["allOf"] = [true]
+// Still rejects every instance, with the title and authored constraints preserved.
+```
+
+This is a source-breaking addition for exhaustive switches over `SchemaValue`: handle
+`.annotatedFalse(let keywords)` alongside the existing cases. The associated dictionary and
+subscript expose authored keywords; `object`, `value`, and encoding emit the complete schema,
+including an `allOf` rejection guard. When the authored keywords include `allOf`, that keyword
+is retained inside a separate conjunct rather than overwriting the guard. To intentionally
+replace the rejection, assign a new `SchemaValue` instead of editing a keyword.

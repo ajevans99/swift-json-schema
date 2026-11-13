@@ -1,9 +1,61 @@
 import JSONSchemaMacro
 import SwiftSyntaxMacros
+import SwiftSyntaxMacrosGenericTestSupport
 import Testing
 
 @Suite struct SchemableEnumExpansionTests {
   let testMacros: [String: Macro.Type] = ["Schemable": SchemableMacro.self]
+
+  @Test func qualifiedNestedRecursivePayloadIsDiagnosed() {
+    assertMacroExpansion(
+      """
+      struct Outer {
+        @Schemable
+        indirect enum Tree {
+          case leaf
+          case node(Outer.Tree)
+        }
+      }
+      """,
+      expandedSource: """
+        struct Outer {
+          indirect enum Tree {
+            case leaf
+            case node(Outer.Tree)
+
+            @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
+            static var schema: some JSONSchemaComponent<Tree> {
+              JSONString()
+                .enumValues {
+                  "leaf"
+                }
+                .compactMap {
+                  switch $0 {
+                  case "leaf":
+                    return Self.leaf
+                  default:
+                    return nil
+                  }
+                }
+            }
+          }
+        }
+
+        extension Outer.Tree: Schemable {
+        }
+        """,
+      diagnostics: [
+        DiagnosticSpec(
+          message:
+            "Recursive enum payloads are not supported by @Schemable (case 'node'); provide a manual schema",
+          line: 5,
+          column: 15,
+          severity: .error
+        )
+      ],
+      macros: testMacros
+    )
+  }
 
   @Test func basic() {
     assertMacroExpansion(
@@ -424,7 +476,7 @@ import Testing
               JSONObject {
                 JSONProperty(key: "flightNumber") {
                   JSONObject {
-                    JSONProperty(key: "_") {
+                    JSONProperty(key: "_0") {
                       JSONInteger()
                         .default(0)
                     }

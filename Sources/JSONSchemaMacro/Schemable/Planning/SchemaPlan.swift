@@ -84,7 +84,11 @@ enum SchemaPlanner {
       .emitDiagnostics(for: members.compactMap(\.included).map(\.source))
       body = .object(members)
     case .enumeration:
-      body = .enumeration(declaration.cases.map { planCase($0, diagnostics: diagnostics) })
+      body = .enumeration(
+        declaration.cases.map {
+          planCase($0, declaration: declaration, diagnostics: diagnostics)
+        }
+      )
     }
     return SchemaPlan(
       declaration: declaration,
@@ -170,16 +174,45 @@ enum SchemaPlanner {
 
   private static func planCase(
     _ enumCase: SchemableEnumCase,
+    declaration: SchemableDeclaration,
     diagnostics: DiagnosticCollector
   ) -> EnumCasePlan {
     guard let parameters = enumCase.associatedValues else { return .simple(enumCase) }
     var fields: [PayloadField] = []
     var isUnsupported = false
+    var keys: Set<String> = []
     for (index, parameter) in parameters.enumerated() {
+      let label = parameter.firstName.flatMap { $0.text == "_" ? nil : $0.trimmed }
+      let key = label?.text.trimmingBackticks() ?? "_\(index)"
+      guard keys.insert(key).inserted else {
+        isUnsupported = true
+        diagnostics.diagnose(
+          Diagnostic(
+            node: parameter,
+            message: UnsupportedTypeDiagnostic.duplicateEnumPayloadKey(
+              caseName: enumCase.identifier.text,
+              key: key
+            )
+          )
+        )
+        continue
+      }
       switch SchemaType.parse(parameter.type) {
       case .success(let type):
-        let label = parameter.firstName.flatMap { $0.text == "_" ? nil : $0.trimmed }
-        let key = parameter.firstName?.text.trimmingBackticks() ?? "_\(index)"
+        if declaration.selfReferenceNames.contains(where: {
+          type.resolvingSelfReferences(named: $0).usesSelfReference
+        }) {
+          isUnsupported = true
+          diagnostics.diagnose(
+            Diagnostic(
+              node: parameter.type,
+              message: UnsupportedTypeDiagnostic.recursiveEnumPayload(
+                caseName: enumCase.identifier.text
+              )
+            )
+          )
+          continue
+        }
         fields.append(
           PayloadField(
             label: label,
