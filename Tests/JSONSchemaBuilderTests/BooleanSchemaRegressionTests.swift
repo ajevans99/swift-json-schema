@@ -108,4 +108,18 @@ struct BooleanSchemaRegressionTests {
     #expect(result.value == nil)
   }
 
+  @Test(arguments: ["default", "const", "enum", "examples"])
+  func booleanFallbackIgnoresKeywordLikeInstanceData(keyword: String) throws {
+    let data: JSONValue = ["$ref": "data", "$schema": "data", "$vocabulary": [:]]
+    let value: JSONValue = keyword == "const" || keyword == "enum" ? data : "hello"
+    let component = JSONAnyValue()
+      .flatMap { _ in
+        var boolean: JSONBooleanSchema = true
+        boolean.schemaValue[keyword] =
+          keyword == "enum" || keyword == "examples" ? .array([data]) : data
+        return boolean
+      }
+    #expect(try component.parseAndValidate(value))
+  }
+
 }

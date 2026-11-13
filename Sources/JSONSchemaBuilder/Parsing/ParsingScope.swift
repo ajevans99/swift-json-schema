@@ -179,9 +179,15 @@ enum ParsingScope {
           if let entries = value.object {
             return entries.values.contains { containsScopeKeyword($0, matching: predicate) }
           }
+        case "allOf", "anyOf", "oneOf", "prefixItems":
+          return value.array?.contains { containsScopeKeyword($0, matching: predicate) } ?? false
+        case "additionalProperties", "unevaluatedProperties", "items", "unevaluatedItems",
+          "contains", "propertyNames", "not", "if", "then", "else", "contentSchema":
+          return containsScopeKeyword(value, matching: predicate)
         default: break
         }
-        return containsScopeKeyword(value, matching: predicate)
+        // Instance data in const, enum, defaults, examples and extensions is not a schema.
+        return false
       }
     case .array(let values):
       return values.contains { containsScopeKeyword($0, matching: predicate) }
