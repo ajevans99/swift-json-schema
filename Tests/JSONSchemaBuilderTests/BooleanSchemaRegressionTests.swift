@@ -1,3 +1,4 @@
+import Foundation
 import JSONSchema
 import Testing
 
@@ -120,6 +121,71 @@ struct BooleanSchemaRegressionTests {
         return boolean
       }
     #expect(try component.parseAndValidate(value))
+  }
+
+  @Test(arguments: [["title", "not", "allOf"], ["not", "allOf", "not"]])
+  func sequentialFalseSchemaWritesPreserveRejection(keys: [String]) throws {
+    var value = SchemaValue.boolean(false)
+    for key in keys {
+      value[key] = key == "title" ? "Never" : key == "not" ? false : [true]
+    }
+    #expect(!schemaValueValidation(value))
+    value["not"] = nil
+    value["allOf"] = nil
+    #expect(!schemaValueValidation(value))
+    value["title"] = nil
+    #expect(!schemaValueValidation(value))
+  }
+
+  private func schemaValueValidation(_ value: SchemaValue) -> Bool {
+    try! Schema(rawSchema: value.value, context: .init(dialect: .draft2020_12)).validate(.null)
+      .isValid
+  }
+
+  @Test func ordinaryObjectKeywordsRemainReplaceable() throws {
+    var value = SchemaValue.object(["not": [:]])
+    value["not"] = false
+    #expect(schemaValueValidation(value))
+  }
+
+  @Test func annotatedFalseRetainsAuthoredKeywordsAndEncoding() throws {
+    var value = SchemaValue.boolean(false)
+    value["title"] = "Never"
+    value["allOf"] = [true]
+    value["not"] = false
+    #expect(value["title"] == "Never")
+    #expect(value["allOf"] == [true])
+    #expect(value["not"] == false)
+    #expect(value.object?["title"] == "Never")
+    #expect(value.value == .object(value.object!))
+    let encoded = try JSONDecoder().decode(JSONValue.self, from: JSONEncoder().encode(value))
+    #expect(encoded == value.value)
+    #expect(!schemaValueValidation(value))
+    var component: JSONBooleanSchema = true
+    component.schemaValue = value
+    #expect(component.parse(.null).value == nil)
+    #expect(!component.definition().validate(.null).isValid)
+  }
+
+  @Test(arguments: [false, true])
+  func mergingAnnotatedFalsePreservesOrigin(reverse: Bool) {
+    let rejection = SchemaValue.annotatedFalse(["title": "Never", "allOf": [true]])
+    let annotation = SchemaValue.object(["description": "Still never", "not": false])
+    var value = reverse ? annotation : rejection
+    value.merge(reverse ? rejection : annotation)
+    #expect(value["title"] == "Never")
+    #expect(value["description"] == "Still never")
+    value["allOf"] = nil
+    value["not"] = nil
+    #expect(!schemaValueValidation(value))
+  }
+
+  @Test func annotatedFalseEqualityIgnoresKeywordOrder() {
+    #expect(
+      SchemaValue.annotatedFalse(["title": "Never", "not": false])
+        == .annotatedFalse(["not": false, "title": "Never"])
+    )
+    #expect(SchemaValue.annotatedFalse(["title": "Never"]) != .annotatedFalse(["title": "Other"]))
   }
 
 }

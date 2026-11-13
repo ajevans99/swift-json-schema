@@ -15,6 +15,8 @@ public struct JSONBooleanSchema: JSONSchemaComponent {
     switch schemaValue {
     case .boolean(let allowed):
       return allowed ? .valid(true) : .error(.typeMismatch(expected: .boolean, actual: value))
+    case .annotatedFalse:
+      return .error(.typeMismatch(expected: .boolean, actual: value))
     case .object:
       // The public schema can be replaced or annotated after initialization.
       // Reuse its enclosing evaluation when available, rather than the original literal.

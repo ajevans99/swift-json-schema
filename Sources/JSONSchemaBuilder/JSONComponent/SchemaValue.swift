@@ -4,6 +4,9 @@ import OrderedCollections
 public enum SchemaValue: Sendable, Equatable {
   case boolean(Bool)
   case object(OrderedDictionary<KeywordIdentifier, JSONValue>)
+  /// Keywords attached to a false schema. The rejection constraint is retained
+  /// separately so subsequent keyword replacement or removal cannot erase it.
+  case annotatedFalse(OrderedDictionary<KeywordIdentifier, JSONValue>)
 
   public static func == (lhs: SchemaValue, rhs: SchemaValue) -> Bool {
     switch (lhs, rhs) {
@@ -17,6 +20,8 @@ public enum SchemaValue: Sendable, Equatable {
         guard r[key] == value else { return false }
       }
       return true
+    case (.annotatedFalse(let l), .annotatedFalse(let r)):
+      return SchemaValue.object(l) == SchemaValue.object(r)
     default:
       return false
     }
@@ -26,6 +31,11 @@ public enum SchemaValue: Sendable, Equatable {
     switch self {
     case .boolean: return nil
     case .object(let dict): return dict
+    case .annotatedFalse(var dict):
+      // Keep authored allOf separate from the permanent rejection constraint.
+      let authoredAllOf = dict["allOf"]
+      dict["allOf"] = .array([false] + (authoredAllOf.map { [.object(["allOf": $0])] } ?? []))
+      return dict
     }
   }
 
@@ -35,6 +45,8 @@ public enum SchemaValue: Sendable, Equatable {
       return .boolean(bool)
     case .object(let dict):
       return .object(dict)
+    case .annotatedFalse:
+      return .object(object!)
     }
   }
 
@@ -43,7 +55,7 @@ public enum SchemaValue: Sendable, Equatable {
       switch self {
       case .boolean:
         return nil
-      case .object(let dict):
+      case .object(let dict), .annotatedFalse(let dict):
         return dict[key]
       }
     }
@@ -51,17 +63,13 @@ public enum SchemaValue: Sendable, Equatable {
       switch self {
       case .boolean(let allowed):
         guard let newValue else { return }
-        // Keep the false-schema guard separate from the keyword being added.
-        // In particular, setting `not` must not overwrite the rejection itself.
-        var object: OrderedDictionary<KeywordIdentifier, JSONValue> = [:]
-        if !allowed {
-          object = key == "not" ? ["allOf": [false]] : ["not": [:]]
-        }
-        object[key] = newValue
-        self = .object(object)
+        self = allowed ? .object([key: newValue]) : .annotatedFalse([key: newValue])
       case .object(var dict):
         dict[key] = newValue
         self = .object(dict)
+      case .annotatedFalse(var dict):
+        dict[key] = newValue
+        self = .annotatedFalse(dict)
       }
     }
   }
@@ -86,6 +94,16 @@ public enum SchemaValue: Sendable, Equatable {
         }
       }
       self = .object(dict1)
+    case (.annotatedFalse(let lhs), .object(let rhs)),
+      (.object(let lhs), .annotatedFalse(let rhs)),
+      (.annotatedFalse(let lhs), .annotatedFalse(let rhs)):
+      var merged = SchemaValue.object(lhs)
+      merged.merge(.object(rhs))
+      self = .annotatedFalse(merged.object!)
+    case (.annotatedFalse, .boolean):
+      break
+    case (.boolean, .annotatedFalse(let keywords)):
+      self = .annotatedFalse(keywords)
     }
   }
 }
@@ -109,6 +127,8 @@ extension SchemaValue: Encodable {
       try container.encode(bool)
     case .object(let dict):
       try container.encode(JSONValue.object(dict))
+    case .annotatedFalse:
+      try container.encode(value)
     }
   }
 }
